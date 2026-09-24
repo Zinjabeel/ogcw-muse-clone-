@@ -1,0 +1,4 @@
+- [x] Build OGCW editorial homepage and core pages
+- [x] Add timed full-frame hero carousel
+- [ ] Replace key generated visuals with properly licensed real rapper and singer photography in the established palette
+- [ ] Resolve type checks and complete responsive verification
