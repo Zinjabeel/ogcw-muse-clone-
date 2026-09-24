@@ -30,7 +30,8 @@ function HomePage() {
   const [playing, setPlaying] = useState(true);
   useEffect(() => { if (!playing) return; const timer = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 3500); return () => window.clearInterval(timer); }, [playing]);
   const go = (direction: number) => setActive((value) => (value + direction + slides.length) % slides.length);
-  const slide = slides[active];
+  const slide = slides[active] ?? slides[0];
+  if (!slide) return null;
 
   return <SiteShell>
     <div className="overflow-hidden bg-foreground py-2 text-background"><div className="ticker-track flex w-max whitespace-nowrap">{[0,1].map((copy) => <div key={copy} className="flex items-center gap-10 px-5">{headlines.map((headline) => <span key={`${copy}-${headline}`} className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[.2em]"><i className="size-1.5 bg-accent" />{headline}</span>)}</div>)}</div></div>

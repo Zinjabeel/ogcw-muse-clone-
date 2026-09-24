@@ -7,7 +7,7 @@ const nav = [
   { label: "Trends", to: "/trends" as const },
   { label: "Blog", to: "/blog" as const },
   { label: "About", to: "/about" as const },
-];
+] as const;
 
 export function SiteShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
