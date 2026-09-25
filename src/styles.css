@@ -205,7 +205,7 @@
   .bento-burger:hover span, .bento-burger:focus-visible span { width: 28px; }
 }
 
-/* Main: the cover slideshow with the Ask OGCW prompt over it */
+/* Main: the cover slideshow */
 .bento-main { grid-area: main; position: relative; display: grid; grid-template-areas: "cover"; gap: var(--gap); min-width: 0; min-height: 0; }
 .bento-cover { grid-area: cover; position: relative; display: block; aspect-ratio: 4 / 5; max-height: 72svh; overflow: hidden; border-radius: var(--r); background: var(--surface-pull-quote-gray); }
 /* Cover slides: a soft crossfade. The next story fades in on top of the current one;
@@ -226,11 +226,6 @@
 }
 .bento-cover img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); }
 @media (min-width: 640px) and (max-width: 1023px) { .bento-cover { aspect-ratio: 16 / 10; } .bento-frame .bento-right { height: 300px; } }
-.bento-prompt { grid-area: cover; align-self: end; justify-self: start; z-index: 2; display: flex; align-items: center; gap: 10px; width: min(calc(100% - 32px), 320px); height: 46px; margin: 16px; padding: 0 16px 0 6px; border-radius: 999px; background: var(--color-broadsheet-white); }
-.bento-prompt-icon { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--color-folio-black); color: var(--color-signal-yellow); }
-.bento-prompt input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-family: var(--hero-ui); font-size: var(--text-caption); letter-spacing: var(--tracking-button); color: var(--color-folio-black); }
-.bento-prompt input::placeholder { color: var(--color-caption-gray); }
-.bento-prompt:focus-within { box-shadow: 0 0 0 2px var(--color-signal-yellow); }
 
 .bento-eyebrow { font-size: var(--text-caption); font-weight: 500; line-height: var(--leading-caption); letter-spacing: .06em; text-transform: uppercase; }
 
@@ -238,10 +233,6 @@
   .bento-main { display: block; position: relative; }
   .bento-cover { position: absolute; inset: 0; aspect-ratio: auto; max-height: none; }
   .bento-cover img { object-position: var(--pos-lg, var(--pos, 50% 50%)); }
-  .bento-prompt { position: absolute; left: 24px; bottom: 24px; margin: 0; width: min(calc(51% - 64px), 440px); height: 58px; padding: 0 20px 0 8px; gap: 12px; }
-  .bento-prompt-icon { width: 42px; height: 42px; }
-  .bento-prompt-icon svg { width: 17px; height: 17px; }
-  .bento-prompt input { font-size: 15px; }
 }
 
 /* Search pill */
@@ -317,9 +308,7 @@ html:has(dialog.drawer[open]) { overflow: hidden; }
 @keyframes drawer-fade-out { from { opacity: 1; } to { opacity: 0; } }
 
 .drawer-inner { display: flex; flex-direction: column; height: 100%; }
-.drawer-top { flex: none; display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 16px; border-bottom: 1px solid rgb(255 255 255 / .16); }
-.drawer-top-link { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; }
-.drawer-top-link:hover, .drawer-top-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; outline: none; }
+.drawer-top { flex: none; display: flex; align-items: center; justify-content: flex-end; height: 60px; padding: 0 16px; border-bottom: 1px solid rgb(255 255 255 / .16); }
 .drawer-close { display: grid; place-items: center; width: 40px; height: 40px; margin-right: -8px; border-radius: 50%; transition: background-color .2s ease; }
 .drawer-close:hover, .drawer-close:focus-visible { background: rgb(255 255 255 / .12); outline: none; }
 

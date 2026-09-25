@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Sparkle } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavDrawer } from "./nav-drawer";
 import { SOCIALS, SocialIcon } from "./socials";
@@ -68,7 +68,6 @@ function useCoverSlides(count: number) {
 
 export function HeroBento() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const focusAsk = () => document.getElementById("ask-ogcw")?.focus();
   const { active, hold } = useCoverSlides(coverStories.length);
   const prev = (active - 1 + coverStories.length) % coverStories.length;
 
@@ -107,14 +106,6 @@ export function HeroBento() {
               <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
             </button>
           </div>
-
-          <form className="bento-prompt" action="/news" method="get" role="search">
-            <span className="bento-prompt-icon" aria-hidden="true">
-              <Sparkle size={14} fill="currentColor" strokeWidth={0} />
-            </span>
-            <label htmlFor="ask-ogcw" className="sr-only">Ask OGCW</label>
-            <input id="ask-ogcw" name="q" type="text" placeholder="Ask OGCW anything" autoComplete="off" />
-          </form>
         </div>
 
         {/* Socials, where the Search pill used to be: the doc wants them easy to find */}
@@ -161,7 +152,7 @@ export function HeroBento() {
         </div>
       </div>
 
-      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} onAsk={focusAsk} />
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
     </section>
   );
 }

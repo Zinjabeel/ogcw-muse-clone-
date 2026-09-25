@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Info, Search, Sparkle, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import centralCeePhoto from "../assets/central-cee.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
@@ -55,7 +55,7 @@ function Thumb({ story }: { story: Story }) {
   );
 }
 
-export function NavDrawer({ open, onClose, onAsk }: { open: boolean; onClose: () => void; onAsk: () => void }) {
+export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<Section | null>(null);
   const [closing, setClosing] = useState(false);
@@ -102,9 +102,6 @@ export function NavDrawer({ open, onClose, onAsk }: { open: boolean; onClose: ()
     >
       <div className="drawer-inner">
         <div className="drawer-top">
-          <button type="button" className="drawer-top-link" onClick={() => close(onAsk)}>
-            Ask OGCW <ChevronRight size={16} aria-hidden="true" />
-          </button>
           <button type="button" className="drawer-close" aria-label="Close menu" onClick={() => close()}>
             <X size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>
@@ -144,11 +141,6 @@ export function NavDrawer({ open, onClose, onAsk }: { open: boolean; onClose: ()
             </div>
 
             <ul className="drawer-utility">
-              <li>
-                <button type="button" onClick={() => close(onAsk)}>
-                  <Sparkle size={16} strokeWidth={1.5} aria-hidden="true" /> Ask OGCW
-                </button>
-              </li>
               <li>
                 <Link to="/news" onClick={() => close()}>
                   <Search size={16} strokeWidth={1.5} aria-hidden="true" /> Search
