@@ -202,7 +202,8 @@
 .bento-burger span:nth-child(2) { width: 16px; }
 .bento-burger span:nth-child(3) { width: 11px; }
 .bento-burger:hover span, .bento-burger:focus-visible span { width: 22px; }
-.bento-burger:hover, .bento-burger:focus-visible { background: var(--color-signal-yellow); outline: none; }
+.bento-burger:hover, .bento-burger:focus-visible { outline: none; }
+.bento-burger:focus-visible { box-shadow: 0 0 0 var(--gap) var(--frame), 0 0 0 calc(var(--gap) + 2px) var(--color-broadsheet-white); }
 /* Phones use the header's menu button instead (choice 2A) */
 @media (max-width: 767px) { .bento-burger-wrap { display: none; } }
 @media (min-width: 1024px) {
@@ -391,8 +392,8 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 /* ------------------------------------------------------------------
    News front, built to the Monocle reference (design md monocle):
    a broadsheet on cream paper. One serif for all editorial text, sans only
-   for the button, hairline rules instead of shadows, yellow only in the
-   Briefing rail. 0 radius except the photo tiles in the feature row (8px).
+   for the button, hairline rules instead of shadows, black and white only
+   (no yellow). 0 radius except the photo tiles in the feature row (8px).
    ------------------------------------------------------------------ */
 /* Every value below reads from the Monocle tokens in src/styles/monocle-tokens.css. */
 .broadsheet {
@@ -461,14 +462,14 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .bs-photo-feature { aspect-ratio: 4 / 5; margin-bottom: var(--spacing-12); border-radius: var(--radius-lg); }
 
 /* Briefing rail: the Monocle Radio card, reworked for OGCW */
-.bs-briefing { background: var(--surface-margin-white); }
+.bs-briefing { background: var(--color-broadsheet-white); box-shadow: inset 0 0 0 1px var(--color-rule-gray); }
 .bs-briefing-head { display: flex; align-items: center; justify-content: space-between; padding: 10px var(--card-padding); background: var(--color-folio-black); color: var(--color-broadsheet-white); font-size: var(--text-caption); line-height: var(--leading-caption); letter-spacing: var(--tracking-nav); text-transform: uppercase; }
-.bs-dot { width: var(--spacing-8); height: var(--spacing-8); background: var(--color-signal-yellow); }
+.bs-dot { width: var(--spacing-8); height: var(--spacing-8); background: var(--color-broadsheet-white); }
 .bs-briefing-body { padding: var(--card-padding); }
 .bs-briefing-intro { font-size: var(--text-body); line-height: 1.5; }
 .bs-button { display: inline-flex; align-items: center; gap: var(--spacing-8); margin-top: var(--spacing-16); padding: var(--spacing-8) var(--spacing-16); border-radius: var(--radius-buttons); background: var(--color-folio-black); color: var(--color-broadsheet-white); font-family: var(--font-helvetica-neue); font-size: var(--text-caption); font-weight: var(--font-weight-bold); line-height: var(--leading-button); letter-spacing: var(--tracking-button); text-transform: uppercase; transition: background-color .2s ease; }
 .bs-button:hover, .bs-button:focus-visible { background: var(--color-charcoal); }
-.bs-button svg { color: var(--color-signal-yellow); transition: transform .2s ease; }
+.bs-button svg { transition: transform .2s ease; }
 .bs-button:hover svg, .bs-button:focus-visible svg { transform: translateX(3px); }
 .bs-schedule { margin-top: var(--spacing-20); border-top: 1px solid var(--color-rule-gray); }
 .bs-schedule a { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--element-gap); padding-block: var(--spacing-12); border-bottom: 1px solid var(--color-rule-gray); }
@@ -485,7 +486,7 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 /* Opinion row: portraits on warm circles, split by vertical rules */
 .bs-opinion { display: grid; gap: var(--spacing-32); }
 .bs-byline { display: flex; align-items: center; gap: var(--spacing-12); }
-.bs-portrait { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--surface-margin-white); box-shadow: inset 0 0 0 1px var(--color-rule-gray); font-size: var(--text-subheading); font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-heading-sm); }
+.bs-portrait { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--color-broadsheet-white); box-shadow: inset 0 0 0 1px var(--color-rule-gray); font-size: var(--text-subheading); font-weight: var(--font-weight-bold); letter-spacing: var(--tracking-heading-sm); }
 .bs-opinion > :nth-child(2) .bs-portrait { background: var(--surface-pull-quote-gray); }
 .bs-author { font-size: var(--text-subheading); font-weight: var(--font-weight-bold); line-height: var(--leading-author); }
 .bs-opinion-card .bs-title { margin-top: var(--spacing-16); }

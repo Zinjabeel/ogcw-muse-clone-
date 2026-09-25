@@ -9,7 +9,7 @@ import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 
 // The news front page, built to the Monocle reference (design md monocle):
 // a broadsheet on cream paper. Serif does all the editorial talking, hairline
-// rules build the grid, and yellow only appears in the Briefing rail.
+// rules build the grid, and colour stays black and white.
 
 type Crop = { pos: string; zoom: number };
 type Story = { tag: string; title: string; read: string; deck?: string; image: string; alt: string; crop?: Crop };
