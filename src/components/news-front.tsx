@@ -6,6 +6,7 @@ import musicHero from "../assets/ogcw-hero-music.jpg";
 import styleHero from "../assets/ogcw-hero-style.jpg";
 import designHero from "../assets/ogcw-hero-design.jpg";
 import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
+import { SignupCard } from "./signup-card";
 
 // The news front page, built to the Monocle reference (design md monocle):
 // a broadsheet on cream paper. Serif does all the editorial talking, hairline
@@ -196,6 +197,17 @@ export function NewsFront() {
               </article>
             ))}
           </div>
+        </section>
+
+        <hr className="bs-rule" />
+
+        <section className="bs-signup" aria-labelledby="signup-title">
+          <div className="bs-signup-copy">
+            <p className="bs-eyebrow">Newsletter</p>
+            <h3 id="signup-title" className="bs-title">The OGCW Briefing, in your inbox every Friday.</h3>
+            <p className="bs-deck">Five stories, in the order they broke, from the people shaping culture now. No spam, one click to leave.</p>
+          </div>
+          <SignupCard />
         </section>
       </div>
     </section>

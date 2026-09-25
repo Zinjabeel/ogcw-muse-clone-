@@ -401,8 +401,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   font-family: var(--font-plantin); font-size: var(--text-body); line-height: var(--leading-body); letter-spacing: var(--tracking-body);
   padding-block: 56px var(--section-gap);
 }
-.bs-wrap { max-width: var(--page-max-width); margin-inline: auto; padding-inline: var(--spacing-16); }
-@media (min-width: 1024px) { .bs-wrap { padding-inline: var(--spacing-24); } }
+/* Full width, like the hero: the same 16px / 32px side gutters as the header and footer */
+.bs-wrap { padding-inline: var(--spacing-16); }
+@media (min-width: 1024px) { .bs-wrap { padding-inline: 32px; } }
 
 /* Masthead: wide-tracked wordmark centred, flags either side */
 .bs-masthead { display: grid; grid-template-columns: 1fr; justify-items: center; gap: var(--spacing-8); padding-bottom: var(--spacing-20); }
@@ -440,6 +441,7 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   .bs-front { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) 280px; }
   .bs-col-rail { grid-column: auto; border-left: 1px solid var(--color-rule-gray) !important; padding: 0 0 0 var(--spacing-24) !important; }
 }
+@media (min-width: 1440px) { .bs-front { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) 340px; } }
 .bs-col-secondary > * + * { padding-top: var(--spacing-32); border-top: 1px solid var(--color-rule-gray); }
 
 /* Cards */
@@ -503,6 +505,105 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 @media (min-width: 768px) { .bs-features { gap: var(--spacing-32) var(--spacing-16); } .bs-features .bs-title { font-size: var(--text-heading-sm); } }
 @media (min-width: 1024px) { .bs-features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
+/* Newsletter strip: pitch on the left, the sign-up card on the right */
+.bs-signup { display: grid; gap: var(--spacing-40); align-items: center; }
+.bs-signup-copy { max-width: 34rem; }
+.bs-signup-copy .bs-title { font-size: var(--text-heading-lg); line-height: var(--leading-heading-lg); letter-spacing: var(--tracking-heading-lg); text-decoration: none; }
+.bs-signup .ogcw-signup { justify-self: center; padding: 8px 23px 23px 8px; }
+@media (min-width: 768px) {
+  .bs-signup { grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-40) 64px; }
+  .bs-signup .ogcw-signup { justify-self: end; margin-right: 24px; }
+}
+
+/* Sign-up card, from Uiverse.io by 0xnihilism, scoped under .ogcw-signup so
+   its generic class names can't clash with anything else on the site. */
+.ogcw-signup .card {
+  width: 320px;
+  max-width: calc(100vw - 64px);
+  padding: 30px;
+  background: #fff;
+  border: 8px solid #000;
+  box-shadow: 15px 15px 0 #000;
+  transform: rotate(-2deg);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-helvetica-neue);
+}
+.ogcw-signup .card:active { animation: ogcw-shake 0.5s ease-in-out; }
+.ogcw-signup .card:hover { transform: rotate(0deg) scale(1.02); box-shadow: 20px 20px 0 #000; }
+.ogcw-signup .banner {
+  position: absolute;
+  top: 3px;
+  right: -95px;
+  background: #000;
+  color: #fff;
+  padding: 15px;
+  width: 350px;
+  text-align: center;
+  transform: rotate(45deg);
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 2px;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+.ogcw-signup .banner-text {
+  display: inline-block;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  width: 100%;
+  position: absolute;
+  left: 13%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ogcw-signup .banner:hover .banner-text:first-child { opacity: 0; transform: translateY(-100%); }
+.ogcw-signup .banner:hover .banner-text:last-child { opacity: 1; transform: translateY(-40%); }
+.ogcw-signup .banner-text:last-child { opacity: 0; transform: translateY(60%); }
+.ogcw-signup .banner:hover { background: red; }
+.ogcw-signup .card__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+  border-bottom: 2px solid #000;
+  width: 50%;
+}
+.ogcw-signup .card__subtitle { font-size: 16px; line-height: 1.4; color: #333; margin-bottom: 20px; padding-bottom: 10px; }
+.ogcw-signup .card__form { display: flex; flex-direction: column; gap: 20px; }
+.ogcw-signup .card__form input {
+  padding: 12px;
+  border: 4px solid #000;
+  font-size: 16px;
+  font-family: "Proxima Nova", sans-serif;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+.ogcw-signup .card__form input:focus { outline: none; transform: scale(1.05); }
+.ogcw-signup .sign-up {
+  border: 4px solid #000;
+  background: #000;
+  color: #fff;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.ogcw-signup .sign-up:hover { background: #fff; color: #000; transform: translateY(-5px); box-shadow: 0 5px 0 #000; }
+.ogcw-signup .sign-up:active { animation: ogcw-shake 0.5s ease-in-out; transform: translateY(0); box-shadow: none; }
+.ogcw-signup .card__thanks { font-size: 16px; line-height: 1.4; color: #000; font-weight: 700; }
+@keyframes ogcw-shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
 /* A quiet reveal as each story scrolls into view (CSS only, where supported) */
 @keyframes bs-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @supports (animation-timeline: view()) {
@@ -511,6 +612,8 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 
 @media (prefers-reduced-motion: reduce) {
   .bento-frame { animation: none; }
+  .ogcw-signup .card, .ogcw-signup .card:hover { transform: rotate(-2deg); transition: none; animation: none; }
+  .ogcw-signup .sign-up, .ogcw-signup .card__form input, .ogcw-signup .banner-text { transition: none; animation: none; }
   .bento-burger span, .bento-slide, .bento-deck-card, .bento-fan-card { transition: none !important; }
   .drawer[open], .drawer[open]::backdrop, .drawer[data-closing], .drawer[data-closing]::backdrop, .search[open] { animation: none; }
   .drawer-panel, .drawer-thumb img { transition: none; }
