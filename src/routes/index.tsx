@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, StoryLink } from "../components/ogcw-layout";
+import { HeroBento } from "../components/hero-bento";
 import { NewsFront } from "../components/news-front";
 import musicHero from "../assets/ogcw-hero-music.jpg";
 
@@ -16,9 +17,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return <SiteShell>
-    <section className="hero-empty" aria-labelledby="hero-title">
-      <h1 id="hero-title" className="sr-only">OGCW: culture, unfiltered</h1>
-    </section>
+    <HeroBento />
 
     <main>
       <NewsFront />

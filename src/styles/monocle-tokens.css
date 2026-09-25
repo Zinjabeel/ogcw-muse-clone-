@@ -1,13 +1,15 @@
 /*
  * Monocle design tokens, from design md monocle/variables.css (with tokens.json
- * for the exact type steps). Scoped to .broadsheet (the news front) instead of
- * :root or a Tailwind @theme, because names like --spacing-4, --radius-lg and
- * --text-body would otherwise override the site's own Tailwind scale.
+ * for the exact type steps). Scoped to .broadsheet (the news front) and
+ * .hero-bento (the hero, dressed to match it) instead of :root or a Tailwind
+ * @theme, because names like --spacing-4, --radius-lg and --text-body would
+ * otherwise override the site's own Tailwind scale.
  *
  * Plantin and Helvetica Neue are licensed faces; Source Serif 4 and Inter are the
  * substitutes named in the design md and are loaded in src/routes/__root.tsx.
  */
-.broadsheet {
+.broadsheet,
+.hero-bento {
   /* Colors */
   --color-signal-yellow: #ffc500;
   --color-folio-black: #000000;
