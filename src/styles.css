@@ -172,13 +172,22 @@
 .pill-cta svg { transition: transform .25s ease; }
 .pill-cta:hover svg { transform: translateX(3px); }
 
-/* Hero story rows: an ink fill wipes in from the left on hover */
-.hero-story { position: relative; isolation: isolate; }
+/* Glass vitrine from the Sneak in Peace reference: translucent paper over the photo */
+.glass-panel { background: color-mix(in oklab, var(--background) 68%, transparent); -webkit-backdrop-filter: blur(22px) saturate(1.25); backdrop-filter: blur(22px) saturate(1.25); border: 1px solid color-mix(in oklab, white 45%, transparent); border-radius: 6px; box-shadow: rgba(0, 0, 0, .08) 1px 1px 6px -1px; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .glass-panel { background: color-mix(in oklab, var(--background) 94%, transparent); } }
+
+/* Time left on the active artist tab: fills over one slide */
+@keyframes tab-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.tab-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); transform-origin: left; animation: tab-progress 3s linear both; }
+
+/* Hero story cards: an ink fill wipes in from the left on hover */
+.hero-story { position: relative; isolation: isolate; transition: color .3s ease, border-color .3s ease; }
 .hero-story::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--foreground); transform: scaleX(0); transform-origin: left; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
 .hero-story:hover::before, .hero-story:focus-visible::before { transform: scaleX(1); }
-.hero-story:hover, .hero-story:focus-visible { color: var(--background); outline: none; }
-.hero-story .hero-story-index, .hero-story .hero-story-meta { transition: color .3s ease; }
-.hero-story:hover .hero-story-index, .hero-story:focus-visible .hero-story-index { color: var(--accent); }
+.hero-story:hover, .hero-story:focus-visible { color: var(--background); border-color: var(--foreground); outline: none; }
+.hero-story .hero-story-index, .hero-story .hero-story-tag, .hero-story .hero-story-meta { transition: color .3s ease, background-color .3s ease; }
+.hero-story:hover .hero-story-index, .hero-story:focus-visible .hero-story-index { background: var(--accent); color: var(--accent-foreground); }
+.hero-story:hover .hero-story-tag, .hero-story:focus-visible .hero-story-tag { background: color-mix(in oklab, var(--background) 16%, transparent); color: var(--background); }
 .hero-story:hover .hero-story-meta, .hero-story:focus-visible .hero-story-meta { color: color-mix(in oklab, var(--background) 65%, transparent); }
 .hero-story .hero-story-arrow { opacity: 0; transform: translate(-.5rem, .5rem); transition: opacity .3s ease, transform .45s cubic-bezier(.2,.8,.2,1); }
 .hero-story:hover .hero-story-arrow, .hero-story:focus-visible .hero-story-arrow { opacity: 1; transform: translate(0, 0); color: var(--accent); }
@@ -188,6 +197,6 @@
 .story-cta:hover { gap: 1.15rem; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track, .hero-image-enter, .hero-copy-enter, .hero-story-enter { animation: none; }
+  .ticker-track, .hero-image-enter, .hero-copy-enter, .hero-story-enter, .tab-progress { animation: none; }
   .hero-story::before, .hero-story .hero-story-arrow { transition: none; }
 }
