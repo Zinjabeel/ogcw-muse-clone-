@@ -22,7 +22,7 @@ const coverStories = [
   { kicker: "Music", title: "Small rooms, big sound: the live nights to know", date: "24 September 2026", datetime: "2026-09-24", image: musicHero, pos: "40% 45%", posLg: "40% 40%" },
   { kicker: "Design", title: "Streetwear's new object makers", date: "23 September 2026", datetime: "2026-09-23", image: designHero, pos: "50% 55%", posLg: "50% 55%" },
 ];
-const SLIDE_MS = 2000;
+const SLIDE_MS = 5000;
 
 // Trending topics strip (from the requirements doc): hashtags the team updates
 // from the admin panel. The first two are marked hot.
