@@ -10,9 +10,8 @@ import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 
 // Hero, built on the "hero section model 1" layout (a bento dashboard in a
-// dark frame) and dressed in the OGCW News look: the Monocle tokens, Source
-// Serif for editorial labels, Inter only for inputs, cream page, white panels,
-// hairlines, and a single yellow accent.
+// dark frame): Anybody for the headline, Space Grotesk for labels and inputs,
+// cream panels on a #0D0D0D frame, and yellow only for hot and active states.
 
 type Crop = { pos: string; zoom: number };
 
