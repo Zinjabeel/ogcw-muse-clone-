@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiteShell, StoryLink } from "../components/ogcw-layout";
-import { Button } from "../components/ui/button";
+import { cn } from "../lib/utils";
 import cartiPhoto from "../assets/playboi-carti.jpg.asset.json";
 import evePhoto from "../assets/eve.jpg.asset.json";
 import drakePhoto from "../assets/drake.jpg.asset.json";
@@ -20,39 +20,156 @@ export const Route = createFileRoute("/")({
   ]}), component: HomePage,
 });
 
-const slides = [
-  { image: cartiPhoto.url, title: "PLAYBOI CARTI: FULL FORCE", cta: "VIEW THE DISPATCH" },
-  { image: evePhoto.url, title: "EVE LANDS IN STOCKHOLM", cta: "SEE THE CONCERT STORY" },
-  { image: drakePhoto.url, title: "DRAKE DROPS “QUEBEC”", cta: "READ THE HEADLINE" },
+// Each featured artist gets a photo (left) and three stories in reading order (right).
+const features = [
+  {
+    name: "Playboi Carti",
+    image: cartiPhoto.url,
+    alt: "Playboi Carti performing on a smoke-filled festival stage",
+    focus: "45% 30%",
+    cta: "View the dispatch",
+    stories: [
+      { tag: "Live", title: "Playboi Carti: full force at Clout Festival", read: "4 min read" },
+      { tag: "Label", title: "Inside Opium, the label Carti built", read: "6 min read" },
+      { tag: "Retrospective", title: "How Whole Lotta Red rewired rap's sound", read: "8 min read" },
+    ],
+  },
+  {
+    name: "Eve",
+    image: evePhoto.url,
+    alt: "Eve singing on stage in a black hat and studded leather jacket",
+    focus: "50% 22%",
+    cta: "See the concert story",
+    stories: [
+      { tag: "Live", title: "Eve lands in Stockholm", read: "3 min read" },
+      { tag: "Anniversary", title: "Let Me Blow Ya Mind at 25", read: "5 min read" },
+      { tag: "Legacy", title: "The First Lady of Ruff Ryders, revisited", read: "7 min read" },
+    ],
+  },
+  {
+    name: "Drake",
+    image: drakePhoto.url,
+    alt: "Drake pointing to the crowd with a microphone in hand",
+    focus: "47% 40%",
+    cta: "Read the headline",
+    stories: [
+      { tag: "Release", title: "Drake drops “Quebec”", read: "2 min read" },
+      { tag: "Anniversary", title: "Take Care at 15: the blueprint for moody rap", read: "6 min read" },
+      { tag: "Culture", title: "OVO Fest and the Toronto homecoming", read: "5 min read" },
+    ],
+  },
 ];
+const SLIDE_MS = 3000;
 const headlines = ["Independent labels reclaim the runway", "The listening bars changing nightlife", "A new generation remakes print", "Why brutalism keeps returning"];
 
-function HomePage() {
-  const [active, setActive] = useState(0);
-  useEffect(() => { const timer = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 4500); return () => window.clearInterval(timer); }, []);
-  const go = (direction: number) => setActive((value) => (value + direction + slides.length) % slides.length);
-  const slide = slides[active] ?? slides[0];
-  if (!slide) return null;
+function FeatureHero() {
+  const [slide, setSlide] = useState({ active: 0, prev: -1 });
+  const [paused, setPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(query.matches);
+    const onChange = () => setReduceMotion(query.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  // Advance every 3s. Hovering or focusing the hero pauses it so nobody loses the story they're reading.
+  useEffect(() => {
+    if (paused || reduceMotion) return;
+    const timer = window.setTimeout(() => setSlide((s) => ({ prev: s.active, active: (s.active + 1) % features.length })), SLIDE_MS);
+    return () => window.clearTimeout(timer);
+  }, [slide.active, paused, reduceMotion]);
+
+  const go = (direction: number) => setSlide((s) => ({ prev: s.active, active: (s.active + direction + features.length) % features.length }));
+  const feature = features[slide.active] ?? features[0];
+  if (!feature) return null;
+
+  return (
+    <section
+      className="grid bg-foreground lg:h-[calc(100svh-5.5rem)] lg:min-h-[600px] lg:max-h-[880px] lg:grid-cols-2"
+      aria-roledescription="carousel"
+      aria-label="Featured artists"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}
+    >
+      <h1 className="sr-only">OGCW: culture, unfiltered</h1>
+
+      <Link to="/news" className="group relative block aspect-[4/5] max-h-[72svh] w-full overflow-hidden sm:aspect-[4/3] lg:aspect-auto lg:h-full lg:max-h-none" tabIndex={-1} aria-hidden="true">
+        <div className="absolute inset-0 transition-transform duration-[1.4s] ease-[cubic-bezier(.2,.8,.2,1)] group-hover:scale-[1.035]">
+          {features.map((item, index) => (
+            <img
+              key={item.name}
+              src={item.image}
+              alt=""
+              width={1920}
+              height={1088}
+              fetchPriority={index === 0 ? "high" : "low"}
+              style={{ objectPosition: item.focus }}
+              className={cn(
+                "absolute inset-0 h-full w-full object-cover saturate-[.7] contrast-110",
+                index === slide.active ? "hero-image-enter z-10" : index === slide.prev ? "z-0" : "z-0 opacity-0",
+              )}
+            />
+          ))}
+        </div>
+        <span className="absolute bottom-4 left-4 z-20 rounded-[50px] bg-background px-4 py-2 text-[10px] font-medium uppercase tracking-[.1em] text-foreground lg:bottom-6 lg:left-6">
+          {String(slide.active + 1).padStart(2, "0")} / {String(features.length).padStart(2, "0")}
+        </span>
+      </Link>
+
+      <div className="flex flex-col justify-between gap-10 bg-muted px-5 py-8 sm:px-8 lg:px-12 lg:py-10 xl:px-16" aria-live={paused ? "polite" : "off"}>
+        <div className="flex items-center justify-between gap-4">
+          <p className="section-kicker">Now on OGCW</p>
+          <div className="flex items-center gap-2">
+            <button className="icon-button grid" onClick={() => go(-1)} aria-label="Previous artist"><ChevronLeft size={16} /></button>
+            <button className="icon-button grid" onClick={() => go(1)} aria-label="Next artist"><ChevronRight size={16} /></button>
+          </div>
+        </div>
+
+        {/* All three story sets share one grid cell, so the panel always reserves the tallest
+            and the page never jumps when headlines wrap differently. Only the active set is visible. */}
+        <div className="grid">
+          {features.map((item, featureIndex) => {
+            const isActive = featureIndex === slide.active;
+            return (
+              <div key={item.name} className={cn("[grid-area:1/1]", !isActive && "invisible")} aria-hidden={!isActive}>
+                <h2 className={cn("font-display text-6xl leading-[.85] sm:text-7xl xl:text-8xl", isActive && "hero-story-enter")}>{item.name}</h2>
+                <ol className="mt-8 border-t border-foreground">
+                  {item.stories.map((story, index) => (
+                    <li key={story.title} className={cn("border-b border-border", isActive && "hero-story-enter")} style={{ animationDelay: `${120 + index * 110}ms` }}>
+                      <Link to="/news" className="hero-story -mx-3 grid grid-cols-[auto_1fr_auto] items-center gap-4 px-3 py-4 sm:gap-6 lg:py-5">
+                        <span className="hero-story-index font-display text-3xl leading-none text-muted-foreground">0{index + 1}</span>
+                        <span className="min-w-0">
+                          <span className="hero-story-meta block text-[10px] font-medium uppercase tracking-[.1em] text-muted-foreground">{story.tag} / {story.read}</span>
+                          <span className="mt-1.5 block font-display text-2xl leading-none sm:text-3xl">{story.title}</span>
+                        </span>
+                        <ArrowUpRight className="hero-story-arrow" size={20} aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            );
+          })}
+        </div>
+
+        <div>
+          <Link to="/news" className="pill-cta">{feature.cta}<ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HomePage() {
   return <SiteShell>
     <div className="overflow-hidden bg-foreground py-2 text-background"><div className="ticker-track flex w-max whitespace-nowrap">{[0,1].map((copy) => <div key={copy} className="flex items-center gap-10 px-5">{headlines.map((headline) => <span key={`${copy}-${headline}`} className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[.2em]"><i className="size-1.5 bg-accent" />{headline}</span>)}</div>)}</div></div>
 
-    <section className="relative h-[calc(100svh-5rem)] min-h-[560px] max-h-[900px] overflow-hidden bg-foreground">
-      <img key={slide.image} src={slide.image} alt="Featured artist on stage" width={1920} height={1088} className="hero-image-enter absolute inset-0 h-full w-full object-cover saturate-[.7] contrast-110" />
-      <div className="absolute inset-0 bg-linear-to-r from-foreground/65 via-foreground/30 to-foreground/55" />
-      <div className="absolute inset-0 mx-auto flex max-w-[1440px] items-center justify-center px-6 text-center lg:px-8">
-        <div key={slide.title} className="hero-copy-enter flex max-w-5xl flex-col items-center text-background">
-          <h1 className="font-display text-5xl leading-none sm:text-7xl lg:text-8xl">{slide.title}</h1>
-          <Button asChild size="lg" className="mt-7 min-w-64 rounded-full bg-background px-10 text-xs font-bold tracking-widest text-foreground shadow-none transition-all duration-300 hover:scale-[1.03] hover:bg-accent hover:text-accent-foreground">
-            <Link to="/news">{slide.cta}</Link>
-          </Button>
-        </div>
-      </div>
-      <div className="absolute bottom-4 right-4 flex items-center gap-2 lg:bottom-8 lg:right-8">
-        <button className="grid size-10 place-items-center border border-background/40 bg-foreground/30 text-background backdrop-blur-sm hover:bg-background hover:text-foreground" onClick={() => go(-1)} aria-label="Previous story"><ChevronLeft size={20}/></button>
-        <button className="grid size-10 place-items-center border border-background/40 bg-foreground/30 text-background backdrop-blur-sm hover:bg-background hover:text-foreground" onClick={() => go(1)} aria-label="Next story"><ChevronRight size={20}/></button>
-      </div>
-    </section>
+    <FeatureHero />
 
     <main>
       <section className="mx-auto max-w-[1440px] px-4 py-16 lg:px-8 lg:py-24">

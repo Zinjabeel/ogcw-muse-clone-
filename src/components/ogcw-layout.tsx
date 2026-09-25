@@ -16,19 +16,17 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="mx-auto grid h-16 max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 sm:flex sm:justify-between lg:px-8">
-          <div className="flex min-w-0 items-center gap-10">
-            <Link to="/" className="shrink-0 font-display text-[2.6rem] leading-none" aria-label="OGCW home">OGCW</Link>
-            <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
-              {nav.map((item) => (
-                <Link key={item.to} to={item.to} className={`nav-link ${pathname === item.to ? "nav-link-active" : ""}`}>{item.label}</Link>
-              ))}
-            </nav>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <button className="icon-button hidden sm:grid" aria-label="Search"><Search size={18} /></button>
-            <button className="icon-button md:hidden" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)}>
-              {open ? <X size={20} /> : <Menu size={20} />}
+        <div className="mx-auto grid h-14 max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-8">
+          <Link to="/" className="site-logo justify-self-start" aria-label="OGCW home">OGCW</Link>
+          <nav className="hidden items-center gap-[25px] md:flex" aria-label="Main navigation">
+            {nav.map((item) => (
+              <Link key={item.to} to={item.to} className={`nav-link ${pathname === item.to ? "nav-link-active" : ""}`}>{item.label}</Link>
+            ))}
+          </nav>
+          <div className="col-start-3 flex items-center gap-2 justify-self-end">
+            <button className="icon-button hidden sm:grid" aria-label="Search"><Search size={16} /></button>
+            <button className="icon-button grid md:hidden" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)}>
+              {open ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>

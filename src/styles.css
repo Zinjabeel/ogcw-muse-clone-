@@ -151,17 +151,43 @@
 @keyframes hero-image-in { from { opacity: .35; transform: scale(1.06) translateX(2%); } to { opacity: 1; transform: scale(1) translateX(0); } }
 @keyframes hero-copy-in { from { opacity: 0; transform: translateY(20px); filter: blur(8px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 
+@keyframes hero-story-in { from { opacity: 0; transform: translateX(1.25rem); } to { opacity: 1; transform: translateX(0); } }
+
 @utility ticker-track { animation: ticker 32s linear infinite; }
 @utility hero-image-enter { animation: hero-image-in 1.1s cubic-bezier(.2,.8,.2,1) both; }
 @utility hero-copy-enter { animation: hero-copy-in .8s .15s cubic-bezier(.2,.8,.2,1) both; }
+/* Same fade and drift as the hero image, so the stories arrive with the photo */
+@utility hero-story-enter { animation: hero-story-in .9s cubic-bezier(.2,.8,.2,1) both; }
 
-.nav-link { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; transition: color .2s ease; }
+/* Navigation, sized to the Visionnaire reference: 14px tracked caps, compact bar */
+.site-logo { font-family: var(--font-sans); font-size: .875rem; font-weight: 700; text-transform: uppercase; letter-spacing: .064em; line-height: 1; }
+.nav-link { font-size: .875rem; font-weight: 500; text-transform: uppercase; letter-spacing: .058em; transition: color .2s ease; }
 .nav-link:hover, .nav-link-active { color: var(--accent); }
-.icon-button { height: 2.5rem; width: 2.5rem; place-items: center; border: 1px solid var(--border); transition: .2s ease; }
-.icon-button:hover { background: var(--foreground); color: var(--background); }
+.icon-button { height: 2.25rem; width: 2.25rem; place-items: center; border: 1px solid var(--border); border-radius: 50px; transition: .2s ease; }
+.icon-button:hover { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
+
+/* Pill CTA from the Visionnaire reference: ghost outline that fills with ink on hover */
+.pill-cta { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; border: 1px solid var(--foreground); border-radius: 50px; padding: .625rem 1.25rem; font-size: .875rem; font-weight: 500; text-transform: uppercase; letter-spacing: .058em; line-height: 1.2; color: var(--foreground); background: transparent; transition: background-color .25s ease, color .25s ease; }
+.pill-cta:hover, .pill-cta:focus-visible { background: var(--foreground); color: var(--background); }
+.pill-cta svg { transition: transform .25s ease; }
+.pill-cta:hover svg { transform: translateX(3px); }
+
+/* Hero story rows: an ink fill wipes in from the left on hover */
+.hero-story { position: relative; isolation: isolate; }
+.hero-story::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--foreground); transform: scaleX(0); transform-origin: left; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+.hero-story:hover::before, .hero-story:focus-visible::before { transform: scaleX(1); }
+.hero-story:hover, .hero-story:focus-visible { color: var(--background); outline: none; }
+.hero-story .hero-story-index, .hero-story .hero-story-meta { transition: color .3s ease; }
+.hero-story:hover .hero-story-index, .hero-story:focus-visible .hero-story-index { color: var(--accent); }
+.hero-story:hover .hero-story-meta, .hero-story:focus-visible .hero-story-meta { color: color-mix(in oklab, var(--background) 65%, transparent); }
+.hero-story .hero-story-arrow { opacity: 0; transform: translate(-.5rem, .5rem); transition: opacity .3s ease, transform .45s cubic-bezier(.2,.8,.2,1); }
+.hero-story:hover .hero-story-arrow, .hero-story:focus-visible .hero-story-arrow { opacity: 1; transform: translate(0, 0); color: var(--accent); }
 .section-kicker { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .22em; color: var(--muted-foreground); }
 .section-kicker::before { content: ""; display: inline-block; width: 1.8rem; height: 2px; margin-right: .65rem; vertical-align: middle; background: var(--accent); }
 .story-cta { display: inline-flex; width: fit-content; align-items: center; gap: .75rem; border-bottom: 2px solid var(--accent); padding-bottom: .35rem; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; transition: gap .2s ease; }
 .story-cta:hover { gap: 1.15rem; }
 
-@media (prefers-reduced-motion: reduce) { .ticker-track, .hero-image-enter, .hero-copy-enter { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track, .hero-image-enter, .hero-copy-enter, .hero-story-enter { animation: none; }
+  .hero-story::before, .hero-story .hero-story-arrow { transition: none; }
+}
