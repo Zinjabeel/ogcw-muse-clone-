@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowUpRight, BookOpen, Home, Info, Mail, Newspaper, Search, Sparkle, TrendingUp } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Search, Sparkle } from "lucide-react";
+import { useState } from "react";
+import { NavDrawer } from "./nav-drawer";
 import styleHero from "../assets/ogcw-hero-style.jpg";
 import designHero from "../assets/ogcw-hero-design.jpg";
 import musicHero from "../assets/ogcw-hero-music.jpg";
@@ -12,14 +14,6 @@ import vedanPhoto from "../assets/vedan.jpg.asset.json";
 // hairlines, and a single yellow accent.
 
 type Crop = { pos: string; zoom: number };
-
-const sections = [
-  { label: "Home", to: "/" as const, icon: Home },
-  { label: "News", to: "/news" as const, icon: Newspaper },
-  { label: "Trends", to: "/trends" as const, icon: TrendingUp },
-  { label: "Blog", to: "/blog" as const, icon: BookOpen },
-  { label: "About", to: "/about" as const, icon: Info },
-];
 
 const topics = [
   { label: "Music", hot: true },
@@ -56,37 +50,25 @@ function Photo({ src, crop, alt = "" }: { src: string; crop: Crop; alt?: string 
 }
 
 export function HeroBento() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const focusAsk = () => document.getElementById("ask-ogcw")?.focus();
+
   return (
     <section className="hero-bento" aria-labelledby="hero-title">
       <h1 id="hero-title" className="sr-only">OGCW: culture, unfiltered</h1>
 
       <div className="bento-frame">
-        <Link to="/" className="bento-logo" aria-label="OGCW home">
-          <Sparkle size={30} fill="currentColor" strokeWidth={0} aria-hidden="true" />
-        </Link>
-
-        <nav className="bento-side" aria-label="Sections">
-          <ul>
-            {sections.map(({ label, to, icon: Icon }, index) => (
-              <li key={to}>
-                <Link to={to} className="bento-side-link" aria-label={label} title={label} data-active={index === 0 ? "" : undefined}>
-                  <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="bento-side-foot">
-            <Link to="/news" className="bento-side-link" aria-label="Newsletter" title="Newsletter">
-              <Mail size={17} strokeWidth={1.6} aria-hidden="true" />
-            </Link>
-            <span className="bento-avatar" aria-hidden="true">OG</span>
-          </div>
-        </nav>
-
         <div className="bento-main">
           <Link to="/news" className="bento-cover" aria-label="Independent labels reclaim the runway">
             <img src={styleHero} alt="" />
           </Link>
+
+          {/* Menu button, set into a notch in the cover's top-left corner */}
+          <div className="bento-burger-wrap">
+            <button type="button" className="bento-burger" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
+              <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
+            </button>
+          </div>
 
           <a href="#news-front-title" className="bento-notch" aria-label="Jump to the news">
             <ArrowDown size={20} strokeWidth={1.6} aria-hidden="true" />
@@ -146,6 +128,8 @@ export function HeroBento() {
           </Link>
         </div>
       </div>
+
+      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} onAsk={focusAsk} />
     </section>
   );
 }
