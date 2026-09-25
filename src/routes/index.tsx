@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SiteShell, StoryLink } from "../components/ogcw-layout";
 import cartiPhoto from "../assets/playboi-carti.jpg.asset.json";
@@ -28,7 +28,9 @@ const headlines = ["Independent labels reclaim the runway", "The listening bars 
 
 function HomePage() {
   const [active, setActive] = useState(0);
-  useEffect(() => { const timer = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 3500); return () => window.clearInterval(timer); }, []);
+  const [playing, setPlaying] = useState(true);
+  useEffect(() => { if (!playing) return; const timer = window.setInterval(() => setActive((value) => (value + 1) % slides.length), 3500); return () => window.clearInterval(timer); }, [playing]);
+  const go = (direction: number) => setActive((value) => (value + direction + slides.length) % slides.length);
   const slide = slides[active] ?? slides[0];
   if (!slide) return null;
 
@@ -46,6 +48,12 @@ function HomePage() {
           <Link to="/news" className="mt-7 inline-flex items-center gap-3 border border-background bg-background px-5 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:border-accent hover:bg-accent">{slide.cta}<ArrowRight size={16} /></Link>
         </div>
       </div>
+      <div className="absolute bottom-4 right-4 flex items-center gap-2 lg:bottom-8 lg:right-8">
+        <button className="grid size-10 place-items-center border border-background/40 bg-foreground/30 text-background backdrop-blur-sm hover:bg-background hover:text-foreground" onClick={() => go(-1)} aria-label="Previous story"><ChevronLeft size={20}/></button>
+        <button className="grid size-10 place-items-center border border-background/40 bg-foreground/30 text-background backdrop-blur-sm hover:bg-background hover:text-foreground" onClick={() => setPlaying((value) => !value)} aria-label={playing ? "Pause slideshow" : "Play slideshow"}>{playing ? <Pause size={17}/> : <Play size={17}/>}</button>
+        <button className="grid size-10 place-items-center border border-background/40 bg-foreground/30 text-background backdrop-blur-sm hover:bg-background hover:text-foreground" onClick={() => go(1)} aria-label="Next story"><ChevronRight size={20}/></button>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 flex">{slides.map((item, index) => <button key={item.title} aria-label={`Show story ${index + 1}`} onClick={() => setActive(index)} className="h-1 flex-1 bg-background/30"><span key={active === index ? active : -1} className={`block h-full bg-accent ${active === index && playing ? "slide-progress" : active === index ? "w-full" : "w-0"}`} /></button>)}</div>
     </section>
 
     <main>
