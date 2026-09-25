@@ -2,3 +2,5 @@
 - [x] Add timed full-frame hero carousel
 - [x] Replace key generated visuals with properly licensed real rapper and singer photography in the established palette
 - [x] Resolve type checks and complete responsive verification
+- [x] Simplify hero controls, copy, CTA styling, and transitions
+- [x] Replace Vedan and Roga Roga with timely artist stories and licensed photography
