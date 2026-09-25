@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavDrawer } from "./nav-drawer";
+import { useSiteMenu } from "./ogcw-layout";
 import { SOCIALS, SocialIcon } from "./socials";
 import styleHero from "../assets/ogcw-hero-style.jpg";
 import designHero from "../assets/ogcw-hero-design.jpg";
@@ -67,7 +67,7 @@ function useCoverSlides(count: number) {
 }
 
 export function HeroBento() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { menuOpen, openMenu } = useSiteMenu();
   const { active, hold } = useCoverSlides(coverStories.length);
   const prev = (active - 1 + coverStories.length) % coverStories.length;
 
@@ -100,9 +100,10 @@ export function HeroBento() {
             ))}
           </Link>
 
-          {/* Menu button, set into a notch in the cover's top-left corner */}
+          {/* Menu button, set into a notch in the cover's top-left corner. Hidden on
+              phones, where the header's menu button does the job. */}
           <div className="bento-burger-wrap">
-            <button type="button" className="bento-burger" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>
+            <button type="button" className="bento-burger" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={openMenu}>
               <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
             </button>
           </div>
@@ -151,8 +152,6 @@ export function HeroBento() {
           </Link>
         </div>
       </div>
-
-      <NavDrawer open={menuOpen} onClose={() => setMenuOpen(false)} />
     </section>
   );
 }

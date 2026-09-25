@@ -13,7 +13,7 @@ import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 // stories; a "Featured" strip and utility links sit below the list.
 
 type Crop = { pos: string; zoom: number };
-type Story = { title: string; sub: string; image: string; crop?: Crop };
+export type Story = { title: string; sub: string; image: string; crop?: Crop };
 type Section = { label: string; to: "/" | "/news" | "/trends" | "/blog" | "/about"; stories?: Story[] };
 
 const s = {
@@ -26,6 +26,9 @@ const s = {
   print: { title: "A new generation remakes print", sub: "Print / 5 min read", image: editorialGrid, crop: { pos: "100% 100%", zoom: 2 } },
   scenes: { title: "Four scenes, one shared language", sub: "Culture / 6 min read", image: editorialGrid },
 } satisfies Record<string, Story>;
+
+// Every story the site knows about, for the search screen.
+export const allStories: Story[] = Object.values(s);
 
 const sections: Section[] = [
   { label: "News", to: "/news", stories: [s.cee, s.vedan, s.bars] },
@@ -41,7 +44,7 @@ const sections: Section[] = [
 
 const featured = [s.cee, s.labels, s.objects, s.bars];
 
-function Thumb({ story }: { story: Story }) {
+export function Thumb({ story }: { story: Story }) {
   const crop = story.crop ?? { pos: "50% 50%", zoom: 1 };
   return (
     <span className="drawer-thumb">
@@ -55,7 +58,7 @@ function Thumb({ story }: { story: Story }) {
   );
 }
 
-export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose: () => void; onSearch: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<Section | null>(null);
   const [closing, setClosing] = useState(false);
@@ -142,9 +145,9 @@ export function NavDrawer({ open, onClose }: { open: boolean; onClose: () => voi
 
             <ul className="drawer-utility">
               <li>
-                <Link to="/news" onClick={() => close()}>
+                <button type="button" onClick={() => close(onSearch)}>
                   <Search size={16} strokeWidth={1.5} aria-hidden="true" /> Search
-                </Link>
+                </button>
               </li>
               <li>
                 <Link to="/about" onClick={() => close()}>

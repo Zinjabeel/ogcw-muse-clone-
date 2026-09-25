@@ -1,6 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowRight, Menu, Search, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { ArrowRight, Menu, Search } from "lucide-react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { NavDrawer } from "./nav-drawer";
+import { SearchOverlay } from "./search-overlay";
 
 const nav = [
   { label: "News", to: "/news" as const },
@@ -9,44 +11,53 @@ const nav = [
   { label: "About", to: "/about" as const },
 ] as const;
 
+// One menu for the whole site: the header button and the hero's round button
+// both open the same drawer.
+const SiteMenuContext = createContext({ menuOpen: false, openMenu: () => {} });
+export const useSiteMenu = () => useContext(SiteMenuContext);
+
 export function SiteShell({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const openMenu = useCallback(() => setMenuOpen(true), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+  const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="mx-auto grid h-14 max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-8">
-          <Link to="/" className="site-logo justify-self-start" aria-label="OGCW home">OGCW</Link>
-          <nav className="hidden items-center gap-[25px] md:flex" aria-label="Main navigation">
-            {nav.map((item) => (
-              <Link key={item.to} to={item.to} className={`nav-link ${pathname === item.to ? "nav-link-active" : ""}`}>{item.label}</Link>
-            ))}
-          </nav>
-          <div className="col-start-3 flex items-center gap-2 justify-self-end">
-            <button className="icon-button hidden sm:grid" aria-label="Search"><Search size={16} /></button>
-            <button className="icon-button grid md:hidden" aria-label={open ? "Close menu" : "Open menu"} onClick={() => setOpen((value) => !value)}>
-              {open ? <X size={18} /> : <Menu size={18} />}
-            </button>
+    <SiteMenuContext.Provider value={{ menuOpen, openMenu }}>
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="site-header sticky top-0 z-50">
+          <div className="mx-auto grid h-14 max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-8">
+            <Link to="/" className="site-logo justify-self-start" aria-label="OGCW home">OGCW</Link>
+            <nav className="hidden items-center gap-[25px] md:flex" aria-label="Main navigation">
+              {nav.map((item) => (
+                <Link key={item.to} to={item.to} className={`nav-link ${pathname === item.to ? "nav-link-active" : ""}`}>{item.label}</Link>
+              ))}
+            </nav>
+            <div className="col-start-3 flex items-center gap-2 justify-self-end">
+              <button type="button" className="icon-button grid" aria-label="Search" aria-haspopup="dialog" aria-expanded={searchOpen} onClick={openSearch}><Search size={16} /></button>
+              <button type="button" className="icon-button grid md:hidden" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={openMenu}>
+                <Menu size={18} />
+              </button>
+            </div>
           </div>
-        </div>
-        {open && (
-          <nav className="grid border-t border-border bg-background px-4 py-3 md:hidden" aria-label="Mobile navigation">
-            {nav.map((item) => <Link key={item.to} to={item.to} onClick={() => setOpen(false)} className="border-b border-border py-3 font-display text-2xl">{item.label}</Link>)}
-          </nav>
-        )}
-      </header>
-      {children}
-      <footer className="border-t border-border bg-foreground py-12 text-background">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-background/60">Independent reporting from the people shaping culture now.</p></div>
-            <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-widest">{nav.map((item) => <Link key={item.to} to={item.to} className="hover:text-accent">{item.label}</Link>)}</div>
+        </header>
+        {children}
+        <footer className="border-t border-border bg-foreground py-12 text-background">
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 lg:px-8">
+            <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+              <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-background/60">Independent reporting from the people shaping culture now.</p></div>
+              <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-widest">{nav.map((item) => <Link key={item.to} to={item.to} className="hover:text-accent">{item.label}</Link>)}</div>
+            </div>
+            <div className="flex items-center justify-between border-t border-background/20 pt-5 text-[10px] font-semibold uppercase tracking-widest text-background/50"><span>OG Culture World</span><span>Independent / Worldwide</span></div>
           </div>
-          <div className="flex items-center justify-between border-t border-background/20 pt-5 text-[10px] font-semibold uppercase tracking-widest text-background/50"><span>OG Culture World</span><span>Independent / Worldwide</span></div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+        <NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} />
+        <SearchOverlay open={searchOpen} onClose={closeSearch} />
+      </div>
+    </SiteMenuContext.Provider>
   );
 }
 
