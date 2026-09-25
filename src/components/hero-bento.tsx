@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowUpRight, Sparkle } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpRight, Sparkle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavDrawer } from "./nav-drawer";
 import { SOCIALS, SocialIcon } from "./socials";
 import styleHero from "../assets/ogcw-hero-style.jpg";
@@ -10,18 +10,19 @@ import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 
 // Hero, built on the "hero section model 1" layout (a bento dashboard in a
-// dark frame): Anybody for the headline, Space Grotesk for labels and inputs,
-// cream panels on a #0D0D0D frame, and yellow only for hot and active states.
+// dark frame): a three-story cover slideshow, Anybody for the headline and
+// Space Grotesk for labels and inputs, on the Monocle colour tokens.
 
 type Crop = { pos: string; zoom: number };
 
-// The lead story shown on the cover. Will come from the admin panel later.
-const lead = {
-  kicker: "Style",
-  title: "Independent labels reclaim the runway",
-  date: "25 September 2026",
-  datetime: "2026-09-25",
-};
+// Cover stories, one per slide. Will come from the admin panel later.
+// pos/posLg set the photo's focal point on mobile and desktop.
+const coverStories = [
+  { kicker: "Style", title: "Independent labels reclaim the runway", date: "25 September 2026", datetime: "2026-09-25", image: styleHero, pos: "64% 50%", posLg: "68% 45%" },
+  { kicker: "Music", title: "Small rooms, big sound: the live nights to know", date: "24 September 2026", datetime: "2026-09-24", image: musicHero, pos: "40% 45%", posLg: "40% 40%" },
+  { kicker: "Design", title: "Streetwear's new object makers", date: "23 September 2026", datetime: "2026-09-23", image: designHero, pos: "50% 55%", posLg: "50% 55%" },
+];
+const SLIDE_MS = 2000;
 
 // Trending topics strip (from the requirements doc): hashtags the team updates
 // from the admin panel. The first two are marked hot.
@@ -59,9 +60,29 @@ function Photo({ src, crop, alt = "" }: { src: string; crop: Crop; alt?: string 
   );
 }
 
+// Advances the cover every SLIDE_MS. Holds still while the reader hovers or
+// focuses the cover, while the tab is hidden, and for reduced-motion users.
+function useCoverSlides(count: number) {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const id = window.setInterval(() => {
+      if (!document.hidden) setActive((i) => (i + 1) % count);
+    }, SLIDE_MS);
+    return () => window.clearInterval(id);
+  }, [paused, count]);
+
+  const hold = { onMouseEnter: () => setPaused(true), onMouseLeave: () => setPaused(false), onFocus: () => setPaused(true), onBlur: () => setPaused(false) };
+  return { active, hold };
+}
+
 export function HeroBento() {
   const [menuOpen, setMenuOpen] = useState(false);
   const focusAsk = () => document.getElementById("ask-ogcw")?.focus();
+  const { active, hold } = useCoverSlides(coverStories.length);
+  const prev = (active - 1 + coverStories.length) % coverStories.length;
 
   return (
     <section className="hero-bento" aria-labelledby="hero-title">
@@ -69,13 +90,27 @@ export function HeroBento() {
 
       <div className="bento-frame">
         <div className="bento-main">
-          <Link to="/news" className="bento-cover">
-            <img src={styleHero} alt="" />
-            <span className="bento-lead">
-              <span className="bento-lead-kicker">{lead.kicker}</span>
-              <span className="bento-lead-title">{lead.title}</span>
-              <time className="bento-lead-date" dateTime={lead.datetime}>{lead.date}</time>
-            </span>
+          <Link to="/news" className="bento-cover" {...hold}>
+            {coverStories.map((story, index) => (
+              <span
+                key={story.title}
+                className="bento-slide"
+                data-state={index === active ? "active" : index === prev ? "prev" : undefined}
+                aria-hidden={index === active ? undefined : true}
+              >
+                <img
+                  src={story.image}
+                  alt=""
+                  loading={index === 0 ? "eager" : "lazy"}
+                  style={{ ["--pos" as string]: story.pos, ["--pos-lg" as string]: story.posLg }}
+                />
+                <span className="bento-lead">
+                  <span className="bento-lead-kicker">{story.kicker}</span>
+                  <span className="bento-lead-title">{story.title}</span>
+                  <time className="bento-lead-date" dateTime={story.datetime}>{story.date}</time>
+                </span>
+              </span>
+            ))}
           </Link>
 
           {/* Menu button, set into a notch in the cover's top-left corner */}
@@ -84,11 +119,6 @@ export function HeroBento() {
               <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
             </button>
           </div>
-
-          <a href="#news-front-title" className="bento-notch" aria-label="Latest news">
-            <ArrowDown size={20} strokeWidth={1.6} aria-hidden="true" />
-            <span className="bento-notch-tip" aria-hidden="true">Latest news</span>
-          </a>
 
           <form className="bento-prompt" action="/news" method="get" role="search">
             <span className="bento-prompt-icon" aria-hidden="true">
