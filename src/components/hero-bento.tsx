@@ -24,18 +24,6 @@ const coverStories = [
 ];
 const SLIDE_MS = 5000;
 
-// Trending topics strip (from the requirements doc): hashtags the team updates
-// from the admin panel. The first two are marked hot.
-const trending = [
-  { label: "#NewMusicFriday", hot: true },
-  { label: "#ComplexCon", hot: true },
-  { label: "#ParisFashionWeek", hot: false },
-  { label: "#ChampionsLeague", hot: false },
-  { label: "#UKRap", hot: false },
-  { label: "#Sneakers", hot: false },
-  { label: "#GRAMMYs", hot: false },
-];
-
 // Top three, stacked: 03 sits at the back, 01 at the front.
 const topStories = [
   { n: "03", title: "Objects built to outlast the feed", image: designHero, crop: { pos: "50% 55%", zoom: 1 } },
@@ -127,19 +115,6 @@ export function HeroBento() {
             <label htmlFor="ask-ogcw" className="sr-only">Ask OGCW</label>
             <input id="ask-ogcw" name="q" type="text" placeholder="Ask OGCW anything" autoComplete="off" />
           </form>
-
-          <section className="bento-topics" aria-labelledby="topics-title">
-            <span className="bento-corner bento-corner-top" aria-hidden="true" />
-            <span className="bento-corner bento-corner-left" aria-hidden="true" />
-            <h2 id="topics-title" className="bento-eyebrow">Trending now</h2>
-            <ul className="bento-chips">
-              {trending.map((topic) => (
-                <li key={topic.label}>
-                  <Link to="/news" className="bento-chip" data-hot={topic.hot ? "" : undefined}>{topic.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </section>
         </div>
 
         {/* Socials, where the Search pill used to be: the doc wants them easy to find */}

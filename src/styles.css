@@ -205,8 +205,8 @@
   .bento-burger:hover span, .bento-burger:focus-visible span { width: 28px; }
 }
 
-/* Main: the cover slideshow, the prompt and the wrap-around topics card */
-.bento-main { grid-area: main; position: relative; display: grid; grid-template-areas: "cover" "topics"; gap: var(--gap); min-width: 0; min-height: 0; }
+/* Main: the cover slideshow with the Ask OGCW prompt over it */
+.bento-main { grid-area: main; position: relative; display: grid; grid-template-areas: "cover"; gap: var(--gap); min-width: 0; min-height: 0; }
 .bento-cover { grid-area: cover; position: relative; display: block; aspect-ratio: 4 / 5; max-height: 72svh; overflow: hidden; border-radius: var(--r); background: var(--surface-pull-quote-gray); }
 /* Cover slides: a soft crossfade. The next story fades in on top of the current one;
    "prev" stays fully visible underneath until the fade has covered it. */
@@ -232,12 +232,7 @@
 .bento-prompt input::placeholder { color: var(--color-caption-gray); }
 .bento-prompt:focus-within { box-shadow: 0 0 0 2px var(--color-signal-yellow); }
 
-.bento-topics { grid-area: topics; position: relative; display: flex; flex-direction: column; gap: var(--spacing-12); padding: 20px 22px 16px; border-radius: var(--r); background: var(--color-broadsheet-white); }
-.bento-corner { display: none; }
 .bento-eyebrow { font-size: var(--text-caption); font-weight: 500; line-height: var(--leading-caption); letter-spacing: .06em; text-transform: uppercase; }
-.bento-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.bento-chip { display: inline-block; padding: 7px 14px; border: 1px solid var(--color-charcoal); border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.2; letter-spacing: .04em; text-transform: uppercase; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
-.bento-chip[data-hot], .bento-chip:hover, .bento-chip:focus-visible { background: var(--color-folio-black); color: var(--color-broadsheet-white); outline: none; }
 
 @media (min-width: 1024px) {
   .bento-main { display: block; position: relative; }
@@ -247,15 +242,6 @@
   .bento-prompt-icon { width: 42px; height: 42px; }
   .bento-prompt-icon svg { width: 17px; height: 17px; }
   .bento-prompt input { font-size: 15px; }
-
-  /* Topics: the cover wraps around it. The frame-coloured ring makes the cut, the two corners round it off. */
-  .bento-topics { position: absolute; right: 0; bottom: 0; z-index: 2; width: 49%; height: clamp(210px, 30%, 290px); gap: var(--spacing-16); padding: 28px 30px 22px; box-shadow: 0 0 0 var(--gap) var(--frame); }
-  .bento-topics .bento-eyebrow { font-size: 15px; }
-  .bento-chips { gap: 8px; }
-  .bento-chip { padding: 9px 17px; font-size: 13px; }
-  .bento-corner { display: block; position: absolute; width: var(--r); height: var(--r); background: radial-gradient(circle at 0 0, transparent calc(var(--r) - .5px), var(--frame) var(--r)); pointer-events: none; }
-  .bento-corner-top { right: 0; bottom: calc(100% + var(--gap)); }
-  .bento-corner-left { right: calc(100% + var(--gap)); bottom: 0; }
 }
 
 /* Search pill */
