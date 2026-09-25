@@ -208,18 +208,11 @@
 /* Main: the cover slideshow, the prompt and the wrap-around topics card */
 .bento-main { grid-area: main; position: relative; display: grid; grid-template-areas: "cover" "topics"; gap: var(--gap); min-width: 0; min-height: 0; }
 .bento-cover { grid-area: cover; position: relative; display: block; aspect-ratio: 4 / 5; max-height: 72svh; overflow: hidden; border-radius: var(--r); background: var(--surface-pull-quote-gray); }
-/* Cover slides: the next story wipes in from the right over the current one while its photo settles
-   from a slight zoom. "prev" stays underneath until the wipe has covered it. */
-.bento-slide { position: absolute; inset: 0; z-index: 0; clip-path: inset(0 0 0 100%); }
-.bento-slide[data-state="prev"] { z-index: 1; clip-path: inset(0); }
-.bento-slide[data-state="active"] { z-index: 2; clip-path: inset(0); transition: clip-path .9s cubic-bezier(.7,0,.2,1); }
-.bento-slide[data-state="active"] img { animation: bento-settle 2.4s cubic-bezier(.2,.8,.2,1) both; }
-.bento-slide[data-state="active"] .bento-lead > * { animation: bento-rise .6s cubic-bezier(.2,.8,.2,1) both; }
-.bento-slide[data-state="active"] .bento-lead > :nth-child(1) { animation-delay: .3s; }
-.bento-slide[data-state="active"] .bento-lead > :nth-child(2) { animation-delay: .38s; }
-.bento-slide[data-state="active"] .bento-lead > :nth-child(3) { animation-delay: .46s; }
-@keyframes bento-settle { from { transform: scale(1.12); } to { transform: scale(1); } }
-@keyframes bento-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+/* Cover slides: a soft crossfade. The next story fades in on top of the current one;
+   "prev" stays fully visible underneath until the fade has covered it. */
+.bento-slide { position: absolute; inset: 0; z-index: 0; opacity: 0; }
+.bento-slide[data-state="prev"] { z-index: 1; opacity: 1; }
+.bento-slide[data-state="active"] { z-index: 2; opacity: 1; transition: opacity 1.2s ease-in-out; }
 /* Lead story on each slide: kicker, headline, date, over a soft top scrim for legibility */
 .bento-slide::before { content: ""; position: absolute; inset: 0 0 auto; height: 55%; z-index: 1; background: linear-gradient(to bottom, rgb(0 0 0 / .55), transparent); pointer-events: none; }
 .bento-lead { position: absolute; top: 16px; left: 76px; right: 16px; z-index: 2; display: grid; gap: 6px; color: var(--color-broadsheet-white); }
@@ -507,7 +500,6 @@ html:has(dialog.drawer[open]) { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .bento-frame { animation: none; }
   .bento-burger span, .bento-slide, .bento-deck-card, .bento-fan-card { transition: none !important; }
-  .bento-slide img, .bento-slide .bento-lead > * { animation: none !important; }
   .drawer[open], .drawer[open]::backdrop, .drawer[data-closing], .drawer[data-closing]::backdrop { animation: none; }
   .drawer-panel, .drawer-thumb img { transition: none; }
   .bs-reveal { animation: none; }
