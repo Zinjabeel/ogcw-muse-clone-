@@ -10,7 +10,7 @@ import { SignupCard } from "./signup-card";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
-// system (dark page, Anybody headlines, Inter text, yellow labels).
+// system (dark page, Source Serif 4 headlines and text, Inter labels, yellow accents).
 
 type Crop = { pos: string; zoom: number };
 type Story = { tag: string; title: string; read: string; deck?: string; image: string; alt: string; crop?: Crop };

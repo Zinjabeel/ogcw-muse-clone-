@@ -11,7 +11,7 @@ import vedanPhoto from "../assets/vedan.jpg.asset.json";
 
 // Hero, built on the "hero section model 1" layout (a bento dashboard in a
 // dark frame): a three-story cover that crossfades every 5 seconds, in the
-// OGCW brand system (Anybody 900 headlines, Inter labels, --ogcw-* colours).
+// OGCW brand system (Source Serif 4 headlines, Inter labels, --ogcw-* colours).
 
 type Crop = { pos: string; zoom: number };
 
