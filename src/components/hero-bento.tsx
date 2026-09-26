@@ -10,8 +10,8 @@ import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 
 // Hero, built on the "hero section model 1" layout (a bento dashboard in a
-// dark frame): a three-story cover that crossfades every 5 seconds, Anybody for the headline and
-// Space Grotesk for labels and inputs, on the Monocle colour tokens.
+// dark frame): a three-story cover that crossfades every 5 seconds, in the
+// OGCW brand system (Anybody 900 headlines, Inter labels, --ogcw-* colours).
 
 type Crop = { pos: string; zoom: number };
 

@@ -45,13 +45,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         {children}
-        <footer className="border-t border-border bg-foreground py-12 text-background">
+        <footer className="border-t border-border bg-background py-12 text-foreground">
           <div className="mx-auto flex max-w-none flex-col gap-10 px-4 lg:px-8">
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-              <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-background/60">Independent reporting from the people shaping culture now.</p></div>
-              <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-widest">{nav.map((item) => <Link key={item.to} to={item.to} className="hover:text-accent">{item.label}</Link>)}</div>
+              <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-muted-foreground">Independent reporting from the people shaping culture now.</p></div>
+              <div className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-widest">{nav.map((item) => <Link key={item.to} to={item.to} className="transition-colors hover:text-accent">{item.label}</Link>)}</div>
             </div>
-            <div className="flex items-center justify-between border-t border-background/20 pt-5 text-[10px] font-semibold uppercase tracking-widest text-background/50"><span>OG Culture World</span><span>Independent / Worldwide</span></div>
+            <div className="flex items-center justify-between gap-4 border-t border-border pt-5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"><span>One Great Culture World</span><span>Independent / Worldwide</span></div>
           </div>
         </footer>
         <NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} />

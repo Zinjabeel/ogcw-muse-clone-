@@ -62,7 +62,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             Go home
           </a>
@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OGCW — OG Culture World" },
+      { title: "OGCW — One Great Culture World" },
       { name: "description", content: "Independent news and stories from the people shaping culture now." },
-      { name: "author", content: "OG Culture World" },
-      { property: "og:title", content: "OGCW — OG Culture World" },
+      { name: "author", content: "One Great Culture World" },
+      { property: "og:title", content: "OGCW — One Great Culture World" },
       { property: "og:description", content: "Independent news and stories from the people shaping culture now." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -88,7 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Anybody:wdth,wght@50..150,700..900&family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,700..900&family=Inter:wght@400;500;600;700&display=swap" },
       {
         rel: "stylesheet",
         href: appCss,
