@@ -8,9 +8,9 @@ import designHero from "../assets/ogcw-hero-design.jpg";
 import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 import { SignupCard } from "./signup-card";
 
-// The news front page, built to the Monocle reference (design md monocle):
-// a broadsheet on cream paper. Serif does all the editorial talking, hairline
-// rules build the grid, and colour stays black and white.
+// The news front page: the broadsheet grid from the Monocle reference (design
+// md monocle), with hairline rules building the grid, dressed in the OGCW brand
+// system (dark page, Anybody headlines, Inter text, yellow labels).
 
 type Crop = { pos: string; zoom: number };
 type Story = { tag: string; title: string; read: string; deck?: string; image: string; alt: string; crop?: Crop };
