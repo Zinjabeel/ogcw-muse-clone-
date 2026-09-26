@@ -185,138 +185,120 @@
 .site-header .icon-button:hover, .site-header .icon-button:focus-visible { background: var(--ogcw-accent); color: var(--ogcw-bg); border-color: var(--ogcw-accent); outline: none; }
 
 /* ------------------------------------------------------------------
-   Hero bento, built on "hero section model 1": a dashboard in a dark
-   frame (cover slideshow with a menu notch, socials pill, a numbered
-   stack, an Originals card), in the OGCW brand colours (--ogcw-*).
+   Hero (src/components/hero-slider.tsx), built on "hero section model 2":
+   a full-bleed photo per story, the right part frosted behind a hairline
+   divider, a huge section word, and a timeline along the bottom whose
+   centre pill (on the divider) is the story's call to action.
    ------------------------------------------------------------------ */
-/* The frame IS the hero: edge to edge, full height under the nav */
-.hero-bento {
-  --hero-display: var(--ogcw-display);
-  --hero-ui: var(--ogcw-ui);
-  display: grid; min-height: calc(100svh - 3.5rem);
-  background: var(--ogcw-bg); color: var(--ogcw-text);
-  font-family: var(--hero-ui); font-size: var(--text-body); line-height: var(--leading-body); letter-spacing: var(--tracking-body);
+.hero {
+  --split: 62%;            /* where the frosted panel starts (desktop) */
+  --edge: 16px;            /* frame inset */
+  --rail: 64px;            /* timeline distance from the bottom */
+  --hair: rgb(245 245 245 / .38);
+  position: relative; overflow: hidden; isolation: isolate;
+  height: calc(100svh - 3.5rem); min-height: 620px;
+  background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui);
 }
-.bento-frame {
-  --frame: var(--ogcw-bg); --gap: 12px; --r: 28px;
-  display: grid; gap: var(--gap); width: 100%; padding: var(--gap);
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "search" "main" "right";
-  background: var(--frame);
-  animation: bento-in .9s cubic-bezier(.2,.8,.2,1) both;
-}
-@media (min-width: 1024px) {
-  .bento-frame {
-    --gap: 14px; --r: 32px;
-    grid-template-columns: minmax(0, 1fr) clamp(280px, 24vw, 420px); grid-template-rows: 76px minmax(0, 1fr);
-    grid-template-areas: "main search" "main right";
-    height: calc(100svh - 3.5rem); min-height: 640px;
-  }
-}
+@media (min-width: 1024px) { .hero { --edge: 32px; --rail: 72px; min-height: 680px; } }
 
-/* Menu button: a dark disc with three lines, set into a notch in the cover's top-left corner.
-   The frame-coloured ring makes the cut. Turns yellow on hover. */
-.bento-burger-wrap { --size: 52px; position: absolute; top: 0; left: 0; z-index: 3; width: var(--size); height: var(--size); }
-.bento-burger { display: grid; place-content: center; gap: 5px; width: 100%; height: 100%; border: 1px solid var(--ogcw-border); border-radius: 50%; background: var(--ogcw-surface); box-shadow: 0 0 0 var(--gap) var(--frame); transition: background-color .2s ease, border-color .2s ease; }
-.bento-burger span { display: block; width: 22px; height: 2px; border-radius: 2px; background: var(--ogcw-text); transition: width .35s cubic-bezier(.2,.8,.2,1), background-color .2s ease; }
-.bento-burger span:nth-child(2) { width: 16px; }
-.bento-burger span:nth-child(3) { width: 11px; }
-.bento-burger:hover span, .bento-burger:focus-visible span { width: 22px; background: var(--ogcw-bg); }
-.bento-burger:hover, .bento-burger:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); outline: none; }
-/* Phones use the header's menu button instead (choice 2A) */
-@media (max-width: 767px) { .bento-burger-wrap { display: none; } }
-@media (min-width: 1024px) {
-  .bento-burger-wrap { --size: 76px; }
-  .bento-burger { gap: 6px; }
-  .bento-burger span { width: 28px; }
-  .bento-burger span:nth-child(2) { width: 20px; }
-  .bento-burger span:nth-child(3) { width: 13px; }
-  .bento-burger:hover span, .bento-burger:focus-visible span { width: 28px; }
+/* Slides crossfade: the next fades in over the current, which stays underneath until covered */
+.hero-slide { position: absolute; inset: 0; z-index: 0; opacity: 0; }
+.hero-slide[data-state="prev"] { z-index: 1; opacity: 1; }
+.hero-slide[data-state="active"] { z-index: 2; opacity: 1; transition: opacity 1.2s ease-in-out; }
+.hero-slide[data-state="active"] .hero-name > *,
+.hero-slide[data-state="active"] .hero-panel-inner > * { animation: hero-rise .8s cubic-bezier(.2,.8,.2,1) both; }
+.hero-slide[data-state="active"] .hero-name > :nth-child(2),
+.hero-slide[data-state="active"] .hero-panel-inner > :nth-child(2) { animation-delay: .08s; }
+.hero-slide[data-state="active"] .hero-name > :nth-child(3),
+.hero-slide[data-state="active"] .hero-panel-inner > :nth-child(3) { animation-delay: .16s; }
+.hero-slide[data-state="active"] .hero-panel-inner > :nth-child(4) { animation-delay: .24s; }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-photo[data-flip] { transform: scaleX(-1); }
+/* Soft shade at the bottom-left so the headline reads on any photo */
+.hero-slide::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgb(13 13 13 / .7), rgb(13 13 13 / 0) 55%); pointer-events: none; }
+
+/* The huge section word, bleeding off the top-left */
+.hero-word {
+  position: absolute; z-index: 1; left: -.04em; top: -.12em;
+  font-family: var(--ogcw-serif); font-size: clamp(120px, 30vw, 520px); font-weight: 400; line-height: .8; letter-spacing: -.03em;
+  text-transform: uppercase; white-space: nowrap; color: rgb(245 245 245 / .16); pointer-events: none; user-select: none;
 }
 
-/* Main: the cover slideshow */
-.bento-main { grid-area: main; position: relative; display: grid; grid-template-areas: "cover"; gap: var(--gap); min-width: 0; min-height: 0; }
-.bento-cover { grid-area: cover; position: relative; display: block; aspect-ratio: 4 / 5; max-height: 72svh; overflow: hidden; border-radius: var(--r); background: var(--ogcw-surface); }
-/* Cover slides: a soft crossfade. The next story fades in on top of the current one;
-   "prev" stays fully visible underneath until the fade has covered it. */
-.bento-slide { position: absolute; inset: 0; z-index: 0; opacity: 0; }
-.bento-slide[data-state="prev"] { z-index: 1; opacity: 1; }
-.bento-slide[data-state="active"] { z-index: 2; opacity: 1; transition: opacity 1.2s ease-in-out; }
-/* Lead story on each slide: kicker, headline, date, over a soft top scrim for legibility */
-.bento-slide::before { content: ""; position: absolute; inset: 0 0 auto; height: 55%; z-index: 1; background: linear-gradient(to bottom, rgb(0 0 0 / .55), transparent); pointer-events: none; }
-.bento-lead { position: absolute; top: 16px; left: 76px; right: 16px; z-index: 2; display: grid; justify-items: start; gap: 6px; color: var(--ogcw-text); }
-/* Section label: the yellow tag */
-.bento-lead-kicker { padding: 4px 8px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 11px; font-weight: 600; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; }
-.bento-lead-title { max-width: 18ch; font-family: var(--hero-display); font-weight: 400; font-size: 28px; line-height: 1.08; letter-spacing: -.01em; text-wrap: balance; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 5px; transition: text-decoration-color .2s ease; }
-.bento-cover:hover .bento-lead-title, .bento-cover:focus-visible .bento-lead-title { text-decoration-color: currentColor; }
-.bento-lead-date { font-size: var(--text-caption); color: rgb(245 245 245 / .75); }
-@media (max-width: 767px) { .bento-lead { left: 16px; } }
-@media (min-width: 1024px) {
-  .bento-lead { top: 30px; left: 118px; right: auto; max-width: min(52%, 560px); gap: 10px; }
-  .bento-lead-title { font-size: clamp(36px, 3.2vw, 56px); }
+/* Headline, bottom-left above the timeline */
+.hero-name { position: absolute; z-index: 3; left: calc(var(--edge) + 16px); bottom: calc(var(--rail) + 36px); width: min(calc(var(--split) - var(--edge) - 56px), 760px); }
+.hero-kicker { display: inline-block; padding: 4px 8px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 11px; font-weight: 700; line-height: 1.2; letter-spacing: .1em; text-transform: uppercase; }
+.hero-title { margin-top: 14px; font-family: var(--ogcw-serif); font-size: clamp(34px, 4vw, 68px); font-weight: 400; line-height: 1.04; letter-spacing: -.015em; text-wrap: balance; }
+.hero-date { display: block; margin-top: 12px; font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: rgb(245 245 245 / .72); }
+
+/* Frosted right-hand panel with the story details */
+.hero-panel {
+  position: absolute; z-index: 2; top: 0; right: 0; bottom: 0; left: var(--split);
+  border-left: 1px solid var(--hair);
+  background: rgb(13 13 13 / .22); -webkit-backdrop-filter: blur(26px) saturate(.85); backdrop-filter: blur(26px) saturate(.85);
 }
-.bento-cover img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); }
-@media (min-width: 640px) and (max-width: 1023px) { .bento-cover { aspect-ratio: 16 / 10; } .bento-frame .bento-right { height: 300px; } }
+.hero-panel-inner { position: absolute; left: 48px; right: calc(var(--edge) + 32px); top: clamp(80px, 16%, 160px); max-width: 520px; }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgb(245 245 245 / .72); }
+.hero-heading { margin-top: 12px; font-family: var(--ogcw-serif); font-size: clamp(28px, 2.6vw, 44px); line-height: 1.08; letter-spacing: -.01em; text-wrap: balance; }
+.hero-deck { margin-top: 16px; font-family: var(--ogcw-serif); font-size: 17px; line-height: 1.5; color: rgb(245 245 245 / .82); }
+.hero-facts { margin-top: 32px; border-top: 1px solid var(--hair); }
+.hero-facts div { display: flex; justify-content: space-between; gap: 16px; padding-block: 11px; border-bottom: 1px solid var(--hair); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.hero-facts dt { color: rgb(245 245 245 / .72); }
+.hero-facts dd { font-variant-numeric: tabular-nums; }
 
-.bento-eyebrow { font-size: var(--text-caption); font-weight: 500; line-height: var(--leading-caption); letter-spacing: .06em; text-transform: uppercase; }
+/* Thin frame with a node at each corner */
+.hero-frame { position: absolute; z-index: 4; inset: var(--edge); border: 1px solid rgb(245 245 245 / .22); pointer-events: none; }
+.hero-frame i { position: absolute; width: 7px; height: 7px; border: 1px solid var(--hair); border-radius: 50%; background: var(--ogcw-bg); }
+.hero-frame i:nth-child(1) { top: -4px; left: -4px; }
+.hero-frame i:nth-child(2) { top: -4px; right: -4px; }
+.hero-frame i:nth-child(3) { bottom: -4px; left: -4px; }
+.hero-frame i:nth-child(4) { bottom: -4px; right: -4px; }
 
-@media (min-width: 1024px) {
-  .bento-main { display: block; position: relative; }
-  .bento-cover { position: absolute; inset: 0; aspect-ratio: auto; max-height: none; }
-  .bento-cover img { object-position: var(--pos-lg, var(--pos, 50% 50%)); }
+/* Timeline: a hairline across the frame with a yellow progress fill; pills at each end, the CTA on the divider */
+.hero-rail { position: absolute; z-index: 5; left: var(--edge); right: var(--edge); bottom: var(--rail); height: 0; }
+.hero-line { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--hair); }
+.hero-progress { position: absolute; left: 0; top: 0; height: 1px; width: 100%; background: var(--ogcw-accent); transform-origin: left; animation: hero-progress 5s linear both; }
+.hero-progress[data-paused] { animation-play-state: paused; }
+@keyframes hero-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.hero-pill, .hero-cta { position: absolute; top: 0; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.hero-pill { border: 1px solid var(--hair); background: rgb(13 13 13 / .35); color: var(--ogcw-text); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.hero-pill-prev { left: 16px; }
+.hero-pill-next { right: 16px; }
+.hero-pill:hover, .hero-pill:focus-visible { border-color: var(--ogcw-text); background: var(--ogcw-text); color: var(--ogcw-bg); outline: none; }
+/* The CTA sits exactly on the divider line */
+.hero-cta { left: calc(var(--split) - var(--edge)); transform: translate(-50%, -50%); height: 44px; padding: 0 20px; background: var(--ogcw-accent); color: var(--ogcw-bg); box-shadow: 0 0 0 6px rgb(13 13 13 / .35); }
+.hero-cta svg { transition: transform .2s ease; }
+.hero-cta:hover, .hero-cta:focus-visible { background: var(--ogcw-text); outline: none; }
+.hero-cta:hover svg, .hero-cta:focus-visible svg { transform: translate(2px, -2px); }
+
+/* Phones and tablets: the frosted panel becomes the lower part, the divider runs across */
+@media (max-width: 1023px) {
+  .hero { --split: 0%; --rail: 36px; height: auto; min-height: calc(100svh - 3.5rem); }
+  .hero-word { font-size: 40vw; top: -.08em; }
+  .hero-panel { left: 0; top: 54%; border-left: 0; border-top: 1px solid var(--hair); }
+  .hero-panel-inner { left: calc(var(--edge) + 12px); right: calc(var(--edge) + 12px); top: 20px; }
+  .hero-heading { font-size: 24px; }
+  .hero-deck { margin-top: 10px; font-size: 15px; display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .hero-facts { display: none; }
+  .hero-name { left: calc(var(--edge) + 12px); right: calc(var(--edge) + 12px); width: auto; bottom: calc(46% + 20px); }
+  .hero-title { font-size: 30px; }
+  .hero-slide::after { background: linear-gradient(to top, rgb(13 13 13 / .75) 46%, rgb(13 13 13 / 0) 80%); }
+  .hero-pill { height: 34px; padding: 0 12px; font-size: 10px; }
+  .hero-pill-prev { left: 8px; }
+  .hero-pill-next { right: 8px; }
+  .hero-cta { left: 50%; height: 38px; padding: 0 14px; font-size: 11px; }
 }
-
-/* Search pill */
-/* Socials pill (in the old Search slot) */
-.bento-socials { grid-area: search; display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 48px; padding: 0 6px 0 20px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-surface); color: var(--ogcw-text); }
-.bento-socials-label { font-size: var(--text-caption); font-weight: 600; line-height: 1; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-.bento-socials ul { display: flex; gap: 2px; }
-.bento-socials a { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; transition: background-color .2s ease, color .2s ease; }
-.bento-socials a:hover, .bento-socials a:focus-visible { background: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
-@media (min-width: 1024px) { .bento-socials { align-self: start; height: 60px; padding: 0 8px 0 24px; } .bento-socials a { width: 44px; height: 44px; } }
-
-/* Right column: the numbered stack and the inspiration card */
-.bento-right { grid-area: right; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); min-height: 0; height: 250px; }
-@media (min-width: 1024px) { .bento-right { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.55fr) minmax(0, 1fr); height: auto; } }
-
-.bento-deck-wrap { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; min-height: 0; }
-.bento-deck-label { padding-left: 4px; font-size: var(--text-caption); font-weight: 600; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-accent); }
-.bento-deck { position: relative; min-height: 0; }
-.bento-deck-card a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(0 0 0 / .6), transparent 45%); pointer-events: none; }
-.bento-deck-num, .bento-deck-title { z-index: 1; }
-.bento-deck-title { position: absolute; left: 46px; right: 12px; top: 14px; display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--ogcw-text); font-family: var(--ogcw-serif); font-size: 14px; font-weight: 600; line-height: 1.25; letter-spacing: 0; }
-.bento-deck-card a:hover .bento-deck-title, .bento-deck-card a:focus-visible .bento-deck-title { text-decoration: underline; text-underline-offset: 3px; }
-.bento-deck-card { position: absolute; left: 0; right: 0; height: 58%; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-.bento-deck-card:nth-child(1) { top: 0; z-index: 1; }
-.bento-deck-card:nth-child(2) { top: 21%; z-index: 2; }
-.bento-deck-card:nth-child(3) { top: 42%; z-index: 3; }
-.bento-deck-card a { position: relative; display: block; height: 100%; overflow: hidden; border-radius: var(--r); background: var(--ogcw-surface); box-shadow: 0 0 0 3px var(--frame); }
-.bento-deck-card img { width: 100%; height: 100%; object-fit: cover; }
-.bento-deck-card:not(:last-child):hover { transform: translateY(-10px); }
-.bento-deck-num { position: absolute; left: 8px; top: 12px; display: grid; place-items: center; width: 28px; height: 40px; border: 1px solid rgb(245 245 245 / .75); border-radius: 999px; background: rgb(13 13 13 / .35); color: var(--ogcw-text); font-size: var(--text-caption); line-height: 1; }
-
-.bento-inspired { position: relative; display: block; min-height: 0; overflow: hidden; padding: 16px 18px; border: 1px solid var(--ogcw-border); border-radius: var(--r); background: var(--ogcw-surface); color: var(--ogcw-text); }
-.bento-inspired .bento-eyebrow { display: block; padding-right: 40px; font-family: var(--ogcw-display); font-size: 18px; font-weight: 400; line-height: 1.1; letter-spacing: 0; text-transform: none; }
-.bento-ring { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--ogcw-border); border-radius: 50%; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
-.bento-inspired:hover .bento-ring, .bento-inspired:focus-visible .bento-ring { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
-.bento-inspired:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
-.bento-fan { position: absolute; right: -8%; bottom: -24%; width: min(62%, 170px); aspect-ratio: 3 / 4; }
-.bento-fan-card { position: absolute; inset: 0; overflow: hidden; border: 2px solid var(--ogcw-bg); border-radius: 18px; background: var(--ogcw-bg); transform-origin: 80% 100%; transform: translateX(calc(var(--n) * 14%)) rotate(calc(-22deg + var(--n) * 11deg)); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
-.bento-fan-card img { width: 100%; height: 100%; object-fit: cover; transform: scale(var(--zoom, 1)); transform-origin: var(--origin, center); }
-.bento-inspired:hover .bento-fan-card { transform: translateX(calc(var(--n) * 18%)) rotate(calc(-30deg + var(--n) * 15deg)); }
-@media (min-width: 1024px) {
-  .bento-deck-num { left: 12px; top: 16px; width: 34px; height: 50px; font-size: var(--text-body); }
-  .bento-deck-title { left: 58px; top: 18px; font-size: 17px; }
-  .bento-deck-label { font-size: 14px; }
-  .bento-inspired { padding: 24px 26px; }
-  .bento-inspired .bento-eyebrow { padding-right: 56px; font-size: 24px; }
-  .bento-ring { top: 16px; right: 16px; width: 44px; height: 44px; }
-  .bento-ring svg { width: 19px; height: 19px; }
-  .bento-fan { width: auto; height: 78%; bottom: -20%; }
-  .bento-fan-card { border-radius: 22px; border-width: 3px; }
+/* Tablets: same stacked layout, bigger type and the facts list back */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .hero-title { font-size: 46px; }
+  .hero-heading { font-size: 32px; }
+  .hero-deck { font-size: 17px; -webkit-line-clamp: 4; }
+  .hero-facts { display: block; margin-top: 24px; }
+  .hero-panel-inner { max-width: 640px; top: 32px; }
+  .hero-pill { height: 38px; padding: 0 16px; font-size: 11px; }
+  .hero-cta { height: 42px; padding: 0 18px; font-size: 12px; }
 }
-
-@keyframes bento-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
 /* ------------------------------------------------------------------
    Site menu drawer (src/components/nav-drawer.tsx), modelled on the
@@ -657,10 +639,11 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bento-frame { animation: none; }
+  .hero-slide, .hero-pill, .hero-cta { transition: none !important; }
+  .hero-slide .hero-name > *, .hero-slide .hero-panel-inner > *, .hero-progress { animation: none !important; }
+  .hero-progress { transform: scaleX(0); }
   .ogcw-signup .card, .ogcw-signup .card:hover { transform: rotate(-2deg); transition: none; animation: none; }
   .ogcw-signup .sign-up, .ogcw-signup .card__form input, .ogcw-signup .banner-text { transition: none; animation: none; }
-  .bento-burger span, .bento-slide, .bento-deck-card, .bento-fan-card { transition: none !important; }
   .drawer[open], .drawer[open]::backdrop, .drawer[data-closing], .drawer[data-closing]::backdrop, .search[open] { animation: none; }
   .drawer-panel, .drawer-thumb img { transition: none; }
   .bs-reveal { animation: none; }

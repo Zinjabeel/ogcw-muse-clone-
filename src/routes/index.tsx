@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, StoryLink } from "../components/ogcw-layout";
-import { HeroBento } from "../components/hero-bento";
+import { HeroSlider } from "../components/hero-slider";
 import { NewsFront } from "../components/news-front";
 import musicHero from "../assets/ogcw-hero-music.jpg";
 
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return <SiteShell>
-    <HeroBento />
+    <HeroSlider />
 
     <main>
       <NewsFront />
