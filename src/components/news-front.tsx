@@ -1,12 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Clapperboard, Play } from "lucide-react";
+import { ArrowRight, BookOpen, Clapperboard, Play, ShoppingBag } from "lucide-react";
 import type { MouseEvent } from "react";
 import centralCeePhoto from "../assets/central-cee.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 import musicHero from "../assets/ogcw-hero-music.jpg";
-import styleHero from "../assets/ogcw-hero-style.jpg";
-import designHero from "../assets/ogcw-hero-design.jpg";
-import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
 import { SignupCard } from "./signup-card";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
@@ -50,14 +47,19 @@ const originals: Original[] = [
   { kind: "Reportage", title: "Made to last: in the studio with the object makers", length: "08:15", tone: "white" },
   { kind: "The list", title: "Ten records that shaped the year so far", length: "05:32", tone: "yellow" },
 ];
-// Cards are clickable but go nowhere until the Originals tab is built.
+// Originals and Shop cards are clickable but go nowhere until those tabs are built.
 const comingSoon = (event: MouseEvent<HTMLAnchorElement>) => event.preventDefault();
 
-const features: Story[] = [
-  { tag: "Style", title: "Independent labels reclaim the runway", read: "6 min read", image: styleHero, alt: "A man in a long black coat under a bridge in the rain" },
-  { tag: "Design", title: "Objects built to outlast the feed", read: "4 min read", image: designHero, alt: "A sneaker and headphones on a concrete plinth" },
-  { tag: "Architecture", title: "Why brutalism keeps returning", read: "8 min read", image: editorialGrid, alt: "A brutalist concrete building against a grey sky", crop: { pos: "0% 100%", zoom: 2 } },
-  { tag: "Print", title: "A new generation remakes print", read: "5 min read", image: editorialGrid, alt: "Two people working over pages in a print studio", crop: { pos: "100% 100%", zoom: 2 } },
+// Shop row (was "More from OGCW"): one tile per partner shop. Photos are
+// hotlinked from Unsplash (free Unsplash License), as Unsplash asks; credits
+// are in the home page's photo credit line.
+// TODO: link each tile, and "Visit the shop", to the OGCW shop section.
+const unsplash = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
+const shops: Story[] = [
+  { tag: "Nike", title: "Air Max, Dunks and the latest drops", read: "Shop Nike", image: unsplash("photo-1637844528447-aee837ccfc7f"), alt: "An orange Nike swoosh lit up on the corner of a dark building" },
+  { tag: "Adidas", title: "Sambas, Gazelles and the Originals line", read: "Shop Adidas", image: unsplash("photo-1778521269710-748a3e4d5e15"), alt: "A neon Adidas trefoil in a store window, clothing rails behind" },
+  { tag: "StockX", title: "Verified sneakers at live resale prices", read: "Shop StockX", image: unsplash("photo-1560769629-975ec94e6a86"), alt: "A pair of colourful sneakers on a white plinth" },
+  { tag: "Uniqlo", title: "Everyday essentials, done right", read: "Shop Uniqlo", image: unsplash("photo-1602519095267-53c956c8cf74"), alt: "The red Uniqlo sign glowing on a glass building at night", crop: { pos: "50% 62%", zoom: 1 } },
 ];
 
 function ReadTime({ children }: { children: string }) {
@@ -188,20 +190,20 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <section aria-labelledby="more-title">
+        <section aria-labelledby="shop-title">
           <div className="bs-section-head">
-            <h3 id="more-title" className="bs-eyebrow">More from OGCW</h3>
-            <Link to="/news" className="bs-more">All news</Link>
+            <h3 id="shop-title" className="bs-eyebrow">Shop</h3>
+            <a href="#shop-title" className="bs-more" onClick={comingSoon}>Visit the shop</a>
           </div>
           <div className="bs-features">
-            {features.map((story) => (
-              <article key={story.title} className="bs-reveal">
-                <Link to="/news" className="bs-card">
-                  <Photo story={story} className="bs-photo-feature" />
-                  <p className="bs-eyebrow">{story.tag}</p>
-                  <h4 className="bs-title">{story.title}</h4>
-                  <ReadTime>{story.read}</ReadTime>
-                </Link>
+            {shops.map((shop) => (
+              <article key={shop.tag} className="bs-reveal">
+                <a href="#shop-title" className="bs-card" onClick={comingSoon}>
+                  <Photo story={shop} className="bs-photo-feature" />
+                  <p className="bs-eyebrow">{shop.tag}</p>
+                  <h4 className="bs-title">{shop.title}</h4>
+                  <span className="bs-read"><ShoppingBag size={13} strokeWidth={1.5} aria-hidden="true" />{shop.read}</span>
+                </a>
               </article>
             ))}
           </div>
