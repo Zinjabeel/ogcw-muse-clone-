@@ -30,8 +30,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <SiteMenuContext.Provider value={{ menuOpen, openMenu }}>
       <div className="min-h-screen bg-background text-foreground">
         <header className="site-header sticky top-0 z-50">
-          <div className="mx-auto grid h-14 max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-8">
-            <Link to="/" className="site-logo justify-self-start" aria-label="OGCW home">OGCW</Link>
+          <div className="mx-auto grid h-14 max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
+            {/* Menu button sits with the logo on the left */}
+            <div className="flex items-center gap-3 justify-self-start">
+              <button type="button" className="icon-button grid" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={openMenu}>
+                <Menu size={18} />
+              </button>
+              <Link to="/" className="site-logo" aria-label="OGCW home">OGCW</Link>
+            </div>
             <nav className="hidden items-center gap-[25px] md:flex" aria-label="Main navigation">
               {nav.map((item) => (
                 <Link key={item.to} to={item.to} className={`nav-link ${pathname === item.to ? "nav-link-active" : ""}`}>{item.label}</Link>
@@ -39,15 +45,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
             </nav>
             <div className="col-start-3 flex items-center gap-2 justify-self-end">
               <button type="button" className="icon-button grid" aria-label="Search" aria-haspopup="dialog" aria-expanded={searchOpen} onClick={openSearch}><Search size={16} /></button>
-              <button type="button" className="icon-button grid" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={openMenu}>
-                <Menu size={18} />
-              </button>
             </div>
           </div>
         </header>
         {children}
         <footer className="border-t border-border bg-background py-12 text-foreground">
-          <div className="mx-auto flex max-w-none flex-col gap-10 px-4 lg:px-8">
+          <div className="mx-auto flex max-w-none flex-col gap-10 px-4 lg:px-[4vw]">
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
               <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-muted-foreground">Independent reporting from the people shaping culture now.</p></div>
               <div className="flex flex-col gap-6 md:items-end">
@@ -77,7 +80,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 }
 
 export function PageIntro({ kicker, title, copy }: { kicker: string; title: string; copy: string }) {
-  return <section className="mx-auto max-w-none px-4 pb-12 pt-14 lg:px-8 lg:pb-16 lg:pt-20"><p className="section-kicker">{kicker}</p><div className="mt-5 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><h1 className="font-display text-6xl leading-[.9] sm:text-8xl lg:text-9xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground">{copy}</p></div></section>;
+  return <section className="mx-auto max-w-none px-4 pb-12 pt-14 lg:px-[4vw] lg:pb-16 lg:pt-20"><p className="section-kicker">{kicker}</p><div className="mt-5 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><h1 className="font-display text-6xl leading-[.9] sm:text-8xl lg:text-9xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground">{copy}</p></div></section>;
 }
 
 export function StoryLink({ to = "/news", children }: { to?: "/news" | "/trends" | "/blog" | "/about"; children: ReactNode }) {

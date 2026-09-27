@@ -393,9 +393,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   padding-block: 56px var(--section-gap);
   border-top: 1px solid var(--ogcw-border);
 }
-/* Full width, like the hero: the same 16px / 32px side gutters as the header and footer */
+/* Same side gutters as the header, footer and pages: 16px on phones, 4% of the screen from 1024px */
 .bs-wrap { padding-inline: var(--spacing-16); }
-@media (min-width: 1024px) { .bs-wrap { padding-inline: 32px; } }
+@media (min-width: 1024px) { .bs-wrap { padding-inline: 4vw; } }
 
 /* Headline face, shared by every story title and section heading */
 .bs-wordmark, .bs-title, .bs-section-head .bs-eyebrow { font-family: var(--ogcw-display); font-weight: 400; }
