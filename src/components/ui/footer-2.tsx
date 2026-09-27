@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { SOCIALS, SocialIcon } from "@/components/socials";
 import type { InfoSlug } from "@/components/info-pages";
@@ -100,14 +101,43 @@ function AppBadge({ store }: { store: "apple" | "google" }) {
   );
 }
 
+// The footer's contents slide up and fade in the first time it scrolls into
+// view. It only hides them once JavaScript is running and the footer is still
+// below the fold, so it never stays invisible; reduced-motion users skip it.
+function useScrollReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [state, setState] = useState<"idle" | "hidden" | "shown">("idle");
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (el.getBoundingClientRect().top < window.innerHeight) return; // already on screen
+    setState("hidden");
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setState("shown");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, state };
+}
+
 export function Footer2() {
+  const reveal = useScrollReveal<HTMLElement>();
   return (
-    <footer className="border-t bg-background text-foreground font-sans">
+    <footer ref={reveal.ref} data-reveal={reveal.state} className="site-footer border-t bg-background text-foreground font-sans">
       <div className="page-wrap">
         {/* Grid container with headings and links */}
         <div className="grid grid-cols-2 gap-8 py-12 md:grid-cols-4">
-          {footerLinks.map((item) => (
-            <div key={item.title}>
+          {footerLinks.map((item, index) => (
+            <div key={item.title} className="footer-reveal" style={{ ["--i" as string]: index }}>
               <h3 className="mb-4 text-xs font-medium text-foreground">{item.title}</h3>
               <ul className="space-y-2 text-sm">
                 {item.links.map((link) => (
@@ -117,9 +147,9 @@ export function Footer2() {
             </div>
           ))}
         </div>
-        <div className="h-px bg-border" />
+        <div className="footer-reveal h-px bg-border" style={{ ["--i" as string]: 4 }} />
         {/* Social buttons + app badges */}
-        <div className="flex flex-wrap items-center justify-between gap-4 py-5">
+        <div className="footer-reveal flex flex-wrap items-center justify-between gap-4 py-5" style={{ ["--i" as string]: 4 }}>
           <div className="flex items-center gap-2">
             {SOCIALS.map((social) => (
               <a
@@ -140,8 +170,8 @@ export function Footer2() {
             <AppBadge store="google" />
           </div>
         </div>
-        <div className="h-px bg-border" />
-        <div className="py-4 text-center text-xs text-foreground">
+        <div className="footer-reveal h-px bg-border" style={{ ["--i" as string]: 5 }} />
+        <div className="footer-reveal py-4 text-center text-xs text-foreground" style={{ ["--i" as string]: 5 }}>
           <p>
             © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
             <Link to="/" className="footer-link">One Great Culture World</Link>. All rights reserved.

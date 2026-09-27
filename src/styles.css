@@ -736,6 +736,18 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .ogcw-connect-email svg { color: var(--ogcw-accent); }
 .ogcw-connect-email:hover, .ogcw-connect-email:focus-visible { color: var(--ogcw-accent); outline: none; }
 
+/* Footer scroll-in: once the footer is below the fold (data-reveal="hidden"),
+   its rows wait; when it scrolls into view they slide up and fade in, one
+   after another (--i). */
+.footer-reveal { transition: opacity .7s ease, transform .8s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i, 0) * 90ms); }
+.site-footer[data-reveal="hidden"] .footer-reveal { opacity: 0; transform: translateY(32px); }
+
+/* Where the About / Newsletter / Work with OGCW band ends the page, it fades
+   from #1A1A1A into the footer's black over a little extra space, with no
+   hard line between them. */
+.ogcw-connect { background: linear-gradient(to bottom, var(--ogcw-surface) 0, var(--ogcw-surface) calc(100% - 160px), var(--ogcw-bg) 100%); padding-bottom: 96px; }
+main:has(> .ogcw-connect:last-child) + .site-footer { border-top-color: transparent; }
+
 /* Footer (src/components/ui/footer-2.tsx): white links that glow on hover */
 .footer-link { color: var(--ogcw-text); transition: text-shadow .25s ease, color .25s ease; }
 .footer-link:hover, .footer-link:focus-visible { color: #ffffff; text-shadow: 0 0 6px rgb(255 255 255 / .9), 0 0 16px rgb(255 255 255 / .55), 0 0 28px rgb(255 255 255 / .3); outline: none; }
