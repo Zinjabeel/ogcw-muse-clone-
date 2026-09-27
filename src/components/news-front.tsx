@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Clapperboard, Play } from "lucide-react";
+import type { MouseEvent } from "react";
 import centralCeePhoto from "../assets/central-cee.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 import musicHero from "../assets/ogcw-hero-music.jpg";
@@ -40,11 +41,17 @@ const briefing = [
   { time: "Fri", title: "Small-run magazines are selling out again" },
 ];
 
-const opinions = [
-  { author: "Nia Vale", initials: "NV", title: "Personal style never left. We just stopped posting it.", read: "4 min read" },
-  { author: "Jonah Reyes", initials: "JR", title: "Rap doesn't need another rollout. It needs a room.", read: "5 min read" },
-  { author: "Sana Lind", initials: "SL", title: "Can a city still have an underground?", read: "6 min read" },
+// OGCW Originals: exclusive OGCW-made video (interviews, reportage, lists,
+// analysis). The thumbnails are blank colour placeholders until the videos
+// exist. TODO: link each card, and "All originals", to the OGCW Originals tab.
+type Original = { kind: string; title: string; length: string; tone: "black" | "white" | "yellow" };
+const originals: Original[] = [
+  { kind: "Interview", title: "Inside the listening bar: one night, one record", length: "12:40", tone: "black" },
+  { kind: "Reportage", title: "Made to last: in the studio with the object makers", length: "08:15", tone: "white" },
+  { kind: "The list", title: "Ten records that shaped the year so far", length: "05:32", tone: "yellow" },
 ];
+// Cards are clickable but go nowhere until the Originals tab is built.
+const comingSoon = (event: MouseEvent<HTMLAnchorElement>) => event.preventDefault();
 
 const features: Story[] = [
   { tag: "Style", title: "Independent labels reclaim the runway", read: "6 min read", image: styleHero, alt: "A man in a long black coat under a bridge in the rain" },
@@ -157,22 +164,23 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <section aria-labelledby="opinion-title">
+        <section aria-labelledby="originals-title">
           <div className="bs-section-head">
-            <h3 id="opinion-title" className="bs-eyebrow">Opinion</h3>
-            <Link to="/blog" className="bs-more">All columns</Link>
+            <h3 id="originals-title" className="bs-eyebrow">OGCW Originals</h3>
+            <a href="#originals-title" className="bs-more" onClick={comingSoon}>All originals</a>
           </div>
           <div className="bs-opinion">
-            {opinions.map((item) => (
-              <article key={item.author} className="bs-reveal">
-                <Link to="/blog" className="bs-card bs-opinion-card">
-                  <span className="bs-byline">
-                    <span className="bs-portrait" aria-hidden="true">{item.initials}</span>
-                    <span className="bs-author">{item.author}</span>
+            {originals.map((video) => (
+              <article key={video.title} className="bs-reveal">
+                <a href="#originals-title" className="bs-card bs-video-card" onClick={comingSoon}>
+                  <span className="bs-video" data-tone={video.tone}>
+                    <span className="bs-play" aria-hidden="true"><Play size={22} fill="currentColor" strokeWidth={0} /></span>
+                    <span className="bs-duration"><span className="sr-only">Length </span>{video.length}</span>
                   </span>
-                  <h4 className="bs-title">{item.title}</h4>
-                  <ReadTime>{item.read}</ReadTime>
-                </Link>
+                  <p className="bs-eyebrow">{video.kind}</p>
+                  <h4 className="bs-title">{video.title}</h4>
+                  <span className="bs-read"><Clapperboard size={13} strokeWidth={1.5} aria-hidden="true" />OGCW Original · Video</span>
+                </a>
               </article>
             ))}
           </div>
