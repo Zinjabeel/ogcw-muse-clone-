@@ -2,14 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { SOCIALS, SocialIcon } from "./socials";
+import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 
 // Three columns under the news front (requirements doc):
 // About OGCW (who we are, vision, what we cover, social links),
 // Newsletter (sign-up with the doc's CTA and what's in it), and
 // Business, Partnerships & Contact (Work With OGCW areas + business email).
 
-const BUSINESS_EMAIL = "business@ogcultureworld.com";
-const mail = (subject: string) => `mailto:${BUSINESS_EMAIL}?subject=${encodeURIComponent(subject)}`;
 
 const newsletterTopics = ["The week's biggest stories", "Trending", "New music", "Pop culture", "Fashion", "Film & TV", "Sport", "OGCW exclusives"];
 
