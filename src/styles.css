@@ -736,7 +736,13 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .ogcw-connect-email svg { color: var(--ogcw-accent); }
 .ogcw-connect-email:hover, .ogcw-connect-email:focus-visible { color: var(--ogcw-accent); outline: none; }
 
-/* Footer app badges (src/components/ui/footer-2.tsx): light pills like the store badges, not links yet */
+/* Footer (src/components/ui/footer-2.tsx): white links that glow on hover */
+.footer-link { color: var(--ogcw-text); transition: text-shadow .25s ease, color .25s ease; }
+.footer-link:hover, .footer-link:focus-visible { color: #ffffff; text-shadow: 0 0 6px rgb(255 255 255 / .9), 0 0 16px rgb(255 255 255 / .55), 0 0 28px rgb(255 255 255 / .3); outline: none; }
+.footer-social { color: var(--ogcw-text); }
+.footer-social:hover, .footer-social:focus-visible { border-color: var(--ogcw-accent); }
+
+/* Footer app badges: light pills like the store badges, not links yet */
 .app-badge { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px 0 12px; border-radius: 8px; background: var(--ogcw-text); color: var(--ogcw-bg); cursor: default; user-select: none; }
 
 /* Footer info pages (src/routes/info.$slug.tsx): a readable text column */

@@ -22,7 +22,6 @@ function HomePage() {
     <main>
       <NewsFront />
       <ConnectSection />
-      <p className="page-wrap pb-8 text-[10px] leading-relaxed text-muted-foreground">Photography: Central Cee by 200izo (CC BY-SA 4.0), via Wikimedia Commons. Cropped. Drake by The Come Up Show (CC BY 2.0). Cropped. Shop photos via Unsplash by Paul Steuber, Sou Jest, Irene Kredenets and Howen.</p>
     </main>
   </SiteShell>;
 }

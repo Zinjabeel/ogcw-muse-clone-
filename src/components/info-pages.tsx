@@ -9,7 +9,7 @@ import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 // coming instead of inventing it.
 // TODO: replace the placeholder pages with the final documents.
 
-export type InfoSlug = "faq" | "help" | "brand" | "press" | "testimonials" | "terms" | "privacy" | "cookies" | "legal";
+export type InfoSlug = "faq" | "help" | "brand" | "press" | "testimonials" | "terms" | "privacy" | "cookies" | "legal" | "credits";
 type InfoPage = { kicker: string; title: string; intro: string; body: ReactNode };
 
 const Mail = ({ subject, children }: { subject: string; children: ReactNode }) => <a href={mail(subject)}>{children}</a>;
@@ -133,6 +133,20 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     title: "Legal",
     intro: "Company details and legal notices.",
     body: comingSoon("Our legal notice is being finalised and will be published here.", "Legal"),
+  },
+  // Attribution the Creative Commons licences require (moved here from the home page).
+  credits: {
+    kicker: "Legal",
+    title: "Photo credits",
+    intro: "The photographers whose work appears on OGCW.",
+    body: (
+      <ul className="info-list">
+        <li>Central Cee by 200izo, via Wikimedia Commons, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Cropped.</li>
+        <li>Drake by The Come Up Show, licensed <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>. Cropped.</li>
+        <li>Shop photos via <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), under the Unsplash License.</li>
+        <li>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we'll fix it.</li>
+      </ul>
+    ),
   },
 };
 
