@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Info, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import centralCeePhoto from "../assets/central-cee.jpg";
@@ -63,6 +63,9 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<Section | null>(null);
   const [closing, setClosing] = useState(false);
+  // The section tab for the page you're on gets the active style
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const currentLabel = ({ "/news": "News", "/trends": "Trends", "/blog": "Blog", "/about": "About" } as Record<string, string>)[pathname];
 
   useEffect(() => {
     const el = dialog.current;
@@ -114,20 +117,34 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
         <div className="drawer-panels" data-sub={active ? "" : undefined}>
           {/* Main panel: sections, featured strip, utility links */}
           <div className="drawer-panel drawer-panel-main" inert={active !== null}>
-            <ul className="drawer-sections">
-              {sections.map((section) => (
-                <li key={section.label}>
-                  {section.stories ? (
-                    <button type="button" className="drawer-row" onClick={() => setActive(section)}>
-                      {section.label}
-                      <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <Link to={section.to} className="drawer-row" onClick={() => close()}>{section.label}</Link>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {/* Section list styled as "printstream" tabs (Uiverse.io by bob_3989); the current page's tab is active */}
+            <div className="cs2-printstream-ui drawer-tabs">
+              <ul className="sidebar drawer-sections">
+                {sections.map((section) => {
+                  const current = currentLabel === section.label;
+                  const inner = (
+                    <>
+                      <span className="vtab-label">{section.label}</span>
+                      {section.stories && <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />}
+                      <b className="vtab-bar" aria-hidden="true" />
+                      <i className="debris" aria-hidden="true" />
+                      <i className="debris" aria-hidden="true" />
+                      <i className="debris" aria-hidden="true" />
+                    </>
+                  );
+                  const className = `vtab drawer-row${current ? " active" : ""}`;
+                  return (
+                    <li key={section.label}>
+                      {section.stories ? (
+                        <button type="button" className={className} aria-current={current ? "page" : undefined} onClick={() => setActive(section)}>{inner}</button>
+                      ) : (
+                        <Link to={section.to} className={className} aria-current={current ? "page" : undefined} onClick={() => close()}>{inner}</Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
 
             <div className="drawer-featured">
               <p className="drawer-label">Featured</p>

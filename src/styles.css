@@ -322,6 +322,137 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .drawer-back { justify-content: flex-start; gap: 8px; font-weight: 500; border-bottom: 1px solid var(--ogcw-border); }
 .drawer-back:hover svg { transform: translateX(-2px); }
 
+/* ------------------------------------------------------------------
+   Menu section tabs: "CS2 Printstream" tabs, from Uiverse.io by
+   bob_3989, scoped under .cs2-printstream-ui. Changes from the original:
+   the site font instead of sans-serif; the sidebar fills the drawer
+   instead of 200px; and the active bar is its own element (.vtab-bar),
+   because the original drew it with the same ::after as the hover sweep,
+   whose opacity: 0 and blur hid it.
+   ------------------------------------------------------------------ */
+.cs2-printstream-ui { font-family: var(--ogcw-ui); }
+
+.cs2-printstream-ui .sidebar {
+  width: 200px;
+  background: rgb(12, 12, 12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border: 1px solid rgb(28, 28, 28);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.cs2-printstream-ui .vtab {
+  position: relative;
+  overflow: hidden;
+  background: rgb(20, 20, 20);
+  color: rgb(170, 170, 170);
+  border: 1px solid rgb(35, 35, 35);
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+  will-change: transform;
+}
+
+/* subtle sheen */
+.cs2-printstream-ui .vtab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 55%);
+  pointer-events: none;
+}
+
+/* active state */
+.cs2-printstream-ui .vtab.active {
+  background: rgb(26, 26, 26);
+  color: white;
+  border-color: rgb(90, 90, 90);
+}
+.cs2-printstream-ui .vtab-bar { display: none; }
+.cs2-printstream-ui .vtab.active .vtab-bar {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: rgb(180, 180, 180);
+}
+
+/* printstream hover */
+.cs2-printstream-ui .vtab::after {
+  content: "";
+  position: absolute;
+  inset: -70%;
+  background: conic-gradient(
+    from 180deg,
+    rgba(0, 255, 255, 0),
+    rgba(0, 255, 255, 0.25),
+    rgba(255, 0, 255, 0.25),
+    rgba(0, 255, 128, 0.25),
+    rgba(255, 255, 255, 0.12),
+    rgba(0, 255, 255, 0)
+  );
+  filter: blur(16px);
+  opacity: 0;
+  transform: translateX(-70%) rotate(20deg);
+  pointer-events: none;
+}
+.cs2-printstream-ui .vtab:hover::after {
+  opacity: 1;
+  animation: cs2-sweep 3.2s ease-in-out infinite;
+}
+@keyframes cs2-sweep {
+  0% { transform: translateX(-70%) rotate(20deg); }
+  50% { transform: translateX(0%) rotate(20deg); }
+  100% { transform: translateX(70%) rotate(20deg); }
+}
+.cs2-printstream-ui .vtab:hover {
+  color: white;
+  border-color: rgb(110, 110, 110);
+  background: rgb(22, 22, 22);
+  transform: translateX(2px);
+}
+.cs2-printstream-ui .vtab:active { transform: translateX(1px) scale(0.99); }
+
+/* debris system */
+.cs2-printstream-ui .debris {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(220, 220, 220, 0.22);
+  border-radius: 1px;
+  top: 50%;
+  left: -20px;
+  opacity: 0;
+  filter: blur(0.3px);
+  animation: cs2-drift 6s linear infinite;
+  pointer-events: none;
+}
+.cs2-printstream-ui .debris:nth-of-type(1) { top: 25%; animation-duration: 5s; }
+.cs2-printstream-ui .debris:nth-of-type(2) { top: 60%; animation-duration: 7s; opacity: 0.18; }
+.cs2-printstream-ui .debris:nth-of-type(3) { top: 80%; animation-duration: 6.5s; opacity: 0.12; }
+@keyframes cs2-drift {
+  0% { transform: translateX(-20px); opacity: 0; }
+  10% { opacity: 0.25; }
+  50% { opacity: 0.2; }
+  90% { opacity: 0.25; }
+  100% { transform: translateX(240px); opacity: 0; }
+}
+.cs2-printstream-ui .vtab:hover .debris { animation-play-state: paused; opacity: 0; }
+
+/* Fitting the tabs into the menu drawer: full width, label and chevron above the sheen */
+.drawer-tabs { padding: 12px 16px 0; }
+.drawer-tabs .sidebar { width: auto; }
+.drawer-tabs .vtab { height: 48px; padding: 0 14px 0 16px; }
+.drawer-tabs .vtab-label, .drawer-tabs .vtab > svg { position: relative; z-index: 1; }
+.drawer-tabs .vtab:hover > svg { color: inherit; }
+.drawer-tabs .vtab:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: -2px; }
+
 .drawer-featured { margin-top: 8px; padding: 16px 0 20px; border-top: 1px solid var(--ogcw-border); }
 .drawer-label { padding: 0 16px 12px; font-size: 12px; color: var(--ogcw-text-2); }
 .drawer-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 10px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; }
@@ -617,6 +748,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   .bs-explore-grid { animation: none; }
   .drawer[open], .drawer[open]::backdrop, .drawer[data-closing], .drawer[data-closing]::backdrop, .search[open] { animation: none; }
   .drawer-panel, .drawer-thumb img { transition: none; }
+  .cs2-printstream-ui .debris { animation: none; opacity: 0; }
+  .cs2-printstream-ui .vtab:hover::after { animation: none; transform: translateX(0) rotate(20deg); }
+  .cs2-printstream-ui .vtab, .cs2-printstream-ui .vtab:hover, .cs2-printstream-ui .vtab:active { transform: none; }
   .bs-reveal { animation: none; }
   .bs-photo img { transition: none; }
 }
