@@ -4,7 +4,7 @@ import type { MouseEvent } from "react";
 import centralCeePhoto from "../assets/central-cee.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 import musicHero from "../assets/ogcw-hero-music.jpg";
-import { SignupCard } from "./signup-card";
+import { Explore } from "./explore";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
@@ -215,14 +215,7 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <section className="bs-signup" aria-labelledby="signup-title">
-          <div className="bs-signup-copy">
-            <p className="bs-eyebrow">Newsletter</p>
-            <h3 id="signup-title" className="bs-title">The OGCW Briefing, in your inbox every Friday.</h3>
-            <p className="bs-deck">Five stories, in the order they broke, from the people shaping culture now. No spam, one click to leave.</p>
-          </div>
-          <SignupCard />
-        </section>
+        <Explore />
       </div>
     </section>
   );

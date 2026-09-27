@@ -27,7 +27,8 @@ const s = {
   scenes: { title: "Four scenes, one shared language", sub: "Culture / 6 min read", image: editorialGrid },
 } satisfies Record<string, Story>;
 
-// Every story the site knows about, for the search screen.
+// Every story the site knows about, by key (Explore) and as a list (search).
+export const storyIndex = s;
 export const allStories: Story[] = Object.values(s);
 
 const sections: Section[] = [

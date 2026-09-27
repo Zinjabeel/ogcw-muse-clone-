@@ -515,111 +515,91 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .bs-shop-card { height: 100%; -webkit-backdrop-filter: none; backdrop-filter: none; } /* a backdrop filter stops the fixed glow background from tracking the pointer */
 @media (max-width: 767px) { .bs-shop-card { padding: 10px; } }
 
-/* Newsletter strip: pitch on the left, the sign-up card on the right */
-.bs-signup { display: grid; gap: var(--spacing-40); align-items: center; }
-.bs-signup-copy { max-width: 34rem; }
-.bs-signup-copy .bs-title { font-size: 30px; line-height: 1.1; text-decoration: none; }
-@media (min-width: 1024px) { .bs-signup-copy .bs-title { font-size: 42px; } }
-.bs-signup .ogcw-signup { justify-self: center; padding: 8px 23px 23px 8px; }
-@media (min-width: 768px) {
-  .bs-signup { grid-template-columns: minmax(0, 1fr) auto; gap: var(--spacing-40) 64px; }
-  .bs-signup .ogcw-signup { justify-self: end; margin-right: 24px; }
+/* Explore (src/components/explore.tsx): tabs on the right of the heading;
+   one lead story on the left, a numbered list of four on the right. */
+.bs-explore .bs-section-head { flex-wrap: wrap; align-items: center; row-gap: 16px; }
+.bs-tabs { display: flex; gap: 6px; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.bs-tabs::-webkit-scrollbar { display: none; }
+.bs-tab { flex: none; height: 34px; padding: 0 14px; border: 1px solid var(--ogcw-border); border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); transition: color .2s ease, border-color .2s ease, background-color .2s ease; }
+.bs-tab:hover { color: var(--ogcw-text); border-color: var(--ogcw-text-2); }
+.bs-tab:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
+.bs-tab[aria-selected="true"] { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
+
+.bs-explore-grid { display: grid; gap: 32px; animation: bs-fade .35s ease both; }
+@keyframes bs-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (min-width: 1024px) {
+  .bs-explore-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0 48px; }
+  .bs-explore-list { position: relative; }
+  .bs-explore-list::before { content: ""; position: absolute; top: 0; bottom: 0; left: -24px; width: 1px; background: var(--ogcw-border); }
 }
 
-/* Sign-up card, from Uiverse.io by 0xnihilism, scoped under .ogcw-signup so
-   its generic class names can't clash with anything else on the site.
-   Recoloured for the dark brand: #1A1A1A card, #F5F5F5 frame and shadow,
-   yellow banner and button (the original red hover is dropped). */
-.ogcw-signup .card {
-  width: 320px;
-  max-width: calc(100vw - 64px);
-  padding: 30px;
-  background: var(--ogcw-surface);
-  color: var(--ogcw-text);
-  border: 8px solid var(--ogcw-text);
-  box-shadow: 15px 15px 0 var(--ogcw-text);
-  transform: rotate(-2deg);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  font-family: var(--ogcw-ui);
+.bs-explore-lead { display: block; }
+.bs-explore-lead-media { position: relative; display: block; }
+.bs-explore-lead-photo { display: block; aspect-ratio: 16 / 9; border-radius: 8px; }
+.bs-explore-badge { position: absolute; left: 12px; top: 12px; display: grid; place-items: center; min-width: 36px; height: 28px; padding: 0 8px; border-radius: 4px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bs-explore-lead .bs-eyebrow { margin-top: 16px; }
+.bs-explore-lead .bs-title { font-size: 26px; }
+@media (min-width: 1024px) { .bs-explore-lead .bs-title { font-size: 34px; line-height: 1.1; } }
+
+.bs-explore-list { border-top: 1px solid var(--ogcw-border); }
+@media (min-width: 1024px) { .bs-explore-list { border-top: 0; } }
+.bs-explore-list li { border-bottom: 1px solid var(--ogcw-border); }
+@media (min-width: 1024px) { .bs-explore-list li:first-child .bs-explore-row { padding-top: 0; } }
+.bs-explore-row { display: grid; grid-template-columns: 28px 88px minmax(0, 1fr); gap: 14px; align-items: start; padding-block: 16px; }
+.bs-explore-num { padding-top: 2px; font-family: var(--ogcw-serif); font-size: 20px; line-height: 1; color: var(--ogcw-text-2); font-variant-numeric: tabular-nums; }
+.bs-explore-thumb { display: block; aspect-ratio: 4 / 3; border-radius: 6px; }
+.bs-explore-row .bs-eyebrow, .bs-explore-row .bs-title, .bs-explore-row .bs-read { display: block; }
+.bs-explore-row .bs-title { margin-top: 4px; font-size: 17px; line-height: 1.2; }
+.bs-explore-row .bs-read { margin-top: 6px; }
+@media (min-width: 768px) {
+  .bs-explore-row { grid-template-columns: 36px 120px minmax(0, 1fr); gap: 18px; padding-block: 18px; }
+  .bs-explore-num { font-size: 24px; }
+  .bs-explore-row .bs-title { font-size: 19px; }
 }
-.ogcw-signup .card:active { animation: ogcw-shake 0.5s ease-in-out; }
-.ogcw-signup .card:hover { transform: rotate(0deg) scale(1.02); box-shadow: 20px 20px 0 var(--ogcw-text); }
-.ogcw-signup .banner {
-  position: absolute;
-  top: 3px;
-  right: -95px;
-  background: var(--ogcw-accent);
-  color: var(--ogcw-bg);
-  padding: 15px;
-  width: 350px;
-  text-align: center;
-  transform: rotate(45deg);
-  font-weight: bold;
-  font-size: 18px;
-  letter-spacing: 2px;
-  overflow: hidden;
-  transition: background 0.5s ease;
+
+/* About / Newsletter / Work with OGCW (src/components/connect-section.tsx):
+   three columns on a #1A1A1A band, split by hairlines like the news rows. */
+.ogcw-connect { border-top: 1px solid var(--ogcw-border); background: var(--ogcw-surface); color: var(--ogcw-text); font-family: var(--ogcw-ui); }
+.ogcw-connect-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; padding: 64px 16px; }
+@media (min-width: 1024px) {
+  .ogcw-connect-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 64px; padding: 88px 4vw; }
+  .ogcw-connect-col + .ogcw-connect-col { position: relative; }
+  .ogcw-connect-col + .ogcw-connect-col::before { content: ""; position: absolute; top: 0; bottom: 0; left: -32px; width: 1px; background: var(--ogcw-border); }
 }
-.ogcw-signup .banner-text {
-  display: inline-block;
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  width: 100%;
-  position: absolute;
-  left: 13%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.ogcw-signup .banner:hover .banner-text:first-child { opacity: 0; transform: translateY(-100%); }
-.ogcw-signup .banner:hover .banner-text:last-child { opacity: 1; transform: translateY(-40%); }
-.ogcw-signup .banner-text:last-child { opacity: 0; transform: translateY(60%); }
-.ogcw-signup .banner:hover { background: var(--ogcw-text); }
-.ogcw-signup .card__title {
-  font-family: var(--ogcw-display);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--ogcw-text);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  display: block;
-  border-bottom: 2px solid var(--ogcw-accent);
-  width: 50%;
-}
-.ogcw-signup .card__subtitle { font-size: 16px; line-height: 1.4; color: var(--ogcw-text-2); margin-bottom: 20px; padding-bottom: 10px; }
-.ogcw-signup .card__form { display: flex; flex-direction: column; gap: 20px; }
-.ogcw-signup .card__form input {
-  padding: 12px;
-  border: 4px solid var(--ogcw-text-2);
-  font-size: 16px;
-  font-family: var(--ogcw-ui);
-  transition: all 0.3s ease;
-  background-color: var(--ogcw-bg);
-  color: var(--ogcw-text);
-}
-.ogcw-signup .card__form input::placeholder { color: var(--ogcw-text-2); }
-.ogcw-signup .card__form input:focus { outline: none; border-color: var(--ogcw-accent); transform: scale(1.05); }
-.ogcw-signup .sign-up {
-  border: 4px solid var(--ogcw-accent);
-  background: var(--ogcw-accent);
-  color: var(--ogcw-bg);
-  padding: 12px;
-  font-size: 18px;
-  font-weight: bold;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.ogcw-signup .sign-up:hover { background: var(--ogcw-surface); color: var(--ogcw-accent); transform: translateY(-5px); box-shadow: 0 5px 0 var(--ogcw-accent); }
-.ogcw-signup .sign-up:active { animation: ogcw-shake 0.5s ease-in-out; transform: translateY(0); box-shadow: none; }
-.ogcw-signup .card__thanks { font-size: 16px; line-height: 1.4; color: var(--ogcw-text); font-weight: 700; }
-@keyframes ogcw-shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
+@media (max-width: 1023px) { .ogcw-connect-col + .ogcw-connect-col { padding-top: 56px; border-top: 1px solid var(--ogcw-border); } }
+
+.ogcw-connect-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-accent); }
+.ogcw-connect-title { margin-top: 12px; font-family: var(--ogcw-serif); font-size: 30px; font-weight: 400; line-height: 1.1; letter-spacing: -.01em; }
+.ogcw-connect-copy { margin-top: 14px; max-width: 34rem; font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.6; color: var(--ogcw-text-2); }
+
+.ogcw-connect-socials { display: flex; gap: 8px; margin-top: 24px; }
+.ogcw-connect-socials a { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--ogcw-border); border-radius: 50%; color: var(--ogcw-text); transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.ogcw-connect-socials a:hover, .ogcw-connect-socials a:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
+.ogcw-connect-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding-bottom: 4px; border-bottom: 2px solid var(--ogcw-accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: gap .2s ease; }
+.ogcw-connect-link:hover { gap: 12px; }
+
+.ogcw-connect-topics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.ogcw-connect-topics li { padding: 5px 10px; border: 1px solid var(--ogcw-border); border-radius: 999px; font-size: 12px; color: var(--ogcw-text-2); }
+.ogcw-connect-form { display: flex; gap: 8px; margin-top: 24px; }
+.ogcw-connect-form input { flex: 1; min-width: 0; height: 48px; padding: 0 16px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font-size: 15px; transition: border-color .2s ease; }
+.ogcw-connect-form input::placeholder { color: var(--ogcw-text-2); }
+.ogcw-connect-form input:focus { outline: none; border-color: var(--ogcw-accent); }
+.ogcw-connect-form button { flex: none; height: 48px; padding: 0 22px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: background-color .2s ease; }
+.ogcw-connect-form button:hover, .ogcw-connect-form button:focus-visible { background: var(--ogcw-text); outline: none; }
+.ogcw-connect-thanks { margin-top: 24px; font-size: 15px; font-weight: 600; color: var(--ogcw-text); }
+
+.ogcw-connect-work { margin-top: 20px; border-top: 1px solid var(--ogcw-border); }
+.ogcw-connect-work li { border-bottom: 1px solid var(--ogcw-border); }
+.ogcw-connect-work a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.ogcw-connect-work a > svg { flex: none; color: var(--ogcw-text-2); transition: transform .2s ease, color .2s ease; }
+.ogcw-connect-work-label { display: block; font-size: 14px; font-weight: 600; }
+.ogcw-connect-work-note { display: block; margin-top: 2px; font-size: 13px; color: var(--ogcw-text-2); }
+.ogcw-connect-work a:hover .ogcw-connect-work-label, .ogcw-connect-work a:focus-visible .ogcw-connect-work-label { color: var(--ogcw-accent); }
+.ogcw-connect-work a:hover > svg, .ogcw-connect-work a:focus-visible > svg { color: var(--ogcw-accent); transform: translate(2px, -2px); }
+.ogcw-connect-work a:focus-visible { outline: none; }
+.ogcw-connect-email { display: inline-flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 15px; font-weight: 600; color: var(--ogcw-text); transition: color .2s ease; }
+.ogcw-connect-email svg { color: var(--ogcw-accent); }
+.ogcw-connect-email:hover, .ogcw-connect-email:focus-visible { color: var(--ogcw-accent); outline: none; }
 
 /* A quiet reveal as each story scrolls into view (CSS only, where supported) */
 @keyframes bs-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -630,8 +610,7 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 @media (prefers-reduced-motion: reduce) {
   .hero-slide, .hero-pill, .hero-event-buy { transition: none !important; }
   .hero-slide .hero-name > * { animation: none !important; }
-  .ogcw-signup .card, .ogcw-signup .card:hover { transform: rotate(-2deg); transition: none; animation: none; }
-  .ogcw-signup .sign-up, .ogcw-signup .card__form input, .ogcw-signup .banner-text { transition: none; animation: none; }
+  .bs-explore-grid { animation: none; }
   .drawer[open], .drawer[open]::backdrop, .drawer[data-closing], .drawer[data-closing]::backdrop, .search[open] { animation: none; }
   .drawer-panel, .drawer-thumb img { transition: none; }
   .bs-reveal { animation: none; }
