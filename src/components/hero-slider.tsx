@@ -1,47 +1,124 @@
+import { Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import styleHero from "../assets/ogcw-hero-style.jpg";
-import musicHero from "../assets/ogcw-hero-music.jpg";
-import designHero from "../assets/ogcw-hero-design.jpg";
+import { useEffect, useState, type ReactNode } from "react";
+import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
+import centralCeePhoto from "../assets/central-cee.jpg";
 import drakePhoto from "../assets/drake.jpg.asset.json";
+import { storyIndex as s, type Story } from "./nav-drawer";
 
-// Hero, built on "hero section model 2": one full-bleed photo per story
-// (crossfading every 5 seconds) with a huge section word and the headline on
-// the left 60%, and a frosted right-hand 40% that carries a featured event:
-// photo, a few lines about it, and a Buy now button.
+// Hero, built on "hero section model 2" and styled like complex.com's
+// cover: a full-bleed photo that sits back like a background (darkened,
+// slowly settling from a slight zoom) with a huge word and the headline on
+// the left, and a floating frosted panel (about 40% wide, pulled in from the
+// right edge) whose content changes with each slide and fades in with it.
+//   1. Welcome to One Great Culture World: the OGCW logo and featured news
+//   2. Drake: the concert, with Buy now
+//   3. Central Cee: his feature
+// Slides change every 3 seconds, holding while the reader hovers or focuses.
 
 type Slide = {
   word: string;
   kicker: string;
   title: string;
-  date: string;
-  datetime: string;
+  sub: string;
   image: string;
-  pos: string;
-  flip?: boolean; // mirror the photo so the subject sits on the sharp (left) side
+  pos: string; // photo focal point
+  tall?: boolean; // draw the photo taller than the hero so its bottom strip (e.g. a watermark) is cut off
+  panel: ReactNode;
 };
 
-// Cover stories. Will come from the admin panel later.
+// TODO: fill in the real date, venue and ticket link once the concert is confirmed.
+const DRAKE_TICKETS = "https://www.ticketmaster.com/search?q=drake";
+
+const featured: Story[] = [s.cee, s.labels, s.bars];
+
 const slides: Slide[] = [
-  { word: "Style", kicker: "Style", title: "Independent labels reclaim the runway", date: "25 September 2026", datetime: "2026-09-25", image: styleHero, pos: "62% 40%", flip: true },
-  { word: "Music", kicker: "Music", title: "Small rooms, big sound: the live nights to know", date: "24 September 2026", datetime: "2026-09-24", image: musicHero, pos: "35% 45%" },
-  { word: "Design", kicker: "Design", title: "Streetwear's new object makers", date: "23 September 2026", datetime: "2026-09-23", image: designHero, pos: "45% 55%", flip: true },
+  {
+    word: "OGCW",
+    kicker: "Welcome",
+    title: "Welcome to One Great Culture World",
+    sub: "Music, fashion, film & TV, sport and pop culture from everywhere, in one place.",
+    image: editorialGrid,
+    pos: "50% 50%",
+    panel: (
+      <>
+        <div className="hero-brand">
+          <span className="hero-brand-mark">OGCW</span>
+          <span className="hero-brand-name">One Great Culture World</span>
+        </div>
+        <p className="hero-panel-label">Featured now</p>
+        <ol className="hero-featured">
+          {featured.map((story, index) => {
+            const [section, read] = story.sub.split(" / ");
+            const crop = story.crop ?? { pos: "50% 50%", zoom: 1 };
+            return (
+              <li key={story.title}>
+                <Link to="/news" className="hero-featured-item">
+                  <span className="hero-featured-num">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="hero-featured-thumb"><img src={story.image} alt="" style={{ objectPosition: crop.pos }} /></span>
+                  <span>
+                    <span className="hero-featured-section">{section}</span>
+                    <span className="hero-featured-title">{story.title}</span>
+                    <span className="hero-featured-read">{read}</span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ol>
+      </>
+    ),
+  },
+  {
+    word: "Live",
+    kicker: "Live",
+    title: "Drake, live in concert",
+    sub: "Date TBA · Venue TBA",
+    image: drakePhoto.url,
+    pos: "50% 0%",
+    tall: true,
+    panel: (
+      <>
+        <div className="hero-panel-photo">
+          <img src={drakePhoto.url} alt="Drake on stage, pointing to the crowd with a microphone in hand" />
+        </div>
+        <p className="hero-panel-label">Live · Tickets</p>
+        <h3 className="hero-panel-title">Drake, live in concert</h3>
+        <p className="hero-panel-copy">The full show: two decades of hits, the new era and a crowd that knows every word. Tickets are limited, so don't sleep on this one.</p>
+        <p className="hero-panel-meta">Date TBA · Venue TBA</p>
+        <a className="hero-panel-button" href={DRAKE_TICKETS} target="_blank" rel="noopener noreferrer">
+          Buy now <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" />
+        </a>
+      </>
+    ),
+  },
+  {
+    word: "Music",
+    kicker: "Music",
+    title: "Central Cee and the global rise of UK rap",
+    sub: "7 min read",
+    image: centralCeePhoto,
+    pos: "50% 16%",
+    panel: (
+      <>
+        <p className="hero-panel-label">Music · Feature</p>
+        <h3 className="hero-panel-title">How Central Cee took UK drill global</h3>
+        <p className="hero-panel-copy">From “Sprinter” to “Band4Band”, how the West London rapper carried British drill from the estate to the world stage.</p>
+        <p className="hero-panel-meta">7 min read</p>
+        <Link to="/news" className="hero-panel-button">
+          Read the story <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+        </Link>
+        <p className="hero-panel-label hero-panel-more">More on UK rap</p>
+        <ul className="hero-panel-links">
+          <li><Link to="/news">{s.vedan.title}</Link></li>
+          <li><Link to="/news">{s.bars.title}</Link></li>
+        </ul>
+      </>
+    ),
+  },
 ];
 
-// Featured event on the frosted side.
-// TODO: fill in the real date, venue and ticket link once the concert is confirmed.
-const event = {
-  label: "Live · Tickets",
-  title: "Drake, live in concert",
-  copy: "The full show: two decades of hits, the new era and a crowd that knows every word. Tickets are limited, so don't sleep on this one.",
-  when: "Date TBA",
-  where: "Venue TBA",
-  ticketUrl: "https://www.ticketmaster.com/search?q=drake",
-  image: drakePhoto.url,
-  imageAlt: "Drake on stage, pointing to the crowd with a microphone in hand",
-};
-
-const SLIDE_MS = 5000;
+const SLIDE_MS = 3000;
 const pad = (n: number) => String(n + 1).padStart(2, "0");
 
 // Advances every SLIDE_MS. Holds still while the reader hovers or focuses the
@@ -94,43 +171,27 @@ export function HeroSlider() {
           aria-hidden={index === active ? undefined : true}
           inert={index !== active}
         >
-          <img className="hero-photo" src={slide.image} alt="" loading={index === 0 ? "eager" : "lazy"} style={{ objectPosition: slide.pos }} data-flip={slide.flip ? "" : undefined} />
+          <img className="hero-photo" src={slide.image} alt="" loading={index === 0 ? "eager" : "lazy"} style={{ objectPosition: slide.pos }} data-tall={slide.tall ? "" : undefined} />
           <span className="hero-word" aria-hidden="true">{slide.word}</span>
           <div className="hero-name">
             <p className="hero-kicker">{slide.kicker}</p>
             <h2 className="hero-title">{slide.title}</h2>
-            <time className="hero-date" dateTime={slide.datetime}>{slide.date}</time>
+            <p className="hero-date">{slide.sub}</p>
           </div>
-          {/* The frosted glass; the event sits on top of it and stays put between slides */}
-          <div className="hero-panel" aria-hidden="true" />
+          {/* Floating frosted panel; its content belongs to this slide and fades in with it */}
+          <div className="hero-panel">
+            <div className="hero-panel-inner">{slide.panel}</div>
+          </div>
         </div>
       ))}
 
-      <aside className="hero-event" aria-labelledby="hero-event-title">
-        <div className="hero-event-inner">
-          <div className="hero-event-photo">
-            <img src={event.image} alt={event.imageAlt} />
-          </div>
-          <div className="hero-event-body">
-            <p className="hero-event-label">{event.label}</p>
-            <h2 id="hero-event-title" className="hero-event-title">{event.title}</h2>
-            <p className="hero-event-copy">{event.copy}</p>
-            <p className="hero-event-meta">{event.when} · {event.where}</p>
-            <a className="hero-event-buy" href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
-              Buy now
-              <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" />
-            </a>
-          </div>
-        </div>
-      </aside>
-
       {/* Previous / next story */}
       <div className="hero-nav">
-        <button type="button" className="hero-pill" onClick={() => setActive(prev)} aria-label={`Previous story: ${prevSlide.title}`}>
+        <button type="button" className="hero-pill" onClick={() => setActive(prev)} aria-label={`Previous: ${prevSlide.title}`}>
           <ArrowLeft size={14} strokeWidth={2} aria-hidden="true" />
           {pad(prev)} {prevSlide.kicker}
         </button>
-        <button type="button" className="hero-pill" onClick={() => setActive(next)} aria-label={`Next story: ${nextSlide.title}`}>
+        <button type="button" className="hero-pill" onClick={() => setActive(next)} aria-label={`Next: ${nextSlide.title}`}>
           {pad(next)} {nextSlide.kicker}
           <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
         </button>
