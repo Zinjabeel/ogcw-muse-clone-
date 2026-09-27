@@ -511,6 +511,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .bs-features .bs-title { font-size: 18px; }
 @media (min-width: 768px) { .bs-features { gap: var(--spacing-32) var(--spacing-16); } .bs-features .bs-title { font-size: 22px; } }
 @media (min-width: 1024px) { .bs-features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* Shop tiles sit in GlowCards (src/components/ui/spotlight-card.tsx): fill the row height */
+.bs-shop-card { height: 100%; -webkit-backdrop-filter: none; backdrop-filter: none; } /* a backdrop filter stops the fixed glow background from tracking the pointer */
+@media (max-width: 767px) { .bs-shop-card { padding: 10px; } }
 
 /* Newsletter strip: pitch on the left, the sign-up card on the right */
 .bs-signup { display: grid; gap: var(--spacing-40); align-items: center; }

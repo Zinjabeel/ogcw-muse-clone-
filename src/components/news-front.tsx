@@ -5,6 +5,7 @@ import centralCeePhoto from "../assets/central-cee.jpg";
 import vedanPhoto from "../assets/vedan.jpg.asset.json";
 import musicHero from "../assets/ogcw-hero-music.jpg";
 import { SignupCard } from "./signup-card";
+import { GlowCard } from "@/components/ui/spotlight-card";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -197,13 +198,16 @@ export function NewsFront() {
           </div>
           <div className="bs-features">
             {shops.map((shop) => (
-              <article key={shop.tag} className="bs-reveal">
-                <a href="#shop-title" className="bs-card" onClick={comingSoon}>
-                  <Photo story={shop} className="bs-photo-feature" />
-                  <p className="bs-eyebrow">{shop.tag}</p>
-                  <h4 className="bs-title">{shop.title}</h4>
-                  <span className="bs-read"><ShoppingBag size={13} strokeWidth={1.5} aria-hidden="true" />{shop.read}</span>
-                </a>
+              <article key={shop.tag}>
+                {/* Yellow spotlight glow on the edges that follows the pointer */}
+                <GlowCard glowColor="yellow" customSize className="bs-shop-card">
+                  <a href="#shop-title" className="bs-card" onClick={comingSoon}>
+                    <Photo story={shop} className="bs-photo-feature" />
+                    <p className="bs-eyebrow">{shop.tag}</p>
+                    <h4 className="bs-title">{shop.title}</h4>
+                    <span className="bs-read"><ShoppingBag size={13} strokeWidth={1.5} aria-hidden="true" />{shop.read}</span>
+                  </a>
+                </GlowCard>
               </article>
             ))}
           </div>
