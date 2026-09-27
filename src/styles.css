@@ -393,9 +393,11 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   padding-block: 56px var(--section-gap);
   border-top: 1px solid var(--ogcw-border);
 }
-/* Same side gutters as the header, footer and pages: 16px on phones, 4% of the screen from 1024px */
-.bs-wrap { padding-inline: var(--spacing-16); }
-@media (min-width: 1024px) { .bs-wrap { padding-inline: 4vw; } }
+/* Everything below the hero sits in one centred column: at most 1200px wide,
+   with 16px (phones) / 32px (desktop) of breathing room at the screen edges.
+   The header and hero stay full width. */
+.page-wrap, .bs-wrap { width: min(calc(100% - 32px), 1200px); margin-inline: auto; }
+@media (min-width: 1024px) { .page-wrap, .bs-wrap { width: min(calc(100% - 64px), 1200px); } }
 
 /* Headline face, shared by every story title and section heading */
 .bs-wordmark, .bs-title, .bs-section-head .bs-eyebrow { font-family: var(--ogcw-display); font-weight: 400; }
@@ -560,9 +562,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 /* About / Newsletter / Work with OGCW (src/components/connect-section.tsx):
    three columns on a #1A1A1A band, split by hairlines like the news rows. */
 .ogcw-connect { border-top: 1px solid var(--ogcw-border); background: var(--ogcw-surface); color: var(--ogcw-text); font-family: var(--ogcw-ui); }
-.ogcw-connect-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; padding: 64px 16px; }
+.ogcw-connect-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; width: min(calc(100% - 32px), 1200px); margin-inline: auto; padding-block: 64px; }
 @media (min-width: 1024px) {
-  .ogcw-connect-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 64px; padding: 88px 4vw; }
+  .ogcw-connect-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 64px; width: min(calc(100% - 64px), 1200px); padding-block: 88px; }
   .ogcw-connect-col + .ogcw-connect-col { position: relative; }
   .ogcw-connect-col + .ogcw-connect-col::before { content: ""; position: absolute; top: 0; bottom: 0; left: -32px; width: 1px; background: var(--ogcw-border); }
 }

@@ -50,7 +50,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         </header>
         {children}
         <footer className="border-t border-border bg-background py-12 text-foreground">
-          <div className="mx-auto flex max-w-none flex-col gap-10 px-4 lg:px-[4vw]">
+          <div className="page-wrap flex flex-col gap-10">
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
               <div><p className="font-display text-7xl leading-none sm:text-9xl">OGCW</p><p className="mt-3 max-w-md text-sm text-muted-foreground">Independent reporting from the people shaping culture now.</p></div>
               <div className="flex flex-col gap-6 md:items-end">
@@ -80,7 +80,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 }
 
 export function PageIntro({ kicker, title, copy }: { kicker: string; title: string; copy: string }) {
-  return <section className="mx-auto max-w-none px-4 pb-12 pt-14 lg:px-[4vw] lg:pb-16 lg:pt-20"><p className="section-kicker">{kicker}</p><div className="mt-5 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><h1 className="font-display text-6xl leading-[.9] sm:text-8xl lg:text-9xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground">{copy}</p></div></section>;
+  return <section className="page-wrap pb-12 pt-14 lg:pb-16 lg:pt-20"><p className="section-kicker">{kicker}</p><div className="mt-5 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><h1 className="font-display text-6xl leading-[.9] sm:text-8xl lg:text-9xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground">{copy}</p></div></section>;
 }
 
 export function StoryLink({ to = "/news", children }: { to?: "/news" | "/trends" | "/blog" | "/about"; children: ReactNode }) {
