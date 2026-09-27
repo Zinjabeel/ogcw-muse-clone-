@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as NewsRouteImport } from './routes/news'
 import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const TrendsRoute = TrendsRouteImport.update({
   path: '/trends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InfoSlugRoute = InfoSlugRouteImport.update({
+  id: '/info/$slug',
+  path: '/info/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/news': typeof NewsRoute
   '/trends': typeof TrendsRoute
+  '/info/$slug': typeof InfoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/news': typeof NewsRoute
   '/trends': typeof TrendsRoute
+  '/info/$slug': typeof InfoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,15 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/news': typeof NewsRoute
   '/trends': typeof TrendsRoute
+  '/info/$slug': typeof InfoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/blog' | '/news' | '/trends'
+  fullPaths: '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/blog' | '/news' | '/trends'
-  id: '__root__' | '/' | '/about' | '/blog' | '/news' | '/trends'
+  to: '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
+  id:
+    '__root__' | '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +87,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   NewsRoute: typeof NewsRoute
   TrendsRoute: typeof TrendsRoute
+  InfoSlugRoute: typeof InfoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +127,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/info/$slug': {
+      id: '/info/$slug'
+      path: '/info/$slug'
+      fullPath: '/info/$slug'
+      preLoaderRoute: typeof InfoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +143,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   NewsRoute: NewsRoute,
   TrendsRoute: TrendsRoute,
+  InfoSlugRoute: InfoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

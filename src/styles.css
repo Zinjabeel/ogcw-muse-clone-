@@ -736,6 +736,25 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .ogcw-connect-email svg { color: var(--ogcw-accent); }
 .ogcw-connect-email:hover, .ogcw-connect-email:focus-visible { color: var(--ogcw-accent); outline: none; }
 
+/* Footer app badges (src/components/ui/footer-2.tsx): light pills like the store badges, not links yet */
+.app-badge { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px 0 12px; border-radius: 8px; background: var(--ogcw-text); color: var(--ogcw-bg); cursor: default; user-select: none; }
+
+/* Footer info pages (src/routes/info.$slug.tsx): a readable text column */
+.info-prose { max-width: 44rem; border-top: 1px solid var(--ogcw-border); padding-top: 40px; font-family: var(--ogcw-serif); font-size: 18px; line-height: 1.65; color: var(--ogcw-text-2); }
+.info-prose > * + * { margin-top: 18px; }
+.info-prose h2 { margin-top: 40px; font-size: 26px; line-height: 1.2; color: var(--ogcw-text); }
+.info-prose a { color: var(--ogcw-text); text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.info-prose a:hover { color: var(--ogcw-accent); }
+.info-list { display: grid; gap: 10px; padding-left: 1.2em; list-style: disc; }
+.info-list li::marker { color: var(--ogcw-accent); }
+.info-faq dt { margin-top: 28px; font-size: 21px; line-height: 1.3; color: var(--ogcw-text); }
+.info-faq dt:first-child { margin-top: 0; }
+.info-faq dd { margin-top: 8px; }
+.info-swatches { display: grid; gap: 10px; }
+.info-swatches li { display: flex; align-items: center; gap: 14px; font-family: var(--ogcw-ui); font-size: 14px; }
+.info-swatches span { flex: none; width: 40px; height: 40px; border: 1px solid var(--ogcw-border); border-radius: 6px; }
+.info-swatches strong { font-weight: 600; color: var(--ogcw-text); font-variant-numeric: tabular-nums; }
+
 /* A quiet reveal as each story scrolls into view (CSS only, where supported) */
 @keyframes bs-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @supports (animation-timeline: view()) {
