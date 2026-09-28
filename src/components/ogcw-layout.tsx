@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 import { NavDrawer } from "./nav-drawer";
 import { SearchOverlay } from "./search-overlay";
 import { Footer2 } from "@/components/ui/footer-2";
+import { ThemeSwitcher } from "./theme-switcher";
 
 const nav = [
   { label: "News", to: "/news" as const },
@@ -44,6 +45,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               ))}
             </nav>
             <div className="col-start-3 flex items-center gap-2 justify-self-end">
+              <ThemeSwitcher />
               <button type="button" className="icon-button grid" aria-label="Search" aria-haspopup="dialog" aria-expanded={searchOpen} onClick={openSearch}><Search size={16} /></button>
             </div>
           </div>
