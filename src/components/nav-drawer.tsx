@@ -1,61 +1,75 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Info, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import centralCeePhoto from "../assets/central-cee.jpg";
-import vedanPhoto from "../assets/vedan.jpg.asset.json";
-import musicHero from "../assets/ogcw-hero-music.jpg";
-import styleHero from "../assets/ogcw-hero-style.jpg";
-import designHero from "../assets/ogcw-hero-design.jpg";
-import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
+import { articlesIn, ARTICLES, EPISODES, LISTS, SHOPS, type Article, type Episode, type Photo, type Shop } from "@/data/content";
+import { Poster } from "./cards";
 
-// Site menu, modelled on complex.com's: a 380px black drawer from the left
-// over a blurred, darkened page. Section rows open a sub-panel of featured
-// stories; a "Featured" strip and utility links sit below the list.
+// Site menu, modelled on complex.com's: a 380px drawer from the left over a
+// blurred, darkened page. Section rows open a sub-panel of that section's
+// stories, episodes or shops (each linking to its own page); a "Featured"
+// strip and utility links sit below the list.
 
-type Crop = { pos: string; zoom: number };
-export type Story = { title: string; sub: string; image: string; crop?: Crop };
-type Section = { label: string; to: "/" | "/news" | "/trends" | "/blog" | "/about"; stories?: Story[] };
+type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
+type SectionPath = "/news" | "/music" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
+type Section = { label: string; to: SectionPath; items?: Item[] };
 
-const s = {
-  cee: { title: "Central Cee and the global rise of UK rap", sub: "Music / 7 min read", image: centralCeePhoto, crop: { pos: "50% 22%", zoom: 1 } },
-  vedan: { title: "Vedan and the reach of regional rap", sub: "New voices / 5 min read", image: vedanPhoto.url },
-  bars: { title: "The listening bars changing nightlife", sub: "Nightlife / 6 min read", image: musicHero },
-  labels: { title: "Independent labels reclaim the runway", sub: "Style / 6 min read", image: styleHero, crop: { pos: "68% 45%", zoom: 1 } },
-  objects: { title: "Objects built to outlast the feed", sub: "Design / 4 min read", image: designHero },
-  brutalism: { title: "Why brutalism keeps returning", sub: "Architecture / 8 min read", image: editorialGrid, crop: { pos: "0% 100%", zoom: 2 } },
-  print: { title: "A new generation remakes print", sub: "Print / 5 min read", image: editorialGrid, crop: { pos: "100% 100%", zoom: 2 } },
-  scenes: { title: "Four scenes, one shared language", sub: "Culture / 6 min read", image: editorialGrid },
-} satisfies Record<string, Story>;
-
-// Every story the site knows about, by key (Explore) and as a list (search).
-export const storyIndex = s;
-export const allStories: Story[] = Object.values(s);
-
+const stories = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
 const sections: Section[] = [
-  { label: "News", to: "/news", stories: [s.cee, s.vedan, s.bars] },
-  { label: "Music", to: "/news", stories: [s.cee, s.vedan, s.bars] },
-  { label: "Style", to: "/news", stories: [s.labels, s.objects] },
-  { label: "Art & Culture", to: "/news", stories: [s.scenes, s.print] },
-  { label: "Design", to: "/news", stories: [s.objects, s.brutalism] },
-  { label: "Nightlife", to: "/news", stories: [s.bars] },
-  { label: "Trends", to: "/trends", stories: [s.labels, s.brutalism] },
-  { label: "Blog", to: "/blog", stories: [s.print, s.scenes] },
+  { label: "News", to: "/news", items: stories(ARTICLES.slice(0, 4)) },
+  { label: "Music", to: "/music", items: stories(articlesIn("music")) },
+  { label: "Culture", to: "/culture", items: stories(articlesIn("culture").slice(0, 4)) },
+  { label: "Originals", to: "/originals", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
+  { label: "Shop", to: "/shop", items: SHOPS.map((s) => ({ kind: "shop", s })) },
+  { label: "Trends", to: "/trends" },
+  { label: "Blog", to: "/blog" },
   { label: "About", to: "/about" },
 ];
 
-const featured = [s.cee, s.labels, s.objects, s.bars];
+const featured = LISTS.featured.slice(0, 4);
 
-export function Thumb({ story }: { story: Story }) {
-  const crop = story.crop ?? { pos: "50% 50%", zoom: 1 };
+export function Thumb({ photo }: { photo: Photo }) {
+  const crop = photo.crop ?? { pos: "50% 50%" };
   return (
     <span className="drawer-thumb">
       <img
-        src={story.image}
+        src={photo.src}
         alt=""
         loading="lazy"
-        style={{ objectPosition: crop.pos, ["--zoom" as string]: String(crop.zoom), ["--origin" as string]: crop.pos }}
+        style={{ objectPosition: crop.pos, ["--zoom" as string]: String(crop.zoom ?? 1), ["--origin" as string]: crop.pos }}
       />
     </span>
+  );
+}
+
+function DrawerCard({ item, onGo, large = false }: { item: Item; onGo: () => void; large?: boolean }) {
+  const className = `drawer-card${large ? " drawer-card-large" : ""}`;
+  if (item.kind === "article") {
+    const { a } = item;
+    return (
+      <Link to="/news/$slug" params={{ slug: a.slug }} className={className} onClick={onGo}>
+        <Thumb photo={a.photo} />
+        <span className="drawer-card-title">{a.title}</span>
+        <span className="drawer-card-sub">{a.kicker} / {a.read}</span>
+      </Link>
+    );
+  }
+  if (item.kind === "episode") {
+    const { e } = item;
+    return (
+      <Link to="/originals/$slug" params={{ slug: e.slug }} className={className} onClick={onGo}>
+        <span className="drawer-thumb drawer-thumb-poster"><Poster episode={e} play={false} /></span>
+        <span className="drawer-card-title">{e.title}</span>
+        <span className="drawer-card-sub">{e.series} / {e.length}</span>
+      </Link>
+    );
+  }
+  const { s } = item;
+  return (
+    <Link to="/shop/$slug" params={{ slug: s.slug }} className={className} onClick={onGo}>
+      <Thumb photo={s.hero} />
+      <span className="drawer-card-title">Shop {s.name}</span>
+      <span className="drawer-card-sub">{s.tagline}</span>
+    </Link>
   );
 }
 
@@ -65,7 +79,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const [closing, setClosing] = useState(false);
   // The section tab for the page you're on gets the active style
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const currentLabel = ({ "/news": "News", "/trends": "Trends", "/blog": "Blog", "/about": "About" } as Record<string, string>)[pathname];
+  const currentLabel = sections.find((s) => pathname === s.to || pathname.startsWith(`${s.to}/`))?.label;
 
   useEffect(() => {
     const el = dialog.current;
@@ -125,7 +139,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                   const inner = (
                     <>
                       <span className="vtab-label">{section.label}</span>
-                      {section.stories && <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />}
+                      {section.items && <ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" />}
                       <b className="vtab-bar" aria-hidden="true" />
                       <i className="debris" aria-hidden="true" />
                       <i className="debris" aria-hidden="true" />
@@ -135,7 +149,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                   const className = `vtab drawer-row${current ? " active" : ""}`;
                   return (
                     <li key={section.label}>
-                      {section.stories ? (
+                      {section.items ? (
                         <button type="button" className={className} aria-current={current ? "page" : undefined} onClick={() => setActive(section)}>{inner}</button>
                       ) : (
                         <Link to={section.to} className={className} aria-current={current ? "page" : undefined} onClick={() => close()}>{inner}</Link>
@@ -149,13 +163,9 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             <div className="drawer-featured">
               <p className="drawer-label">Featured</p>
               <ul className="drawer-strip">
-                {featured.map((story) => (
-                  <li key={story.title}>
-                    <Link to="/news" className="drawer-card" onClick={() => close()}>
-                      <Thumb story={story} />
-                      <span className="drawer-card-title">{story.title}</span>
-                      <span className="drawer-card-sub">{story.sub}</span>
-                    </Link>
+                {featured.map((a) => (
+                  <li key={a.slug}>
+                    <DrawerCard item={{ kind: "article", a }} onGo={() => close()} />
                   </li>
                 ))}
               </ul>
@@ -175,7 +185,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             </ul>
           </div>
 
-          {/* Sub panel: the chosen section's featured stories */}
+          {/* Sub panel: the chosen section's stories, episodes or shops */}
           <div className="drawer-panel drawer-panel-sub" inert={active === null} aria-hidden={active === null}>
             {active && (
               <>
@@ -184,13 +194,9 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                   {active.label}
                 </button>
                 <ul className="drawer-stories">
-                  {active.stories?.map((story) => (
-                    <li key={story.title}>
-                      <Link to={active.to} className="drawer-card drawer-card-large" onClick={() => close()}>
-                        <Thumb story={story} />
-                        <span className="drawer-card-title">{story.title}</span>
-                        <span className="drawer-card-sub">{story.sub}</span>
-                      </Link>
+                  {active.items?.map((item) => (
+                    <li key={item.kind === "article" ? item.a.slug : item.kind === "episode" ? item.e.slug : item.s.slug}>
+                      <DrawerCard item={item} onGo={() => close()} large />
                     </li>
                   ))}
                 </ul>

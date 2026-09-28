@@ -16,12 +16,12 @@ import musicHero from "../assets/ogcw-hero-music.jpg";
 // TODO: fill in the real date, venue and ticket link once the concert is confirmed.
 const DRAKE_TICKETS = "https://www.ticketmaster.com/search?q=drake";
 
-type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean };
+type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
 
 const rail: RailItem[] = [
   { kicker: "Live", title: "Drake, live in concert", meta: "Date TBA · Tickets", image: drakePhoto.url, pos: "50% 20%", live: true },
-  { kicker: "New voices", title: "Vedan and the reach of regional rap", meta: "5 min read", image: vedanPhoto.url, pos: "50% 30%" },
-  { kicker: "Nightlife", title: "The listening bars changing nightlife", meta: "6 min read", image: musicHero, pos: "40% 40%" },
+  { kicker: "New voices", title: "Vedan and the reach of regional rap", meta: "5 min read", image: vedanPhoto.url, pos: "50% 30%", slug: "vedan-and-the-reach-of-regional-rap" },
+  { kicker: "Nightlife", title: "The listening bars changing nightlife", meta: "6 min read", image: musicHero, pos: "40% 40%", slug: "the-listening-bars-changing-nightlife" },
 ];
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
@@ -41,7 +41,7 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
   return item.live ? (
     <a className="cover-rail-item" href={DRAKE_TICKETS} target="_blank" rel="noopener noreferrer">{inner}</a>
   ) : (
-    <Link className="cover-rail-item" to="/news">{inner}</Link>
+    <Link className="cover-rail-item" to="/news/$slug" params={{ slug: item.slug ?? "" }}>{inner}</Link>
   );
 }
 
@@ -71,7 +71,7 @@ export function HeroCover() {
           </h1>
           <p className="cover-deck">From “Sprinter” to “Band4Band”, how the West London rapper carried British drill from the estate to the world stage.</p>
           <div className="cover-cta">
-            <Link to="/news" className="cover-link">
+            <Link to="/news/$slug" params={{ slug: "central-cee-and-the-global-rise-of-uk-rap" }} className="cover-link">
               Read the cover story <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
             </Link>
             <span className="cover-meta">7 min read</span>

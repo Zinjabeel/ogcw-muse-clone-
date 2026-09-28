@@ -12,9 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as BlogRouteImport } from './routes/blog'
-import { Route as NewsRouteImport } from './routes/news'
+import { Route as CultureRouteImport } from './routes/culture'
+import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as MusicRouteImport } from './routes/music'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
+import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as NewsSlugRouteImport } from './routes/news.$slug'
+import { Route as OriginalsIndexRouteImport } from './routes/originals.index'
+import { Route as OriginalsSlugRouteImport } from './routes/originals.$slug'
+import { Route as ShopIndexRouteImport } from './routes/shop.index'
+import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -31,9 +39,19 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NewsRoute = NewsRouteImport.update({
-  id: '/news',
-  path: '/news',
+const CultureRoute = CultureRouteImport.update({
+  id: '/culture',
+  path: '/culture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MusicRoute = MusicRouteImport.update({
+  id: '/music',
+  path: '/music',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrendsRoute = TrendsRouteImport.update({
@@ -46,48 +64,152 @@ const InfoSlugRoute = InfoSlugRouteImport.update({
   path: '/info/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsIndexRoute = NewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OriginalsIndexRoute = OriginalsIndexRouteImport.update({
+  id: '/originals/',
+  path: '/originals/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OriginalsSlugRoute = OriginalsSlugRouteImport.update({
+  id: '/originals/$slug',
+  path: '/originals/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopIndexRoute = ShopIndexRouteImport.update({
+  id: '/shop/',
+  path: '/shop/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopSlugRoute = ShopSlugRouteImport.update({
+  id: '/shop/$slug',
+  path: '/shop/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
-  '/news': typeof NewsRoute
+  '/culture': typeof CultureRoute
+  '/explore': typeof ExploreRoute
+  '/music': typeof MusicRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/originals/$slug': typeof OriginalsSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/news/': typeof NewsIndexRoute
+  '/originals/': typeof OriginalsIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
-  '/news': typeof NewsRoute
+  '/culture': typeof CultureRoute
+  '/explore': typeof ExploreRoute
+  '/music': typeof MusicRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/originals/$slug': typeof OriginalsSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/news': typeof NewsIndexRoute
+  '/originals': typeof OriginalsIndexRoute
+  '/shop': typeof ShopIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog': typeof BlogRoute
-  '/news': typeof NewsRoute
+  '/culture': typeof CultureRoute
+  '/explore': typeof ExploreRoute
+  '/music': typeof MusicRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
+  '/news/$slug': typeof NewsSlugRoute
+  '/originals/$slug': typeof OriginalsSlugRoute
+  '/shop/$slug': typeof ShopSlugRoute
+  '/news/': typeof NewsIndexRoute
+  '/originals/': typeof OriginalsIndexRoute
+  '/shop/': typeof ShopIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/culture'
+    | '/explore'
+    | '/music'
+    | '/trends'
+    | '/info/$slug'
+    | '/news/$slug'
+    | '/originals/$slug'
+    | '/shop/$slug'
+    | '/news/'
+    | '/originals/'
+    | '/shop/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
+  to:
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/culture'
+    | '/explore'
+    | '/music'
+    | '/trends'
+    | '/info/$slug'
+    | '/news/$slug'
+    | '/originals/$slug'
+    | '/shop/$slug'
+    | '/news'
+    | '/originals'
+    | '/shop'
   id:
-    '__root__' | '/' | '/about' | '/blog' | '/news' | '/trends' | '/info/$slug'
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/blog'
+    | '/culture'
+    | '/explore'
+    | '/music'
+    | '/trends'
+    | '/info/$slug'
+    | '/news/$slug'
+    | '/originals/$slug'
+    | '/shop/$slug'
+    | '/news/'
+    | '/originals/'
+    | '/shop/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   BlogRoute: typeof BlogRoute
-  NewsRoute: typeof NewsRoute
+  CultureRoute: typeof CultureRoute
+  ExploreRoute: typeof ExploreRoute
+  MusicRoute: typeof MusicRoute
   TrendsRoute: typeof TrendsRoute
   InfoSlugRoute: typeof InfoSlugRoute
+  NewsSlugRoute: typeof NewsSlugRoute
+  OriginalsSlugRoute: typeof OriginalsSlugRoute
+  ShopSlugRoute: typeof ShopSlugRoute
+  NewsIndexRoute: typeof NewsIndexRoute
+  OriginalsIndexRoute: typeof OriginalsIndexRoute
+  ShopIndexRoute: typeof ShopIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -113,11 +235,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/news': {
-      id: '/news'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsRouteImport
+    '/culture': {
+      id: '/culture'
+      path: '/culture'
+      fullPath: '/culture'
+      preLoaderRoute: typeof CultureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/music': {
+      id: '/music'
+      path: '/music'
+      fullPath: '/music'
+      preLoaderRoute: typeof MusicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trends': {
@@ -134,6 +270,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/': {
+      id: '/news/'
+      path: '/news'
+      fullPath: '/news/'
+      preLoaderRoute: typeof NewsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/originals/': {
+      id: '/originals/'
+      path: '/originals'
+      fullPath: '/originals/'
+      preLoaderRoute: typeof OriginalsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/originals/$slug': {
+      id: '/originals/$slug'
+      path: '/originals/$slug'
+      fullPath: '/originals/$slug'
+      preLoaderRoute: typeof OriginalsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/': {
+      id: '/shop/'
+      path: '/shop'
+      fullPath: '/shop/'
+      preLoaderRoute: typeof ShopIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/$slug': {
+      id: '/shop/$slug'
+      path: '/shop/$slug'
+      fullPath: '/shop/$slug'
+      preLoaderRoute: typeof ShopSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,9 +319,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   BlogRoute: BlogRoute,
-  NewsRoute: NewsRoute,
+  CultureRoute: CultureRoute,
+  ExploreRoute: ExploreRoute,
+  MusicRoute: MusicRoute,
   TrendsRoute: TrendsRoute,
   InfoSlugRoute: InfoSlugRoute,
+  NewsSlugRoute: NewsSlugRoute,
+  OriginalsSlugRoute: OriginalsSlugRoute,
+  ShopSlugRoute: ShopSlugRoute,
+  NewsIndexRoute: NewsIndexRoute,
+  OriginalsIndexRoute: OriginalsIndexRoute,
+  ShopIndexRoute: ShopIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

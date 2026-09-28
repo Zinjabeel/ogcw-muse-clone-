@@ -1,11 +1,12 @@
-import { Link } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { allStories, Thumb } from "./nav-drawer";
+import { LISTS, searchSite, type Hit } from "@/data/content";
+import { Thumb } from "./nav-drawer";
+import { HitLink, hitLabel, hitSub, hitTitle, Poster } from "./cards";
 
-// Full-screen black search, opened from the header and the menu. Filters the
-// stories the site knows about as you type. Swap allStories for a real search
-// endpoint once articles come from the admin panel.
+// Full-screen search, opened from the header and the menu. Matches stories,
+// Originals and shops as you type; each result opens its own page. Shows the
+// most-read stories before you type.
 
 export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -32,9 +33,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
 
   const close = () => dialog.current?.close();
   const term = query.trim().toLowerCase();
-  const results = term
-    ? allStories.filter((story) => `${story.title} ${story.sub}`.toLowerCase().includes(term))
-    : allStories.slice(0, 4);
+  const results: Hit[] = term ? searchSite(term) : LISTS.mostRead.slice(0, 4).map((item) => ({ kind: "article", item }));
 
   return (
     <dialog ref={dialog} className="search" aria-label="Search OGCW">
@@ -46,7 +45,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
             ref={input}
             id="site-search"
             type="search"
-            placeholder="Search stories, artists, scenes"
+            placeholder="Search stories, Originals and shops"
             autoComplete="off"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -59,18 +58,22 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
         </div>
 
         <p className="search-label" aria-live="polite">
-          {term ? (results.length ? `${results.length} ${results.length === 1 ? "story" : "stories"}` : `Nothing matches “${query.trim()}” yet`) : "Popular now"}
+          {term ? (results.length ? `${results.length} ${results.length === 1 ? "result" : "results"}` : `Nothing matches “${query.trim()}” yet`) : "Most read"}
         </p>
         <ul className="search-results">
-          {results.map((story) => (
-            <li key={story.title}>
-              <Link to="/news" className="search-result" onClick={close}>
-                <Thumb story={story} />
+          {results.map((hit) => (
+            <li key={hit.kind + hit.item.slug}>
+              <HitLink hit={hit} className="search-result" onClick={close}>
+                {hit.kind === "episode" ? (
+                  <span className="drawer-thumb drawer-thumb-poster"><Poster episode={hit.item} play={false} /></span>
+                ) : (
+                  <Thumb photo={hit.kind === "article" ? hit.item.photo : hit.item.hero} />
+                )}
                 <span>
-                  <span className="search-result-title">{story.title}</span>
-                  <span className="search-result-sub">{story.sub}</span>
+                  <span className="search-result-title">{hitTitle(hit)}</span>
+                  <span className="search-result-sub">{hitLabel(hit)} · {hitSub(hit)}</span>
                 </span>
-              </Link>
+              </HitLink>
             </li>
           ))}
         </ul>
