@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play, ShoppingBag } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData } from "@/data/content";
+import { article, ARTICLES, formatPrice, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData } from "@/data/content";
 import { ExploreMix } from "./explore-mix";
 import { CultureDeck } from "./culture-deck";
-import { GlowCard } from "@/components/ui/spotlight-card";
+import { ShopCard } from "./cards";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -37,6 +37,10 @@ const song = SONGS[0]!;
 // For the shop call-to-action card: one product from three of the shops
 const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
 const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0);
+// Six more picks for the call-to-action card: the fourth from each shop and
+// the fifth from two, so none repeat the three shown on the shop cards
+const alsoInEdit = [...SHOPS.map((shop) => shop.products[3]!), SHOPS[1]!.products[4]!, SHOPS[3]!.products[4]!];
+const lowestPrice = Math.min(...SHOPS.flatMap((shop) => shop.products.map((product) => product.price)));
 
 const shortDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 
@@ -325,22 +329,12 @@ export function NewsFront() {
             <h3 id="shop-title" className="bs-eyebrow">Shop</h3>
             <Link to="/shop" className="bs-more">All four shops</Link>
           </div>
-          <div className="bs-features bs-features-shop">
-            {SHOPS.map((shop) => (
-              <article key={shop.slug}>
-                {/* Yellow spotlight glow on the edges that follows the pointer */}
-                <GlowCard glowColor="yellow" customSize className="bs-shop-card">
-                  <Link to="/shop/$slug" params={{ slug: shop.slug }} className="bs-card">
-                    <Photo photo={shop.hero} className="bs-photo-feature" />
-                    <p className="bs-eyebrow">{shop.name}</p>
-                    <h4 className="bs-title">{shop.tagline}</h4>
-                    <span className="bs-read"><ShoppingBag size={13} strokeWidth={1.5} aria-hidden="true" />Shop {shop.name}</span>
-                  </Link>
-                </GlowCard>
-              </article>
-            ))}
+          {/* The four shops as shop windows (photo, three picks with prices,
+              a Shop button), and beside them a call-to-action card for the
+              whole shop */}
+          <div className="bs-shop-grid">
+            {SHOPS.map((shop) => <article key={shop.slug}><ShopCard shop={shop} /></article>)}
 
-            {/* The fifth card: a way into the whole shop */}
             <article className="bs-shop-cta-wrap">
               <Link to="/shop" className="bs-shop-cta">
                 <span className="bs-shop-cta-thumbs" aria-hidden="true">
@@ -348,7 +342,23 @@ export function NewsFront() {
                 </span>
                 <span className="bs-shop-cta-label">The OGCW Shop</span>
                 <span className="bs-shop-cta-title">Shop the OGCW edit</span>
-                <span className="bs-shop-cta-copy">{pickCount} picks from Nike, Adidas, StockX and Uniqlo, bought straight from the retailer.</span>
+                <span className="bs-shop-cta-copy">Picked by our style desk from the brands in our stories, and bought straight from the retailer.</span>
+                <span className="bs-shop-cta-more">
+                  <span className="bs-shop-cta-more-label">Also in the edit</span>
+                  <span className="bs-shop-cta-picks">
+                    {alsoInEdit.map((product) => (
+                      <span key={product.image} className="bs-shop-cta-pick">
+                        <img src={product.image} alt="" loading="lazy" />
+                        <span>{product.name}</span>
+                        <span className="bs-shop-cta-pick-price">{formatPrice(product.price)}</span>
+                      </span>
+                    ))}
+                  </span>
+                </span>
+                <span className="bs-shop-cta-stat">
+                  <span className="bs-shop-cta-num">{pickCount}</span>
+                  <span>picks from {SHOPS.length} shops, from {formatPrice(lowestPrice)}</span>
+                </span>
                 <span className="bs-shop-cta-button">Visit the shop <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></span>
               </Link>
             </article>

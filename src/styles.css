@@ -933,26 +933,55 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 }
 
 /* Feature row: four large photo tiles */
-.bs-features { display: grid; gap: 28px var(--spacing-12); grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.bs-features .bs-title { font-size: 18px; }
-@media (min-width: 768px) { .bs-features { gap: var(--spacing-32) var(--spacing-16); } .bs-features .bs-title { font-size: 22px; } }
-@media (min-width: 1024px) { .bs-features { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-/* Shop tiles sit in GlowCards (src/components/ui/spotlight-card.tsx): fill the row height */
+/* Shop cards sit in GlowCards (src/components/ui/spotlight-card.tsx): fill the row height */
 .bs-shop-card { height: 100%; -webkit-backdrop-filter: none; backdrop-filter: none; } /* a backdrop filter stops the fixed glow background from tracking the pointer */
 @media (max-width: 767px) { .bs-shop-card { padding: 10px; } }
 
-/* Home shop row: the four shops and a call-to-action card. Two across on
-   phones (the card takes a full row), three on tablets (it fills the last
-   two slots), five in one row on wide screens. */
-.bs-shop-cta-wrap { grid-column: 1 / -1; }
-@media (min-width: 1024px) { .bs-features-shop { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bs-shop-cta-wrap { grid-column: span 2; } }
-@media (min-width: 1280px) {
-  .bs-features-shop { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-16); }
-  .bs-shop-cta-wrap { grid-column: auto; }
-  .bs-features-shop .bs-title { font-size: 19px; }
+/* ------------------------------------------------------------------
+   Shop cards (ShopCard in src/components/cards.tsx): a shop window. The
+   shop's photo with its name and number of picks, the tagline, three
+   picks with their prices (each opens the retailer), then the lowest
+   price and a button into the shop.
+   ------------------------------------------------------------------ */
+.shopcard-inner { display: flex; flex-direction: column; gap: 14px; height: 100%; min-width: 0; font-family: var(--ogcw-ui); color: var(--ogcw-text); }
+.shopcard-hero { position: relative; display: block; aspect-ratio: 2 / 1; overflow: hidden; border-radius: 10px; }
+.shopcard-photo { position: absolute; inset: 0; }
+.shopcard-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .72), rgb(0 0 0 / .08) 60%, transparent); }
+.shopcard:hover .shopcard-photo img { transform: scale(calc(var(--zoom, 1) * 1.05)); }
+.shopcard-brand { position: absolute; left: 16px; bottom: 12px; z-index: 1; font-family: var(--ogcw-display); font-size: clamp(26px, 2.2vw, 32px); line-height: 1; color: #fff; text-shadow: 0 2px 16px rgb(0 0 0 / .45); }
+.shopcard-count { position: absolute; right: 12px; top: 12px; z-index: 1; padding: 5px 10px; border-radius: 999px; background: rgb(0 0 0 / .55); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .03em; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.shopcard-title { font-family: var(--ogcw-display); font-size: 20px; line-height: 1.2; text-wrap: balance; }
+.shopcard-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.shopcard-product { display: grid; align-content: start; gap: 5px; border-radius: 8px; }
+.shopcard-product:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 3px; }
+.shopcard-thumb { display: block; aspect-ratio: 1; overflow: hidden; border-radius: 8px; background: #f1f1f1; }
+.shopcard-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.shopcard-product:hover .shopcard-thumb img { transform: scale(1.07); }
+.shopcard-product-name { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 12.5px; font-weight: 600; line-height: 1.3; }
+.shopcard-product:hover .shopcard-product-name { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-underline-offset: 3px; }
+.shopcard-price { font-size: 12.5px; color: var(--ogcw-text-2); font-variant-numeric: tabular-nums; }
+.shopcard-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--ogcw-border); }
+.shopcard-from { font-size: 13px; color: var(--ogcw-text-2); }
+.shopcard-from strong { font-weight: 700; color: var(--ogcw-text); font-variant-numeric: tabular-nums; }
+.shopcard-button {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 18px; border-radius: 999px;
+  background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 13px; font-weight: 700; transition: gap .25s ease, background-color .2s ease;
+}
+.shopcard-button:hover, .shopcard-button:focus-visible { gap: 12px; background: var(--ogcw-text); outline: none; }
+.shopcard-button:focus-visible { box-shadow: 0 0 0 3px var(--ogcw-bg), 0 0 0 5px var(--ogcw-accent); }
+@media (prefers-reduced-motion: reduce) { .shopcard-thumb img, .shopcard-button { transition: none; } }
+
+/* Home shop row: the four shop cards two by two, and beside them the
+   call-to-action card running the full height. Tablets: two across with
+   the call to action as a banner underneath. Phones: one column. */
+.bs-shop-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-16); }
+@media (min-width: 640px) { .bs-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bs-shop-cta-wrap { grid-column: 1 / -1; } }
+@media (min-width: 1024px) {
+  .bs-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(250px, .62fr); }
+  .bs-shop-cta-wrap { grid-column: 3; grid-row: 1 / span 2; }
 }
 .bs-shop-cta {
-  position: relative; isolation: isolate; display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 300px; padding: 22px 20px 20px; overflow: hidden;
+  position: relative; isolation: isolate; display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 300px; padding: 26px 24px 24px; overflow: hidden;
   border-radius: 14px; background: var(--ogcw-accent); color: var(--ogcw-bg);
   box-shadow: 0 1rem 2rem -1rem rgb(0 0 0 / .6);
   transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease;
@@ -967,19 +996,34 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .bs-shop-cta:hover .bs-shop-cta-thumbs img:nth-child(1) { transform: translateX(-4px) rotate(-6deg); }
 .bs-shop-cta:hover .bs-shop-cta-thumbs img:nth-child(3) { transform: translateX(4px) rotate(6deg); }
 .bs-shop-cta-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
-.bs-shop-cta-title { font-family: var(--ogcw-display); font-size: clamp(26px, 2vw, 32px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
+.bs-shop-cta-title { font-family: var(--ogcw-display); font-size: clamp(28px, 2.2vw, 36px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
 .bs-shop-cta-copy { font-family: var(--ogcw-serif); font-size: 15px; line-height: 1.45; opacity: .85; }
+/* Four more picks from the edit, two by two (the round thumbnails stand in
+   for them in the tablet banner) */
+.bs-shop-cta-thumbs { display: none; }
+.bs-shop-cta-more { display: grid; gap: 10px; margin-top: 12px; }
+.bs-shop-cta-more-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.bs-shop-cta-picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; }
+.bs-shop-cta-pick { display: grid; align-content: start; gap: 6px; font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+.bs-shop-cta-pick img { width: 100%; aspect-ratio: 1; border-radius: 8px; background: #fff; object-fit: cover; box-shadow: 0 8px 18px -10px rgb(0 0 0 / .5); transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.bs-shop-cta:hover .bs-shop-cta-pick img { transform: translateY(-3px); }
+.bs-shop-cta-pick-price { margin-top: -3px; font-weight: 500; opacity: .75; font-variant-numeric: tabular-nums; }
+/* The count, set large, towards the foot of the tall card */
+.bs-shop-cta-stat { display: grid; gap: 4px; margin-top: auto; padding-top: 24px; border-top: 1px solid color-mix(in srgb, var(--ogcw-bg) 22%, transparent); font-size: 14px; font-weight: 600; line-height: 1.35; }
+.bs-shop-cta-num { font-family: var(--ogcw-display); font-size: clamp(64px, 6vw, 96px); font-weight: 400; line-height: .9; letter-spacing: -.03em; }
 .bs-shop-cta-button {
-  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; margin-top: auto; padding: 0 18px;
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; margin-top: 18px; padding: 0 20px;
   border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font-size: 14px; font-weight: 700;
   transition: gap .25s ease;
 }
 .bs-shop-cta-button svg { transition: transform .25s ease; }
 .bs-shop-cta:hover .bs-shop-cta-button svg { transform: translateX(4px); }
-@media (min-width: 640px) and (max-width: 1279.98px) {
+@media (min-width: 640px) and (max-width: 1023.98px) {
   /* A wide banner here: thumbs and words on the left, the button on the right */
   .bs-shop-cta { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center; }
   .bs-shop-cta > :not(.bs-shop-cta-button) { grid-column: 1; }
+  .bs-shop-cta-thumbs { display: flex; }
+  .bs-shop-cta-stat, .bs-shop-cta-more { display: none; }
   .bs-shop-cta-button { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .bs-shop-cta, .bs-shop-cta-thumbs img, .bs-shop-cta-button svg { transition: none; } }
@@ -1690,7 +1734,11 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .og-credits dt { padding-top: 2px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); }
 
 /* Shop index */
-.og-shop-tile { aspect-ratio: 4 / 5; margin-bottom: 14px; border-radius: 8px; }
+/* Shop index: the four shop cards, two across from tablets up */
+.og-shop-cards { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 768px) { .og-shop-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; } }
+.og-shop-cards .shopcard-hero { aspect-ratio: 16 / 7; }
+.og-shop-cards .shopcard-title { font-size: 22px; }
 .og-how { padding-top: 0; }
 .og-how .og-section-title { padding-top: 20px; margin-bottom: 32px; border-top: 1px solid var(--ogcw-border); }
 .og-how-list { display: grid; gap: 32px; }

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, Play } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Play } from "lucide-react";
 import type { ReactNode } from "react";
+import { GlowCard } from "@/components/ui/spotlight-card";
 import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song, Streamer } from "@/data/content";
 import { formatDate, formatPrice, SECTIONS, youtubeThumb, youtubeUrl } from "@/data/content";
 
@@ -161,6 +162,44 @@ export function SongCard({ song, size = "md" }: { song: Song; size?: "md" | "sm"
         <span className="og-meta">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
       </span>
     </a>
+  );
+}
+
+/** A shop as a shop window: its photo with the name and number of picks,
+ *  the tagline, three of the picks with prices (each opening the retailer),
+ *  the lowest price and a button into the shop's page. Sits in the yellow
+ *  spotlight frame (GlowCard). */
+export function ShopCard({ shop }: { shop: Shop }) {
+  const picks = shop.products.slice(0, 3);
+  const from = Math.min(...shop.products.map((product) => product.price));
+  return (
+    <GlowCard glowColor="yellow" customSize className="bs-shop-card shopcard">
+      <div className="shopcard-inner">
+        <Link to="/shop/$slug" params={{ slug: shop.slug }} className="shopcard-hero" tabIndex={-1} aria-hidden="true">
+          <Img photo={shop.hero} className="shopcard-photo" />
+          <span className="shopcard-brand">{shop.name}</span>
+          <span className="shopcard-count">{shop.products.length} picks</span>
+        </Link>
+        <p className="shopcard-title">{shop.tagline}</p>
+        <ul className="shopcard-products" aria-label={`Picks from ${shop.name}`}>
+          {picks.map((product) => (
+            <li key={`${product.name}-${product.detail}`}>
+              <a className="shopcard-product" href={product.url} target="_blank" rel="noopener noreferrer">
+                <span className="shopcard-thumb"><img src={product.image} alt={`${product.name}, ${product.detail}`} loading="lazy" /></span>
+                <span className="shopcard-product-name">{product.name}</span>
+                <span className="shopcard-price">{formatPrice(product.price)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="shopcard-foot">
+          <span className="shopcard-from">From <strong>{formatPrice(from)}</strong></span>
+          <Link to="/shop/$slug" params={{ slug: shop.slug }} className="shopcard-button">
+            Shop {shop.name} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </GlowCard>
   );
 }
 

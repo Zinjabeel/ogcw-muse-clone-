@@ -1,8 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShoppingBag } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { Img, ProductCard } from "../components/cards";
-import { GlowCard } from "@/components/ui/spotlight-card";
+import { ProductCard, ShopCard } from "../components/cards";
 import { SHOPS } from "../data/content";
 
 export const Route = createFileRoute("/shop/")({
@@ -22,17 +20,8 @@ function ShopIndex() {
     <SiteShell>
       <PageIntro kicker="OGCW Shop" title="Shop" copy="Four shops, one edit: the pieces behind the stories, picked by the OGCW style desk and bought straight from the retailer." />
       <main className="page-wrap pb-24">
-        <div className="og-grid-4 og-shop-grid">
-          {SHOPS.map((shop) => (
-            <GlowCard key={shop.slug} glowColor="yellow" customSize className="bs-shop-card">
-              <Link to="/shop/$slug" params={{ slug: shop.slug }} className="og-card">
-                <Img photo={shop.hero} className="og-shop-tile" />
-                <span className="og-kicker">{shop.name}</span>
-                <span className="og-card-title">{shop.tagline}</span>
-                <span className="og-meta"><ShoppingBag size={13} strokeWidth={1.5} aria-hidden="true" /> {shop.products.length} picks · Shop {shop.name}</span>
-              </Link>
-            </GlowCard>
-          ))}
+        <div className="og-shop-cards">
+          {SHOPS.map((shop) => <ShopCard key={shop.slug} shop={shop} />)}
         </div>
 
         <section className="og-block" aria-labelledby="staff-picks">
