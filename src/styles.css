@@ -922,6 +922,64 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .bs-shop-card { height: 100%; -webkit-backdrop-filter: none; backdrop-filter: none; } /* a backdrop filter stops the fixed glow background from tracking the pointer */
 @media (max-width: 767px) { .bs-shop-card { padding: 10px; } }
 
+/* Home shop row: the four shops and a call-to-action card. Two across on
+   phones (the card takes a full row), three on tablets (it fills the last
+   two slots), five in one row on wide screens. */
+.bs-shop-cta-wrap { grid-column: 1 / -1; }
+@media (min-width: 1024px) { .bs-features-shop { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bs-shop-cta-wrap { grid-column: span 2; } }
+@media (min-width: 1280px) {
+  .bs-features-shop { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--spacing-16); }
+  .bs-shop-cta-wrap { grid-column: auto; }
+  .bs-features-shop .bs-title { font-size: 19px; }
+}
+.bs-shop-cta {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; gap: 10px; height: 100%; min-height: 300px; padding: 22px 20px 20px; overflow: hidden;
+  border-radius: 14px; background: var(--ogcw-accent); color: var(--ogcw-bg);
+  box-shadow: 0 1rem 2rem -1rem rgb(0 0 0 / .6);
+  transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease;
+}
+/* A soft light in the top corner */
+.bs-shop-cta::before { content: ""; position: absolute; inset: -40% -30% auto auto; z-index: -1; width: 90%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgb(255 255 255 / .38), transparent 65%); }
+.bs-shop-cta:hover, .bs-shop-cta:focus-visible { transform: translateY(-6px); box-shadow: 0 1.6rem 2.6rem -1.2rem rgb(0 0 0 / .7); outline: none; }
+.bs-shop-cta:focus-visible { box-shadow: 0 0 0 3px var(--ogcw-bg), 0 0 0 5px var(--ogcw-accent); }
+.bs-shop-cta-thumbs { display: flex; margin-bottom: 6px; }
+.bs-shop-cta-thumbs img { width: 56px; height: 56px; border: 3px solid var(--ogcw-accent); border-radius: 50%; background: #fff; object-fit: cover; box-shadow: 0 6px 14px -6px rgb(0 0 0 / .45); transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+.bs-shop-cta-thumbs img + img { margin-left: -16px; }
+.bs-shop-cta:hover .bs-shop-cta-thumbs img:nth-child(1) { transform: translateX(-4px) rotate(-6deg); }
+.bs-shop-cta:hover .bs-shop-cta-thumbs img:nth-child(3) { transform: translateX(4px) rotate(6deg); }
+.bs-shop-cta-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.bs-shop-cta-title { font-family: var(--ogcw-display); font-size: clamp(26px, 2vw, 32px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
+.bs-shop-cta-copy { font-family: var(--ogcw-serif); font-size: 15px; line-height: 1.45; opacity: .85; }
+.bs-shop-cta-button {
+  display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; margin-top: auto; padding: 0 18px;
+  border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font-size: 14px; font-weight: 700;
+  transition: gap .25s ease;
+}
+.bs-shop-cta-button svg { transition: transform .25s ease; }
+.bs-shop-cta:hover .bs-shop-cta-button svg { transform: translateX(4px); }
+@media (min-width: 640px) and (max-width: 1279.98px) {
+  /* A wide banner here: thumbs and words on the left, the button on the right */
+  .bs-shop-cta { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center; }
+  .bs-shop-cta > :not(.bs-shop-cta-button) { grid-column: 1; }
+  .bs-shop-cta-button { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bs-shop-cta, .bs-shop-cta-thumbs img, .bs-shop-cta-button svg { transition: none; } }
+
+/* ------------------------------------------------------------------
+   Bands (src/components/news-front.tsx): on wide screens the news front's
+   sections step in and out. The front (masthead, lead, Briefing) is 80% of
+   the column, the streamers and the shop 90%, More news and Explore the
+   full column. Below 1280px everything uses the full column.
+   ------------------------------------------------------------------ */
+@media (min-width: 1280px) {
+  .bs-band-80 { width: 80%; margin-inline: auto; }
+  .bs-band-90 { width: 90%; margin-inline: auto; }
+  /* The narrower front: a slimmer Briefing rail and headlines to match */
+  .bs-band-80 .bs-front { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 300px; }
+  .bs-band-80 .bs-title-lead { font-size: clamp(32px, 2.4vw, 46px); }
+  .bs-band-80 .bs-col-secondary .bs-title { font-size: 22px; }
+}
+
 /* Secondary decks, Briefing kickers and the song card in the rail */
 .bs-deck-sm { margin-top: var(--spacing-8); font-size: 15px; line-height: 1.5; }
 .bs-schedule a { grid-template-columns: 3.4rem 1fr; }
@@ -941,9 +999,10 @@ a:hover .bs-song-play, a:hover .og-thumb-play { transform: scale(1.08); }
 .bs-song-artist { font-size: 13px; font-weight: 600; }
 .bs-song-note { font-family: var(--ogcw-serif); font-size: 14px; line-height: 1.5; color: var(--ogcw-text-2); }
 .bs-song .bs-read { margin-top: 2px; }
-/* Under the lead story: the thumbnail beside the words */
+/* Under the lead story: the thumbnail beside the words when the column has room */
 .bs-song-wide { margin-top: var(--spacing-32); }
-@media (min-width: 640px) {
+.bs-front > .bs-col:first-child { container: bs-lead / inline-size; }
+@container bs-lead (min-width: 470px) {
   .bs-song-wide { grid-template-columns: minmax(0, 46%) minmax(0, 1fr); column-gap: 20px; align-items: start; }
   .bs-song-wide .bs-song-head { grid-column: 1 / -1; }
   .bs-song-wide .bs-song-media { grid-row: 2 / span 5; margin: 4px 0 0; }
@@ -961,7 +1020,9 @@ a:hover .bs-song-play, a:hover .og-thumb-play { transform: scale(1.08); }
 /* Trendiest streamers: the Originals row layout, now with YouTube thumbnails */
 .bs-video-platform { position: absolute; right: 10px; top: 10px; padding: 4px 9px; border-radius: 999px; background: rgb(0 0 0 / .62); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .04em; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .bs-streamers { row-gap: var(--spacing-40); }
-.bs-video-card .bs-read { display: flex; flex-wrap: wrap; }
+/* The video title runs on with its arrow, instead of the arrow dropping to its own line */
+.bs-video-card .bs-read { display: block; }
+.bs-video-card .bs-read svg { display: inline; margin-left: 4px; vertical-align: -1px; }
 @media (min-width: 768px) {
   /* Two rows of three: no rule before the first card of each row */
   .bs-streamers > :nth-child(3n + 1)::before { display: none; }

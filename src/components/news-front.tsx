@@ -29,6 +29,9 @@ const moreNews = ["bts-arirang-world-tour-latin-america", "taylor-swift-the-life
 const onFront = new Set([lead, ...secondary, ...moreNews].map((a) => a.slug));
 const briefing = ARTICLES.filter((a) => !onFront.has(a.slug));
 const song = SONGS[0]!;
+// For the shop call-to-action card: one product from three of the shops
+const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
+const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0);
 
 const shortDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 
@@ -61,6 +64,10 @@ export function NewsFront() {
   return (
     <section className="broadsheet" aria-labelledby="news-front-title">
       <div className="bs-wrap">
+        {/* Sections sit in bands of different widths on wide screens: the
+            front at 80%, More news and Explore at full width, the streamers
+            and the shop at 90% (see .bs-band in styles.css) */}
+        <div className="bs-band bs-band-80">
         <header className="bs-masthead">
           <p className="bs-flag">
             <span suppressHydrationWarning>{today}</span>
@@ -149,6 +156,7 @@ export function NewsFront() {
             </div>
           </aside>
         </div>
+        </div>
 
         <hr className="bs-rule" />
 
@@ -171,9 +179,9 @@ export function NewsFront() {
           </div>
         </section>
 
-        <hr className="bs-rule" />
+        <hr className="bs-rule bs-band bs-band-90" />
 
-        <section aria-labelledby="streamers-title">
+        <section className="bs-band bs-band-90" aria-labelledby="streamers-title">
           <div className="bs-section-head">
             <h3 id="streamers-title" className="bs-eyebrow">Trendiest streamers</h3>
             <Link to="/streaming" className="bs-more">More streaming</Link>
@@ -196,14 +204,14 @@ export function NewsFront() {
           </div>
         </section>
 
-        <hr className="bs-rule" />
+        <hr className="bs-rule bs-band bs-band-90" />
 
-        <section aria-labelledby="shop-title">
+        <section className="bs-band bs-band-90" aria-labelledby="shop-title">
           <div className="bs-section-head">
             <h3 id="shop-title" className="bs-eyebrow">Shop</h3>
-            <Link to="/shop" className="bs-more">Visit the shop</Link>
+            <Link to="/shop" className="bs-more">All four shops</Link>
           </div>
-          <div className="bs-features">
+          <div className="bs-features bs-features-shop">
             {SHOPS.map((shop) => (
               <article key={shop.slug}>
                 {/* Yellow spotlight glow on the edges that follows the pointer */}
@@ -217,6 +225,19 @@ export function NewsFront() {
                 </GlowCard>
               </article>
             ))}
+
+            {/* The fifth card: a way into the whole shop */}
+            <article className="bs-shop-cta-wrap">
+              <Link to="/shop" className="bs-shop-cta">
+                <span className="bs-shop-cta-thumbs" aria-hidden="true">
+                  {shopThumbs.map((product) => <img key={product.image} src={product.image} alt="" loading="lazy" />)}
+                </span>
+                <span className="bs-shop-cta-label">The OGCW Shop</span>
+                <span className="bs-shop-cta-title">Shop the OGCW edit</span>
+                <span className="bs-shop-cta-copy">{pickCount} picks from Nike, Adidas, StockX and Uniqlo, bought straight from the retailer.</span>
+                <span className="bs-shop-cta-button">Visit the shop <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></span>
+              </Link>
+            </article>
           </div>
         </section>
 
