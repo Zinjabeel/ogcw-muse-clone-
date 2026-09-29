@@ -46,6 +46,11 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
   ["Noah Wyle at his Walk of Fame ceremony", "Kevin Paul", "CC BY 4.0", "Noah_Wyle_-_Walk_of_Fame-01.jpg"],
   ["Rhea Seehorn", "Gage Skidmore", "CC BY-SA 2.0", "Rhea_Seehorn_(41794796000).jpg"],
   ["Barbican Estate, London", "Julian Herzog", "CC BY 4.0", "Barbican_Estate_Lakeside_City_of_London_2026_10.jpg"],
+  ["Miley Cyrus at Primavera Sound", "Jwslubbock", "CC BY-SA 4.0", "Miley_Cyrus,_Seat_stage_2.jpg"],
+  ["Nia Archives in Amsterdam", "Michielderoo", "CC0", "Nia_Archives_2024-11-16_Amsterdam.jpg"],
+  ["Bill Skarsgård", "Gage Skidmore", "CC BY-SA 2.0", "Bill_Skarsgård_(8608397609).jpg"],
+  ["The Venice Film Festival red carpet", "Pietro Luca Cassarino", "CC BY-SA 2.0", "Venice_2020_Red_Carpet.jpg"],
+  ["IShowSpeed in Singapore", "Aerodynamically", "CC0", "IShowSpeed_at_Trifecta_Somerset,_Singapore.jpg"],
 ];
 
 export const infoPages: Record<InfoSlug, InfoPage> = {
@@ -174,8 +179,8 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             </li>
           ))}
         </ul>
-        <p>Streamer and music video thumbnails belong to the channels that published them and link to the videos on YouTube.</p>
-        <p>Shop, hero and Originals photos come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
+        <p>Video thumbnails (streamers, music videos, and game trailers and showcases from Capcom and PlayStation) belong to the channels that published them and link to the videos on YouTube.</p>
+        <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>
     ),
