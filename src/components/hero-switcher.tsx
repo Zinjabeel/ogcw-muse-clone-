@@ -1,0 +1,115 @@
+import { Check, GalleryHorizontal, LayoutPanelTop } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+// Hero switcher in the header, beside the colour switcher and built the same
+// way: "Cover story" is the original hero (hero-cover.tsx), "Gallery" the
+// sliding news pictures (hero-gallery.tsx). The choice is <html data-hero>,
+// remembered in this browser and applied before first paint by
+// heroInitScript; styles.css shows the matching hero.
+
+const HEROES = [
+  { id: "cover", name: "Cover story", note: "One big photo and headline", Icon: LayoutPanelTop },
+  { id: "gallery", name: "Gallery", note: "News pictures that slide by", Icon: GalleryHorizontal },
+] as const;
+type HeroId = (typeof HEROES)[number]["id"];
+
+const STORAGE_KEY = "ogcw-hero";
+const isHero = (value: unknown): value is HeroId => HEROES.some((h) => h.id === value);
+
+// Runs in <head> before first paint so a saved hero never flashes the default.
+export const heroInitScript = `(function(){try{var h=localStorage.getItem("${STORAGE_KEY}");if(h==="gallery"){document.documentElement.dataset.hero=h}}catch(e){}})();`;
+
+function applyHero(id: HeroId) {
+  const root = document.documentElement;
+  if (id === "cover") delete root.dataset["hero"];
+  else root.dataset["hero"] = id;
+  try {
+    localStorage.setItem(STORAGE_KEY, id);
+  } catch {
+    // private mode or storage blocked: the hero still changes for this visit
+  }
+}
+
+export function HeroSwitcher() {
+  const [hero, setHero] = useState<HeroId>("cover");
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+
+  // Pick up the hero the head script already applied
+  useEffect(() => {
+    const current = document.documentElement.dataset["hero"];
+    if (isHero(current)) setHero(current);
+  }, []);
+
+  // Close on a click outside or on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!wrap.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        button.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const current = HEROES.find((h) => h.id === hero)!;
+
+  const choose = (id: HeroId) => {
+    setHero(id);
+    applyHero(id);
+    setOpen(false);
+    button.current?.focus();
+    window.scrollTo({ top: 0 });
+  };
+
+  return (
+    <div className="theme-switch" ref={wrap}>
+      <button
+        ref={button}
+        type="button"
+        className="icon-button grid theme-switch-button"
+        aria-label={`Hero section: ${current.name}`}
+        aria-haspopup="true"
+        aria-expanded={open}
+        aria-controls="hero-menu"
+        title="Hero section"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <current.Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+      </button>
+      {open && (
+        <div id="hero-menu" className="theme-menu" role="group" aria-label="Hero section">
+          <p className="theme-menu-label">Hero section</p>
+          {HEROES.map((h, index) => (
+            <button
+              key={h.id}
+              type="button"
+              className="theme-option"
+              aria-pressed={h.id === hero}
+              autoFocus={h.id === hero}
+              onClick={() => choose(h.id)}
+            >
+              <span className="theme-option-num">{index + 1}</span>
+              <span className="hero-glyph" aria-hidden="true"><h.Icon size={15} strokeWidth={1.75} /></span>
+              <span className="theme-option-text">
+                <span className="theme-option-name">{h.name}</span>
+                <span className="theme-option-note">{h.note}</span>
+              </span>
+              {h.id === hero && <Check size={16} strokeWidth={2} className="theme-option-check" aria-hidden="true" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

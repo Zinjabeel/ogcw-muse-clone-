@@ -241,6 +241,89 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 .site-header .icon-button { border-color: var(--ogcw-border); color: var(--ogcw-text); }
 .site-header .icon-button:hover, .site-header .icon-button:focus-visible { background: var(--ogcw-accent); color: var(--ogcw-bg); border-color: var(--ogcw-accent); outline: none; }
 
+/* Hero switcher (src/components/hero-switcher.tsx): same menu as the colour
+   switcher; each option shows a small outline of its layout */
+.hero-glyph { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--ogcw-border); border-radius: 7px; color: var(--ogcw-text); }
+.theme-option[aria-pressed="true"] .hero-glyph { border-color: var(--ogcw-accent); color: var(--ogcw-accent); }
+/* The chosen hero shows; the other stays out of the page */
+.gallery { display: none; }
+:root[data-hero="gallery"] .gallery { display: flex; }
+:root[data-hero="gallery"] .cover { display: none; }
+
+/* ------------------------------------------------------------------
+   Gallery hero (src/components/hero-gallery.tsx): news pictures hung like
+   a gallery wall with museum captions, sliding sideways on their own.
+   Behind them, a blurred copy of the current picture washed in the theme
+   colour, crossfading as the pictures change.
+   ------------------------------------------------------------------ */
+.gallery {
+  --pad: max(16px, calc((100% - var(--page-width)) / 2));
+  position: relative; isolation: isolate; overflow: hidden; flex-direction: column;
+  min-height: calc(100svh - 3.5rem); background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui);
+}
+@media (min-width: 1024px) { .gallery { --pad: max(32px, calc((100% - var(--page-width)) / 2)); } }
+.gallery-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.gallery-bg img { position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; object-fit: cover; filter: blur(64px) saturate(1.25); opacity: 0; transition: opacity 1.4s ease; }
+.gallery-bg img.is-on { opacity: 1; }
+.gallery-bg::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--ogcw-bg) 80%, transparent); }
+
+.gallery-top { display: flex; justify-content: space-between; gap: 16px; padding: 28px var(--pad) 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--ogcw-text) 62%, transparent); }
+.gallery-top p { margin: 0; }
+
+/* The wall: a sideways row that snaps each picture to the page's left edge */
+.gallery-track {
+  display: flex; flex: 1; align-items: flex-start; gap: clamp(48px, 9vw, 180px); margin: 0;
+  padding: clamp(40px, 8vh, 96px) 0 24px var(--pad); list-style: none;
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline-start: var(--pad); scrollbar-width: none;
+}
+.gallery-track::-webkit-scrollbar { display: none; }
+/* Room after the last picture, so it too can line up with the page edge */
+.gallery-track::after { content: ""; flex: none; width: 60vw; }
+.gallery-slide { flex: none; scroll-snap-align: start; }
+.gallery-wide { width: clamp(300px, 40vw, 760px); }
+.gallery-tall { width: clamp(220px, 19vw, 380px); margin-top: clamp(32px, 7vh, 72px); }
+.gallery-link { display: block; }
+.gallery-frame { position: relative; display: block; }
+.gallery-wide .gallery-frame { aspect-ratio: 10 / 7; }
+.gallery-tall .gallery-frame { aspect-ratio: 5 / 7; }
+/* A thin mount behind each picture, set off to one side */
+.gallery-mount { position: absolute; inset: 0; background: color-mix(in srgb, var(--ogcw-text) 8%, transparent); transform: translateX(-12px); }
+.gallery-tall .gallery-mount { transform: translateX(22px); }
+.gallery-frame img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; transition: filter .8s ease; }
+.gallery-slide:not([aria-current]) .gallery-frame img { filter: saturate(.8) brightness(.88); }
+.gallery-caption { display: grid; gap: 3px; margin-top: 22px; transition: opacity .8s ease; }
+.gallery-slide:not([aria-current]) .gallery-caption { opacity: .6; }
+.gallery-label { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--ogcw-text) 55%, transparent); }
+.gallery-title { margin: 4px 0 2px; font-family: var(--ogcw-serif); font-size: clamp(18px, 1.5vw, 24px); font-style: italic; line-height: 1.2; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 4px; transition: text-decoration-color .25s ease; }
+.gallery-link:hover .gallery-title, .gallery-link:focus-visible .gallery-title { text-decoration-color: var(--ogcw-accent); }
+.gallery-link:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 6px; }
+.gallery-meta { font-size: 12px; line-height: 1.45; color: color-mix(in srgb, var(--ogcw-text) 62%, transparent); }
+
+/* Counter: 01 — 03, the line filling up until the next picture */
+.gallery-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; padding: 8px var(--pad) 28px; }
+.gallery-foot-label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: color-mix(in srgb, var(--ogcw-text) 55%, transparent); }
+.gallery-count { display: flex; align-items: center; gap: 22px; margin: 0; font-family: var(--ogcw-serif); font-size: clamp(40px, 4.4vw, 68px); font-weight: 400; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
+.gallery-line { position: relative; width: clamp(64px, 8vw, 128px); height: 1px; overflow: hidden; background: color-mix(in srgb, var(--ogcw-text) 28%, transparent); }
+.gallery-line i { position: absolute; inset: 0; background: var(--ogcw-accent); transform: scaleX(0); transform-origin: left; animation: gallery-progress var(--dur) linear forwards; }
+.gallery-line i[data-run="false"] { animation-play-state: paused; }
+@keyframes gallery-progress { to { transform: scaleX(1); } }
+.gallery-controls { display: flex; justify-self: end; gap: 8px; }
+.gallery-controls button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--ogcw-border); border-radius: 50%; background: color-mix(in srgb, var(--ogcw-bg) 40%, transparent); color: var(--ogcw-text); transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.gallery-controls button:hover, .gallery-controls button:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
+
+@media (max-width: 767px) {
+  .gallery { min-height: 0; }
+  .gallery-top p:last-child, .gallery-foot-label { display: none; }
+  .gallery-track { padding-block: 36px 20px; }
+  .gallery-wide { width: 82vw; }
+  .gallery-tall { width: 62vw; margin-top: 24px; }
+  .gallery-foot { grid-template-columns: auto minmax(0, 1fr); }
+  .gallery-count { font-size: 38px; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-bg img, .gallery-frame img, .gallery-caption { transition: none; }
+}
+
 /* Colour-theme switcher (src/components/theme-switcher.tsx): a disc of the
    current palette in the header, opening a small menu of the three themes */
 .theme-switch { position: relative; }

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "../components/ogcw-layout";
 import { ConnectSection } from "../components/connect-section";
 import { HeroCover } from "../components/hero-cover";
+import { HeroGallery } from "../components/hero-gallery";
 import { NewsFront } from "../components/news-front";
 
 export const Route = createFileRoute("/")({
@@ -17,7 +18,9 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return <SiteShell>
+    {/* Both heroes render; the hero switcher's choice (html data-hero) decides which shows */}
     <HeroCover />
+    <HeroGallery />
 
     <main>
       <NewsFront />

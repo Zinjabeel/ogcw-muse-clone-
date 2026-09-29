@@ -6,6 +6,7 @@ import { SearchOverlay } from "./search-overlay";
 import { Footer2 } from "@/components/ui/footer-2";
 import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow";
 import { ThemeSwitcher } from "./theme-switcher";
+import { HeroSwitcher } from "./hero-switcher";
 
 // Header navigation. Between 1024 and 1279px there isn't room for all eight,
 // so Trends, Blog and About move into "More" (wide: true marks them).
@@ -121,6 +122,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <MoreMenu pathname={pathname} />
             </nav>
             <div className="col-start-3 flex items-center gap-2 justify-self-end">
+              {pathname === "/" && <HeroSwitcher />}
               <ThemeSwitcher />
               <button type="button" className="icon-button grid" aria-label="Search" aria-haspopup="dialog" aria-expanded={searchOpen} onClick={openSearch}><Search size={16} /></button>
             </div>

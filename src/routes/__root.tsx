@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { themeInitScript } from "../components/theme-switcher";
+import { heroInitScript } from "../components/hero-switcher";
 
 function NotFoundComponent() {
   return (
@@ -108,8 +109,8 @@ function RootShell({ children }: { children: ReactNode }) {
     // data-theme is set by the script below before React hydrates, hence suppressHydrationWarning
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Apply the visitor's saved colour theme before first paint */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Apply the visitor's saved colour theme and hero before first paint */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript + heroInitScript }} />
         <HeadContent />
       </head>
       <body>
