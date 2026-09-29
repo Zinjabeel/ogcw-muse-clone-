@@ -17,14 +17,15 @@ export const Route = createFileRoute("/trends")({
   component: Trends,
 });
 
-// The culture index: what the desk keeps seeing, each with the story that covers it
+// The culture index: what the desk keeps seeing in its reporting, each trend
+// with the story that shows it
 const TRENDS = [
-  { title: "The return of the personal archive", note: "Labelled mixtapes, scanned flyers and objects bought to keep: people want a record of their own scene, not just what the feed remembers.", story: article("objects-built-to-outlast-the-feed") },
-  { title: "Listening bars after the hype", note: "The first wave of rooms has settled in. The ones still full care more about the sound system than the queue outside.", story: article("the-listening-bars-changing-nightlife") },
-  { title: "Small-run print finds its audience", note: "Zines and risograph posters sell out in days, and the buyers are younger than the collectors who kept print alive.", story: article("a-new-generation-remakes-print") },
-  { title: "Useful clothes replace statement pieces", note: "Workwear cuts, deep pockets and fabrics that last a season of wear: independent labels are designing for use first.", story: article("independent-labels-reclaim-the-runway") },
-  { title: "The new rules of night photography", note: "Flash off, grain up, concrete in frame. The city after dark has become a generation’s favourite backdrop.", story: article("why-brutalism-keeps-returning") },
-  { title: "Local scenes reject the algorithm", note: "Artists are building crowds city by city, in their own language, long before a playlist notices them.", story: article("vedan-and-the-reach-of-regional-rap") },
+  { title: "Albums get a second act", note: "New songs added almost a year after release keep a record in the conversation, and on the charts, long after its first week.", story: article("taylor-swift-the-life-of-a-showgirl-the-encore") },
+  { title: "The comeback is a stadium tour", note: "After time away, the biggest acts return at full scale: 88 shows in 34 cities, not a quiet warm-up.", story: article("bts-arirang-world-tour-latin-america") },
+  { title: "Charity streams go record-sized", note: "Livestream marathons now raise sums that used to belong to telethons, and the audience keeps growing with them.", story: article("z-event-2026-final-edition") },
+  { title: "VTubers lead the launches", note: "Animated creators are no longer a niche: some of the biggest audiences for new games now tune in to a cartoon face.", story: article("wardogs-launch-theburntpeanut") },
+  { title: "Big games, bigger waits", note: "Studios are announcing years ahead, with release windows in 2029 and 2030, while fans count down to this year’s giants.", story: article("blizzcon-2026-diablo-v-starcraft") },
+  { title: "Paris backs its big names", note: "After two seasons defined by designer debuts, the spotlight in Paris swings back to the houses everyone already knows.", story: article("paris-fashion-week-ss27") },
 ];
 
 function Trends() {

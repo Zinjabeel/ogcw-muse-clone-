@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { Explore } from "../components/explore";
+import { ExploreMix } from "../components/explore-mix";
 import { HitLink, hitLabel, hitSub, hitTitle, Img, StoryRow } from "../components/cards";
 import { READING_LISTS, searchSite } from "../data/content";
 
-// Explore hub: search across everything, the Latest / Trending / Most Read
-// tabs, curated reading lists and a directory of every section.
+// Explore hub: search across everything, the Explore mix, curated reading
+// lists and a directory of every section.
 export const Route = createFileRoute("/explore")({
   head: () => ({
     meta: [
@@ -22,8 +22,10 @@ export const Route = createFileRoute("/explore")({
 
 const DIRECTORY = [
   { label: "News", note: "Every story, newest first", el: (c: string) => <Link to="/news" className={c}>News</Link> },
-  { label: "Music", note: "Rap, rumba and live", el: (c: string) => <Link to="/music" className={c}>Music</Link> },
-  { label: "Culture", note: "Style, design, nightlife", el: (c: string) => <Link to="/culture" className={c}>Culture</Link> },
+  { label: "Music", note: "Releases, tours and awards", el: (c: string) => <Link to="/music" className={c}>Music</Link> },
+  { label: "Games", note: "Launches and showcases", el: (c: string) => <Link to="/games" className={c}>Games</Link> },
+  { label: "Streaming", note: "Creators and records", el: (c: string) => <Link to="/streaming" className={c}>Streaming</Link> },
+  { label: "Culture", note: "Fashion, TV and sneakers", el: (c: string) => <Link to="/culture" className={c}>Culture</Link> },
   { label: "Originals", note: "OGCW-made video", el: (c: string) => <Link to="/originals" className={c}>Originals</Link> },
   { label: "Shop", note: "The OGCW edit", el: (c: string) => <Link to="/shop" className={c}>Shop</Link> },
   { label: "Trends", note: "The culture index", el: (c: string) => <Link to="/trends" className={c}>Trends</Link> },
@@ -60,7 +62,7 @@ function ExplorePage() {
         )}
 
         <div className="og-block">
-          <Explore title="Right now" idPrefix="explore-page" />
+          <ExploreMix title="Right now" idPrefix="explore-page" />
         </div>
 
         <section className="og-block" aria-labelledby="reading-lists">

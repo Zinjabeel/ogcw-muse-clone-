@@ -1,41 +1,37 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Clapperboard, ShoppingBag } from "lucide-react";
-import { article, EPISODES, SHOPS, type Photo as PhotoData } from "@/data/content";
-import { Explore } from "./explore";
+import { ArrowRight, ArrowUpRight, BookOpen, Play, ShoppingBag } from "lucide-react";
+import { article, ARTICLES, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Photo as PhotoData } from "@/data/content";
+import { ExploreMix } from "./explore-mix";
 import { CultureDeck } from "./culture-deck";
-import { Poster } from "./cards";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
-// system (dark page, Source Serif 4 headlines and text, Inter labels, yellow accents).
-// Every card opens its own story, episode or shop page.
+// system (Source Serif 4 headlines and text, Inter labels, accent colour).
+// Lead | two secondary stories | the Briefing rail and a song to check out,
+// then more news, the trendiest streamers, the shop and the Explore mix.
 
 const sections = [
   { label: "All news", to: "/news" },
   { label: "Music", to: "/music" },
+  { label: "Games", to: "/games" },
+  { label: "Streaming", to: "/streaming" },
   { label: "Culture", to: "/culture" },
   { label: "Originals", to: "/originals" },
   { label: "Shop", to: "/shop" },
-  { label: "Trends", to: "/trends" },
   { label: "Explore", to: "/explore" },
 ] as const;
 
-// The hero already leads with Central Cee, so the front opens on Dave.
-const lead = article("dave-and-the-art-of-the-long-verse");
-const secondary = [article("playboi-carti-at-clout-festival"), article("congolese-rumbas-second-life")];
+const lead = article("vmas-2026-winners");
+const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
+const moreNews = ["bts-arirang-world-tour-latin-america", "taylor-swift-the-life-of-a-showgirl-the-encore", "marvels-wolverine-sales", "emmys-2026-winners"].map(article);
+// The OGCW Briefing: every other story, newest first
+const onFront = new Set([lead, ...secondary, ...moreNews].map((a) => a.slug));
+const briefing = ARTICLES.filter((a) => !onFront.has(a.slug));
+const song = SONGS[0]!;
 
-// The OGCW Briefing: five stories in the order they broke.
-const briefing = [
-  "a-new-generation-remakes-print",
-  "why-brutalism-keeps-returning",
-  "objects-built-to-outlast-the-feed",
-  "independent-labels-reclaim-the-runway",
-  "the-listening-bars-changing-nightlife",
-].map(article);
-const weekday = (iso: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" }).format(new Date(iso));
+const shortDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 
-const originals = EPISODES.slice(0, 3);
 function ReadTime({ children }: { children: string }) {
   return (
     <span className="bs-read">
@@ -72,8 +68,8 @@ export function NewsFront() {
           </p>
           <h2 id="news-front-title" className="bs-wordmark">OGCW News</h2>
           <p className="bs-flag bs-flag-right">
-            <span>Culture, reported</span>
-            <span>from the inside</span>
+            <span>{ARTICLES.length} stories this month</span>
+            <span>Every source linked</span>
           </p>
         </header>
 
@@ -96,6 +92,18 @@ export function NewsFront() {
               <ReadTime>{lead.read}</ReadTime>
               <Photo photo={lead.photo} className="bs-photo-lead" />
             </Link>
+
+            <a className="bs-song bs-song-wide" href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
+              <span className="bs-song-head">Check out this song</span>
+              <span className="bs-song-media">
+                <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
+                <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
+              </span>
+              <span className="bs-song-title">{song.title}</span>
+              <span className="bs-song-artist">{song.artist}</span>
+              <span className="bs-song-note">{song.note}</span>
+              <span className="bs-read">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
+            </a>
           </article>
 
           <div className="bs-col bs-col-secondary">
@@ -105,6 +113,7 @@ export function NewsFront() {
                   <Photo photo={story.photo} className="bs-photo-secondary" />
                   <p className="bs-eyebrow">{story.kicker}</p>
                   <h3 className="bs-title">{story.title}</h3>
+                  <p className="bs-deck bs-deck-sm">{story.deck}</p>
                   <ReadTime>{story.read}</ReadTime>
                 </Link>
               </article>
@@ -118,21 +127,24 @@ export function NewsFront() {
                 <span className="bs-dot" aria-hidden="true" />
               </p>
               <div className="bs-briefing-body">
-                <p className="bs-briefing-intro">Five stories worth your time, in the order they broke.</p>
-                <Link to="/news" className="bs-button">
-                  All the news
-                  <ArrowRight size={14} aria-hidden="true" />
-                </Link>
+                <p className="bs-briefing-intro">Everything else worth knowing this week, newest first.</p>
                 <ol className="bs-schedule">
                   {briefing.map((item) => (
                     <li key={item.slug}>
                       <Link to="/news/$slug" params={{ slug: item.slug }}>
-                        <span className="bs-schedule-day">{weekday(item.date)}</span>
-                        <span className="bs-schedule-title">{item.title}</span>
+                        <span className="bs-schedule-day">{shortDate(item.date)}</span>
+                        <span>
+                          <span className="bs-schedule-kicker">{item.kicker}</span>
+                          <span className="bs-schedule-title">{item.title}</span>
+                        </span>
                       </Link>
                     </li>
                   ))}
                 </ol>
+                <Link to="/news" className="bs-button">
+                  All the news
+                  <ArrowRight size={14} aria-hidden="true" />
+                </Link>
               </div>
             </div>
           </aside>
@@ -140,20 +152,45 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <section aria-labelledby="originals-title">
+        <section aria-labelledby="more-news-title">
           <div className="bs-section-head">
-            <h3 id="originals-title" className="bs-eyebrow">OGCW Originals</h3>
-            <Link to="/originals" className="bs-more">All originals</Link>
+            <h3 id="more-news-title" className="bs-eyebrow">More news</h3>
+            <Link to="/news" className="bs-more">All stories</Link>
           </div>
-          <div className="bs-opinion">
-            {originals.map((video) => (
-              <article key={video.slug} className="bs-reveal">
-                <Link to="/originals/$slug" params={{ slug: video.slug }} className="bs-card bs-video-card">
-                  <Poster episode={video} />
-                  <p className="bs-eyebrow">{video.kind}</p>
-                  <h4 className="bs-title">{video.title}</h4>
-                  <span className="bs-read"><Clapperboard size={13} strokeWidth={1.5} aria-hidden="true" />{video.series} · {video.length}</span>
+          <div className="bs-more-news">
+            {moreNews.map((story) => (
+              <article key={story.slug} className="bs-reveal">
+                <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
+                  <Photo photo={story.photo} className="bs-photo-more" />
+                  <p className="bs-eyebrow">{story.kicker}</p>
+                  <h4 className="bs-title">{story.title}</h4>
+                  <ReadTime>{story.read}</ReadTime>
                 </Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <hr className="bs-rule" />
+
+        <section aria-labelledby="streamers-title">
+          <div className="bs-section-head">
+            <h3 id="streamers-title" className="bs-eyebrow">Trendiest streamers</h3>
+            <Link to="/streaming" className="bs-more">More streaming</Link>
+          </div>
+          <div className="bs-opinion bs-streamers">
+            {STREAMERS.map((streamer) => (
+              <article key={streamer.name} className="bs-reveal">
+                <a className="bs-card bs-video-card" href={youtubeUrl(streamer.video)} target="_blank" rel="noopener noreferrer">
+                  <span className="bs-video-thumb">
+                    <img src={youtubeThumb(streamer.video)} alt="" loading="lazy" />
+                    <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
+                    <span className="bs-video-platform">{streamer.platform}</span>
+                  </span>
+                  <h4 className="bs-title">{streamer.name}</h4>
+                  <p className="bs-deck bs-deck-sm">{streamer.note}</p>
+                  <span className="bs-read"><span className="sr-only">Watch: </span>{streamer.videoTitle} <ArrowUpRight size={13} aria-hidden="true" /></span>
+                </a>
               </article>
             ))}
           </div>
@@ -185,7 +222,7 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <Explore />
+        <ExploreMix />
 
         <hr className="bs-rule" />
 

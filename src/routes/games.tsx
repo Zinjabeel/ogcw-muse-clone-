@@ -2,18 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell } from "../components/ogcw-layout";
 import { SectionFront } from "../components/section-front";
 
-export const Route = createFileRoute("/music")({
+export const Route = createFileRoute("/games")({
   head: () => ({
     meta: [
-      { title: "Music — OGCW" },
-      { name: "description", content: "New releases, tours and the awards nights everyone is talking about." },
-      { property: "og:title", content: "Music — OGCW" },
+      { title: "Games — OGCW" },
+      { name: "description", content: "Launches, sales and the showcases setting up the next few years of play." },
+      { property: "og:title", content: "Games — OGCW" },
       { property: "og:type", content: "website" },
     ],
   }),
   component: () => (
     <SiteShell>
-      <SectionFront section="music" />
+      <SectionFront section="games" />
     </SiteShell>
   ),
 });

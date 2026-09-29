@@ -1,30 +1,51 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
-import { article, formatDate } from "@/data/content";
+import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 
-// Gallery hero (the second option in the hero switcher): news pictures hung
-// like a gallery wall, each with a museum-style caption. The row scrolls
-// sideways (swipe, trackpad or the arrows) and moves on by itself: the line
-// in the "01 — 03" counter fills up, then the next picture slides in. Behind
-// it all, a blurred copy of the current picture washed in the theme colour,
-// which crossfades as the pictures change. Pauses while the pointer is on the
-// pictures, when off screen, and on the pause button; no autoplay for
-// reduced motion.
+// Gallery hero (the default in the hero switcher): five equal cards, one for
+// each door into OGCW (About, News, Shop, Blog, Subscribe), in a row that
+// slides so the current card sits in the middle. The whole hero takes on the
+// colour of the current card's photo and eases to the next one as the row
+// moves on every few seconds. Cards lift under the pointer. Autoplay pauses
+// on hover or focus, off screen, on the pause button, and never runs for
+// reduced motion. The bottom of the hero melts into OGCW News as you scroll.
 
-const SLIDES = [
-  { story: article("central-cee-and-the-global-rise-of-uk-rap"), shape: "wide" },
-  { story: article("playboi-carti-at-clout-festival"), shape: "tall" },
-  { story: article("dave-and-the-art-of-the-long-verse"), shape: "wide" },
-] as const;
+type Card = {
+  id: string;
+  label: string;
+  title: string;
+  copy: string;
+  cta: string;
+  dest: { to: "/about" | "/news" | "/shop" | "/blog" } | { hash: string };
+  photo: string;
+  alt: string;
+  tone: string; // the photo's own average colour, measured from the image
+};
 
-const DURATION = 6000; // ms per picture
+const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&h=1200&q=80`;
+
+const CARDS: Card[] = [
+  { id: "about", label: "About OGCW", title: "One Great Culture World", copy: "Who we are, what we cover and the people behind the stories.", cta: "Meet OGCW", dest: { to: "/about" }, photo: photo("photo-1470229722913-7c0e2dbbafd3"), alt: "A crowd with hands raised in front of a stage glowing orange", tone: "#8c5e4a" },
+  { id: "news", label: "News", title: "Today’s news", copy: "Music, games, streaming and culture, reported every day with the sources linked.", cta: "Read the news", dest: { to: "/news" }, photo: photo("photo-1504711434969-e33886168f5c"), alt: "A stack of folded newspapers", tone: "#6f8499" },
+  { id: "shop", label: "Shop", title: "The OGCW Shop", copy: "Our picks from Nike, Adidas, StockX and Uniqlo, bought straight from the retailer.", cta: "Visit the shop", dest: { to: "/shop" }, photo: photo("photo-1542291026-7eec264c27ff"), alt: "A red Nike running shoe against a red background", tone: "#a91728" },
+  { id: "blog", label: "Blog", title: "Check out our blog", copy: "Long reads and deep dives from the OGCW desk, for when a headline isn’t enough.", cta: "Read the blog", dest: { to: "/blog" }, photo: photo("photo-1455390582262-044cdead277a"), alt: "A fountain pen writing on a sheet of paper", tone: "#7b6f5a" },
+  { id: "subscribe", label: "Newsletter", title: "Subscribe for daily news", copy: "The day’s biggest stories in your inbox every morning. Free, and one tap to leave.", cta: "Subscribe", dest: { hash: "newsletter-title" }, photo: photo("photo-1511707171634-5f897ff02aa9"), alt: "A smartphone lying on a white desk", tone: "#4f8aa3" },
+];
+
+const DURATION = 6000; // ms per card
 const pad = (n: number) => String(n).padStart(2, "0");
+
+function CardLink({ dest, className, onClick, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; children: ReactNode }) {
+  if ("to" in dest) return <Link to={dest.to} className={className} onClick={onClick}>{children}</Link>;
+  return <Link to="/" hash={dest.hash} className={className} onClick={onClick}>{children}</Link>;
+}
 
 export function HeroGallery() {
   const section = useRef<HTMLElement>(null);
   const track = useRef<HTMLOListElement>(null);
   const [active, setActive] = useState(0);
+  const activeRef = useRef(0); // the latest card, for clicks that land before a re-render
+  activeRef.current = active;
   const [paused, setPaused] = useState(false);
   const [hold, setHold] = useState(false);
   const [inView, setInView] = useState(false);
@@ -47,17 +68,19 @@ export function HeroGallery() {
     return () => observer.disconnect();
   }, []);
 
-  // The active picture is the one closest to the row’s left edge
+  // The current card is the one closest to the middle of the row
   useEffect(() => {
     const el = track.current;
     if (!el) return;
     let frame = 0;
     const measure = () => {
       frame = 0;
-      const start = el.getBoundingClientRect().left + (parseFloat(getComputedStyle(el).paddingLeft) || 0);
+      const box = el.getBoundingClientRect();
+      const middle = box.left + box.width / 2;
       let best = 0, bestDistance = Infinity;
-      Array.from(el.children).forEach((slide, index) => {
-        const distance = Math.abs(slide.getBoundingClientRect().left - start);
+      Array.from(el.children).forEach((card, index) => {
+        const r = card.getBoundingClientRect();
+        const distance = Math.abs(r.left + r.width / 2 - middle);
         if (distance < bestDistance) { best = index; bestDistance = distance; }
       });
       setActive(best);
@@ -67,93 +90,99 @@ export function HeroGallery() {
     return () => { el.removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); };
   }, []);
 
+  // Wide screens show all five cards at once; narrower ones scroll the row
+  const scrollable = () => { const el = track.current; return !!el && el.scrollWidth > el.clientWidth + 2; };
+
   const goTo = useCallback((index: number) => {
+    activeRef.current = index;
+    setActive(index);
     const el = track.current;
-    const slide = el?.children[index] as HTMLElement | undefined;
-    if (!el || !slide) return;
-    const start = parseFloat(getComputedStyle(el).paddingLeft) || 0;
-    el.scrollTo({ left: slide.offsetLeft - start, behavior: reduce ? "auto" : "smooth" });
+    const card = el?.children[index] as HTMLElement | undefined;
+    if (!el || !card || el.scrollWidth <= el.clientWidth + 2) return;
+    el.scrollTo({ left: card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2, behavior: reduce ? "auto" : "smooth" });
   }, [reduce]);
 
-  const next = () => goTo((active + 1) % SLIDES.length);
-  const previous = () => goTo((active - 1 + SLIDES.length) % SLIDES.length);
+  const next = () => goTo((activeRef.current + 1) % CARDS.length);
+  const previous = () => goTo((activeRef.current - 1 + CARDS.length) % CARDS.length);
   const running = !paused && !hold && inView && !reduce;
+  const current = CARDS[active]!;
 
   return (
     <section
       ref={section}
       className="gallery"
+      style={{ "--tone": current.tone } as CSSProperties}
       aria-roledescription="carousel"
-      aria-label="Top stories"
+      aria-labelledby="gallery-title"
     >
+      <h1 id="gallery-title" className="sr-only">OGCW, One Great Culture World</h1>
+
+      {/* The ambient light: the current photo, blurred, over a wash of its colour */}
       <div className="gallery-bg" aria-hidden="true">
-        {SLIDES.map(({ story }, index) => (
-          <img key={story.slug} src={story.photo.src} alt="" className={index === active ? "is-on" : undefined} />
+        {CARDS.map((card, index) => (
+          <img key={card.id} src={card.photo} alt="" className={index === active ? "is-on" : undefined} />
         ))}
       </div>
 
-      <div className="gallery-top">
-        <p>Welcome to One Great Culture World</p>
-        <p>Top stories</p>
-      </div>
-
-      <ol className="gallery-track" ref={track} onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)}>
-        {SLIDES.map(({ story, shape }, index) => (
-          <li
-            key={story.slug}
-            className={`gallery-slide gallery-${shape}`}
-            aria-roledescription="slide"
-            aria-label={`${index + 1} of ${SLIDES.length}`}
-            aria-current={index === active ? "true" : undefined}
-          >
-            <Link
-              to="/news/$slug"
-              params={{ slug: story.slug }}
-              className="gallery-link"
-              // A picture that isn’t in front yet slides into place first
-              onClick={(event) => { if (index !== active) { event.preventDefault(); goTo(index); } }}
+      <div className="gallery-stage">
+        <ol
+          className="gallery-track"
+          ref={track}
+          onPointerEnter={() => setHold(true)}
+          onPointerLeave={() => setHold(false)}
+          onFocus={() => setHold(true)}
+          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
+        >
+          {CARDS.map((card, index) => (
+            <li
+              key={card.id}
+              className="gallery-card"
+              aria-roledescription="slide"
+              aria-label={`${index + 1} of ${CARDS.length}: ${card.label}`}
+              aria-current={index === active ? "true" : undefined}
+              // With all five on screen, the hero takes the colour of the card under the pointer
+              onPointerEnter={() => { if (!scrollable()) setActive(index); }}
             >
-              <span className="gallery-frame">
-                <span className="gallery-mount" aria-hidden="true" />
-                <img src={story.photo.src} alt={story.photo.alt} style={{ objectPosition: story.photo.crop?.pos ?? "50% 50%" }} loading={index === 0 ? "eager" : "lazy"} />
-              </span>
-              <span className="gallery-caption">
-                <span className="gallery-label">{pad(index + 1)} / {story.kicker}</span>
-                <span className="gallery-title">{story.title}</span>
-                <span className="gallery-meta">By {story.author}, {formatDate(story.date)}.</span>
-                <span className="gallery-meta">{story.read}.</span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ol>
+              <CardLink
+                dest={card.dest}
+                className="gallery-card-link"
+                // In the sliding row, a card that isn't in the middle yet slides there first
+                onClick={(event) => { if (index !== active && scrollable()) { event.preventDefault(); goTo(index); } }}
+              >
+                <img src={card.photo} alt={card.alt} loading={index < 3 ? "eager" : "lazy"} />
+                <span className="gallery-card-body">
+                  <span className="gallery-card-label">{card.label}</span>
+                  <span className="gallery-card-title">{card.title}</span>
+                  <span className="gallery-card-copy">{card.copy}</span>
+                  <span className="gallery-card-cta">{card.cta} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+                </span>
+              </CardLink>
+            </li>
+          ))}
+        </ol>
 
-      <div className="gallery-foot">
-        <p className="gallery-foot-label">Culture, reported from the inside</p>
-        <p className="gallery-count" aria-live={running ? "off" : "polite"}>
-          <span className="sr-only">Story </span>
-          <span>{pad(active + 1)}</span>
-          <span className="gallery-line" aria-hidden="true">
+        <div className="gallery-foot">
+          <p className="gallery-now" aria-live={running ? "off" : "polite"}>{current.label}</p>
+          <p className="gallery-count">
+            <span className="sr-only">Card </span>
+            <span>{pad(active + 1)}</span>
+            <span className="gallery-line" aria-hidden="true">
+              {!reduce && (
+                <i key={active} style={{ "--dur": `${DURATION}ms` } as CSSProperties} data-run={running} onAnimationEnd={next} />
+              )}
+            </span>
+            <span className="sr-only"> of </span>
+            <span>{pad(CARDS.length)}</span>
+          </p>
+          <div className="gallery-controls">
+            <button type="button" aria-label="Previous card" onClick={previous}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
             {!reduce && (
-              <i
-                key={active}
-                style={{ "--dur": `${DURATION}ms` } as CSSProperties}
-                data-run={running}
-                onAnimationEnd={next}
-              />
+              <button type="button" aria-label={paused ? "Play" : "Pause"} onClick={() => setPaused((value) => !value)}>
+                {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
+              </button>
             )}
-          </span>
-          <span className="sr-only"> of </span>
-          <span>{pad(SLIDES.length)}</span>
-        </p>
-        <div className="gallery-controls">
-          <button type="button" aria-label="Previous story" onClick={previous}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
-          {!reduce && (
-            <button type="button" aria-label={paused ? "Play the slideshow" : "Pause the slideshow"} onClick={() => setPaused((value) => !value)}>
-              {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
-            </button>
-          )}
-          <button type="button" aria-label="Next story" onClick={next}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+            <button type="button" aria-label="Next card" onClick={next}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          </div>
         </div>
       </div>
     </section>

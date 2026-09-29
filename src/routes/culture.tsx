@@ -6,7 +6,7 @@ export const Route = createFileRoute("/culture")({
   head: () => ({
     meta: [
       { title: "Culture — OGCW" },
-      { name: "description", content: "Style, design, nightlife, architecture and print, and the people who make them matter." },
+      { name: "description", content: "Fashion weeks, television, sneakers and the shows shaping the season." },
       { property: "og:title", content: "Culture — OGCW" },
       { property: "og:type", content: "website" },
     ],

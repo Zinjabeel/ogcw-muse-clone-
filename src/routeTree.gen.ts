@@ -14,7 +14,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CultureRouteImport } from './routes/culture'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as GamesRouteImport } from './routes/games'
 import { Route as MusicRouteImport } from './routes/music'
+import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -49,9 +51,19 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MusicRoute = MusicRouteImport.update({
   id: '/music',
   path: '/music',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StreamingRoute = StreamingRouteImport.update({
+  id: '/streaming',
+  path: '/streaming',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrendsRoute = TrendsRouteImport.update({
@@ -101,7 +113,9 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
+  '/games': typeof GamesRoute
   '/music': typeof MusicRoute
+  '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -117,7 +131,9 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
+  '/games': typeof GamesRoute
   '/music': typeof MusicRoute
+  '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -134,7 +150,9 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
+  '/games': typeof GamesRoute
   '/music': typeof MusicRoute
+  '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -152,7 +170,9 @@ export interface FileRouteTypes {
     | '/blog'
     | '/culture'
     | '/explore'
+    | '/games'
     | '/music'
+    | '/streaming'
     | '/trends'
     | '/info/$slug'
     | '/news/$slug'
@@ -168,7 +188,9 @@ export interface FileRouteTypes {
     | '/blog'
     | '/culture'
     | '/explore'
+    | '/games'
     | '/music'
+    | '/streaming'
     | '/trends'
     | '/info/$slug'
     | '/news/$slug'
@@ -184,7 +206,9 @@ export interface FileRouteTypes {
     | '/blog'
     | '/culture'
     | '/explore'
+    | '/games'
     | '/music'
+    | '/streaming'
     | '/trends'
     | '/info/$slug'
     | '/news/$slug'
@@ -201,7 +225,9 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   CultureRoute: typeof CultureRoute
   ExploreRoute: typeof ExploreRoute
+  GamesRoute: typeof GamesRoute
   MusicRoute: typeof MusicRoute
+  StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
@@ -249,11 +275,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/music': {
       id: '/music'
       path: '/music'
       fullPath: '/music'
       preLoaderRoute: typeof MusicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/streaming': {
+      id: '/streaming'
+      path: '/streaming'
+      fullPath: '/streaming'
+      preLoaderRoute: typeof StreamingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trends': {
@@ -321,7 +361,9 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   CultureRoute: CultureRoute,
   ExploreRoute: ExploreRoute,
+  GamesRoute: GamesRoute,
   MusicRoute: MusicRoute,
+  StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,

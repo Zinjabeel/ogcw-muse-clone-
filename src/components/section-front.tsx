@@ -1,17 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageIntro } from "./ogcw-layout";
-import { EpisodeCard, Img, StoryCard, StoryRow, WatchNext } from "./cards";
-import { articlesIn, drakePhoto, EPISODES, formatDate, SECTIONS, TICKETS, type SectionId } from "@/data/content";
+import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, StreamerCard, WatchNext } from "./cards";
+import { articlesIn, EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, STREAMERS, type SectionId } from "@/data/content";
 
-// Front page for a section (/music, /culture): a lead story beside a
-// numbered list, the rest as a grid, related OGCW Originals and a pointer to
-// the other section. Music also carries the Drake live listing.
+// Front page for a section (/music, /games, /streaming, /culture): a lead
+// story beside a numbered list, the rest as a grid, related OGCW Originals and
+// a pointer to the next section. Music also carries the live listing and the
+// songs to check out; Streaming carries the streamers to watch.
 
 export function SectionFront({ section }: { section: SectionId }) {
   const stories = articlesIn(section);
   const [lead, ...rest] = stories;
-  const other: SectionId = section === "music" ? "culture" : "music";
+  const next = SECTION_IDS[(SECTION_IDS.indexOf(section) + 1) % SECTION_IDS.length]!;
   // Originals tied to this section’s stories first, then the newest others
   const tied = EPISODES.filter((e) => e.related.some((slug) => stories.some((s) => s.slug === slug)));
   const related = [...tied, ...EPISODES.filter((e) => !tied.includes(e))].slice(0, 4);
@@ -42,15 +43,39 @@ export function SectionFront({ section }: { section: SectionId }) {
         </div>
 
         {section === "music" && (
-          <a className="og-live" href={TICKETS.drake} target="_blank" rel="noopener noreferrer">
-            <Img photo={{ src: drakePhoto, alt: "Drake on stage, pointing to the crowd", crop: { pos: "30% 20%", zoom: 1.35 } }} className="og-live-photo" />
+          <a className="og-live" href={LIVE.url} target="_blank" rel="noopener noreferrer">
+            <Img photo={LIVE.photo} className="og-live-photo" />
             <span className="og-live-text">
-              <span className="og-kicker">Live · Tickets</span>
-              <span className="og-live-title">Drake, live in concert</span>
-              <span className="og-meta">Date TBA · Venue TBA</span>
+              <span className="og-kicker">{LIVE.kicker}</span>
+              <span className="og-live-title">{LIVE.title}</span>
+              <span className="og-meta">{LIVE.meta}</span>
             </span>
-            <span className="og-live-cta">Buy tickets <ArrowUpRight size={16} aria-hidden="true" /></span>
+            <span className="og-live-cta">Tour dates <ArrowUpRight size={16} aria-hidden="true" /></span>
           </a>
+        )}
+
+        {section === "music" && (
+          <section className="og-block" aria-labelledby="music-songs">
+            <div className="og-section-head">
+              <h2 id="music-songs" className="og-section-title">Songs to check out</h2>
+              <span className="og-more-link">Official videos on YouTube</span>
+            </div>
+            <ul className="og-songs">
+              {SONGS.map((song) => <li key={song.video}><SongCard song={song} /></li>)}
+            </ul>
+          </section>
+        )}
+
+        {section === "streaming" && (
+          <section className="og-block" aria-labelledby="streaming-trendiest">
+            <div className="og-section-head">
+              <h2 id="streaming-trendiest" className="og-section-title">Trendiest streamers</h2>
+              <span className="og-more-link">Videos from their own channels</span>
+            </div>
+            <div className="og-grid-3 og-streamers">
+              {STREAMERS.map((streamer) => <StreamerCard key={streamer.name} streamer={streamer} />)}
+            </div>
+          </section>
         )}
 
         {rest.length > 0 && (
@@ -79,13 +104,13 @@ export function SectionFront({ section }: { section: SectionId }) {
         <section className="og-next" aria-labelledby="keep-reading">
           <div>
             <p id="keep-reading" className="og-kicker">Keep reading</p>
-            <Link to={other === "music" ? "/music" : "/culture"} className="og-next-link">
-              <span className="og-next-name">{SECTIONS[other].label} <ArrowRight className="og-next-arrow" aria-hidden="true" /></span>
-              <span className="og-next-intro">{SECTIONS[other].intro}</span>
+            <Link to={SECTION_PATH[next]} className="og-next-link">
+              <span className="og-next-name">{SECTIONS[next].label} <ArrowRight className="og-next-arrow" aria-hidden="true" /></span>
+              <span className="og-next-intro">{SECTIONS[next].intro}</span>
             </Link>
           </div>
           <ol className="og-aside-list og-next-list">
-            {articlesIn(other).slice(0, 3).map((story) => <li key={story.slug}><StoryRow story={story} /></li>)}
+            {articlesIn(next).slice(0, 3).map((story) => <li key={story.slug}><StoryRow story={story} /></li>)}
           </ol>
         </section>
       </main>

@@ -2,13 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { Img, StoryCard, StoryRow, WatchNext } from "../components/cards";
-import { ARTICLES, EPISODES, formatDate, LISTS, SECTIONS, type SectionId } from "../data/content";
+import { ARTICLES, EPISODES, formatDate, LISTS, SECTION_IDS, SECTIONS, type SectionId } from "../data/content";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
     meta: [
       { title: "News — OGCW" },
-      { name: "description", content: "The latest stories from One Great Culture World: music, style, design, nightlife and the scenes between." },
+      { name: "description", content: "The latest stories from One Great Culture World: music, games, streaming and culture." },
       { property: "og:title", content: "News — OGCW" },
       { property: "og:description", content: "The latest stories from One Great Culture World." },
       { property: "og:type", content: "website" },
@@ -21,8 +21,7 @@ export const Route = createFileRoute("/news/")({
 type Filter = "all" | SectionId;
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All stories" },
-  { id: "music", label: SECTIONS.music.label },
-  { id: "culture", label: SECTIONS.culture.label },
+  ...SECTION_IDS.map((id) => ({ id, label: SECTIONS[id].label })),
 ];
 
 function News() {
@@ -32,7 +31,7 @@ function News() {
 
   return (
     <SiteShell>
-      <PageIntro kicker="Latest dispatches" title="News" copy="Culture, reported from the inside: the artists, rooms, objects and ideas moving things forward, updated daily." />
+      <PageIntro kicker="Latest dispatches" title="News" copy="Music, games, streaming and culture: the day’s biggest stories, reported and explained, with every source linked." />
       <main className="page-wrap pb-24">
         <div className="og-filters" role="group" aria-label="Filter stories">
           {FILTERS.map((f) => (

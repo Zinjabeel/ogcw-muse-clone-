@@ -10,13 +10,15 @@ import { Poster } from "./cards";
 // strip and utility links sit below the list.
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
-type SectionPath = "/news" | "/music" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
+type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
 type Section = { label: string; to: SectionPath; items?: Item[] };
 
 const stories = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
 const sections: Section[] = [
   { label: "News", to: "/news", items: stories(ARTICLES.slice(0, 4)) },
-  { label: "Music", to: "/music", items: stories(articlesIn("music")) },
+  { label: "Music", to: "/music", items: stories(articlesIn("music").slice(0, 4)) },
+  { label: "Games", to: "/games", items: stories(articlesIn("games").slice(0, 4)) },
+  { label: "Streaming", to: "/streaming", items: stories(articlesIn("streaming").slice(0, 4)) },
   { label: "Culture", to: "/culture", items: stories(articlesIn("culture").slice(0, 4)) },
   { label: "Originals", to: "/originals", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
   { label: "Shop", to: "/shop", items: SHOPS.map((s) => ({ kind: "shop", s })) },

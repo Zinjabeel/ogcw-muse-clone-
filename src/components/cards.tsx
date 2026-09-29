@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
 import type { ReactNode } from "react";
-import type { Article, Episode, Hit, Photo, Product, Shop } from "@/data/content";
-import { formatDate, formatPrice, SECTIONS } from "@/data/content";
+import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song, Streamer } from "@/data/content";
+import { formatDate, formatPrice, SECTIONS, youtubeThumb, youtubeUrl } from "@/data/content";
+
+/** Where each section's front lives */
+export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture" } as const satisfies Record<SectionId, string>;
 
 // Shared pieces for the story, Originals and shop pages.
 
@@ -118,6 +121,46 @@ export function WatchNext({ episode }: { episode: Episode }) {
       <p className="og-aside-title">Watch</p>
       <EpisodeCard episode={episode} />
     </div>
+  );
+}
+
+/** A streamer with a recent video from their own channel: the thumbnail and
+ *  name open the video, the second link follows the channel. */
+export function StreamerCard({ streamer }: { streamer: Streamer }) {
+  return (
+    <article className="og-streamer">
+      <a className="og-streamer-link" href={youtubeUrl(streamer.video)} target="_blank" rel="noopener noreferrer">
+        <span className="og-thumb">
+          <img src={youtubeThumb(streamer.video)} alt="" loading="lazy" />
+          <span className="og-thumb-play" aria-hidden="true"><Play size={14} fill="currentColor" strokeWidth={0} /></span>
+        </span>
+        <span className="og-kicker">{streamer.platform}</span>
+        <span className="og-card-title">{streamer.name}</span>
+        <span className="og-streamer-note">{streamer.note}</span>
+        <span className="og-meta"><span className="sr-only">Watch: </span>{streamer.videoTitle}</span>
+      </a>
+      <a className="og-streamer-follow" href={streamer.channel} target="_blank" rel="noopener noreferrer">
+        Follow on {streamer.channel.includes("twitch.tv") ? "Twitch" : "YouTube"} <ArrowUpRight size={14} aria-hidden="true" />
+      </a>
+    </article>
+  );
+}
+
+/** A song to check out, opening its official video on YouTube. */
+export function SongCard({ song, size = "md" }: { song: Song; size?: "md" | "sm" }) {
+  return (
+    <a className={`og-song og-song-${size}`} href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
+      <span className="og-thumb">
+        <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
+        <span className="og-thumb-play" aria-hidden="true"><Play size={14} fill="currentColor" strokeWidth={0} /></span>
+      </span>
+      <span className="og-song-text">
+        <span className="og-song-title">{song.title}</span>
+        <span className="og-song-artist">{song.artist}</span>
+        {size === "md" && <span className="og-song-note">{song.note}</span>}
+        <span className="og-meta">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
+      </span>
+    </a>
   );
 }
 

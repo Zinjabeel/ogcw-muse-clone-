@@ -1,27 +1,28 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import centralCeePhoto from "../assets/central-cee.jpg";
-import drakePhoto from "../assets/drake.jpg";
-import vedanPhoto from "../assets/vedan.jpg";
-import musicHero from "../assets/ogcw-hero-music.jpg";
+import { article, LIVE } from "@/data/content";
 
-// Home hero, set like a magazine cover rather than a carousel: one cover
-// story in a large serif headline, the portrait dissolving into the black on
-// the right, a faint stage-light glow and film grain for atmosphere, and an
-// "Also on OGCW" rail along the bottom. Motion is kept natural: the headline
-// is revealed line by line on load, and on scroll the photo drifts slower
-// than the text (CSS scroll-driven animation where supported).
+// Home hero, option 2 in the hero switcher, set like a magazine cover rather
+// than a carousel: one cover story in a large serif headline, the photo
+// dissolving into the page on the right, a faint stage-light glow and film
+// grain for atmosphere, and an "Also on OGCW" rail along the bottom. The
+// headline is revealed line by line on load, and on scroll the photo drifts
+// slower than the text (CSS scroll-driven animation where supported).
 // TODO: the cover story and rail will come from the admin panel.
 
-// TODO: fill in the real date, venue and ticket link once the concert is confirmed.
-const DRAKE_TICKETS = "https://www.ticketmaster.com/search?q=drake";
+const cover = article("taylor-swift-the-life-of-a-showgirl-the-encore");
 
 type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
 
+const railStory = (slug: string): RailItem => {
+  const story = article(slug);
+  return { kicker: story.kicker, title: story.title, meta: story.read, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug };
+};
+
 const rail: RailItem[] = [
-  { kicker: "Live", title: "Drake, live in concert", meta: "Date TBA · Tickets", image: drakePhoto, pos: "50% 20%", live: true },
-  { kicker: "New voices", title: "Vedan and the reach of regional rap", meta: "5 min read", image: vedanPhoto, pos: "50% 30%", slug: "vedan-and-the-reach-of-regional-rap" },
-  { kicker: "Nightlife", title: "The listening bars changing nightlife", meta: "6 min read", image: musicHero, pos: "40% 40%", slug: "the-listening-bars-changing-nightlife" },
+  { kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true },
+  railStory("gta-vi-countdown"),
+  railStory("z-event-2026-final-edition"),
 ];
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
@@ -39,7 +40,7 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
     </>
   );
   return item.live ? (
-    <a className="cover-rail-item" href={DRAKE_TICKETS} target="_blank" rel="noopener noreferrer">{inner}</a>
+    <a className="cover-rail-item" href={LIVE.url} target="_blank" rel="noopener noreferrer">{inner}</a>
   ) : (
     <Link className="cover-rail-item" to="/news/$slug" params={{ slug: item.slug ?? "" }}>{inner}</Link>
   );
@@ -51,28 +52,23 @@ export function HeroCover() {
       <div className="cover-glow" aria-hidden="true" />
 
       <figure className="cover-photo">
-        <img src={centralCeePhoto} alt="Central Cee on stage in a monogrammed knit vest and a cap covered in flag patches" />
+        <img src={cover.photo.src} alt={cover.photo.alt} style={{ objectPosition: "50% 45%" }} />
       </figure>
-      <p className="cover-credit">Central Cee · Photo: 200izo, CC BY-SA 4.0</p>
+      <p className="cover-credit">Taylor Swift, The Eras Tour · Photo: {cover.photo.credit}</p>
 
       <div className="cover-inner">
-        {/* The date lives in the OGCW News masthead just below */}
-        <div className="cover-top">
-          <p>Welcome to One Great Culture World</p>
-        </div>
-
         <div className="cover-copy">
           <p className="cover-kicker">Cover story · Music</p>
           <h1 id="cover-title" className="cover-title">
-            <span className="cover-line"><span>Central Cee and the</span></span>
-            <span className="cover-line"><span>global <em>rise</em> of UK rap</span></span>
+            <span className="cover-line"><span>Taylor Swift’s Showgirl</span></span>
+            <span className="cover-line"><span>gets an encore</span></span>
           </h1>
-          <p className="cover-deck">From “Sprinter” to “Band4Band”, how the West London rapper carried British drill from the estate to the world stage.</p>
+          <p className="cover-deck">{cover.deck}</p>
           <div className="cover-cta">
-            <Link to="/news/$slug" params={{ slug: "central-cee-and-the-global-rise-of-uk-rap" }} className="cover-link">
+            <Link to="/news/$slug" params={{ slug: cover.slug }} className="cover-link">
               Read the cover story <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
             </Link>
-            <span className="cover-meta">7 min read</span>
+            <span className="cover-meta">{cover.read}</span>
           </div>
         </div>
 

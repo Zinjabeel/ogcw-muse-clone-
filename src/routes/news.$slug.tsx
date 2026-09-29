@@ -120,6 +120,16 @@ function ArticlePage() {
                 <BodyBlock key={index} block={block} first={index === firstParagraph} />
               ))}
               <p className="og-signoff">{story.author} for OGCW</p>
+              {story.sources.length > 0 && (
+                <div className="og-sources">
+                  <h2 className="og-sources-title">Sources</h2>
+                  <ul>
+                    {story.sources.map((source) => (
+                      <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <aside className="og-article-aside" aria-labelledby="aside-title">
               <p id="aside-title" className="og-aside-title">Most read</p>

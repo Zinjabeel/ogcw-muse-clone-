@@ -8,18 +8,22 @@ import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow
 import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
 
-// Header navigation. Between 1024 and 1279px there isn’t room for all eight,
-// so Trends, Blog and About move into "More" (wide: true marks them).
-const nav = [
-  { label: "News", to: "/news" },
-  { label: "Music", to: "/music" },
-  { label: "Culture", to: "/culture" },
-  { label: "Originals", to: "/originals" },
-  { label: "Shop", to: "/shop" },
-  { label: "Trends", to: "/trends", wide: true },
-  { label: "Blog", to: "/blog", wide: true },
-  { label: "About", to: "/about", wide: true },
-] as const;
+// Header navigation. The sections always show; Originals and Shop join them
+// from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
+// those widths they sit in "More".
+type Tier = "all" | "mid" | "wide";
+const nav: { label: string; to: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about"; tier: Tier }[] = [
+  { label: "News", to: "/news", tier: "all" },
+  { label: "Music", to: "/music", tier: "all" },
+  { label: "Games", to: "/games", tier: "all" },
+  { label: "Streaming", to: "/streaming", tier: "all" },
+  { label: "Culture", to: "/culture", tier: "all" },
+  { label: "Originals", to: "/originals", tier: "mid" },
+  { label: "Shop", to: "/shop", tier: "mid" },
+  { label: "Trends", to: "/trends", tier: "wide" },
+  { label: "Blog", to: "/blog", tier: "wide" },
+  { label: "About", to: "/about", tier: "wide" },
+];
 
 const more = [
   { label: "Explore", note: "Search, trending and reading lists", to: "/explore" },
@@ -50,21 +54,21 @@ function MoreMenu({ pathname }: { pathname: string }) {
     return () => { document.removeEventListener("pointerdown", onPointer); document.removeEventListener("keydown", onKey); };
   }, [open]);
 
-  // Explore and the info pages always live in More; Trends, Blog and About
-  // only below 1280px, so those light More up on narrow screens only
+  // Explore and the info pages always live in More; the mid and wide links
+  // only on narrower screens, so they light More up only there
   const active = isCurrent(pathname, "/explore") || pathname.startsWith("/info/");
-  const activeNarrow = nav.some((item) => "wide" in item && isCurrent(pathname, item.to));
+  const currentTier = nav.find((item) => isCurrent(pathname, item.to))?.tier;
 
   return (
     <div ref={root} className="nav-more">
-      <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""} ${activeNarrow ? "nav-more-narrow-active" : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
+      <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""} ${currentTier && currentTier !== "all" ? `nav-more-${currentTier}-active` : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
         More <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
         <div id="nav-more-menu" className="nav-more-menu">
           <ul className="nav-more-wide">
-            {nav.filter((item) => "wide" in item).map((item) => (
-              <li key={item.to}><Link to={item.to} className="nav-more-link">{item.label}</Link></li>
+            {nav.filter((item) => item.tier !== "all").map((item) => (
+              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} className="nav-more-link">{item.label}</Link></li>
             ))}
           </ul>
           <ul>
@@ -116,7 +120,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`nav-link ${"wide" in item ? "nav-link-wide" : ""} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
+                  className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
                   aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
                 >
                   {item.label}

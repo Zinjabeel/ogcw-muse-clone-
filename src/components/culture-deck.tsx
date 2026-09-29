@@ -87,9 +87,9 @@ export function CultureDeck() {
 
   return (
     <section ref={section} className="deck" aria-labelledby="deck-title">
-      <p className="deck-badge">News · Music · Culture · Originals · Shop</p>
+      <p className="deck-badge">News · Music · Games · Streaming · Culture · Shop</p>
       <h3 id="deck-title" className="deck-title">Culture that<br /><em>moves with you.</em></h3>
-      <p className="deck-sub">Stories, Originals and drops from across music, style and culture. Pick a door below and start anywhere.</p>
+      <p className="deck-sub">Stories, streams and drops from across music, games and culture. Pick a door below and start anywhere.</p>
       <div className="deck-cta">
         <Link to="/news" className="deck-btn deck-btn-primary">Browse the news <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" /></Link>
         <Link to="/explore" className="deck-btn deck-btn-secondary">Explore OGCW</Link>

@@ -1,26 +1,36 @@
-// OGCW content library: every story, Originals episode and shop on the site.
-// Pages, the home page, the header menu, the drawer, search and the footer all
-// read from here, so a story added once shows up everywhere it should.
+// OGCW content library: every story, Originals episode, streamer, song and
+// shop on the site. Pages, the home page, the header menu, the drawer, search
+// and the footer all read from here, so a story added once shows up
+// everywhere it should.
+// Stories are real news from September 2026, written in OGCW's own words,
+// each with the reporting it is based on listed under "sources".
 // TODO: this becomes the admin panel / CMS later.
-import centralCeePhoto from "../assets/central-cee.jpg";
-import davePhoto from "../assets/dave.jpg";
-import styleHero from "../assets/ogcw-hero-style.jpg";
-import musicHero from "../assets/ogcw-hero-music.jpg";
-import designHero from "../assets/ogcw-hero-design.jpg";
-import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
-import vedanPhoto from "../assets/vedan.jpg";
-import cartiPhoto from "../assets/playboi-carti.jpg";
-import rogaPhoto from "../assets/roga-roga.jpg";
-import drakePhoto from "../assets/drake.jpg";
+import taylorPhoto from "../assets/news/taylor-swift-eras-london.jpg";
+import madonnaPhoto from "../assets/news/madonna-celebration-tour.jpg";
+import btsSwimPhoto from "../assets/news/bts-arirang-paris-swim.jpg";
+import btsStadiumPhoto from "../assets/news/bts-arirang-paris-stadium.jpg";
+import tgsPhoto from "../assets/news/tokyo-game-show-2026.jpg";
+import blizzconPhoto from "../assets/news/blizzcon-anaheim.jpg";
+import miamiPhoto from "../assets/news/miami-beach-neon.jpg";
+import zeratorPhoto from "../assets/news/zerator-zevent.jpg";
+import twitchconPhoto from "../assets/news/twitchcon-block-party.jpg";
+import runwayPhoto from "../assets/news/runway-mcqueen.jpg";
+import wylePhoto from "../assets/news/noah-wyle.jpg";
+import seehornPhoto from "../assets/news/rhea-seehorn.jpg";
+import barbicanPhoto from "../assets/news/barbican-lakeside.jpg";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
+export type Source = { name: string; url: string };
 
-export type SectionId = "music" | "culture";
+export type SectionId = "music" | "games" | "streaming" | "culture";
 export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
-  music: { label: "Music", intro: "Rap, rumba and everything between: the artists, scenes and records moving culture right now." },
-  culture: { label: "Culture", intro: "Style, design, nightlife, architecture and print, and the people who make them matter." },
+  music: { label: "Music", intro: "New releases, tours and the awards nights everyone is talking about." },
+  games: { label: "Games", intro: "Launches, sales and the showcases setting up the next few years of play." },
+  streaming: { label: "Streaming", intro: "The creators, records and charity marathons that live on Twitch, YouTube and Kick." },
+  culture: { label: "Culture", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
 };
+export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 
 export type Block =
   | { type: "p"; text: string }
@@ -39,210 +49,306 @@ export type Article = {
   read: string;
   photo: Photo;
   body: Block[];
+  sources: Source[];
 };
 
 const unsplash = (id: string, w = 1200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
+export const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+export const youtubeUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
-export const TICKETS = { drake: "https://www.ticketmaster.com/search?q=drake" }; // TODO: real ticket link
-export { drakePhoto };
-
-// ---------------------------------------------------------------- Stories
+// ---------------------------------------------------------------- Stories (newest first)
 
 export const ARTICLES: Article[] = [
   {
-    slug: "central-cee-and-the-global-rise-of-uk-rap",
-    section: "music",
-    kicker: "Music",
-    title: "Central Cee and the global rise of UK rap",
-    deck: "From “Sprinter” to “Band4Band”, how the West London rapper carried British drill from the estate to the world stage.",
-    author: "Jonah Reyes",
-    date: "2026-09-25",
-    read: "7 min read",
-    photo: { src: centralCeePhoto, alt: "Central Cee on stage in a monogrammed knit vest and a cap covered in flag patches", credit: "200izo, CC BY-SA 4.0", crop: { pos: "50% 18%" } },
-    body: [
-      { type: "p", text: "There was a time when a UK rap record crossing the Atlantic felt like a novelty, a one-off that proved the rule. Central Cee has spent the last few years quietly taking that rule apart. The West London rapper built his audience the modern way: short, sharp verses, a steady run of releases and a sense of timing that turned clips into moments." },
-      { type: "p", text: "His sound comes out of UK drill, but it has never been bound by it. The flows are conversational, the hooks are built for repetition and the references travel. That combination is why a line recorded in London can be quoted in Paris, Lagos and Toronto in the same week." },
-      { type: "h2", text: "The records that changed the scale" },
-      { type: "p", text: "“Sprinter”, his 2023 collaboration with Dave, became one of the biggest British rap singles in years, a song that stayed at the top of the charts long after the first wave of hype had passed. A year later, “Band4Band” with Lil Baby put him in front of an American audience that had rarely made room for UK voices." },
-      { type: "quote", text: "His records never tried to sound American. They sound like London, and the world listens anyway." },
-      { type: "image", photo: { src: davePhoto, alt: "Dave performing, eyes closed, holding the microphone close", crop: { pos: "50% 25%" } }, caption: "Dave, Central Cee’s partner on “Sprinter”, one of the biggest British rap singles in years." },
-      { type: "p", text: "What makes his rise feel significant is what it opened up for others. Promoters book differently, labels listen differently, and younger artists can see a route that doesn’t ask them to soften their accent or their subject matter." },
-      { type: "h2", text: "What comes next" },
-      { type: "p", text: "The question now is less whether UK rap can travel and more what it does once it arrives. For a generation raised on his verses, the answer looks obvious: keep the specifics, keep the slang, and let the world catch up." },
-    ],
-  },
-  {
-    slug: "vedan-and-the-reach-of-regional-rap",
-    section: "music",
-    kicker: "New voices",
-    title: "Vedan and the reach of regional rap",
-    deck: "How a Malayalam rapper from Kerala turned local stories into a voice heard far beyond the region.",
-    author: "Sana Lind",
-    date: "2026-09-24",
-    read: "5 min read",
-    photo: { src: vedanPhoto, alt: "Vedan performing under red stage lights", crop: { pos: "50% 30%" } },
-    body: [
-      { type: "p", text: "Regional rap used to be treated as a footnote to the scenes in the big cities. Vedan is one of the artists making that framing look out of date. Rapping in Malayalam, the Kerala artist writes about the lives around him with a directness that needs no translation to land." },
-      { type: "p", text: "His verses return again and again to labour, caste and the people who are usually left out of the story. It’s protest music in the oldest sense, but delivered with the energy of a festival headliner." },
-      { type: "quote", text: "The more specific the story, the further it seems to travel." },
-      { type: "h2", text: "From shares to stages" },
-      { type: "p", text: "His early independent releases spread through shares and word of mouth long before any industry push. Crowds now know every line, and the shows have the feeling of a community gathering as much as a concert." },
-      { type: "p", text: "What Vedan proves is simple: rap doesn’t need a single centre any more. A voice from Kerala can shape the conversation as much as one from London or Atlanta, as long as it has something true to say." },
-    ],
-  },
-  {
-    slug: "playboi-carti-at-clout-festival",
+    slug: "bts-arirang-world-tour-latin-america",
     section: "music",
     kicker: "Live",
-    title: "Playboi Carti at Clout Festival: a visual dispatch",
-    deck: "Stage design, movement and a crowd operating at full intensity.",
+    title: "BTS take the Arirang World Tour to Latin America",
+    deck: "After a Song of the Year win at the VMAs, the stadium tour heads to Bogotá, Lima, Santiago, La Plata and São Paulo through October.",
+    author: "Nia Vale",
+    date: "2026-09-29",
+    read: "3 min read",
+    photo: { src: btsSwimPhoto, alt: "BTS performing “Swim” to a full stadium in Paris", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 45%" } },
+    body: [
+      { type: "p", text: "BTS head to South America this week as the Arirang World Tour, their first since the members completed military service, moves into its Latin American leg. It opens at Estadio El Campín in Bogotá on 2 and 3 October." },
+      { type: "p", text: "From there the tour plays Lima from 7 to 10 October, Santiago from 14 to 17 October, La Plata outside Buenos Aires from 21 to 24 October and São Paulo’s Estádio MorumBIS from 28 to 31 October. It then crosses to Asia, starting in Kaohsiung, Taiwan, on 19 November." },
+      { type: "h2", text: "A tour built around “Swim”" },
+      { type: "p", text: "The all-stadium run began in Goyang, South Korea, on 9 April and covers 88 shows in 34 cities across 23 countries. Its centrepiece is “Swim”, the lead single from the album Arirang, which debuted at number one on the Billboard Hot 100 and on Sunday won Song of the Year and Best K-Pop at the MTV VMAs." },
+      { type: "quote", text: "Eighty-eight shows, 34 cities, one song leading the way." },
+      { type: "image", photo: { src: btsStadiumPhoto, alt: "The stadium in Paris filling up before BTS take the stage", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 60%" } }, caption: "The Paris stop of the Arirang World Tour on 17 July." },
+      { type: "p", text: "After the Asia-Pacific dates, including Thailand, Malaysia, Singapore and Indonesia in December and Australia in February, the tour finishes in the Philippines in March 2027." },
+    ],
+    sources: [
+      { name: "Wikipedia: Arirang World Tour", url: "https://en.wikipedia.org/wiki/Arirang_World_Tour" },
+      { name: "Wikipedia: Swim (BTS song)", url: "https://en.wikipedia.org/wiki/Swim_(BTS_song)" },
+    ],
+  },
+  {
+    slug: "gta-vi-countdown",
+    section: "games",
+    kicker: "Countdown",
+    title: "Fifty-one days to GTA VI: what we know before launch",
+    deck: "Rockstar’s return to Vice City is on track for 19 November on PS5 and Xbox Series X|S. Pre-orders are open; a PC date is not.",
+    author: "Jonah Reyes",
+    date: "2026-09-29",
+    read: "3 min read",
+    photo: { src: miamiPhoto, alt: "The red neon sign of the Boulevard Hotel in Miami Beach at night", credit: "Radomianin, public domain", crop: { pos: "50% 45%" } },
+    body: [
+      { type: "p", text: "Grand Theft Auto VI is on track for 19 November 2026 on PlayStation 5 and Xbox Series X|S, and pre-orders are open on both consoles’ digital stores." },
+      { type: "p", text: "The game takes the series back to Leonida, Rockstar’s version of Florida, with Vice City at its centre and two leads, Jason and Lucia, introduced in the second trailer in May 2025." },
+      { type: "h2", text: "What is still missing" },
+      { type: "p", text: "There is still no PC date. Take-Two has said Rockstar will announce other platforms in its own time, and the game will not arrive on Game Pass on day one." },
+      { type: "quote", text: "No third trailer yet, and no PC date either." },
+      { type: "p", text: "Rockstar has not announced a third trailer. If it follows the pattern of past launches, a launch trailer should arrive in the week before release, around the time pre-loads open." },
+    ],
+    sources: [
+      { name: "PCGamesN: GTA 6 release date and latest news", url: "https://www.pcgamesn.com/grand-theft-auto-vi/gta-6-release-date-setting-map-characters-gameplay-trailers" },
+      { name: "Beebom: When will GTA 6 Trailer 3 come out?", url: "https://beebom.com/when-will-gta-6-trailer-3-come-out/" },
+    ],
+  },
+  {
+    slug: "vmas-2026-winners",
+    section: "music",
+    kicker: "Awards",
+    title: "VMAs 2026: Swift takes Video of the Year as Madonna wins seven",
+    deck: "Madonna was named Artist of the Year, BTS won Song of the Year and the show drew its biggest audience since 2015.",
+    author: "Jonah Reyes",
+    date: "2026-09-28",
+    read: "4 min read",
+    photo: { src: madonnaPhoto, alt: "Madonna on stage during The Celebration Tour, dancers and screens around her", credit: "Ronald Woan, CC BY 4.0", crop: { pos: "50% 40%" } },
+    body: [
+      { type: "p", text: "The 2026 MTV Video Music Awards went to the two biggest names in the room. Taylor Swift won Video of the Year for “The Fate of Ophelia” on Sunday night at the Peacock Theater in Los Angeles, while Madonna left with seven awards from 13 nominations, including Artist of the Year." },
+      { type: "p", text: "Snoop Dogg hosted. The broadcast drew 8.43 million viewers, the most-watched VMAs since 2015." },
+      { type: "h2", text: "The rest of the winners" },
+      { type: "p", text: "BTS won Song of the Year and Best K-Pop for “Swim”. Lisa took Best Pop for “Dream” with Kentaro Sakaguchi, Cardi B and Kehlani won Best Hip-Hop for “Safe”, and Bad Bunny won Best Latin for “Nuevayol”. Sienna Spiro was named Best New Artist." },
+      { type: "quote", text: "Madonna’s 13 nominations matched Lady Gaga’s record from 2010." },
+      { type: "h2", text: "Honours and a premiere" },
+      { type: "p", text: "Swift also won Best Direction for “Opalite” and received the first MTV VMA Artist Director Honors. Her video for “Patient Zero”, starring Colin Farrell and Dakota Johnson, premiered during the show. Nirvana received the Video Vanguard Award." },
+    ],
+    sources: [
+      { name: "Wikipedia: 2026 MTV Video Music Awards", url: "https://en.wikipedia.org/wiki/2026_MTV_Video_Music_Awards" },
+      { name: "The Hollywood Reporter: MTV VMAs 2026 winners list", url: "https://www.hollywoodreporter.com/lists/mtv-vmas-2026-winners-list/" },
+    ],
+  },
+  {
+    slug: "paris-fashion-week-ss27",
+    section: "culture",
+    kicker: "Fashion",
+    title: "Paris Fashion Week opens its biggest season: the shows to watch",
+    deck: "Around 100 houses show spring/summer 2027 between 28 September and 6 October, with debuts at Courrèges and Carven.",
+    author: "Sana Lind",
+    date: "2026-09-28",
+    read: "3 min read",
+    photo: { src: runwayPhoto, alt: "Models walking the runway at an Alexander McQueen show, seen from behind", credit: "Christopher Macsurak, CC BY 2.0", crop: { pos: "50% 35%" } },
+    body: [
+      { type: "p", text: "Paris Fashion Week opened on Monday 28 September with around 100 houses on the spring/summer 2027 calendar, roughly two-thirds of them staging runway shows. Belgian designer Julie Kegels opened the week." },
+      { type: "p", text: "Tuesday is the heaviest day of the schedule, with Christian Dior in the afternoon and Saint Laurent closing the evening." },
+      { type: "h2", text: "Two debuts" },
+      { type: "p", text: "The season’s newcomers show midweek. Drew Henry, the South African designer who previously worked at Burberry and JW Anderson, presents his first Courrèges collection on Wednesday 30 September. Kai Nesselrath, formerly head of womenswear design at Saint Laurent, makes his Carven debut on Thursday 1 October." },
+      { type: "quote", text: "Two first collections, and a week that ends with Louis Vuitton." },
+      { type: "p", text: "Hermès, Givenchy, Chloé, Miu Miu and Maison Margiela are also on the calendar. Louis Vuitton closes the week on Tuesday 6 October." },
+    ],
+    sources: [
+      { name: "Luxury.it: Paris Fashion Week SS27", url: "https://luxury.it/fashion/paris-fashion-week-ss27/" },
+      { name: "Fédération de la Haute Couture et de la Mode: Paris Fashion Week", url: "https://www.fhcm.paris/en/paris-fashion-week" },
+    ],
+  },
+  {
+    slug: "sneaker-drops-late-september-2026",
+    section: "culture",
+    kicker: "Sneakers",
+    title: "This week in sneakers: Bad Bunny’s BadBo, a Harden for Rayasianboy and Nike’s Hyperslides",
+    deck: "A busy end to the month, from Jordan retros to a recovery slide made with Hyperice.",
+    author: "Jonah Reyes",
+    date: "2026-09-26",
+    read: "2 min read",
+    photo: { src: unsplash("photo-1556906781-9a412961c28c", 1600), alt: "A pair of Air Jordan 1 sneakers dangling over the edge of a rooftop", credit: "Unsplash", crop: { pos: "50% 55%" } },
+    body: [
+      { type: "p", text: "September ends with one of the busiest release weeks of the year. On Friday 25 September the Air Jordan 5 “Sunset” arrived alongside Rayasianboy’s adidas Harden Vol. 10 “RUEI”." },
+      { type: "p", text: "Saturday brought Bad Bunny’s adidas BadBo 1.0 in “Night Navy”, the Air Jordan 1 Low OG “Last Dance at the Garden” and a Mowalola x Air Jordan 14." },
+      { type: "h2", text: "Still to come" },
+      { type: "p", text: "On Tuesday 29 September Nike reissues the Air Bakin OG in “Varsity Red” and releases the Hyperslides, a recovery slide made with Hyperice. Earlier in the month, Anthony Edwards’ adidas AE 3 made its debut on 18 September." },
+      { type: "p", text: "Want the classics instead? The OGCW Shop has our picks from Nike, Adidas, StockX and Uniqlo." },
+    ],
+    sources: [
+      { name: "House of Heat: September 2026 sneaker releases", url: "https://houseofheat.co/upcoming-sneaker-releases-september-2026" },
+    ],
+  },
+  {
+    slug: "taylor-swift-the-life-of-a-showgirl-the-encore",
+    section: "music",
+    kicker: "New music",
+    title: "Taylor Swift adds four songs with The Life of a Showgirl: The Encore",
+    deck: "“Patient Zero”, “Cleveland!”, “Pink Clouding” and “Babylon” extend last year’s record-breaking album.",
+    author: "Sana Lind",
+    date: "2026-09-25",
+    read: "3 min read",
+    photo: { src: taylorPhoto, alt: "A packed stadium lit orange during Taylor Swift’s Eras Tour in London", credit: "BrigidLIS, CC BY 4.0", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Taylor Swift has gone back to The Life of a Showgirl with four new songs. The Encore, released on Friday 25 September, extends last year’s album with “Patient Zero”, “Cleveland!”, “Pink Clouding” and “Babylon”." },
+      { type: "p", text: "Swift wrote the new tracks with Max Martin and Shellback, the Swedish producers behind the original album, during a trip to Sweden to celebrate its success. The Life of a Showgirl had the biggest first week of any album in history." },
+      { type: "h2", text: "The single" },
+      { type: "p", text: "“Patient Zero” leads the set. The song is addressed to the woman now dating Swift’s ex, and its video, starring Colin Farrell and Dakota Johnson, premiered during Sunday’s MTV VMAs, where Swift also won Video of the Year." },
+      { type: "quote", text: "Four songs, written in Sweden, released with a week’s notice." },
+      { type: "p", text: "Swift first mentioned a new song on 22 September and announced the full encore less than a day later." },
+    ],
+    sources: [
+      { name: "UPI: Taylor Swift releases “Showgirl” encore with new single “Patient Zero”", url: "https://www.upi.com/Entertainment_News/Music/2026/09/25/taylor-swift-showgirl-encore-patient-zero/7621790339274/" },
+      { name: "Billboard: All 4 new songs on The Encore ranked", url: "https://www.billboard.com/lists/taylor-swift-life-of-showgirl-encore-tracks-ranked/" },
+    ],
+  },
+  {
+    slug: "marvels-wolverine-sales",
+    section: "games",
+    kicker: "Launch",
+    title: "Marvel’s Wolverine sells 1.9 million in three days despite split reviews",
+    deck: "Insomniac’s single-player action game topped the UK chart after its 15 September launch on PS5.",
     author: "Nia Vale",
     date: "2026-09-22",
-    read: "4 min read",
-    photo: { src: cartiPhoto, alt: "Playboi Carti performing in a red jacket through stage smoke", crop: { pos: "50% 35%" } },
+    read: "3 min read",
+    photo: { src: unsplash("photo-1753297514865-016ed7975966", 1600), alt: "A PlayStation 5 controller on a black surface", credit: "User_Pascal, Unsplash", crop: { pos: "50% 50%" } },
     body: [
-      { type: "p", text: "Some shows are about songs. A Playboi Carti set is about atmosphere. By the time the smoke has settled over the front rows, the crowd has already decided how the night is going to go, and it isn’t gently." },
-      { type: "p", text: "The palette is deliberate: red light, heavy haze, black clothing. It’s the visual language Carti has refined since “Whole Lotta Red” and carried through the Opium world he built around it. On stage it reads less like a look and more like weather." },
-      { type: "quote", text: "It reads less like a look and more like weather." },
-      { type: "h2", text: "A crowd that performs back" },
-      { type: "p", text: "What stays with you is the audience. The energy moves in waves from the barrier to the back of the field, and every drop becomes a shared event. Few artists get a crowd to perform back at them this completely." },
-      { type: "p", text: "Carti rarely explains himself, and he doesn’t need to here. The show is the statement: loud, abrasive, carefully designed and, for the people in front of him, completely unforgettable." },
+      { type: "p", text: "Marvel’s Wolverine sold around 1.9 million copies in its first three days on PlayStation 5, bringing in more than $130 million after its launch on 15 September." },
+      { type: "p", text: "The Insomniac Games title opened at number one on the UK physical chart for the week ending 20 September, and at number one in Switzerland." },
+      { type: "h2", text: "Critics were less sure" },
+      { type: "p", text: "Reviews averaged 76 on Metacritic, and 66 percent of critics on OpenCritic recommended it. Praise went to the performances and the character at its centre; the complaints were about combat that wears thin and a messy story. Insomniac has said it is listening to the feedback." },
+      { type: "quote", text: "Strong sales, softer reviews." },
+      { type: "p", text: "The game costs $69.99, or $79.99 for the Digital Deluxe Edition." },
+    ],
+    sources: [
+      { name: "Wikipedia: Marvel’s Wolverine", url: "https://en.wikipedia.org/wiki/Marvel's_Wolverine" },
     ],
   },
   {
-    slug: "dave-and-the-art-of-the-long-verse",
-    section: "music",
-    kicker: "Profile",
-    title: "Dave and the art of the long verse",
-    deck: "In an era of thirty-second clips, the South London rapper keeps proving that patience can be a hook.",
-    author: "Jonah Reyes",
-    date: "2026-09-20",
-    read: "6 min read",
-    photo: { src: davePhoto, alt: "Dave performing, eyes closed, holding the microphone close", crop: { pos: "50% 25%" } },
-    body: [
-      { type: "p", text: "Most rap is now written for the first ten seconds. Dave writes for the whole song. The South London rapper has built one of the most respected catalogues in British music by trusting that listeners will stay with him, and they do." },
-      { type: "p", text: "“Psychodrama”, his 2019 debut album, won the Mercury Prize and set the template: dense, personal, structured almost like a therapy session. His performance of “Black” at the 2020 BRIT Awards remains one of the most talked-about moments the ceremony has seen." },
-      { type: "quote", text: "He trusts that listeners will stay with him, and they do." },
-      { type: "h2", text: "Range without compromise" },
-      { type: "p", text: "The same artist who writes seven-minute confessionals also made “Sprinter” with Central Cee, one of the biggest UK rap singles of the decade. The range isn’t a contradiction. It’s the point: craft first, then scale." },
-      { type: "image", photo: { src: centralCeePhoto, alt: "Central Cee on stage in a cap covered in flag patches", credit: "200izo, CC BY-SA 4.0", crop: { pos: "50% 18%" } }, caption: "Central Cee, who made “Sprinter” with Dave." },
-      { type: "p", text: "In a feed built for speed, Dave’s career is a reminder that depth still sells. The long verse isn’t dead. It just needs someone willing to earn every bar." },
-    ],
-  },
-  {
-    slug: "congolese-rumbas-second-life",
-    section: "culture",
-    kicker: "Sound & heritage",
-    title: "Congolese rumba’s second life",
-    deck: "From Kinshasa and Brazzaville to dance floors everywhere, the music UNESCO recognised as world heritage is finding a new generation.",
+    slug: "tokyo-game-show-2026-typhoon",
+    section: "games",
+    kicker: "Events",
+    title: "Typhoon Dujuan cuts Tokyo Game Show’s first five-day run short",
+    deck: "The 30th-anniversary show cancelled its final day, the 21 September public holiday, as the storm approached.",
     author: "Sana Lind",
-    date: "2026-09-19",
-    read: "6 min read",
-    photo: { src: rogaPhoto, alt: "Roga Roga singing on stage under blue light with his band", crop: { pos: "50% 16%" } }, // high crop keeps a fan's phone out of frame
+    date: "2026-09-21",
+    read: "2 min read",
+    photo: { src: tgsPhoto, alt: "Crowds in the halls of Tokyo Game Show 2026 at Makuhari Messe", credit: "Syced, CC0", crop: { pos: "50% 60%" } },
     body: [
-      { type: "p", text: "Long before Afrobeats and amapiano filled global playlists, Congolese rumba was already one of Africa’s great exports. Born on both banks of the Congo River, it carried guitars, horns and harmonies from Kinshasa and Brazzaville to clubs across the continent and beyond." },
-      { type: "p", text: "In 2021, UNESCO added Congolese rumba to its list of the Intangible Cultural Heritage of Humanity, a joint recognition for both Congos. It was a formal nod to something audiences had known for decades: this music is a shared inheritance." },
-      { type: "quote", text: "This music was never nostalgia. It was always a living conversation." },
-      { type: "h2", text: "Why it sounds new again" },
-      { type: "p", text: "Producers are sampling the guitar lines, DJs are slipping classic tracks between modern sets, and a younger audience is discovering bandleaders like Roga Roga of Extra Musica through clips before they ever hear a full record." },
-      { type: "p", text: "Heritage status can freeze a tradition in amber. Rumba is doing the opposite: staying on the dance floor, where it has always done its best work." },
+      { type: "p", text: "Tokyo Game Show 2026 was meant to be the longest in the event’s history: five days at Makuhari Messe in Chiba for its 30th anniversary, running through the Monday public holiday on 21 September." },
+      { type: "p", text: "It ended a day early. With Typhoon Dujuan, Japan’s Typhoon No. 25, approaching the Kanto region, the organisers cancelled Monday on safety grounds and refunded tickets for that day. Sunday went ahead as planned." },
+      { type: "h2", text: "Who it affected" },
+      { type: "p", text: "Sony cancelled the PlayStation hands-on demos and streams scheduled for the final day, and exhibitors who had booked booths for all five days were left waiting to hear about compensation." },
+      { type: "quote", text: "The show was extended to five days because of the holiday. The holiday is the day it lost." },
+    ],
+    sources: [
+      { name: "Kotaku: Typhoon Dujuan forces Tokyo Game Show 2026 to shut down a day early", url: "https://kotaku.com/typhoon-dujuan-forces-tokyo-game-show-2026-to-shut-down-a-day-early-2000735879" },
+      { name: "Anime News Network: Tokyo Game Show 2026 cancels final day", url: "https://www.animenewsnetwork.com/news/2026-09-19/tokyo-game-show-2026-cancels-final-day-on-monday-due-to-approaching-typhoon/.241974" },
     ],
   },
   {
-    slug: "the-listening-bars-changing-nightlife",
+    slug: "emmys-2026-winners",
     section: "culture",
-    kicker: "Nightlife",
-    title: "The listening bars changing nightlife",
-    deck: "Two hundred people, one sound system and no phones in the air: the rooms that put music back at the centre of the night.",
-    author: "Nia Vale",
-    date: "2026-09-18",
-    read: "6 min read",
-    photo: { src: musicHero, alt: "A singer under a single yellow spotlight in a packed club", crop: { pos: "40% 40%" } },
-    body: [
-      { type: "p", text: "The idea is almost too simple: a small room, a very good sound system and people who came to listen. Listening bars, a format rooted in Japanese jazz kissa culture, are spreading through cities that had forgotten nights could be this focused." },
-      { type: "p", text: "The rules are unwritten but understood. Conversations drop to a murmur when a record starts. The selector plays albums, not just singles. Nobody films the whole thing." },
-      { type: "quote", text: "Nobody films the whole thing, and that’s exactly why it feels special." },
-      { type: "h2", text: "A room, not a venue" },
-      { type: "p", text: "What these spaces sell isn’t exclusivity. It’s attention. In a culture where music is mostly background, a room built entirely around listening feels almost radical." },
-      { type: "image", photo: { src: editorialGrid, alt: "A DJ at the decks, record shelves behind her", crop: { pos: "0% 0%", zoom: 2.1 } }, caption: "The selector sets the pace: albums, not just singles." },
-      { type: "p", text: "The best ones double as incubators, giving new artists a crowd that actually hears them. That might be their biggest legacy: not the vinyl or the speakers, but the habit of paying attention." },
-    ],
-  },
-  {
-    slug: "independent-labels-reclaim-the-runway",
-    section: "culture",
-    kicker: "Style",
-    title: "Independent labels reclaim the runway",
-    deck: "A wave of independent labels is skipping the big houses and showing on its own terms, in car parks, basements and under bridges.",
-    author: "Sana Lind",
-    date: "2026-09-17",
-    read: "6 min read",
-    photo: { src: styleHero, alt: "A man in a long black coat under a bridge in the rain", crop: { pos: "62% 40%" } },
-    body: [
-      { type: "p", text: "The official fashion calendar still exists, but it’s no longer the only way in. A generation of independent labels is staging shows wherever the rent is cheapest and the atmosphere is right." },
-      { type: "p", text: "The results are rougher and more personal: casting from friends, soundtracks from local producers, collections sold directly to the people in the room. It’s fashion as a scene rather than an industry." },
-      { type: "quote", text: "It’s fashion as a scene rather than an industry." },
-      { type: "h2", text: "Small runs, loyal audiences" },
-      { type: "p", text: "Most of these labels produce in tiny quantities and sell out through communities that feel more like fan clubs than customer bases. Scarcity isn’t a marketing trick here. It’s the reality of making clothes without a backer." },
-      { type: "image", photo: { src: editorialGrid, alt: "A woman in a long leather coat walking through a crowded street", crop: { pos: "100% 0%", zoom: 2.1 } }, caption: "Clothes made to be worn in the street, not just shown on a stage." },
-      { type: "p", text: "Whether they grow or stay small, they’re already changing what a fashion week looks like: less spectacle, more signal." },
-    ],
-  },
-  {
-    slug: "objects-built-to-outlast-the-feed",
-    section: "culture",
-    kicker: "Design",
-    title: "Objects built to outlast the feed",
-    deck: "The designers treating sneakers, headphones and homeware as things to keep, not drops to flip.",
-    author: "Jonah Reyes",
-    date: "2026-09-16",
-    read: "4 min read",
-    photo: { src: designHero, alt: "A sneaker and headphones on a concrete plinth", crop: { pos: "50% 55%" } },
-    body: [
-      { type: "p", text: "Drop culture trained a generation to buy things for the moment they arrive. A growing group of designers is betting on the opposite: objects that are still good in ten years." },
-      { type: "p", text: "That means repairable parts, honest materials and forms that don’t depend on a trend. It also means fewer releases, which is a harder sell in a feed that rewards novelty." },
-      { type: "quote", text: "The most radical thing a product can do now is last." },
-      { type: "h2", text: "Design as a promise" },
-      { type: "p", text: "The designers we spoke to talk less about hype and more about responsibility: to the people who buy their work and to the materials it uses." },
-      { type: "p", text: "It’s slower, and it’s quieter. But in a market drowning in releases, restraint might be the loudest thing left." },
-    ],
-  },
-  {
-    slug: "why-brutalism-keeps-returning",
-    section: "culture",
-    kicker: "Architecture",
-    title: "Why brutalism keeps returning",
-    deck: "Concrete, once the most hated material in the city, has become a backdrop for a generation’s photographs, shoots and videos.",
+    kicker: "TV",
+    title: "Emmys 2026: The Pitt repeats, and Matthew Rhys wins twice",
+    deck: "Widow’s Bay took best comedy, DTF St. Louis best limited series, and Rhea Seehorn won her first Emmy.",
     author: "Nia Vale",
     date: "2026-09-15",
-    read: "8 min read",
-    photo: { src: editorialGrid, alt: "A brutalist concrete building against a grey sky", crop: { pos: "0% 100%", zoom: 2.1 } },
+    read: "3 min read",
+    photo: { src: wylePhoto, alt: "Noah Wyle smiling at his Hollywood Walk of Fame ceremony", credit: "Kevin Paul, CC BY 4.0", crop: { pos: "50% 30%" } },
     body: [
-      { type: "p", text: "Brutalist buildings were once shorthand for everything that went wrong with post-war cities. Now they’re the backdrop of choice for music videos, lookbooks and late-night photographs." },
-      { type: "p", text: "Part of it is visual: raw concrete photographs beautifully, especially at night. Part of it is ideological: these buildings were designed for the public, and that promise still means something." },
-      { type: "quote", text: "These buildings were designed for the public, and that promise still means something." },
-      { type: "h2", text: "Saving what’s left" },
-      { type: "p", text: "Preservation campaigns now draw people who weren’t born when the buildings went up. For them, brutalism isn’t nostalgia. It’s evidence that cities once thought bigger." },
-      { type: "p", text: "Whether the next generation of architecture learns from that ambition, or just borrows the aesthetic, is the real question." },
+      { type: "p", text: "The Pitt won Outstanding Drama Series for the second year running at the 78th Primetime Emmy Awards on 14 September, and Noah Wyle again won Lead Actor in a Drama Series." },
+      { type: "p", text: "Mariska Hargitay hosted the ceremony at the Peacock Theater in Los Angeles." },
+      { type: "h2", text: "The rest of the night" },
+      { type: "p", text: "Apple TV’s Widow’s Bay won Outstanding Comedy Series, and its star Matthew Rhys won Lead Actor in a Comedy Series. Rhys also won Lead Actor in a Limited Series for The Beast in Me. HBO’s DTF St. Louis was named Outstanding Limited or Anthology Series." },
+      { type: "image", photo: { src: seehornPhoto, alt: "Rhea Seehorn speaking on a convention panel", credit: "Gage Skidmore, CC BY-SA 2.0", crop: { pos: "55% 30%" } }, caption: "Rhea Seehorn won her first Emmy, for Pluribus." },
+      { type: "p", text: "Rhea Seehorn won Lead Actress in a Drama Series for Pluribus, her first Emmy. Jean Smart won again for Hacks, and Sally Field won Lead Actress in a Limited Series for Remarkably Bright Creatures." },
+    ],
+    sources: [
+      { name: "Wikipedia: 78th Primetime Emmy Awards", url: "https://en.wikipedia.org/wiki/78th_Primetime_Emmy_Awards" },
+      { name: "NPR: Emmys 2026, the complete list of winners", url: "https://www.npr.org/2026/09/14/nx-s1-5957565/emmys-2026-winners" },
     ],
   },
   {
-    slug: "a-new-generation-remakes-print",
-    section: "culture",
-    kicker: "Print",
-    title: "A new generation remakes print",
-    deck: "Zines, small-run magazines and risograph posters are selling out again, and not only to collectors.",
-    author: "Sana Lind",
-    date: "2026-09-14",
-    read: "5 min read",
-    photo: { src: editorialGrid, alt: "Two people working over pages in a print studio", crop: { pos: "100% 100%", zoom: 2.1 } },
+    slug: "blizzcon-2026-diablo-v-starcraft",
+    section: "games",
+    kicker: "Events",
+    title: "BlizzCon 2026: Diablo V for 2029, and StarCraft becomes an open-world shooter",
+    deck: "Blizzard looked years ahead in Anaheim, with a Netflix Diablo series and a new Overwatch hero for now.",
+    author: "Jonah Reyes",
+    date: "2026-09-13",
+    read: "3 min read",
+    photo: { src: blizzconPhoto, alt: "Fans outside the Anaheim Convention Center during BlizzCon", credit: "tofuprod, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
     body: [
-      { type: "p", text: "Print was supposed to be finished. Instead, small-run magazines and zines are selling out, and their makers are some of the most connected people online." },
-      { type: "p", text: "The appeal is permanence. A printed page can’t be edited after the fact or buried by an algorithm. It sits on a shelf and waits." },
-      { type: "quote", text: "A printed page can’t be buried by an algorithm." },
-      { type: "h2", text: "Made by hand, found by word of mouth" },
-      { type: "p", text: "Many of the new titles are made in shared studios, printed in runs of a few hundred and sold through the same communities they document." },
-      { type: "p", text: "It’s not a nostalgia trip. It’s a way of making something that lasts longer than a scroll." },
+      { type: "p", text: "Blizzard used the BlizzCon 2026 opening ceremony in Anaheim to look years ahead. Diablo V is in development for spring 2029, and a new StarCraft, an open-world shooter rather than a strategy game, is planned for spring 2030. Netflix is making an animated Diablo series." },
+      { type: "h2", text: "Sooner than that" },
+      { type: "p", text: "Diablo IV reached Nintendo Switch 2 on 15 September alongside its Season of Hell’s Legacy, with an Amazon class due in the first half of 2027. Overwatch revealed Doctrine, a vampire-inspired support hero, with reworks for Sombra and Roadhog in Season 5." },
+      { type: "quote", text: "A Diablo for 2029, a StarCraft for 2030 and a lot to play before then." },
+      { type: "p", text: "Heroes of the Storm gets a new hero, Xal’atath, on 28 September, and Hearthstone’s Reign of the Black Empire expansion lands on 20 October. World of Warcraft players get WoW: Forever on 4 November, with details of The Last Titan expansion promised for early 2027." },
+    ],
+    sources: [
+      { name: "Blizzard: Everything announced at the BlizzCon 2026 opening ceremony", url: "https://news.blizzard.com/en-us/article/24301453/everything-announced-at-blizzcon-2026-opening-ceremony" },
+      { name: "GameSpot: BlizzCon 2026 opening ceremony", url: "https://www.gamespot.com/articles/blizzcon-2026-opening-ceremony-all-the-biggest-announcements-and-games/" },
+    ],
+  },
+  {
+    slug: "wardogs-launch-theburntpeanut",
+    section: "streaming",
+    kicker: "Launch week",
+    title: "WARDOGS pulls 452,600 viewers at launch, with TheBurntPeanut out front",
+    deck: "The shooter’s early access release on 10 September became one of Twitch’s biggest game launches of the year.",
+    author: "Sana Lind",
+    date: "2026-09-11",
+    read: "2 min read",
+    photo: { src: youtubeThumb("D-gZx4lbGbo"), alt: "Thumbnail from TheBurntPeanut’s WARDOGS video", credit: "TheBurntPeanut, YouTube", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "WARDOGS went into early access on 10 September and peaked at 452,600 concurrent viewers across streaming platforms, with 346,100 of them in the game’s Twitch category." },
+      { type: "p", text: "TheBurntPeanut, the VTuber behind the peanut avatar, led the launch. Simulcasting across platforms, he was the most-watched WARDOGS streamer on both Twitch and YouTube. shroud and summit1g were among the other big names in the game that week, and maherco drew the biggest audience on Kick." },
+      { type: "h2", text: "One of the year’s biggest channels" },
+      { type: "p", text: "Twitch’s own State of Gaming report, published the day before, counts TheBurntPeanut among its standout creators of 2026, with more than 70 million hours watched on the platform so far this year." },
+    ],
+    sources: [
+      { name: "Streams Charts: WARDOGS viewership statistics", url: "https://streamscharts.com/news/wardogs-viewership-statistics" },
+      { name: "Twitch: State of Gaming 2026", url: "https://blog.twitch.tv/en/2026/09/09/twitch-state-of-gaming-2026/" },
+    ],
+  },
+  {
+    slug: "twitch-state-of-gaming-2026",
+    section: "streaming",
+    kicker: "Data",
+    title: "Twitch: 8.6 billion hours of gaming watched so far this year",
+    deck: "League of Legends leads again, horror and indie games are growing, and Jynxzi and TheBurntPeanut stand out among creators.",
+    author: "Jonah Reyes",
+    date: "2026-09-09",
+    read: "3 min read",
+    photo: { src: twitchconPhoto, alt: "Crowds and stage lights at the TwitchCon block party at night", credit: "Succubussy, CC0", crop: { pos: "50% 55%" } },
+    body: [
+      { type: "p", text: "Viewers watched more than 8.6 billion hours of gaming on Twitch between 1 January and 1 September 2026, according to the platform’s State of Gaming report." },
+      { type: "p", text: "The five most-watched games, League of Legends, Counter-Strike, GTA V, VALORANT and World of Warcraft, accounted for nearly 1.7 billion of those hours. League of Legends placed in the top three in nine of eleven regions." },
+      { type: "h2", text: "Where the growth is" },
+      { type: "p", text: "Sandbox games drew 831 million hours, horror 287 million (up 6 percent) and indie games more than 348 million, with channels tagged indie up 51 percent. Streams with Drops enabled reached 1.6 billion hours, up 46 percent, and 40 million people claimed a Drop." },
+      { type: "quote", text: "8.6 billion hours in eight months." },
+      { type: "p", text: "Among the creators the report highlights, Jynxzi drew 78 million hours watched and TheBurntPeanut more than 70 million. TwitchCon returns to San Diego from 13 to 15 November." },
+    ],
+    sources: [
+      { name: "Twitch: State of Gaming 2026", url: "https://blog.twitch.tv/en/2026/09/09/twitch-state-of-gaming-2026/" },
+      { name: "TwitchCon San Diego 2026", url: "https://www.twitchcon.com/san-diego-2026/" },
+    ],
+  },
+  {
+    slug: "z-event-2026-final-edition",
+    section: "streaming",
+    kicker: "Charity",
+    title: "Z Event signs off with a record €32.9 million for charity",
+    deck: "ZeratoR’s French charity marathon doubled last year’s total in its tenth and final edition.",
+    author: "Nia Vale",
+    date: "2026-09-07",
+    read: "2 min read",
+    photo: { src: zeratorPhoto, alt: "ZeratoR streaming at his desk during Z Event", credit: "Mickaël Schauli, CC BY-SA 4.0", crop: { pos: "50% 40%" } },
+    body: [
+      { type: "p", text: "The final Z Event raised €32,891,874 for 22 charities, more than double the record set the year before. The French-language marathon ran from 3 to 6 September, with the main broadcast from 4 to 6 September." },
+      { type: "p", text: "Organised by Adrien “ZeratoR” Nougaret, this year’s edition brought together 354 channels, peaked at 1.3 million concurrent viewers and logged 26.18 million hours watched." },
+      { type: "h2", text: "The end of an era" },
+      { type: "p", text: "ZeratoR had announced that 2026 would be the last Z Event. Across ten editions since 2016 it has raised more than €90 million. Mastu drew the biggest single audience of the weekend, peaking at 477,000 viewers." },
+      { type: "quote", text: "Ten editions, more than €90 million, and a record to finish on." },
+    ],
+    sources: [
+      { name: "Streams Charts: Z Event 2026 recap", url: "https://streamscharts.com/news/z-event-2026-recap" },
     ],
   },
 ];
@@ -252,20 +358,53 @@ export const articlesIn = (section: SectionId) => ARTICLES.filter((a) => a.secti
 export const article = (slug: string) => getArticle(slug)!;
 
 // Curated orders used across the site
-export const LEAD = article("central-cee-and-the-global-rise-of-uk-rap");
+export const LEAD = article("vmas-2026-winners");
 export const LISTS = {
-  latest: ARTICLES.slice(0, 5),
-  trending: ["vedan-and-the-reach-of-regional-rap", "central-cee-and-the-global-rise-of-uk-rap", "playboi-carti-at-clout-festival", "a-new-generation-remakes-print", "independent-labels-reclaim-the-runway"].map(article),
-  mostRead: ["the-listening-bars-changing-nightlife", "central-cee-and-the-global-rise-of-uk-rap", "dave-and-the-art-of-the-long-verse", "objects-built-to-outlast-the-feed", "vedan-and-the-reach-of-regional-rap"].map(article),
-  editorsPicks: ["why-brutalism-keeps-returning", "congolese-rumbas-second-life", "a-new-generation-remakes-print", "independent-labels-reclaim-the-runway", "dave-and-the-art-of-the-long-verse"].map(article),
-  featured: ["independent-labels-reclaim-the-runway", "central-cee-and-the-global-rise-of-uk-rap", "congolese-rumbas-second-life", "objects-built-to-outlast-the-feed", "the-listening-bars-changing-nightlife"].map(article),
+  latest: ARTICLES.slice(0, 6),
+  trending: ["gta-vi-countdown", "vmas-2026-winners", "marvels-wolverine-sales", "taylor-swift-the-life-of-a-showgirl-the-encore", "wardogs-launch-theburntpeanut"].map(article),
+  mostRead: ["vmas-2026-winners", "gta-vi-countdown", "taylor-swift-the-life-of-a-showgirl-the-encore", "emmys-2026-winners", "z-event-2026-final-edition"].map(article),
+  editorsPicks: ["paris-fashion-week-ss27", "tokyo-game-show-2026-typhoon", "blizzcon-2026-diablo-v-starcraft", "twitch-state-of-gaming-2026", "bts-arirang-world-tour-latin-america"].map(article),
+  featured: ["vmas-2026-winners", "paris-fashion-week-ss27", "gta-vi-countdown", "z-event-2026-final-edition", "taylor-swift-the-life-of-a-showgirl-the-encore"].map(article),
 };
 
 export const READING_LISTS = [
-  { id: "uk-rap", title: "UK rap, explained", note: "Three stories on how British rap went global.", cover: article("dave-and-the-art-of-the-long-verse").photo, items: ["central-cee-and-the-global-rise-of-uk-rap", "dave-and-the-art-of-the-long-verse", "the-listening-bars-changing-nightlife"].map(article) },
-  { id: "built-to-last", title: "Built to last", note: "Design, buildings and pages made to outlive the feed.", items: ["objects-built-to-outlast-the-feed", "why-brutalism-keeps-returning", "a-new-generation-remakes-print"].map(article) },
-  { id: "after-dark", title: "After dark", note: "Live shows, loud rooms and the music that carries a night.", items: ["playboi-carti-at-clout-festival", "the-listening-bars-changing-nightlife", "congolese-rumbas-second-life"].map(article) },
+  { id: "pop-week", title: "Pop’s big week", note: "The VMAs, a Taylor Swift encore and BTS on the road.", cover: undefined as Photo | undefined, items: ["vmas-2026-winners", "taylor-swift-the-life-of-a-showgirl-the-encore", "bts-arirang-world-tour-latin-america"].map(article) },
+  { id: "games-to-watch", title: "Games to watch", note: "Launches, delays and the showcases setting up 2027.", cover: undefined as Photo | undefined, items: ["gta-vi-countdown", "marvels-wolverine-sales", "blizzcon-2026-diablo-v-starcraft"].map(article) },
+  { id: "live-on-stream", title: "Live on stream", note: "Records, marathons and the numbers behind Twitch.", cover: undefined as Photo | undefined, items: ["z-event-2026-final-edition", "wardogs-launch-theburntpeanut", "twitch-state-of-gaming-2026"].map(article) },
 ];
+
+// ---------------------------------------------------------------- Streamers
+// The "Trendiest streamers" row: each with a recent video from their own channel.
+
+export type Streamer = { name: string; platform: "Twitch" | "YouTube"; channel: string; note: string; video: string; videoTitle: string };
+export const STREAMERS: Streamer[] = [
+  { name: "Kai Cenat", platform: "Twitch", channel: "https://www.twitch.tv/kaicenat", note: "Twitch’s most-followed streamer, back from hosting Streamer University 2026.", video: "t4rPg4OYonk", videoTitle: "Streamer University 2026 Best Moments!" },
+  { name: "IShowSpeed", platform: "YouTube", channel: "https://www.youtube.com/@IShowSpeed", note: "Turned his channel into a worldwide talent show, live.", video: "4zVFht1KbnY", videoTitle: "World Talent Show" },
+  { name: "TheBurntPeanut", platform: "Twitch", channel: "https://www.twitch.tv/theburntpeanut", note: "Led the WARDOGS launch on Twitch and YouTube.", video: "D-gZx4lbGbo", videoTitle: "Peanut Absolutely Loses It In WARDOGS" },
+  { name: "Jynxzi", platform: "Twitch", channel: "https://www.twitch.tv/jynxzi", note: "78 million hours watched on Twitch in 2026 so far.", video: "FDXpzsK0KI4", videoTitle: "YOU vs The RANK You “Deserve”… (Rainbow Six Siege)" },
+  { name: "ZeratoR", platform: "Twitch", channel: "https://www.twitch.tv/zerator", note: "Closed the final Z Event with €32.9 million raised for charity.", video: "UlXf1lsiQPw", videoTitle: "MON ZEVENT 2026 – Best of ZeratoR #507" },
+  { name: "Neuro-sama", platform: "Twitch", channel: "https://www.twitch.tv/vedal987", note: "The AI VTuber behind Twitch’s record hype trains has a new single out.", video: "xWDfREk0ZLs", videoTitle: "Pattern Recognition – Neuro-sama x ODDEEO (Official Video)" },
+];
+
+// ---------------------------------------------------------------- Songs to check out
+
+export type Song = { artist: string; title: string; note: string; video: string; kind: string };
+export const SONGS: Song[] = [
+  { artist: "Taylor Swift", title: "Patient Zero", note: "The lead single from The Life of a Showgirl: The Encore, out 25 September.", video: "BpR280fXISA", kind: "Official lyric video" },
+  { artist: "BTS", title: "Swim", note: "Song of the Year at the 2026 VMAs, and the centrepiece of the Arirang tour.", video: "b4iVv91Z6lY", kind: "Official video" },
+  { artist: "Cardi B feat. Kehlani", title: "Safe", note: "Best Hip-Hop at the 2026 VMAs.", video: "E_0y8bmIATM", kind: "Official video" },
+  { artist: "Bad Bunny", title: "NUEVAYoL", note: "Best Latin at the 2026 VMAs.", video: "KU5V5WZVcVE", kind: "Official video" },
+  { artist: "LISA feat. Kentaro Sakaguchi", title: "Dream", note: "Best Pop at the 2026 VMAs, shot as a short film.", video: "FMX98ROVRCE", kind: "Official short film" },
+];
+
+// The live listing on the Music front
+export const LIVE = {
+  kicker: "Live · Tickets",
+  title: "BTS: Arirang World Tour",
+  meta: "Bogotá 2–3 Oct · Lima · Santiago · La Plata · São Paulo",
+  url: "https://ibighit.com/bts/eng/",
+  photo: { src: btsStadiumPhoto, alt: "A full stadium in Paris waiting for BTS", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 55%" } } satisfies Photo,
+};
 
 // ---------------------------------------------------------------- OGCW Originals
 
@@ -289,7 +428,7 @@ export const EPISODES: Episode[] = [
   {
     slug: "inside-the-listening-bar",
     series: "OGCW Sessions", number: 1, kind: "Interview", length: "12:40", date: "2026-09-26",
-    still: { src: musicHero, alt: "A singer under a single spotlight in a packed listening bar", crop: { pos: "40% 40%" } },
+    still: { src: unsplash("photo-1508700115892-45ecd05ae2ad", 1600), alt: "A neon sign reading “you are what you listen to” on a brick wall", crop: { pos: "50% 50%" } },
     title: "Inside the listening bar: one night, one record",
     summary: "We spend a night in a listening bar and ask the selector why one record can hold a room.",
     body: [
@@ -298,12 +437,12 @@ export const EPISODES: Episode[] = [
     ],
     chapters: [["00:00", "Opening the room"], ["02:15", "Choosing the first record"], ["06:40", "The crowd goes quiet"], ["10:05", "Last track"]],
     credits: [["Series", "OGCW Sessions"], ["Produced by", "OGCW"], ["Format", "Interview"]],
-    related: ["the-listening-bars-changing-nightlife"],
+    related: [],
   },
   {
     slug: "made-to-last-object-makers",
     series: "Made to Last", number: 1, kind: "Reportage", length: "08:15", date: "2026-09-23",
-    still: { src: designHero, alt: "A sneaker and headphones on a concrete plinth", crop: { pos: "50% 55%" } },
+    still: { src: unsplash("photo-1558618666-fcd25c85cd64", 1600), alt: "A maker at work at a lathe in a small studio", crop: { pos: "50% 45%" } },
     title: "Made to last: in the studio with the object makers",
     summary: "In the studio with designers building sneakers, headphones and homeware to keep, not to flip.",
     body: [
@@ -312,26 +451,26 @@ export const EPISODES: Episode[] = [
     ],
     chapters: [["00:00", "The studio"], ["01:50", "Materials first"], ["04:30", "Repair, not replace"], ["07:10", "What lasting means"]],
     credits: [["Series", "Made to Last"], ["Produced by", "OGCW"], ["Format", "Reportage"]],
-    related: ["objects-built-to-outlast-the-feed"],
+    related: ["sneaker-drops-late-september-2026"],
   },
   {
     slug: "the-list-records-that-shaped-the-year",
     series: "The List", number: 1, kind: "The list", length: "05:32", date: "2026-09-20",
-    still: { src: editorialGrid, alt: "A DJ at the decks, record shelves behind her", crop: { pos: "0% 0%", zoom: 2.1 } },
+    still: { src: unsplash("photo-1470225620780-dba8ba36b745", 1600), alt: "A DJ’s hands on a controller lit purple", crop: { pos: "50% 50%" } },
     title: "Ten records that shaped the year so far",
     summary: "The OGCW music desk counts down the records everyone kept coming back to.",
     body: [
-      "The List is OGCW’s fast countdown format. In this first episode the music desk argues its way through the records that defined the year so far, across rap, rumba and everything between.",
+      "The List is OGCW’s fast countdown format. In this first episode the music desk argues its way through the records that defined the year so far, from K-pop to Latin, pop and rap.",
       "Expect disagreements, a few surprises and at least one record you’ll want to go back to.",
     ],
     chapters: [["00:00", "The rules"], ["00:45", "10 to 6"], ["02:40", "5 to 2"], ["04:30", "Number one"]],
     credits: [["Series", "The List"], ["Produced by", "OGCW music desk"], ["Format", "Countdown"]],
-    related: ["central-cee-and-the-global-rise-of-uk-rap", "dave-and-the-art-of-the-long-verse"],
+    related: ["vmas-2026-winners", "taylor-swift-the-life-of-a-showgirl-the-encore"],
   },
   {
     slug: "street-level-independent-labels",
     series: "Street Level", number: 1, kind: "Reportage", length: "10:05", date: "2026-09-18",
-    still: { src: styleHero, alt: "A man in a long black coat under a bridge in the rain", crop: { pos: "62% 40%" } },
+    still: { src: unsplash("photo-1445205170230-053b83016050", 1600), alt: "Clothes on rails backstage, lit warm", crop: { pos: "50% 50%" } },
     title: "Independent labels, off the runway",
     summary: "Backstage at a show staged under a bridge, with the labels skipping fashion week altogether.",
     body: [
@@ -340,12 +479,12 @@ export const EPISODES: Episode[] = [
     ],
     chapters: [["00:00", "Finding the location"], ["03:10", "Casting from friends"], ["06:00", "Showtime"], ["08:45", "Sold in the room"]],
     credits: [["Series", "Street Level"], ["Produced by", "OGCW"], ["Format", "Reportage"]],
-    related: ["independent-labels-reclaim-the-runway"],
+    related: ["paris-fashion-week-ss27"],
   },
   {
     slug: "city-notes-where-brutalism-lives",
     series: "City Notes", number: 1, kind: "Analysis", length: "07:48", date: "2026-09-15",
-    still: { src: editorialGrid, alt: "A brutalist concrete building against a grey sky", crop: { pos: "0% 100%", zoom: 2.1 } },
+    still: { src: barbicanPhoto, alt: "Concrete towers and walkways over the lake at London’s Barbican Estate", credit: "Julian Herzog, CC BY 4.0", crop: { pos: "50% 55%" } },
     title: "Where brutalism lives now",
     summary: "A walk through the concrete buildings a new generation wants to save.",
     body: [
@@ -354,12 +493,12 @@ export const EPISODES: Episode[] = [
     ],
     chapters: [["00:00", "Concrete at night"], ["02:20", "Built for the public"], ["05:05", "Saving what’s left"]],
     credits: [["Series", "City Notes"], ["Produced by", "OGCW"], ["Format", "Analysis"]],
-    related: ["why-brutalism-keeps-returning"],
+    related: [],
   },
   {
     slug: "print-run-the-zine-makers",
     series: "Print Run", number: 1, kind: "Short doc", length: "09:20", date: "2026-09-12",
-    still: { src: editorialGrid, alt: "Two people working over pages in a print studio", crop: { pos: "100% 100%", zoom: 2.1 } },
+    still: { src: unsplash("photo-1457369804613-52c61a468e7d", 1600), alt: "Printed pages laid out edge to edge", crop: { pos: "50% 50%" } },
     title: "The zine makers",
     summary: "In a shared studio with the people printing small-run magazines that sell out in days.",
     body: [
@@ -368,7 +507,7 @@ export const EPISODES: Episode[] = [
     ],
     chapters: [["00:00", "The studio"], ["02:40", "Layout"], ["05:15", "On the press"], ["08:00", "Launch night"]],
     credits: [["Series", "Print Run"], ["Produced by", "OGCW"], ["Format", "Short documentary"]],
-    related: ["a-new-generation-remakes-print"],
+    related: [],
   },
 ];
 

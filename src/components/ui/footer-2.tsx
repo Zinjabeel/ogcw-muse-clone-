@@ -14,7 +14,7 @@ import { mail } from "@/lib/contact";
 // App Store / Google Play badges are marked "Coming soon" and don’t link.
 
 type FooterLink =
-  | { label: string; page: "/news" | "/music" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/blog" | "/about" }
+  | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/blog" | "/about" }
   | { label: string; home: string } // a section on the home page, by element id
   | { label: string; info: InfoSlug } // /info/<slug>
   | { label: string; href: string }; // mailto or external
@@ -38,12 +38,12 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "News", page: "/news" },
       { label: "Music", page: "/music" },
+      { label: "Games", page: "/games" },
+      { label: "Streaming", page: "/streaming" },
       { label: "Culture", page: "/culture" },
       { label: "Shop", page: "/shop" },
       { label: "Trends", page: "/trends" },
       { label: "Latest & Most Read", page: "/explore" },
-      { label: "Submit a story", href: mail("Submit a story") },
-      { label: "Music submissions", href: mail("Music submissions") },
     ],
   },
   {
@@ -51,6 +51,8 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "Help", info: "help" },
       { label: "FAQ", info: "faq" },
+      { label: "Submit a story", href: mail("Submit a story") },
+      { label: "Music submissions", href: mail("Music submissions") },
       { label: "Contact us", href: mail("General") },
       { label: "Advertising", href: mail("Advertising") },
       { label: "Partnerships", href: mail("Partnerships") },

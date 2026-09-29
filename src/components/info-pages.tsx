@@ -23,6 +23,31 @@ const comingSoon = (what: string, subject: string) => (
   </>
 );
 
+const LICENCES = {
+  "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
+  "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "CC0": "https://creativecommons.org/publicdomain/zero/1.0/",
+};
+
+// [what, photographer, licence, Commons file name]
+const COMMONS_CREDITS: [string, string, string, string][] = [
+  ["Taylor Swift’s Eras Tour in London", "BrigidLIS", "CC BY 4.0", "Taylor_Swift_Eras_Tour_London_20240819_1989era.jpg"],
+  ["Madonna, The Celebration Tour", "Ronald Woan", "CC BY 4.0", "Madonna_-_The_Celebration_Tour_(53539842925)_(cropped).jpg"],
+  ["BTS, Arirang World Tour in Paris (“Swim”)", "Chiyako92", "CC BY-SA 4.0", "BTS_Arirang_World_Tour_in_Paris_(17_July_2026)_-_Swim.jpg"],
+  ["BTS, Arirang World Tour in Paris (stadium)", "Chiyako92", "CC BY-SA 4.0", "BTS_Arirang_World_Tour_in_Paris_(17_July_2026)_-_stadium_view.jpg"],
+  ["Tokyo Game Show 2026", "Syced", "CC0", "Tokyo_Game_Show_2026.jpg"],
+  ["BlizzCon at the Anaheim Convention Center", "tofuprod", "CC BY-SA 2.0", "BlizzCon_2017.jpg"],
+  ["Boulevard Hotel neon sign, Miami Beach", "Radomianin", "public domain", "Boulevard_Hotel_(Neon_sign),_Miami_Beach.jpg"],
+  ["ZeratoR at Z Event 2025", "Mickaël Schauli", "CC BY-SA 4.0", "ZeratoR_lors_du_ZEVENT_2025_-_11.jpg"],
+  ["TwitchCon block party", "Succubussy", "CC0", "TwitchCon_Block_Party.png"],
+  ["Models walking for Alexander McQueen", "Christopher Macsurak", "CC BY 2.0", "Models_walking_for_Alexander_McQueen_in_2018_(from_behind).jpg"],
+  ["Noah Wyle at his Walk of Fame ceremony", "Kevin Paul", "CC BY 4.0", "Noah_Wyle_-_Walk_of_Fame-01.jpg"],
+  ["Rhea Seehorn", "Gage Skidmore", "CC BY-SA 2.0", "Rhea_Seehorn_(41794796000).jpg"],
+  ["Barbican Estate, London", "Julian Herzog", "CC BY 4.0", "Barbican_Estate_Lakeside_City_of_London_2026_10.jpg"],
+];
+
 export const infoPages: Record<InfoSlug, InfoPage> = {
   faq: {
     kicker: "Help",
@@ -140,12 +165,19 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     title: "Photo credits",
     intro: "The photographers whose work appears on OGCW.",
     body: (
-      <ul className="info-list">
-        <li>Central Cee by 200izo, via Wikimedia Commons, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Cropped.</li>
-        <li>Drake by The Come Up Show, licensed <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>. Cropped.</li>
-        <li>Shop photos via <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), under the Unsplash License.</li>
-        <li>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</li>
-      </ul>
+      <>
+        <p>News photos come from Wikimedia Commons under the licences below. Each was resized, and some are cropped where they appear.</p>
+        <ul className="info-list">
+          {COMMONS_CREDITS.map(([what, who, licence, file]) => (
+            <li key={file}>
+              {what} by {who}, <a href={`https://commons.wikimedia.org/wiki/File:${file}`} target="_blank" rel="noopener noreferrer">via Wikimedia Commons</a>, {licence in LICENCES ? <a href={LICENCES[licence as keyof typeof LICENCES]} target="_blank" rel="noopener noreferrer">{licence}</a> : licence}.
+            </li>
+          ))}
+        </ul>
+        <p>Streamer and music video thumbnails belong to the channels that published them and link to the videos on YouTube.</p>
+        <p>Shop, hero and Originals photos come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
+        <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
+      </>
     ),
   },
 };

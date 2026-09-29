@@ -4,7 +4,15 @@ import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { Img, SectionHead } from "../components/cards";
 import { ARTICLES, articlesIn, EPISODES, SHOPS } from "../data/content";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
-import editorialGrid from "../assets/ogcw-editorial-grid.jpg";
+
+// What OGCW covers, in four photos: live music, the news, games and style
+const shot = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&h=800&q=80`;
+const COLLAGE = [
+  { src: shot("photo-1501386761578-eac5c94b800a"), alt: "Fans singing along at the front of a concert" },
+  { src: shot("photo-1495020689067-958852a7765e"), alt: "A man reading a newspaper on a bench" },
+  { src: shot("photo-1542751371-adc38448a05e"), alt: "A gamer in headphones in front of glowing screens" },
+  { src: shot("photo-1552346154-21d32810aba3"), alt: "A pair of Air Jordan 1 sneakers on a running track" },
+];
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -22,8 +30,10 @@ export const Route = createFileRoute("/about")({
 
 // What OGCW covers, with live counts from the content library
 const DESKS = [
-  { to: "/music", name: "Music", note: "Rap, rumba and live, from the artists moving it", count: `${articlesIn("music").length} stories` },
-  { to: "/culture", name: "Culture", note: "Style, design, nightlife, architecture and print", count: `${articlesIn("culture").length} stories` },
+  { to: "/music", name: "Music", note: "New releases, tours and the big awards nights", count: `${articlesIn("music").length} stories` },
+  { to: "/games", name: "Games", note: "Launches, sales and the showcases ahead", count: `${articlesIn("games").length} stories` },
+  { to: "/streaming", name: "Streaming", note: "The creators and records on Twitch, YouTube and Kick", count: `${articlesIn("streaming").length} stories` },
+  { to: "/culture", name: "Culture", note: "Fashion, television and sneakers", count: `${articlesIn("culture").length} stories` },
   { to: "/originals", name: "Originals", note: "Our own interviews, reportage and short docs", count: `${EPISODES.length} episodes` },
   { to: "/shop", name: "Shop", note: "The pieces behind the stories, picked by our desk", count: `${SHOPS.length} shops` },
 ] as const;
@@ -42,7 +52,9 @@ function About() {
       <PageIntro kicker="About OGCW" title="We report from inside culture." copy="OGCW is an independent editorial platform following the people, places and ideas shaping what comes next." />
       <main className="page-wrap pb-24">
         <section className="about-lead" aria-labelledby="our-position">
-          <Img photo={{ src: editorialGrid, alt: "A DJ at the decks, a crowd on a city street, a brutalist building and a print studio" }} className="about-photo" eager />
+          <div className="about-collage">
+            {COLLAGE.map((photo) => <Img key={photo.src} photo={photo} className="about-collage-photo" eager />)}
+          </div>
           <div className="about-position">
             <p id="our-position" className="og-kicker">Our position</p>
             <p className="about-statement">We pay attention before everyone else does.</p>
