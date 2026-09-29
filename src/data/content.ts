@@ -18,6 +18,11 @@ import runwayPhoto from "../assets/news/runway-mcqueen.jpg";
 import wylePhoto from "../assets/news/noah-wyle.jpg";
 import seehornPhoto from "../assets/news/rhea-seehorn.jpg";
 import barbicanPhoto from "../assets/news/barbican-lakeside.jpg";
+import mileyPhoto from "../assets/news/miley-cyrus-primavera.jpg";
+import skarsgardPhoto from "../assets/news/bill-skarsgard.jpg";
+import speedPhoto from "../assets/news/ishowspeed-singapore.jpg";
+import venicePhoto from "../assets/news/venice-red-carpet.jpg";
+import niaPhoto from "../assets/news/nia-archives.jpg";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
@@ -154,6 +159,50 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "avengers-endgame-encore-box-office",
+    section: "culture",
+    kicker: "Box office",
+    title: "Avengers: Endgame is number one again, seven years on",
+    deck: "The Encore re-release took $26.1 million to top the US box office, the first re-release to do it since The Lion King in 2011.",
+    author: "Jonah Reyes",
+    date: "2026-09-28",
+    read: "2 min read",
+    photo: { src: unsplash("photo-1489599849927-2ee91cede3ba", 1600), alt: "Rows of red seats in a dark cinema", credit: "Unsplash", crop: { pos: "50% 60%" } },
+    body: [
+      { type: "p", text: "Avengers: Endgame is back at the top of the North American box office. The Encore re-release took $26.1 million over the weekend of 25 to 27 September, making it the first re-release to finish number one since The Lion King in 3D in 2011." },
+      { type: "p", text: "It was a strong weekend all round, with three films taking more than $20 million each." },
+      { type: "h2", text: "A record for Spider-Man" },
+      { type: "p", text: "The week before, Resident Evil opened at number one with $60.2 million. In the same week, Spider-Man: Brand New Day passed the $936.6 million of Star Wars: The Force Awakens to become the highest-grossing film ever in the United States and Canada." },
+      { type: "quote", text: "A seven-year-old film, back at number one." },
+    ],
+    sources: [
+      { name: "Wikipedia: 2026 box office number-one films in the United States", url: "https://en.wikipedia.org/wiki/List_of_2026_box_office_number-one_films_in_the_United_States" },
+      { name: "Deadline: Weekend box office, 25–27 September", url: "https://deadline.com/2026/09/box-office-avengers-endgame-primetime-heart-of-the-beast-1237111302/" },
+    ],
+  },
+  {
+    slug: "miley-cyrus-bass-persuades-number-one",
+    section: "music",
+    kicker: "Charts",
+    title: "Miley Cyrus goes to number one with Bass Persuades",
+    deck: "Her tenth album opened at the top of the Billboard 200 with 61,000 units. Two Hollywood Bowl nights follow in October.",
+    author: "Sana Lind",
+    date: "2026-09-27",
+    read: "2 min read",
+    photo: { src: mileyPhoto, alt: "Miley Cyrus on stage at Primavera Sound in Barcelona, lit green and red", credit: "Jwslubbock, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Bass Persuades, Miley Cyrus’s tenth studio album, has debuted at number one on the Billboard 200 with 61,000 album-equivalent units, 47,000 of them in sales. It also topped the chart in Wallonia and reached the top ten across Europe, Australia and Canada." },
+      { type: "p", text: "The album came out on 18 September on Atlantic Records. Its title track arrived as the lead single on 3 September, and “Let’s Get Married” followed on release day. For this era she goes by a single name: Miley." },
+      { type: "h2", text: "Who’s on it" },
+      { type: "p", text: "The record runs to ten tracks, with a bonus track, “Smile”, on some editions. The New York band Model/Actriz appear on two songs, and Andrew Wyatt of Miike Snow on another." },
+      { type: "p", text: "Cyrus plays two nights at the Hollywood Bowl in Los Angeles on 16 and 18 October, with Model/Actriz opening. Live shows from her are rare, which makes these two among the hottest tickets of the autumn." },
+    ],
+    sources: [
+      { name: "Wikipedia: Bass Persuades", url: "https://en.wikipedia.org/wiki/Bass_Persuades" },
+      { name: "Variety: Miley Cyrus announces Bass Persuades and Hollywood Bowl shows", url: "https://variety.com/2026/music/news/miley-cyrus-new-album-bass-persuades-hollywood-bowl-1236847024/" },
+    ],
+  },
+  {
     slug: "sneaker-drops-late-september-2026",
     section: "culture",
     kicker: "Sneakers",
@@ -195,6 +244,51 @@ export const ARTICLES: Article[] = [
     sources: [
       { name: "UPI: Taylor Swift releases “Showgirl” encore with new single “Patient Zero”", url: "https://www.upi.com/Entertainment_News/Music/2026/09/25/taylor-swift-showgirl-encore-patient-zero/7621790339274/" },
       { name: "Billboard: All 4 new songs on The Encore ranked", url: "https://www.billboard.com/lists/taylor-swift-life-of-showgirl-encore-tracks-ranked/" },
+    ],
+  },
+  {
+    slug: "mercury-prize-2026-shortlist",
+    section: "music",
+    kicker: "Awards",
+    title: "Mercury Prize 2026: four weeks to go, and two favourites",
+    deck: "Nia Archives and Suede lead a shortlist that also has Dave, RAYE, Olivia Dean and Paul McCartney. The winner is named in Newcastle on 22 October.",
+    author: "Nia Vale",
+    date: "2026-09-24",
+    read: "3 min read",
+    photo: { src: niaPhoto, alt: "Nia Archives singing on stage in Amsterdam under pink light", credit: "Michielderoo, CC0", crop: { pos: "50% 30%" } },
+    body: [
+      { type: "p", text: "The 2026 Mercury Prize, the award for the best album from the UK and Ireland, will be announced on Thursday 22 October at the Utilita Arena in Newcastle. With four weeks to go, the jungle producer Nia Archives and the band Suede are joint favourites." },
+      { type: "h2", text: "The twelve albums" },
+      { type: "p", text: "Nia Archives is shortlisted for Emotional Junglist and Suede for Antidepressants. They are up against Dave’s The Boy Who Played the Harp, RAYE’s THIS MUSIC MAY CONTAIN HOPE., Olivia Dean’s The Art of Loving and Paul McCartney’s The Boys of Dungeon Lane." },
+      { type: "p", text: "The rest of the list is Florence + The Machine’s Everybody Scream, JADE’s THAT’S SHOWBIZ BABY!, Kojey Radical’s Don’t Look Down, Knats’ A Great Day In Newcastle, Dove Ellis’s Blizzard and HELP(2), the War Child Records compilation." },
+      { type: "quote", text: "A jungle record and a Britpop band, level at the top." },
+      { type: "p", text: "Two of the twelve have won before: Suede, in 1993 with their debut album, and Dave, in 2019 for Psychodrama." },
+    ],
+    sources: [
+      { name: "Mercury Prize: 2026 Albums of the Year revealed", url: "https://www.mercuryprize.com/news/2026/2026-mercury-prize-albums-of-the-year-revealed/" },
+      { name: "Billboard: 2026 Mercury Prize nominees", url: "https://www.billboard.com/music/awards/mercury-prize-2026-nominees-shortlist-raye-mccartney-1236304222/" },
+    ],
+  },
+  {
+    slug: "neuro-sama-pattern-recognition-first-concert",
+    section: "streaming",
+    kicker: "VTubers",
+    title: "Neuro-sama releases “Pattern Recognition” and books her first live concert",
+    deck: "The AI streamer’s new single with ODDEEO is out, and she and Evil Neuro play Los Angeles with a live band on 19 December.",
+    author: "Jonah Reyes",
+    date: "2026-09-22",
+    read: "2 min read",
+    photo: { src: youtubeThumb("xWDfREk0ZLs"), alt: "Artwork from the “Pattern Recognition” video: an anime-style girl in pink light", credit: "Neuro-sama, YouTube", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Neuro-sama, the AI VTuber created by the UK developer Vedal, released a new single on Monday 21 September. “Pattern Recognition” was produced and animated by ODDEEO, who built the song from conversations with Neuro, asking her things like which instrument she finds most comforting." },
+      { type: "p", text: "ODDEEO describes it as a song about growth, and about the real feelings people find in a virtual performer." },
+      { type: "h2", text: "From stream to stage" },
+      { type: "p", text: "Neuro-sama and her twin, Evil Neuro, will play their first live concert on 19 December at The Vermont Hollywood in Los Angeles: an extended-reality show with a live band, on the date Neuro-sama first went live in 2022." },
+      { type: "p", text: "The twins have more than three million followers between them, and their channel is among the most-subscribed in Twitch history after a record-breaking subathon." },
+    ],
+    sources: [
+      { name: "BroadwayWorld: AI twins Neuro and Evil to perform first-ever live concert", url: "https://www.broadwayworld.com/bwwmusic/article/Photos-AI-Twins-Neuro-and-Evil-to-Perform-First-Ever-Live-Concert-at-Vermont-Hollywood-20260921" },
+      { name: "YouTube: Pattern Recognition – Neuro-sama x ODDEEO (official video)", url: "https://www.youtube.com/watch?v=xWDfREk0ZLs" },
     ],
   },
   {
@@ -242,6 +336,28 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "physint-bill-skarsgard-xbox",
+    section: "games",
+    kicker: "Tokyo Game Show",
+    title: "Bill Skarsgård will star in Kojima’s PHYSINT, now an Xbox game",
+    deck: "Hideo Kojima named his lead at the Xbox Tokyo Game Show broadcast, a week after Xbox picked up the spy game.",
+    author: "Nia Vale",
+    date: "2026-09-18",
+    read: "2 min read",
+    photo: { src: skarsgardPhoto, alt: "Bill Skarsgård listening on a convention panel", credit: "Gage Skidmore, CC BY-SA 2.0", crop: { pos: "60% 35%" } },
+    body: [
+      { type: "p", text: "Hideo Kojima has cast Bill Skarsgård as the lead in PHYSINT, the action-espionage game from Kojima Productions. The news came during the Xbox Tokyo Game Show broadcast on 17 September, along with a new poster of Skarsgård and Charlee Fraser that Kojima photographed himself." },
+      { type: "p", text: "Fraser, Don Lee and Minami Hamabe are also in the cast. Kojima says the game is making steady progress and has described it as a spiritual successor to Metal Gear Solid." },
+      { type: "h2", text: "A new home" },
+      { type: "p", text: "Xbox will publish PHYSINT, a week after taking on the project that PlayStation Studios cancelled in June. It extends a partnership that already includes Kojima’s horror game OD, and Xbox says the two companies will now work together on film and television too." },
+      { type: "quote", text: "No platforms and no release date yet, but finally a face." },
+    ],
+    sources: [
+      { name: "Xbox Wire: Bill Skarsgård cast as the lead role in PHYSINT", url: "https://news.xbox.com/en-us/2026/09/17/physint-lead-role-bill-skarsgard-kojima-productions-xbox/" },
+      { name: "Kotaku: PHYSINT’s lead will be played by Bill Skarsgård", url: "https://kotaku.com/kojima-says-physint-is-making-steady-progress-and-stars-bill-skarsgard-in-first-update-since-switching-to-xbox-2000735260" },
+    ],
+  },
+  {
     slug: "emmys-2026-winners",
     section: "culture",
     kicker: "TV",
@@ -262,6 +378,29 @@ export const ARTICLES: Article[] = [
     sources: [
       { name: "Wikipedia: 78th Primetime Emmy Awards", url: "https://en.wikipedia.org/wiki/78th_Primetime_Emmy_Awards" },
       { name: "NPR: Emmys 2026, the complete list of winners", url: "https://www.npr.org/2026/09/14/nx-s1-5957565/emmys-2026-winners" },
+    ],
+  },
+  {
+    slug: "venice-2026-woman-unknown-golden-lion",
+    section: "culture",
+    kicker: "Film",
+    title: "Venice gives its Golden Lion to May el-Toukhy’s Woman Unknown",
+    deck: "The Danish post-war thriller also won best actress for Mathilde Arcel. John Malkovich took best actor.",
+    author: "Sana Lind",
+    date: "2026-09-13",
+    read: "3 min read",
+    photo: { src: venicePhoto, alt: "The red carpet and a row of flags outside the Palazzo del Cinema in Venice", credit: "Pietro Luca Cassarino, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Woman Unknown, directed by May el-Toukhy, won the Golden Lion at the 83rd Venice Film Festival on 12 September. The psychological thriller is set in Denmark in the summer of 1945, and it was one of only two films directed by women in the main competition." },
+      { type: "p", text: "Mathilde Arcel, who plays the nanny and housemaid Marie, won the Volpi Cup for best actress. Accepting the top prize, el-Toukhy spoke about the lack of equal opportunities for women making films." },
+      { type: "h2", text: "The other winners" },
+      { type: "p", text: "The Grand Jury Prize went to Lee Chang-dong’s Possible Love, and the Silver Lion for best director to Ilya Khrzhanovsky for DAU. John Malkovich won best actor for Wild Horse Nine. Maggie Gyllenhaal led the jury." },
+      { type: "quote", text: "One of two films by women in competition, and the one that won." },
+      { type: "p", text: "The festival opened on 2 September with Danny Boyle’s Ink, and gave lifetime achievement Golden Lions to Ellen Burstyn and George Clooney." },
+    ],
+    sources: [
+      { name: "Wikipedia: 83rd Venice International Film Festival", url: "https://en.wikipedia.org/wiki/83rd_Venice_International_Film_Festival" },
+      { name: "Screen Daily: Woman Unknown wins Golden Lion", url: "https://www.screendaily.com/news/woman-unknown-wins-golden-lion-at-venice-film-festival-2026/5220360.article" },
     ],
   },
   {
@@ -351,6 +490,72 @@ export const ARTICLES: Article[] = [
       { name: "Streams Charts: Z Event 2026 recap", url: "https://streamscharts.com/news/z-event-2026-recap" },
     ],
   },
+  {
+    slug: "onimusha-way-of-the-sword-launch",
+    section: "games",
+    kicker: "Launch",
+    title: "Onimusha: Way of the Sword sells a million on day one",
+    deck: "Capcom’s revival of its samurai series is out on Switch 2, PS5, PC and Xbox, and critics are calling it one of the best action games of the year.",
+    author: "Jonah Reyes",
+    date: "2026-09-05",
+    read: "3 min read",
+    photo: { src: youtubeThumb("Gbmd6YFm5oU"), alt: "A frame from the Onimusha: Way of the Sword launch trailer", credit: "Capcom, YouTube", crop: { pos: "50% 40%" } },
+    body: [
+      { type: "p", text: "Capcom’s Onimusha: Way of the Sword sold more than a million copies on its launch day, 4 September, on Nintendo Switch 2, PlayStation 5, PC and Xbox Series X|S. It is the first new game in the series since 2006." },
+      { type: "p", text: "It is set in a dark-fantasy version of Kyoto in the Edo period. Its hero is the swordsman Miyamoto Musashi, modelled on the actor Toshiro Mifune." },
+      { type: "h2", text: "Reviews to match" },
+      { type: "p", text: "Critics have been generous. The Switch 2 version scores 90 on Metacritic, the PS5 version 85, and 95 percent of critics on OpenCritic recommend it. Reviewers praised the slower, more deliberate sword fighting as a fresh direction that still feels like Onimusha." },
+      { type: "quote", text: "Twenty years later, the duel is back." },
+    ],
+    sources: [
+      { name: "Wikipedia: Onimusha: Way of the Sword", url: "https://en.wikipedia.org/wiki/Onimusha:_Way_of_the_Sword" },
+      { name: "Nintendo Life: The reviews for Onimusha: Way of the Sword are in", url: "https://www.nintendolife.com/news/2026/09/round-up-the-reviews-for-onimusha-way-of-the-sword-are-in" },
+    ],
+  },
+  {
+    slug: "ishowspeed-world-talent-show",
+    section: "streaming",
+    kicker: "Live",
+    title: "IShowSpeed’s World Talent Show, and the “green apple” moment",
+    deck: "Three hours of acts from around the world, one clear winner and a meme that spread before the stream was over.",
+    author: "Nia Vale",
+    date: "2026-09-05",
+    read: "2 min read",
+    photo: { src: speedPhoto, alt: "IShowSpeed in an England shirt surrounded by fans and cameras in Singapore", credit: "Aerodynamically, CC0", crop: { pos: "40% 35%" } },
+    body: [
+      { type: "p", text: "IShowSpeed turned his YouTube channel into an international talent competition on 4 September. The World Talent Show ran for more than three hours, with contestants from around the world performing live for his audience." },
+      { type: "p", text: "Viewers crowned a contestant named David the clear winner. A Polish football freestyler and the acrobatic group Momo were among the other favourites." },
+      { type: "h2", text: "“Green apple”" },
+      { type: "p", text: "The moment people shared most came at the end, when Speed lifted a contestant called Jamal, who closed the segment with two words: “green apple”. The clip became a meme on TikTok and X within hours." },
+      { type: "p", text: "Speed has more than 61 million subscribers on YouTube and streams several times a week." },
+    ],
+    sources: [
+      { name: "TubioNews: IShowSpeed’s World Talent Show", url: "https://tubionews.com/news/ishowspeed-world-talent-show-september-2026" },
+      { name: "YouTube: IShowSpeed, World Talent Show", url: "https://www.youtube.com/watch?v=4zVFht1KbnY" },
+    ],
+  },
+  {
+    slug: "state-of-play-september-2026",
+    section: "games",
+    kicker: "Showcase",
+    title: "State of Play: Final Fantasy VII Revelation dated for April 2027",
+    deck: "PlayStation’s September show also dated Metro 2039 and Until Dawn 2, and revealed Maneater 2.",
+    author: "Sana Lind",
+    date: "2026-09-04",
+    read: "3 min read",
+    photo: { src: youtubeThumb("KpXesINIQc4"), alt: "The title card of PlayStation’s State of Play broadcast for 3 September 2026", credit: "PlayStation, YouTube", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Final Fantasy VII Revelation, the last part of Square Enix’s remake trilogy, comes to PlayStation 5 on 8 April 2027. The date came at PlayStation’s State of Play on 3 September, with about ten minutes of new gameplay showing the Highwind airship, chocobos and a grappling hook." },
+      { type: "h2", text: "More dates" },
+      { type: "p", text: "Metro 2039 showed its first console gameplay, captured on PS5 Pro, and is out on 4 February 2027. Until Dawn 2 follows on 28 January 2027, and Maneater 2 was a surprise reveal. For GTA VI fans there are two limited-edition DualSense controllers." },
+      { type: "quote", text: "Three dates, all in early 2027." },
+      { type: "p", text: "A State of Play Japan broadcast followed straight after. Across the two shows, PlayStation featured more than 30 games, and the main stream peaked at 982,400 viewers." },
+    ],
+    sources: [
+      { name: "Streams Charts: State of Play September 2026 viewership", url: "https://streamscharts.com/news/state-play-september-2026-viewership" },
+      { name: "Techloy: State of Play September 2026, everything announced", url: "https://www.techloy.com/playstation-state-of-play-september-2026-everything-announced/" },
+    ],
+  },
 ];
 
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.slug === slug);
@@ -361,7 +566,7 @@ export const article = (slug: string) => getArticle(slug)!;
 export const LEAD = article("vmas-2026-winners");
 export const LISTS = {
   latest: ARTICLES.slice(0, 6),
-  trending: ["gta-vi-countdown", "vmas-2026-winners", "marvels-wolverine-sales", "taylor-swift-the-life-of-a-showgirl-the-encore", "wardogs-launch-theburntpeanut"].map(article),
+  trending: ["gta-vi-countdown", "vmas-2026-winners", "onimusha-way-of-the-sword-launch", "miley-cyrus-bass-persuades-number-one", "avengers-endgame-encore-box-office"].map(article),
   mostRead: ["vmas-2026-winners", "gta-vi-countdown", "taylor-swift-the-life-of-a-showgirl-the-encore", "emmys-2026-winners", "z-event-2026-final-edition"].map(article),
   editorsPicks: ["paris-fashion-week-ss27", "tokyo-game-show-2026-typhoon", "blizzcon-2026-diablo-v-starcraft", "twitch-state-of-gaming-2026", "bts-arirang-world-tour-latin-america"].map(article),
   featured: ["vmas-2026-winners", "paris-fashion-week-ss27", "gta-vi-countdown", "z-event-2026-final-edition", "taylor-swift-the-life-of-a-showgirl-the-encore"].map(article),

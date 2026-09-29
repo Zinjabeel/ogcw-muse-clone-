@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, BookOpen, Play, ShoppingBag } from "lucide-react";
-import { article, ARTICLES, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Photo as PhotoData } from "@/data/content";
+import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play, ShoppingBag } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { article, ARTICLES, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData } from "@/data/content";
 import { ExploreMix } from "./explore-mix";
 import { CultureDeck } from "./culture-deck";
 import { GlowCard } from "@/components/ui/spotlight-card";
@@ -8,8 +9,9 @@ import { GlowCard } from "@/components/ui/spotlight-card";
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
 // system (Source Serif 4 headlines and text, Inter labels, accent colour).
-// Lead | two secondary stories | the Briefing rail and a song to check out,
-// then more news, the trendiest streamers, the shop and the Explore mix.
+// Six headline stories (three down the left side, the lead, two on the
+// right) beside the Briefing rail, then the More news carousel, the
+// trendiest streamers, the shop and the Explore mix.
 
 const sections = [
   { label: "All news", to: "/news" },
@@ -24,10 +26,13 @@ const sections = [
 
 const lead = article("vmas-2026-winners");
 const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
-const moreNews = ["bts-arirang-world-tour-latin-america", "taylor-swift-the-life-of-a-showgirl-the-encore", "marvels-wolverine-sales", "emmys-2026-winners"].map(article);
-// The OGCW Briefing: every other story, newest first
-const onFront = new Set([lead, ...secondary, ...moreNews].map((a) => a.slug));
-const briefing = ARTICLES.filter((a) => !onFront.has(a.slug));
+const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"].map(article);
+// Every other story, newest first, dealt in turn to the More news carousel
+// and the Briefing, so both run from this week back and nothing repeats
+const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
+const rest = ARTICLES.filter((a) => !onFront.has(a.slug));
+const moreNews = rest.filter((_, index) => index % 2 === 0);
+const briefing = rest.filter((_, index) => index % 2 === 1);
 const song = SONGS[0]!;
 // For the shop call-to-action card: one product from three of the shops
 const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
@@ -58,6 +63,116 @@ function Photo({ photo, className }: { photo: PhotoData; className?: string }) {
   );
 }
 
+function StoryCard({ story, photoClass, hidden = false }: { story: Article; photoClass: string; hidden?: boolean }) {
+  return (
+    <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card" tabIndex={hidden ? -1 : undefined}>
+      <Photo photo={story.photo} className={photoClass} />
+      <p className="bs-eyebrow">{story.kicker}</p>
+      <h4 className="bs-title">{story.title}</h4>
+      <ReadTime>{story.read}</ReadTime>
+    </Link>
+  );
+}
+
+// More news: the cards run on past both edges of the page column, so a
+// slice of the next and the previous card shows on each side, with arrows
+// that move a page of stories at a time. The row loops: the stories are
+// laid out three times, the row starts on the middle set and, once a scroll
+// settles in an outer set, jumps back to the same card in the middle one.
+// The outer sets are hidden from screen readers and the Tab key.
+function MoreNewsCarousel({ stories }: { stories: Article[] }) {
+  const section = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = section.current;
+    const row = track.current;
+    if (!el || !row) return;
+
+    const items = () => Array.from(row.children) as HTMLElement[];
+    const setWidth = () => {
+      const all = items();
+      return (all[stories.length]?.offsetLeft ?? 0) - (all[0]?.offsetLeft ?? 0);
+    };
+    const bleedLeft = () => parseFloat(getComputedStyle(row).paddingLeft) || 0;
+
+    // How far the row runs past the column: up to the screen edge, at most 160px
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      const viewport = document.documentElement.clientWidth;
+      el.style.setProperty("--bleed-l", `${Math.round(Math.max(0, Math.min(rect.left, 160)))}px`);
+      el.style.setProperty("--bleed-r", `${Math.round(Math.max(0, Math.min(viewport - rect.right, 160)))}px`);
+      const card = items()[0];
+      if (card) el.style.setProperty("--photo-h", `${Math.round((card.offsetWidth * 2) / 3)}px`);
+    };
+
+    // Keep the scroll position inside the middle set
+    const recentre = () => {
+      const width = setWidth();
+      if (!width) return;
+      if (row.scrollLeft < width * 0.5) row.scrollTo({ left: row.scrollLeft + width, behavior: "instant" });
+      else if (row.scrollLeft > width * 1.5) row.scrollTo({ left: row.scrollLeft - width, behavior: "instant" });
+    };
+
+    measure();
+    const start = requestAnimationFrame(() => {
+      measure();
+      const first = items()[stories.length];
+      if (first) row.scrollTo({ left: first.offsetLeft - bleedLeft(), behavior: "instant" });
+    });
+
+    let settle = 0;
+    const onScroll = () => { window.clearTimeout(settle); settle = window.setTimeout(recentre, 160); };
+    row.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(start);
+      window.clearTimeout(settle);
+      row.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measure);
+    };
+  }, [stories.length]);
+
+  // Move a page: as many whole cards as fit in the column
+  const page = (direction: 1 | -1) => {
+    const el = section.current;
+    const row = track.current;
+    const card = row?.children[0] as HTMLElement | undefined;
+    if (!el || !row || !card) return;
+    const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+    const step = card.offsetWidth + gap;
+    const perPage = Math.max(1, Math.floor((el.clientWidth + gap) / step));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    row.scrollBy({ left: direction * perPage * step, behavior: reduce ? "auto" : "smooth" });
+  };
+
+  return (
+    <section ref={section} className="bs-carousel" aria-labelledby="more-news-title" aria-roledescription="carousel">
+      <div className="bs-section-head">
+        <h3 id="more-news-title" className="bs-eyebrow">More news</h3>
+        <Link to="/news" className="bs-more">All stories</Link>
+      </div>
+      <div className="bs-carousel-stage">
+        <div className="bs-carousel-track" ref={track}>
+          {[0, 1, 2].flatMap((copy) =>
+            stories.map((story) => (
+              <article key={`${copy}-${story.slug}`} className="bs-carousel-item" aria-hidden={copy === 1 ? undefined : true}>
+                <StoryCard story={story} photoClass="bs-photo-more" hidden={copy !== 1} />
+              </article>
+            )),
+          )}
+        </div>
+        <button type="button" className="bs-carousel-arrow bs-carousel-prev" aria-label="Previous stories" onClick={() => page(-1)}>
+          <ChevronLeft size={20} strokeWidth={1.75} aria-hidden="true" />
+        </button>
+        <button type="button" className="bs-carousel-arrow bs-carousel-next" aria-label="More stories" onClick={() => page(1)}>
+          <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export function NewsFront() {
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
 
@@ -65,9 +180,10 @@ export function NewsFront() {
     <section className="broadsheet" aria-labelledby="news-front-title">
       <div className="bs-wrap">
         {/* Sections sit in bands of different widths on wide screens: the
-            front at 80%, More news and Explore at full width, the streamers
-            and the shop at 90% (see .bs-band in styles.css) */}
-        <div className="bs-band bs-band-80">
+            front runs wider than the page column, More news and Explore fill
+            the column, the streamers and the shop take 90% of it (see
+            .bs-band in styles.css) */}
+        <div className="bs-band bs-band-front">
         <header className="bs-masthead">
           <p className="bs-flag">
             <span suppressHydrationWarning>{today}</span>
@@ -91,7 +207,7 @@ export function NewsFront() {
         </nav>
 
         <div className="bs-front">
-          <article className="bs-col bs-reveal">
+          <article className="bs-col bs-col-lead bs-reveal">
             <Link to="/news/$slug" params={{ slug: lead.slug }} className="bs-card">
               <p className="bs-eyebrow">{lead.kicker}</p>
               <h3 className="bs-title bs-title-lead">{lead.title}</h3>
@@ -127,6 +243,21 @@ export function NewsFront() {
             ))}
           </div>
 
+          {/* Three more headline stories: a column down the left on wide
+              screens, a row under the lead on smaller ones */}
+          <div className="bs-col bs-col-side">
+            {side.map((story) => (
+              <article key={story.slug} className="bs-reveal">
+                <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
+                  <Photo photo={story.photo} className="bs-photo-secondary" />
+                  <p className="bs-eyebrow">{story.kicker}</p>
+                  <h3 className="bs-title">{story.title}</h3>
+                  <ReadTime>{story.read}</ReadTime>
+                </Link>
+              </article>
+            ))}
+          </div>
+
           <aside className="bs-col bs-col-rail bs-reveal" aria-labelledby="briefing-title">
             <div className="bs-briefing">
               <p id="briefing-title" className="bs-briefing-head">
@@ -134,7 +265,7 @@ export function NewsFront() {
                 <span className="bs-dot" aria-hidden="true" />
               </p>
               <div className="bs-briefing-body">
-                <p className="bs-briefing-intro">Everything else worth knowing this week, newest first.</p>
+                <p className="bs-briefing-intro">Everything else worth knowing this month, newest first.</p>
                 <ol className="bs-schedule">
                   {briefing.map((item) => (
                     <li key={item.slug}>
@@ -160,24 +291,7 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
-        <section aria-labelledby="more-news-title">
-          <div className="bs-section-head">
-            <h3 id="more-news-title" className="bs-eyebrow">More news</h3>
-            <Link to="/news" className="bs-more">All stories</Link>
-          </div>
-          <div className="bs-more-news">
-            {moreNews.map((story) => (
-              <article key={story.slug} className="bs-reveal">
-                <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
-                  <Photo photo={story.photo} className="bs-photo-more" />
-                  <p className="bs-eyebrow">{story.kicker}</p>
-                  <h4 className="bs-title">{story.title}</h4>
-                  <ReadTime>{story.read}</ReadTime>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section>
+        <MoreNewsCarousel stories={moreNews} />
 
         <hr className="bs-rule bs-band bs-band-90" />
 
