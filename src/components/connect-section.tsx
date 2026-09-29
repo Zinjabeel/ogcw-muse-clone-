@@ -6,11 +6,11 @@ import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 
 // Three columns under the news front (requirements doc):
 // About OGCW (who we are, vision, what we cover, social links),
-// Newsletter (sign-up with the doc's CTA and what's in it), and
+// Newsletter (sign-up with the doc’s CTA and what’s in it), and
 // Business, Partnerships & Contact (Work With OGCW areas + business email).
 
 
-const newsletterTopics = ["The week's biggest stories", "Trending", "New music", "Pop culture", "Fashion", "Film & TV", "Sport", "OGCW exclusives"];
+const newsletterTopics = ["The week’s biggest stories", "Trending", "New music", "Pop culture", "Fashion", "Film & TV", "Sport", "OGCW exclusives"];
 
 // TODO: point these at the Work With OGCW landing page and the contact page once they exist.
 const workWith = [
@@ -50,7 +50,7 @@ export function ConnectSection() {
             OGCW is an independent platform for culture and the stories around it. We cover music, fashion, film &amp; TV, sport and pop culture, reported by the people shaping them.
           </p>
           <p className="ogcw-connect-copy">
-            Our idea is simple: bring culture and what's happening right now, from all over the world, together in one place.
+            Our idea is simple: bring culture and what’s happening right now, from all over the world, together in one place.
           </p>
           <nav className="ogcw-connect-socials" aria-label="Follow OGCW">
             {SOCIALS.map((social) => (
@@ -67,7 +67,7 @@ export function ConnectSection() {
           <p className="ogcw-connect-label">Newsletter</p>
           <h2 id="newsletter-title" className="ogcw-connect-title">Stay in the culture.</h2>
           <p className="ogcw-connect-copy">Get the biggest stories from OGCW directly to your inbox.</p>
-          <ul className="ogcw-connect-topics" aria-label="What's in it">
+          <ul className="ogcw-connect-topics" aria-label="What’s in it">
             {newsletterTopics.map((topic) => <li key={topic}>{topic}</li>)}
           </ul>
           <NewsletterForm />

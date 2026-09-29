@@ -9,10 +9,10 @@ import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 
 // Site footer, based on the "Footer 2" component: four link columns, a
 // divider, social buttons + app badges, another divider and the copyright.
-// Filled with OGCW's own links; the template's Linktree items don't apply.
-// Lucide's brand icons are swapped for the site's Instagram, TikTok,
+// Filled with OGCW’s own links; the template’s Linktree items don’t apply.
+// Lucide’s brand icons are swapped for the site’s Instagram, TikTok,
 // YouTube and X icons (lucide has no TikTok). OGCW has no app yet, so the
-// App Store / Google Play badges are marked "Coming soon" and don't link.
+// App Store / Google Play badges are marked "Coming soon" and don’t link.
 
 type FooterLink =
   | { label: string; page: "/news" | "/music" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/blog" | "/about" }
@@ -90,7 +90,7 @@ const storeLogos = {
     "M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z",
 };
 
-// App badges, styled like the template's, but not links until the app exists.
+// App badges, styled like the template’s, but not links until the app exists.
 function AppBadge({ store }: { store: "apple" | "google" }) {
   return (
     <span className="app-badge" aria-label={`${store === "apple" ? "App Store" : "Google Play"}: coming soon`}>
@@ -103,7 +103,7 @@ function AppBadge({ store }: { store: "apple" | "google" }) {
   );
 }
 
-// The footer's contents slide up and fade in the first time it scrolls into
+// The footer’s contents slide up and fade in the first time it scrolls into
 // view. It only hides them once JavaScript is running and the footer is still
 // below the fold, so it never stays invisible; reduced-motion users skip it.
 function useScrollReveal<T extends HTMLElement>() {

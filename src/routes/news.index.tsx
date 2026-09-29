@@ -32,7 +32,7 @@ function News() {
 
   return (
     <SiteShell>
-      <PageIntro kicker="Latest dispatches" title="NEWS" copy="Culture, reported from the inside: the artists, rooms, objects and ideas moving things forward, updated daily." />
+      <PageIntro kicker="Latest dispatches" title="News" copy="Culture, reported from the inside: the artists, rooms, objects and ideas moving things forward, updated daily." />
       <main className="page-wrap pb-24">
         <div className="og-filters" role="group" aria-label="Filter stories">
           {FILTERS.map((f) => (

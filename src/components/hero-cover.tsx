@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import centralCeePhoto from "../assets/central-cee.jpg";
-import drakePhoto from "../assets/drake.jpg.asset.json";
-import vedanPhoto from "../assets/vedan.jpg.asset.json";
+import drakePhoto from "../assets/drake.jpg";
+import vedanPhoto from "../assets/vedan.jpg";
 import musicHero from "../assets/ogcw-hero-music.jpg";
 
 // Home hero, set like a magazine cover rather than a carousel: one cover
@@ -19,8 +19,8 @@ const DRAKE_TICKETS = "https://www.ticketmaster.com/search?q=drake";
 type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
 
 const rail: RailItem[] = [
-  { kicker: "Live", title: "Drake, live in concert", meta: "Date TBA · Tickets", image: drakePhoto.url, pos: "50% 20%", live: true },
-  { kicker: "New voices", title: "Vedan and the reach of regional rap", meta: "5 min read", image: vedanPhoto.url, pos: "50% 30%", slug: "vedan-and-the-reach-of-regional-rap" },
+  { kicker: "Live", title: "Drake, live in concert", meta: "Date TBA · Tickets", image: drakePhoto, pos: "50% 20%", live: true },
+  { kicker: "New voices", title: "Vedan and the reach of regional rap", meta: "5 min read", image: vedanPhoto, pos: "50% 30%", slug: "vedan-and-the-reach-of-regional-rap" },
   { kicker: "Nightlife", title: "The listening bars changing nightlife", meta: "6 min read", image: musicHero, pos: "40% 40%", slug: "the-listening-bars-changing-nightlife" },
 ];
 

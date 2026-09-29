@@ -47,7 +47,7 @@ export function HeroGallery() {
     return () => observer.disconnect();
   }, []);
 
-  // The active picture is the one closest to the row's left edge
+  // The active picture is the one closest to the row’s left edge
   useEffect(() => {
     const el = track.current;
     if (!el) return;
@@ -110,7 +110,7 @@ export function HeroGallery() {
               to="/news/$slug"
               params={{ slug: story.slug }}
               className="gallery-link"
-              // A picture that isn't in front yet slides into place first
+              // A picture that isn’t in front yet slides into place first
               onClick={(event) => { if (index !== active) { event.preventDefault(); goTo(index); } }}
             >
               <span className="gallery-frame">

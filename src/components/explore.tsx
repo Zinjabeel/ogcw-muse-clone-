@@ -3,15 +3,15 @@ import { useRef, useState, type KeyboardEvent } from "react";
 import { LISTS, type Article } from "@/data/content";
 import { Img } from "./cards";
 
-// Explore / Discover tabs: Latest, Trending, Most Read, Editor's Picks and
+// Explore / Discover tabs: Latest, Trending, Most Read, Editor’s Picks and
 // Featured, so readers arriving from social or search keep reading. Used at
-// the end of the news front and on /explore. Uses the news front's bs-* styles.
+// the end of the news front and on /explore. Uses the news front’s bs-* styles.
 
 const tabs: { id: string; label: string; stories: Article[] }[] = [
   { id: "latest", label: "Latest", stories: LISTS.latest },
   { id: "trending", label: "Trending", stories: LISTS.trending },
   { id: "most-read", label: "Most Read", stories: LISTS.mostRead },
-  { id: "editors-picks", label: "Editor's Picks", stories: LISTS.editorsPicks },
+  { id: "editors-picks", label: "Editor’s Picks", stories: LISTS.editorsPicks },
   { id: "featured", label: "Featured", stories: LISTS.featured },
 ];
 

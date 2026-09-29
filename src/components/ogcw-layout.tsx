@@ -8,7 +8,7 @@ import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow
 import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
 
-// Header navigation. Between 1024 and 1279px there isn't room for all eight,
+// Header navigation. Between 1024 and 1279px there isn’t room for all eight,
 // so Trends, Blog and About move into "More" (wide: true marks them).
 const nav = [
   { label: "News", to: "/news" },
@@ -50,11 +50,14 @@ function MoreMenu({ pathname }: { pathname: string }) {
     return () => { document.removeEventListener("pointerdown", onPointer); document.removeEventListener("keydown", onKey); };
   }, [open]);
 
-  const active = isCurrent(pathname, "/explore") || pathname.startsWith("/info/") || nav.some((item) => "wide" in item && isCurrent(pathname, item.to));
+  // Explore and the info pages always live in More; Trends, Blog and About
+  // only below 1280px, so those light More up on narrow screens only
+  const active = isCurrent(pathname, "/explore") || pathname.startsWith("/info/");
+  const activeNarrow = nav.some((item) => "wide" in item && isCurrent(pathname, item.to));
 
   return (
     <div ref={root} className="nav-more">
-      <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
+      <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""} ${activeNarrow ? "nav-more-narrow-active" : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
         More <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
@@ -81,9 +84,9 @@ function MoreMenu({ pathname }: { pathname: string }) {
   );
 }
 
-// One menu for the whole site, opened from the header's menu button (and
-// anything else that calls openMenu).
-const SiteMenuContext = createContext({ menuOpen: false, openMenu: () => {} });
+// One menu and one search for the whole site, opened from the header’s
+// buttons (and anything else that calls openMenu or openSearch).
+const SiteMenuContext = createContext({ menuOpen: false, openMenu: () => {}, openSearch: () => {} });
 export const useSiteMenu = () => useContext(SiteMenuContext);
 
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -96,7 +99,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const closeSearch = useCallback(() => setSearchOpen(false), []);
 
   return (
-    <SiteMenuContext.Provider value={{ menuOpen, openMenu }}>
+    <SiteMenuContext.Provider value={{ menuOpen, openMenu, openSearch }}>
       <div className="site-root min-h-screen bg-background text-foreground">
         <BackgroundGradientGlow />
         <header className="site-header sticky top-0 z-50">
@@ -137,8 +140,18 @@ export function SiteShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageIntro({ kicker, title, copy }: { kicker: string; title: string; copy: string }) {
-  return <section className="page-wrap pb-12 pt-14 lg:pb-16 lg:pt-20"><p className="section-kicker">{kicker}</p><div className="mt-5 grid gap-6 lg:grid-cols-[2fr_1fr] lg:items-end"><h1 className="font-display text-6xl leading-[.9] sm:text-8xl lg:text-9xl">{title}</h1><p className="max-w-lg text-base leading-relaxed text-muted-foreground">{copy}</p></div></section>;
+/** Page opener: kicker, sentence-case serif title and a short intro. `compact`
+ *  for the small info pages, where a poster-size title would dwarf the text. */
+export function PageIntro({ kicker, title, copy, compact = false }: { kicker: string; title: string; copy: string; compact?: boolean }) {
+  return (
+    <section className={`page-wrap page-intro ${compact ? "page-intro-compact" : ""}`}>
+      <p className="section-kicker">{kicker}</p>
+      <div className="page-intro-grid">
+        <h1 className="page-intro-title">{title}</h1>
+        <p className="page-intro-copy">{copy}</p>
+      </div>
+    </section>
+  );
 }
 
 export function StoryLink({ to = "/news", children }: { to?: "/news" | "/trends" | "/blog" | "/about"; children: ReactNode }) {

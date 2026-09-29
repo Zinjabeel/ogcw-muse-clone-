@@ -1,4 +1,4 @@
-// OGCW's social channels, in one place so the hero, menu and footer share them.
+// OGCW’s social channels, in one place so the hero, menu and footer share them.
 // TODO: replace the hrefs with the real OGCW profile URLs.
 // Icon paths from Simple Icons (CC0).
 

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/originals/")({
   head: () => ({
     meta: [
       { title: "OGCW Originals — OGCW" },
-      { name: "description", content: "Exclusive OGCW-made video: interviews, reportage, lists and analysis you won't find anywhere else." },
+      { name: "description", content: "Exclusive OGCW-made video: interviews, reportage, lists and analysis you won’t find anywhere else." },
       { property: "og:title", content: "OGCW Originals" },
       { property: "og:type", content: "website" },
     ],
@@ -26,7 +26,7 @@ function Originals() {
 
   return (
     <SiteShell>
-      <PageIntro kicker="OGCW Originals" title="ORIGINALS" copy="Exclusive OGCW-made video: interviews, reportage, countdowns and short documentaries you won't find anywhere else." />
+      <PageIntro kicker="OGCW Originals" title="Originals" copy="Exclusive OGCW-made video: interviews, reportage, countdowns and short documentaries you won’t find anywhere else." />
       <main className="page-wrap pb-24">
         {featured && (
           <Link to="/originals/$slug" params={{ slug: featured.slug }} className="og-feature">

@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 // Spotlight card: a border and backdrop glow that follows the pointer.
-// From the owner's snippet; changes: a "yellow" glow (the OGCW accent,
+// From the owner’s snippet; changes: a "yellow" glow (the OGCW accent,
 // #FFE600, hue ~54); no `touch-action: none`, which blocked page scrolling
 // when a swipe started on a card; and the corner radius reads --radius
-// directly, because Tailwind's rounded-2xl is built on the site theme's own
+// directly, because Tailwind’s rounded-2xl is built on the site theme’s own
 // --radius (a length) and broke when this card set --radius to a bare number.
-// The glow uses background-attachment: fixed, so don't put the card inside a
+// The glow uses background-attachment: fixed, so don’t put the card inside a
 // transformed or filtered parent.
 
 interface GlowCardProps {

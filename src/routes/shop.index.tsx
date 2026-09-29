@@ -20,7 +20,7 @@ export const Route = createFileRoute("/shop/")({
 function ShopIndex() {
   return (
     <SiteShell>
-      <PageIntro kicker="OGCW Shop" title="SHOP" copy="Four shops, one edit: the pieces behind the stories, picked by the OGCW style desk and bought straight from the retailer." />
+      <PageIntro kicker="OGCW Shop" title="Shop" copy="Four shops, one edit: the pieces behind the stories, picked by the OGCW style desk and bought straight from the retailer." />
       <main className="page-wrap pb-24">
         <div className="og-grid-4 og-shop-grid">
           {SHOPS.map((shop) => (

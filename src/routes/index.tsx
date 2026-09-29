@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   return <SiteShell>
-    {/* Both heroes render; the hero switcher's choice (html data-hero) decides which shows */}
+    {/* Both heroes render; the hero switcher’s choice (html data-hero) decides which shows */}
     <HeroCover />
     <HeroGallery />
 

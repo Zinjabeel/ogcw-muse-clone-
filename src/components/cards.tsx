@@ -48,13 +48,12 @@ export function StoryRow({ story, index }: { story: Article; index?: number }) {
   );
 }
 
-/** Typographic Originals poster: a tone field with the series and title set on
- *  it, or (with `still`) a darkened photo under the same type. The play pill
- *  carries the running time. */
-export function Poster({ episode, size = "md", play = true, still }: { episode: Episode; size?: "md" | "lg"; play?: boolean; still?: Photo }) {
+/** Originals poster: the episode’s still, darkened, with the series and title
+ *  set on it. The play pill carries the running time. */
+export function Poster({ episode, size = "md", play = true }: { episode: Episode; size?: "md" | "lg"; play?: boolean }) {
   return (
-    <span className={`og-poster og-poster-${size}`} data-tone={still ? "still" : episode.tone}>
-      {still && <Img photo={still} className="og-poster-still" />}
+    <span className={`og-poster og-poster-${size}`}>
+      <Img photo={episode.still} className="og-poster-still" />
       <span className="og-poster-top">
         <span className="og-poster-mark">OGCW Originals</span>
         <span>{episode.series} · Ep. {episode.number}</span>
@@ -112,7 +111,7 @@ export const hitTitle = (hit: Hit) => (hit.kind === "shop" ? `Shop ${hit.item.na
 export const hitSub = (hit: Hit) =>
   hit.kind === "article" ? `${hit.item.kicker} · ${hit.item.read}` : hit.kind === "episode" ? `${hit.item.series} · ${hit.item.length}` : hit.item.tagline;
 
-/** The "Watch" block under a front page's list: one Originals episode. */
+/** The "Watch" block under a front page’s list: one Originals episode. */
 export function WatchNext({ episode }: { episode: Episode }) {
   return (
     <div className="og-watch">
@@ -122,7 +121,7 @@ export function WatchNext({ episode }: { episode: Episode }) {
   );
 }
 
-/** A product from a shop's edit, linking out to the retailer. */
+/** A product from a shop’s edit, linking out to the retailer. */
 export function ProductCard({ product, shop, showShop = false }: { product: Product; shop: Shop; showShop?: boolean }) {
   return (
     <a className="og-product" href={product.url} target="_blank" rel="noopener noreferrer">

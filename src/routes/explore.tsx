@@ -12,7 +12,7 @@ export const Route = createFileRoute("/explore")({
   head: () => ({
     meta: [
       { title: "Explore — OGCW" },
-      { name: "description", content: "Search OGCW, browse what's trending and follow curated reading lists across music, culture, Originals and the shop." },
+      { name: "description", content: "Search OGCW, browse what’s trending and follow curated reading lists across music, culture, Originals and the shop." },
       { property: "og:title", content: "Explore — OGCW" },
       { property: "og:type", content: "website" },
     ],
@@ -35,7 +35,7 @@ function ExplorePage() {
 
   return (
     <SiteShell>
-      <PageIntro kicker="Explore" title="EXPLORE" copy="Search everything, see what people are reading right now, or follow one of our reading lists." />
+      <PageIntro kicker="Explore" title="Explore" copy="Search everything, see what people are reading right now, or follow one of our reading lists." />
       <main className="page-wrap pb-24">
         <div className="og-explore-search">
           <Search size={22} strokeWidth={1.5} aria-hidden="true" />

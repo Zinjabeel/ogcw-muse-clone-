@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { articlesIn, ARTICLES, EPISODES, LISTS, SHOPS, type Article, type Episode, type Photo, type Shop } from "@/data/content";
 import { Poster } from "./cards";
 
-// Site menu, modelled on complex.com's: a 380px drawer from the left over a
-// blurred, darkened page. Section rows open a sub-panel of that section's
+// Site menu, modelled on complex.com’s: a 380px drawer from the left over a
+// blurred, darkened page. Section rows open a sub-panel of that section’s
 // stories, episodes or shops (each linking to its own page); a "Featured"
 // strip and utility links sit below the list.
 
@@ -77,7 +77,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<Section | null>(null);
   const [closing, setClosing] = useState(false);
-  // The section tab for the page you're on gets the active style
+  // The section tab for the page you’re on gets the active style
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const currentLabel = sections.find((s) => pathname === s.to || pathname.startsWith(`${s.to}/`))?.label;
 
@@ -131,7 +131,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
         <div className="drawer-panels" data-sub={active ? "" : undefined}>
           {/* Main panel: sections, featured strip, utility links */}
           <div className="drawer-panel drawer-panel-main" inert={active !== null}>
-            {/* Section list styled as "printstream" tabs (Uiverse.io by bob_3989); the current page's tab is active */}
+            {/* Section list styled as "printstream" tabs (Uiverse.io by bob_3989); the current page’s tab is active */}
             <div className="cs2-printstream-ui drawer-tabs">
               <ul className="sidebar drawer-sections">
                 {sections.map((section) => {
@@ -185,7 +185,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             </ul>
           </div>
 
-          {/* Sub panel: the chosen section's stories, episodes or shops */}
+          {/* Sub panel: the chosen section’s stories, episodes or shops */}
           <div className="drawer-panel drawer-panel-sub" inert={active === null} aria-hidden={active === null}>
             {active && (
               <>

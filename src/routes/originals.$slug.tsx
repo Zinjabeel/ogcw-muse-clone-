@@ -3,7 +3,7 @@ import { ArrowLeft, Bell, Play } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { EpisodeCard, Poster, StoryRow } from "../components/cards";
-import { EPISODES, getArticle, getEpisode, type Episode, type Photo } from "../data/content";
+import { EPISODES, getArticle, getEpisode, type Episode } from "../data/content";
 
 // One OGCW Originals episode: the player, then the episode text, chapters and
 // credits, related stories, and "Latest episodes" to keep watching.
@@ -28,19 +28,19 @@ export const Route = createFileRoute("/originals/$slug")({
 
 // No episodes are online yet, so the player shows a premiere notice rather
 // than pretending to play. TODO: embed the real video once it exists.
-function Player({ episode, still }: { episode: Episode; still?: Photo }) {
+function Player({ episode }: { episode: Episode }) {
   const [notice, setNotice] = useState(false);
   return (
     <div className="og-player">
       <button type="button" className="og-player-button" onClick={() => setNotice(true)} aria-label={`Play ${episode.title}`}>
-        {still ? <Poster episode={episode} size="lg" play={false} still={still} /> : <Poster episode={episode} size="lg" play={false} />}
+        <Poster episode={episode} size="lg" play={false} />
         <span className="og-player-play" aria-hidden="true"><Play size={30} fill="currentColor" strokeWidth={0} /></span>
       </button>
       {notice && (
         <div className="og-player-notice" role="status">
           <Bell size={22} aria-hidden="true" />
           <p className="og-player-notice-title">This episode premieres soon</p>
-          <p className="og-player-notice-copy">Sign up to the newsletter and we'll tell you the moment it's live.</p>
+          <p className="og-player-notice-copy">Sign up to the newsletter and we’ll tell you the moment it’s live.</p>
           <div className="og-player-notice-actions">
             <Link to="/" hash="newsletter-title" className="og-cta">Get notified</Link>
             <button type="button" className="og-text-button" onClick={() => setNotice(false)}>Close</button>
@@ -68,7 +68,7 @@ function EpisodePage() {
             <span>{episode.series}</span>
           </nav>
 
-          {related[0] ? <Player episode={episode} still={related[0].photo} /> : <Player episode={episode} />}
+          <Player episode={episode} />
 
           <div className="og-episode-layout">
             <div>

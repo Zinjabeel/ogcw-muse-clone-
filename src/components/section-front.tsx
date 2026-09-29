@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageIntro } from "./ogcw-layout";
 import { EpisodeCard, Img, StoryCard, StoryRow, WatchNext } from "./cards";
 import { articlesIn, drakePhoto, EPISODES, formatDate, SECTIONS, TICKETS, type SectionId } from "@/data/content";
@@ -12,7 +12,7 @@ export function SectionFront({ section }: { section: SectionId }) {
   const stories = articlesIn(section);
   const [lead, ...rest] = stories;
   const other: SectionId = section === "music" ? "culture" : "music";
-  // Originals tied to this section's stories first, then the newest others
+  // Originals tied to this section’s stories first, then the newest others
   const tied = EPISODES.filter((e) => e.related.some((slug) => stories.some((s) => s.slug === slug)));
   const related = [...tied, ...EPISODES.filter((e) => !tied.includes(e))].slice(0, 4);
   const [watch, ...more] = related;
@@ -20,7 +20,7 @@ export function SectionFront({ section }: { section: SectionId }) {
 
   return (
     <>
-      <PageIntro kicker={`The ${SECTIONS[section].label.toLowerCase()} desk`} title={SECTIONS[section].label.toUpperCase()} copy={SECTIONS[section].intro} />
+      <PageIntro kicker={`The ${SECTIONS[section].label.toLowerCase()} desk`} title={SECTIONS[section].label} copy={SECTIONS[section].intro} />
       <main className="page-wrap pb-24">
         <div className="og-news-top">
           <Link to="/news/$slug" params={{ slug: lead.slug }} className="og-lead">
@@ -43,7 +43,7 @@ export function SectionFront({ section }: { section: SectionId }) {
 
         {section === "music" && (
           <a className="og-live" href={TICKETS.drake} target="_blank" rel="noopener noreferrer">
-            <Img photo={{ src: drakePhoto.url, alt: "Drake on stage, pointing to the crowd", crop: { pos: "30% 20%", zoom: 1.35 } }} className="og-live-photo" />
+            <Img photo={{ src: drakePhoto, alt: "Drake on stage, pointing to the crowd", crop: { pos: "30% 20%", zoom: 1.35 } }} className="og-live-photo" />
             <span className="og-live-text">
               <span className="og-kicker">Live · Tickets</span>
               <span className="og-live-title">Drake, live in concert</span>
@@ -76,14 +76,18 @@ export function SectionFront({ section }: { section: SectionId }) {
           </section>
         )}
 
-        <div className="og-next">
-          <span className="og-kicker">Keep reading</span>
-          {other === "music" ? (
-            <Link to="/music" className="og-next-link">{SECTIONS.music.label} <span>{SECTIONS.music.intro}</span></Link>
-          ) : (
-            <Link to="/culture" className="og-next-link">{SECTIONS.culture.label} <span>{SECTIONS.culture.intro}</span></Link>
-          )}
-        </div>
+        <section className="og-next" aria-labelledby="keep-reading">
+          <div>
+            <p id="keep-reading" className="og-kicker">Keep reading</p>
+            <Link to={other === "music" ? "/music" : "/culture"} className="og-next-link">
+              <span className="og-next-name">{SECTIONS[other].label} <ArrowRight className="og-next-arrow" aria-hidden="true" /></span>
+              <span className="og-next-intro">{SECTIONS[other].intro}</span>
+            </Link>
+          </div>
+          <ol className="og-aside-list og-next-list">
+            {articlesIn(other).slice(0, 3).map((story) => <li key={story.slug}><StoryRow story={story} /></li>)}
+          </ol>
+        </section>
       </main>
     </>
   );

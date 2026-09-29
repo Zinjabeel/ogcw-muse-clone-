@@ -31,26 +31,26 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     body: (
       <dl className="info-faq">
         <dt>What is OGCW?</dt>
-        <dd>OGCW, One Great Culture World, is an independent platform for culture and the stories around it. The idea is to bring culture and what's happening right now, from all over the world, together in one place.</dd>
+        <dd>OGCW, One Great Culture World, is an independent platform for culture and the stories around it. The idea is to bring culture and what’s happening right now, from all over the world, together in one place.</dd>
         <dt>What do you cover?</dt>
-        <dd>Music, fashion, film &amp; TV, sport and pop culture, plus OGCW Originals: our own interviews, reportage, lists and analysis.</dd>
+        <dd>Music, from rap to rumba, and culture: style, design, nightlife, architecture and print. Plus OGCW Originals, our own interviews, reportage, lists and short documentaries, and the OGCW Shop.</dd>
         <dt>How do I send you a story or a tip?</dt>
-        <dd>Email <Mail subject="Submit a story">{BUSINESS_EMAIL}</Mail> with "Submit a story" in the subject.</dd>
-        <dt>I'm an artist or a label. Can I send you music?</dt>
-        <dd>Yes. Email <Mail subject="Music submissions">{BUSINESS_EMAIL}</Mail> with "Music submissions" in the subject and a link to the release.</dd>
+        <dd>Email <Mail subject="Submit a story">{BUSINESS_EMAIL}</Mail> with “Submit a story” in the subject.</dd>
+        <dt>I’m an artist or a label. Can I send you music?</dt>
+        <dd>Yes. Email <Mail subject="Music submissions">{BUSINESS_EMAIL}</Mail> with “Music submissions” in the subject and a link to the release.</dd>
         <dt>How do I advertise or partner with OGCW?</dt>
-        <dd>Email <Mail subject="Advertising">{BUSINESS_EMAIL}</Mail> with "Advertising" or "Partnerships" in the subject.</dd>
+        <dd>Email <Mail subject="Advertising">{BUSINESS_EMAIL}</Mail> with “Advertising” or “Partnerships” in the subject.</dd>
         <dt>How do I get the newsletter?</dt>
         <dd>Sign up in the Newsletter box on the <Link to="/" hash="newsletter-title">home page</Link>. It launches soon.</dd>
         <dt>Something of mine is on OGCW and I want it removed.</dt>
-        <dd>Email <Mail subject="Copyright / Content removal">{BUSINESS_EMAIL}</Mail> with "Copyright / Content removal" in the subject and a link to the page.</dd>
+        <dd>Email <Mail subject="Copyright / Content removal">{BUSINESS_EMAIL}</Mail> with “Copyright / Content removal” in the subject and a link to the page.</dd>
       </dl>
     ),
   },
   help: {
     kicker: "Help",
     title: "How can we help?",
-    intro: "Pick what you need and we'll get it to the right person.",
+    intro: "Pick what you need and we’ll get it to the right person.",
     body: (
       <>
         <p>Most answers are in the <Link to="/info/$slug" params={{ slug: "faq" }}>FAQ</Link>. Otherwise, email us with one of these subjects:</p>
@@ -72,7 +72,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     body: (
       <>
         <h2>Name</h2>
-        <p>Write OGCW in capitals. In full it's One Great Culture World.</p>
+        <p>Write OGCW in capitals. In full it’s One Great Culture World.</p>
         <h2>Colours</h2>
         <ul className="info-swatches">
           {[
@@ -89,7 +89,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>Type</h2>
         <p>Source Serif 4 for headlines and reading text; Inter for labels, navigation and buttons.</p>
         <h2>Assets</h2>
-        <p>For logos and brand files, email <Mail subject="Brand assets">{BUSINESS_EMAIL}</Mail> with "Brand assets" in the subject.</p>
+        <p>For logos and brand files, email <Mail subject="Brand assets">{BUSINESS_EMAIL}</Mail> with “Brand assets” in the subject.</p>
       </>
     ),
   },
@@ -99,7 +99,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     intro: "For journalists and media.",
     body: (
       <>
-        <p>For interviews, comment or information about OGCW, email <Mail subject="Press">{BUSINESS_EMAIL}</Mail> with "Press" in the subject.</p>
+        <p>For interviews, comment or information about OGCW, email <Mail subject="Press">{BUSINESS_EMAIL}</Mail> with “Press” in the subject.</p>
         <p>Brand guidance is on the <Link to="/info/$slug" params={{ slug: "brand" }}>brand page</Link>.</p>
       </>
     ),
@@ -108,7 +108,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     kicker: "Company",
     title: "Testimonials",
     intro: "What artists, brands and readers say about working with OGCW.",
-    body: comingSoon("We're collecting these now and will publish them here soon. Worked with us and want to share how it went? We'd love to hear it.", "Testimonial"),
+    body: comingSoon("We’re collecting these now and will publish them here soon. Worked with us and want to share how it went? We’d love to hear it.", "Testimonial"),
   },
   terms: {
     kicker: "Legal",
@@ -144,7 +144,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <li>Central Cee by 200izo, via Wikimedia Commons, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Cropped.</li>
         <li>Drake by The Come Up Show, licensed <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>. Cropped.</li>
         <li>Shop photos via <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), under the Unsplash License.</li>
-        <li>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we'll fix it.</li>
+        <li>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</li>
       </ul>
     ),
   },
