@@ -308,7 +308,7 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 @property --tone { syntax: "<color>"; inherits: true; initial-value: #6b5a4a; }
 .gallery {
   --wash: 42%;
-  --card-w: clamp(250px, 23vw, 350px);
+  --card-w: clamp(240px, min(30vw, (100svh - 290px) * .75), 440px);
   position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
   min-height: calc(100svh - 3.5rem); padding-block: clamp(28px, 5vh, 56px) clamp(56px, 10vh, 120px);
   background: color-mix(in srgb, var(--tone) var(--wash), var(--ogcw-bg)); color: var(--ogcw-text); font-family: var(--ogcw-ui);
@@ -324,42 +324,59 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 :root:is([data-theme="gold"], [data-theme="aurora"]) .gallery-bg::before { mix-blend-mode: multiply; opacity: .25; }
 .gallery-bg::after { content: ""; position: absolute; inset: 0; z-index: 2; background: linear-gradient(to bottom, color-mix(in srgb, var(--ogcw-bg) 35%, transparent) 0%, transparent 22%, transparent 62%, var(--ogcw-bg) 100%); }
 
-/* The row: each card can scroll to the exact middle */
-.gallery-track {
-  display: flex; align-items: center; gap: clamp(14px, 1.6vw, 24px); margin: 0;
-  padding: 28px calc(50% - var(--card-w) / 2) 36px; list-style: none;
-  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+/* The stage: every card sits on the middle of the stage and is moved into
+   its place by --x (its centre, in card widths from the middle) and --s
+   (its size). Changing the current card changes those two numbers, and the
+   cards glide to their new places. The row fades out towards the screen
+   edges. --card-w is the middle card's width: about a quarter of the
+   screen, kept short enough to fit the hero's height. */
+.gallery-cards {
+  /* The padding gives the cards' shadows and hover lift room inside the fade mask */
+  position: relative; box-sizing: content-box; height: calc(var(--card-w) * 4 / 3); margin: -30px 0 -76px; padding: 50px 0 120px; list-style: none;
+  touch-action: pan-y; user-select: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
 }
-.gallery-track::-webkit-scrollbar { display: none; }
-.gallery-card { flex: none; width: var(--card-w); scroll-snap-align: center; transition: opacity .6s ease, transform .6s cubic-bezier(.2, .8, .2, 1); }
-.gallery-card:not([aria-current]) { opacity: .62; transform: scale(.92); }
-.gallery-card-link {
-  position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 18px; background: #111;
-  box-shadow: 0 18px 50px -24px rgb(0 0 0 / .55), 0 0 0 1px rgb(255 255 255 / .06) inset;
-  transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s ease;
+.gallery-card {
+  position: absolute; top: 50px; left: 50%; width: var(--card-w);
+  transform: translateX(-50%) translateX(calc(var(--x) * var(--card-w))) scale(var(--s));
+  transition: transform 1s cubic-bezier(.65, 0, .25, 1), opacity 1s ease, filter 1s ease;
 }
-.gallery-card-link img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .9s cubic-bezier(.2, .8, .2, 1); }
-.gallery-card-link::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(6 6 6 / .96) 0%, rgb(6 6 6 / .88) 34%, rgb(6 6 6 / .55) 56%, rgb(6 6 6 / .12) 78%, transparent 100%); }
-/* Pop under the pointer (and on keyboard focus) */
-.gallery-card:hover { opacity: 1; }
-.gallery-card-link:hover, .gallery-card-link:focus-visible { transform: translateY(-10px) scale(1.025); box-shadow: 0 36px 70px -26px rgb(0 0 0 / .7), 0 0 0 1px color-mix(in srgb, var(--tone) 60%, #fff) inset; outline: none; }
-.gallery-card-link:hover img, .gallery-card-link:focus-visible img { transform: scale(1.06); }
-.gallery-card-link:focus-visible { box-shadow: 0 0 0 3px var(--ogcw-accent), 0 36px 70px -26px rgb(0 0 0 / .7); }
+/* Neighbours dim a little, the outer cards more */
+.gallery-card[data-pos="1"] { filter: brightness(.6) saturate(.85); }
+.gallery-card[data-pos="2"] { filter: brightness(.38) saturate(.7); opacity: .85; }
+.gallery-card[data-pos="1"]:hover, .gallery-card[data-pos="2"]:hover { filter: brightness(.85); cursor: pointer; }
+/* The card that goes round the back appears in its new place without sliding across */
+.gallery-card.is-wrapping { transition: none; animation: gallery-wrap .9s ease both; }
+@keyframes gallery-wrap { from { opacity: 0; } }
 
-.gallery-card-body { position: absolute; inset: auto 0 0; z-index: 1; display: grid; gap: 8px; padding: 22px 20px 20px; color: #f5f5f5; text-shadow: 0 1px 14px rgb(0 0 0 / .5); }
-.gallery-card-cta { text-shadow: none; }
-.gallery-card-label { width: fit-content; padding: 5px 10px; border-radius: 999px; background: rgb(255 255 255 / .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-size: 11px; font-weight: 600; letter-spacing: .06em; }
-.gallery-card-title { margin-top: 4px; font-family: var(--ogcw-display); font-size: clamp(22px, 1.9vw, 28px); line-height: 1.08; letter-spacing: -.01em; text-wrap: balance; }
-.gallery-card-copy { font-family: var(--ogcw-serif); font-size: 14.5px; line-height: 1.45; color: rgb(245 245 245 / .78); }
+.gallery-card-link {
+  position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 20px; background: #111;
+  box-shadow: 0 18px 50px -24px rgb(0 0 0 / .55), 0 0 0 1px rgb(255 255 255 / .06) inset;
+  transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .6s ease;
+}
+.gallery-card-link img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); -webkit-user-drag: none; }
+.gallery-card-link::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(6 6 6 / .96) 0%, rgb(6 6 6 / .86) 32%, rgb(6 6 6 / .5) 54%, rgb(6 6 6 / .1) 76%, transparent 100%); }
+/* The middle card: a light rim in the photo's colour, a deep shadow, and it lifts under the pointer */
+.gallery-card[aria-current] .gallery-card-link { box-shadow: 0 40px 90px -30px rgb(0 0 0 / .8), 0 0 0 1px color-mix(in srgb, var(--tone) 55%, #fff) inset; }
+.gallery-card[aria-current] .gallery-card-link:hover, .gallery-card[aria-current] .gallery-card-link:focus-visible { transform: translateY(-10px); box-shadow: 0 50px 100px -30px rgb(0 0 0 / .85), 0 0 0 1px color-mix(in srgb, var(--tone) 70%, #fff) inset; outline: none; }
+.gallery-card[aria-current] .gallery-card-link:hover img { transform: scale(1.05); }
+.gallery-card[aria-current] .gallery-card-link:focus-visible { box-shadow: 0 0 0 3px var(--ogcw-accent), 0 50px 100px -30px rgb(0 0 0 / .85); }
+
+.gallery-card-body { position: absolute; inset: auto 0 0; z-index: 1; display: grid; gap: 8px; padding: 26px 24px 24px; color: #f5f5f5; text-shadow: 0 1px 14px rgb(0 0 0 / .5); }
+.gallery-card-label { width: fit-content; padding: 5px 11px; border-radius: 999px; background: rgb(255 255 255 / .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-size: 11px; font-weight: 600; letter-spacing: .06em; }
+.gallery-card-title { margin-top: 4px; font-family: var(--ogcw-display); font-size: clamp(24px, 2.2vw, 32px); line-height: 1.06; letter-spacing: -.01em; text-wrap: balance; }
+.gallery-card-copy { font-family: var(--ogcw-serif); font-size: 15px; line-height: 1.45; color: rgb(245 245 245 / .8); }
 .gallery-card-cta {
-  display: inline-flex; align-items: center; gap: 8px; width: fit-content; min-height: 40px; margin-top: 8px; padding: 0 16px;
-  border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 13px; font-weight: 700; letter-spacing: .01em;
-  transition: gap .25s ease, background-color .25s ease;
+  display: inline-flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; margin-top: 10px; padding: 0 18px;
+  border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 14px; font-weight: 700; letter-spacing: .01em; text-shadow: none;
+  transition: gap .25s ease, opacity .5s ease;
 }
 .gallery-card-link:hover .gallery-card-cta { gap: 12px; }
-/* The cards away from the middle keep their text quiet */
-.gallery-card:not([aria-current]) .gallery-card-copy, .gallery-card:not([aria-current]) .gallery-card-cta { opacity: 0; transition: opacity .4s ease; }
-.gallery-card:hover .gallery-card-copy, .gallery-card:hover .gallery-card-cta { opacity: 1; }
+/* Only the middle card shows its line and button; they fade in as it arrives */
+.gallery-card-copy { transition: opacity .5s ease; }
+.gallery-card:not([aria-current]) :is(.gallery-card-copy, .gallery-card-cta) { opacity: 0; transition-duration: .2s; }
+.gallery-card[aria-current] :is(.gallery-card-copy, .gallery-card-cta) { transition-delay: .45s; }
 
 /* Foot: which card, the counter with its filling line, and the controls */
 .gallery-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; width: min(calc(100% - 32px), 1040px); margin: 4px auto 0; }
@@ -373,16 +390,6 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 .gallery-controls button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid color-mix(in srgb, var(--ogcw-text) 22%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--ogcw-bg) 30%, transparent); color: var(--ogcw-text); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
 .gallery-controls button:hover, .gallery-controls button:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
 
-/* Wide screens: all five cards side by side across the middle; the current
-   one lifts, the rest rest a little lower and quieter */
-@media (min-width: 1200px) {
-  .gallery { --card-w: calc((min(100vw, 1680px) - 208px) / 5); }
-  .gallery-track { justify-content: center; overflow: visible; padding-inline: 64px; scroll-snap-type: none; }
-  .gallery-card:not([aria-current]) { opacity: .9; transform: scale(.95); }
-  .gallery-card:not([aria-current]) .gallery-card-copy, .gallery-card:not([aria-current]) .gallery-card-cta { opacity: 1; }
-  .gallery-card[aria-current] .gallery-card-link { box-shadow: 0 30px 70px -28px rgb(0 0 0 / .75), 0 0 0 1px color-mix(in srgb, var(--tone) 55%, #fff) inset; }
-}
-
 /* On scroll the hero drifts up and softens as OGCW News rises into place */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
@@ -394,15 +401,17 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 }
 
 @media (max-width: 767px) {
-  .gallery { --card-w: 76vw; min-height: 0; padding-block: 16px 72px; }
-  .gallery-track { padding-block: 20px 28px; }
+  .gallery { --card-w: 70vw; min-height: 0; padding-block: 16px 72px; }
+  .gallery-cards { margin: -38px 0 -38px; -webkit-mask-image: none; mask-image: none; }
+  .gallery-card-body { padding: 20px 18px 18px; }
   .gallery-foot { grid-template-columns: minmax(0, 1fr) auto; }
   .gallery-count { display: none; }
   .gallery-now { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gallery { transition: none; }
-  .gallery-bg img, .gallery-card, .gallery-card-link, .gallery-card-link img { transition: none; }
+  .gallery-bg img, .gallery-card, .gallery-card-link, .gallery-card-link img, .gallery-card-copy, .gallery-card-cta { transition: none; }
+  .gallery-card.is-wrapping { animation: none; }
 }
 
 /* Colour-theme switcher (src/components/theme-switcher.tsx): a disc of the

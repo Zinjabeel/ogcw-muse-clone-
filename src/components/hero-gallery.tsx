@@ -1,14 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 
-// Gallery hero (the default in the hero switcher): five equal cards, one for
-// each door into OGCW (About, News, Shop, Blog, Subscribe), in a row that
-// slides so the current card sits in the middle. The whole hero takes on the
-// colour of the current card's photo and eases to the next one as the row
-// moves on every few seconds. Cards lift under the pointer. Autoplay pauses
-// on hover or focus, off screen, on the pause button, and never runs for
-// reduced motion. The bottom of the hero melts into OGCW News as you scroll.
+// Gallery hero (the default in the hero switcher): the five doors into OGCW
+// (About, News, Shop, Blog, Subscribe) as cards on a stage. The current card
+// stands in the middle of the screen, larger than the rest, with two smaller
+// cards on each side. Every few seconds the row glides one place and the
+// next card takes the middle; the row loops, so there are always cards on
+// both sides. The whole hero takes the colour of the middle card's photo.
+// Arrows, the arrow keys, a swipe or a click on a side card move it by hand.
+// Autoplay pauses under the pointer, on focus, off screen and on the pause
+// button, and never runs for reduced motion.
 
 type Card = {
   id: string;
@@ -32,24 +34,38 @@ const CARDS: Card[] = [
   { id: "subscribe", label: "Newsletter", title: "Subscribe for daily news", copy: "The day’s biggest stories in your inbox every morning. Free, and one tap to leave.", cta: "Subscribe", dest: { hash: "newsletter-title" }, photo: photo("photo-1511707171634-5f897ff02aa9"), alt: "A smartphone lying on a white desk", tone: "#4f8aa3" },
 ];
 
-const DURATION = 6000; // ms per card
+const DURATION = 5500; // ms per card
 const pad = (n: number) => String(n).padStart(2, "0");
 
-function CardLink({ dest, className, onClick, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; children: ReactNode }) {
-  if ("to" in dest) return <Link to={dest.to} className={className} onClick={onClick}>{children}</Link>;
-  return <Link to="/" hash={dest.hash} className={className} onClick={onClick}>{children}</Link>;
+// Where a card sits relative to the middle one: 0 is the middle, -1 and 1
+// its neighbours, -2 and 2 the outer cards
+const offsetOf = (index: number, active: number) => {
+  const n = CARDS.length;
+  const d = (((index - active) % n) + n) % n;
+  return d > n / 2 ? d - n : d;
+};
+// Each position's centre (in card widths from the middle) and size. The
+// neighbours are 80% and the outer cards 64% of the middle card, with a gap
+// of 6% of a card width between them.
+const GAP = 0.06;
+const SCALE = [1, 0.8, 0.64];
+const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]! / 2];
+
+function CardLink({ dest, className, onClick, tabIndex, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; tabIndex: number | undefined; children: ReactNode }) {
+  if ("to" in dest) return <Link to={dest.to} className={className} onClick={onClick} tabIndex={tabIndex}>{children}</Link>;
+  return <Link to="/" hash={dest.hash} className={className} onClick={onClick} tabIndex={tabIndex}>{children}</Link>;
 }
 
 export function HeroGallery() {
   const section = useRef<HTMLElement>(null);
-  const track = useRef<HTMLOListElement>(null);
   const [active, setActive] = useState(0);
-  const activeRef = useRef(0); // the latest card, for clicks that land before a re-render
-  activeRef.current = active;
   const [paused, setPaused] = useState(false);
   const [hold, setHold] = useState(false);
   const [inView, setInView] = useState(false);
   const [reduce, setReduce] = useState(false);
+  // Where each card was last time, to spot the one that wraps round the back
+  const lastOffsets = useRef<number[]>(CARDS.map((_, index) => offsetOf(index, 0)));
+  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -68,44 +84,28 @@ export function HeroGallery() {
     return () => observer.disconnect();
   }, []);
 
-  // The current card is the one closest to the middle of the row
-  useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      const box = el.getBoundingClientRect();
-      const middle = box.left + box.width / 2;
-      let best = 0, bestDistance = Infinity;
-      Array.from(el.children).forEach((card, index) => {
-        const r = card.getBoundingClientRect();
-        const distance = Math.abs(r.left + r.width / 2 - middle);
-        if (distance < bestDistance) { best = index; bestDistance = distance; }
-      });
-      setActive(best);
-    };
-    const onScroll = () => { if (!frame) frame = requestAnimationFrame(measure); };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => { el.removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); };
-  }, []);
+  const offsets = CARDS.map((_, index) => offsetOf(index, active));
+  useEffect(() => { lastOffsets.current = offsets; });
 
-  // Wide screens show all five cards at once; narrower ones scroll the row
-  const scrollable = () => { const el = track.current; return !!el && el.scrollWidth > el.clientWidth + 2; };
-
-  const goTo = useCallback((index: number) => {
-    activeRef.current = index;
-    setActive(index);
-    const el = track.current;
-    const card = el?.children[index] as HTMLElement | undefined;
-    if (!el || !card || el.scrollWidth <= el.clientWidth + 2) return;
-    el.scrollTo({ left: card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2, behavior: reduce ? "auto" : "smooth" });
-  }, [reduce]);
-
-  const next = () => goTo((activeRef.current + 1) % CARDS.length);
-  const previous = () => goTo((activeRef.current - 1 + CARDS.length) % CARDS.length);
+  const go = (step: number) => setActive((value) => (((value + step) % CARDS.length) + CARDS.length) % CARDS.length);
   const running = !paused && !hold && inView && !reduce;
   const current = CARDS[active]!;
+
+  // Swipe on touch screens (and drag with a mouse): a clear sideways move of 40px or more
+  const onPointerDown = (event: PointerEvent) => { swipe.current = { x: event.clientX, y: event.clientY, moved: false }; };
+  const onPointerUp = (event: PointerEvent) => {
+    const start = swipe.current;
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(event.clientY - start.y)) {
+      start.moved = true;
+      go(dx < 0 ? 1 : -1);
+    }
+  };
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "ArrowRight") { event.preventDefault(); go(1); }
+    if (event.key === "ArrowLeft") { event.preventDefault(); go(-1); }
+  };
 
   return (
     <section
@@ -117,7 +117,7 @@ export function HeroGallery() {
     >
       <h1 id="gallery-title" className="sr-only">OGCW, One Great Culture World</h1>
 
-      {/* The ambient light: the current photo, blurred, over a wash of its colour */}
+      {/* The ambient light: the middle card's photo, blurred, over a wash of its colour */}
       <div className="gallery-bg" aria-hidden="true">
         {CARDS.map((card, index) => (
           <img key={card.id} src={card.photo} alt="" className={index === active ? "is-on" : undefined} />
@@ -126,39 +126,52 @@ export function HeroGallery() {
 
       <div className="gallery-stage">
         <ol
-          className="gallery-track"
-          ref={track}
-          onPointerEnter={() => setHold(true)}
+          className="gallery-cards"
+          onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
           onPointerLeave={() => setHold(false)}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
           onFocus={() => setHold(true)}
           onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
+          onKeyDown={onKeyDown}
         >
-          {CARDS.map((card, index) => (
-            <li
-              key={card.id}
-              className="gallery-card"
-              aria-roledescription="slide"
-              aria-label={`${index + 1} of ${CARDS.length}: ${card.label}`}
-              aria-current={index === active ? "true" : undefined}
-              // With all five on screen, the hero takes the colour of the card under the pointer
-              onPointerEnter={() => { if (!scrollable()) setActive(index); }}
-            >
-              <CardLink
-                dest={card.dest}
-                className="gallery-card-link"
-                // In the sliding row, a card that isn't in the middle yet slides there first
-                onClick={(event) => { if (index !== active && scrollable()) { event.preventDefault(); goTo(index); } }}
+          {CARDS.map((card, index) => {
+            const offset = offsets[index]!;
+            const distance = Math.abs(offset);
+            // A card jumping from one end of the row to the other moves out of sight, with no slide
+            const wraps = Math.abs(offset - (lastOffsets.current[index] ?? offset)) > 2;
+            return (
+              <li
+                key={card.id}
+                className={`gallery-card${wraps ? " is-wrapping" : ""}`}
+                data-pos={distance}
+                style={{ "--x": Math.sign(offset) * X[distance]!, "--s": SCALE[distance], zIndex: 10 - distance } as CSSProperties}
+                aria-roledescription="slide"
+                aria-label={`${index + 1} of ${CARDS.length}: ${card.label}`}
+                aria-current={offset === 0 ? "true" : undefined}
               >
-                <img src={card.photo} alt={card.alt} loading={index < 3 ? "eager" : "lazy"} />
-                <span className="gallery-card-body">
-                  <span className="gallery-card-label">{card.label}</span>
-                  <span className="gallery-card-title">{card.title}</span>
-                  <span className="gallery-card-copy">{card.copy}</span>
-                  <span className="gallery-card-cta">{card.cta} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
-                </span>
-              </CardLink>
-            </li>
-          ))}
+                <CardLink
+                  dest={card.dest}
+                  className="gallery-card-link"
+                  // Only the middle card is in the tab order; the others are reached with the arrows
+                  tabIndex={offset === 0 ? undefined : -1}
+                  onClick={(event) => {
+                    if (swipe.current?.moved) { event.preventDefault(); swipe.current = null; return; }
+                    // A card on the side comes to the middle first
+                    if (offset !== 0) { event.preventDefault(); go(offset); }
+                  }}
+                >
+                  <img src={card.photo} alt={card.alt} loading={distance < 2 ? "eager" : "lazy"} draggable={false} />
+                  <span className="gallery-card-body">
+                    <span className="gallery-card-label">{card.label}</span>
+                    <span className="gallery-card-title">{card.title}</span>
+                    <span className="gallery-card-copy">{card.copy}</span>
+                    <span className="gallery-card-cta">{card.cta} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+                  </span>
+                </CardLink>
+              </li>
+            );
+          })}
         </ol>
 
         <div className="gallery-foot">
@@ -168,20 +181,20 @@ export function HeroGallery() {
             <span>{pad(active + 1)}</span>
             <span className="gallery-line" aria-hidden="true">
               {!reduce && (
-                <i key={active} style={{ "--dur": `${DURATION}ms` } as CSSProperties} data-run={running} onAnimationEnd={next} />
+                <i key={active} style={{ "--dur": `${DURATION}ms` } as CSSProperties} data-run={running} onAnimationEnd={() => go(1)} />
               )}
             </span>
             <span className="sr-only"> of </span>
             <span>{pad(CARDS.length)}</span>
           </p>
           <div className="gallery-controls">
-            <button type="button" aria-label="Previous card" onClick={previous}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+            <button type="button" aria-label="Previous card" onClick={() => go(-1)}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
             {!reduce && (
               <button type="button" aria-label={paused ? "Play" : "Pause"} onClick={() => setPaused((value) => !value)}>
                 {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
               </button>
             )}
-            <button type="button" aria-label="Next card" onClick={next}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+            <button type="button" aria-label="Next card" onClick={() => go(1)}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
           </div>
         </div>
       </div>
