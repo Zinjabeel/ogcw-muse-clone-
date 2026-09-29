@@ -3,14 +3,16 @@ import { useEffect, useRef, useState } from "react";
 
 // Colour-theme switcher in the header. "Night" is the original black and
 // yellow; "Gold" is white and gold; "Navy" is navy, off-white and creamy
-// yellow. A theme is just <html data-theme="..."> swapping the six --ogcw-*
-// colour tokens in styles.css. The choice is remembered in this browser
-// (localStorage) and applied before the page paints by themeInitScript.
+// yellow; "Aurora" is a pastel glow behind the page with plum text and a
+// violet accent. A theme is just <html data-theme="..."> swapping the
+// --ogcw-* colour tokens in styles.css. The choice is remembered in this
+// browser (localStorage) and applied before the page paints by themeInitScript.
 
 const THEMES = [
   { id: "night", name: "Night", note: "Black & yellow", swatch: ["#0d0d0d", "#ffe600", "#f5f5f5"] },
   { id: "gold", name: "Gold", note: "White & gold", swatch: ["#ffffff", "#94701b", "#15130f"] },
   { id: "navy", name: "Navy", note: "Navy, off-white & cream", swatch: ["#0e1a33", "#f2dc8c", "#f5f1e6"] },
+  { id: "aurora", name: "Aurora", note: "Pastel glow & violet", swatch: ["#f7eaff", "#7a3fd6", "#1d1426"] },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
 
@@ -18,7 +20,7 @@ const STORAGE_KEY = "ogcw-theme";
 const isTheme = (value: unknown): value is ThemeId => THEMES.some((t) => t.id === value);
 
 // Runs in <head> before first paint so a saved theme never flashes the default.
-export const themeInitScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t==="gold"||t==="navy"){document.documentElement.dataset.theme=t}}catch(e){}})();`;
+export const themeInitScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t==="gold"||t==="navy"||t==="aurora"){document.documentElement.dataset.theme=t}}catch(e){}})();`;
 
 function applyTheme(id: ThemeId) {
   const root = document.documentElement;

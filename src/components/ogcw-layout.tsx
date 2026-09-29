@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { NavDrawer } from "./nav-drawer";
 import { SearchOverlay } from "./search-overlay";
 import { Footer2 } from "@/components/ui/footer-2";
+import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow";
 import { ThemeSwitcher } from "./theme-switcher";
 
 // Header navigation. Between 1024 and 1279px there isn't room for all eight,
@@ -95,7 +96,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <SiteMenuContext.Provider value={{ menuOpen, openMenu }}>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="site-root min-h-screen bg-background text-foreground">
+        <BackgroundGradientGlow />
         <header className="site-header sticky top-0 z-50">
           <div className="mx-auto grid h-14 max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
             {/* Menu button sits with the logo on the left */}
