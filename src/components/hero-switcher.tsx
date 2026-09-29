@@ -1,14 +1,16 @@
-import { Check, GalleryHorizontal, LayoutPanelTop } from "lucide-react";
+import { Check, GalleryHorizontal, LayoutPanelTop, PanelsTopLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 // Hero switcher in the header, beside the colour switcher and built the same
 // way: "Gallery" (the default, hero-gallery.tsx) is five cards into OGCW,
+// "Gallery 2" (hero-gallery-2.tsx) the top news with the cards below it,
 // "Cover story" (hero-cover.tsx) one big photo and headline. The choice is
-// <html data-hero="cover"> (no attribute means the gallery), remembered in
+// <html data-hero="gallery2|cover"> (no attribute means the gallery), remembered in
 // this browser and applied before first paint by heroInitScript.
 
 const HEROES = [
   { id: "gallery", name: "Gallery", note: "Five cards into OGCW", Icon: GalleryHorizontal },
+  { id: "gallery2", name: "Gallery 2", note: "Top news, with the cards below", Icon: PanelsTopLeft },
   { id: "cover", name: "Cover story", note: "One big photo and headline", Icon: LayoutPanelTop },
 ] as const;
 type HeroId = (typeof HEROES)[number]["id"];
@@ -17,7 +19,7 @@ const STORAGE_KEY = "ogcw-hero";
 const isHero = (value: unknown): value is HeroId => HEROES.some((h) => h.id === value);
 
 // Runs in <head> before first paint so a saved hero never flashes the default.
-export const heroInitScript = `(function(){try{var h=localStorage.getItem("${STORAGE_KEY}");if(h==="cover"){document.documentElement.dataset.hero=h}}catch(e){}})();`;
+export const heroInitScript = `(function(){try{var h=localStorage.getItem("${STORAGE_KEY}");if(h==="cover"||h==="gallery2"){document.documentElement.dataset.hero=h}}catch(e){}})();`;
 
 function applyHero(id: HeroId) {
   const root = document.documentElement;

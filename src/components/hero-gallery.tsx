@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, ty
 // Autoplay pauses under the pointer, on focus, off screen and on the pause
 // button, and never runs for reduced motion.
 
-type Card = {
+export type Card = {
   id: string;
   label: string;
   title: string;
@@ -26,7 +26,7 @@ type Card = {
 
 const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&h=1200&q=80`;
 
-const CARDS: Card[] = [
+export const CARDS: Card[] = [
   { id: "about", label: "About OGCW", title: "One Great Culture World", copy: "Who we are, what we cover and the people behind the stories.", cta: "Meet OGCW", dest: { to: "/about" }, photo: photo("photo-1470229722913-7c0e2dbbafd3"), alt: "A crowd with hands raised in front of a stage glowing orange", tone: "#8c5e4a" },
   { id: "news", label: "News", title: "Today’s news", copy: "Music, games, streaming and culture, reported every day with the sources linked.", cta: "Read the news", dest: { to: "/news" }, photo: photo("photo-1504711434969-e33886168f5c"), alt: "A stack of folded newspapers", tone: "#6f8499" },
   { id: "shop", label: "Shop", title: "The OGCW Shop", copy: "Our picks from Nike, Adidas, StockX and Uniqlo, bought straight from the retailer.", cta: "Visit the shop", dest: { to: "/shop" }, photo: photo("photo-1542291026-7eec264c27ff"), alt: "A red Nike running shoe against a red background", tone: "#a91728" },
@@ -51,7 +51,7 @@ const GAP = 0.06;
 const SCALE = [1, 0.8, 0.64];
 const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]! / 2];
 
-function CardLink({ dest, className, onClick, tabIndex, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; tabIndex: number | undefined; children: ReactNode }) {
+export function CardLink({ dest, className, onClick, tabIndex, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; tabIndex: number | undefined; children: ReactNode }) {
   if ("to" in dest) return <Link to={dest.to} className={className} onClick={onClick} tabIndex={tabIndex}>{children}</Link>;
   return <Link to="/" hash={dest.hash} className={className} onClick={onClick} tabIndex={tabIndex}>{children}</Link>;
 }

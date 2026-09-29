@@ -39,7 +39,6 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
   ["BTS, Arirang World Tour in Paris (stadium)", "Chiyako92", "CC BY-SA 4.0", "BTS_Arirang_World_Tour_in_Paris_(17_July_2026)_-_stadium_view.jpg"],
   ["Tokyo Game Show 2026", "Syced", "CC0", "Tokyo_Game_Show_2026.jpg"],
   ["BlizzCon at the Anaheim Convention Center", "tofuprod", "CC BY-SA 2.0", "BlizzCon_2017.jpg"],
-  ["Boulevard Hotel neon sign, Miami Beach", "Radomianin", "public domain", "Boulevard_Hotel_(Neon_sign),_Miami_Beach.jpg"],
   ["ZeratoR at Z Event 2025", "Mickaël Schauli", "CC BY-SA 4.0", "ZeratoR_lors_du_ZEVENT_2025_-_11.jpg"],
   ["TwitchCon block party", "Succubussy", "CC0", "TwitchCon_Block_Party.png"],
   ["Models walking for Alexander McQueen", "Christopher Macsurak", "CC BY 2.0", "Models_walking_for_Alexander_McQueen_in_2018_(from_behind).jpg"],

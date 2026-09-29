@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageIntro } from "./ogcw-layout";
-import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, StreamerCard, WatchNext } from "./cards";
-import { articlesIn, EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, STREAMERS, type SectionId } from "@/data/content";
+import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, WatchNext } from "./cards";
+import { ContentOfTheMonth } from "./content-of-the-month";
+import { articlesIn, EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
 
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
 // a pointer to the next section. Music also carries the live listing and the
-// songs to check out; Streaming carries the streamers to watch.
+// songs to check out; Streaming carries Content of the month.
 
 export function SectionFront({ section }: { section: SectionId }) {
   const stories = articlesIn(section);
@@ -67,15 +68,9 @@ export function SectionFront({ section }: { section: SectionId }) {
         )}
 
         {section === "streaming" && (
-          <section className="og-block" aria-labelledby="streaming-trendiest">
-            <div className="og-section-head">
-              <h2 id="streaming-trendiest" className="og-section-title">Trendiest streamers</h2>
-              <span className="og-more-link">Videos from their own channels</span>
-            </div>
-            <div className="og-grid-3 og-streamers">
-              {STREAMERS.map((streamer) => <StreamerCard key={streamer.name} streamer={streamer} />)}
-            </div>
-          </section>
+          <div className="og-block og-cotm">
+            <ContentOfTheMonth headingLevel="h2" />
+          </div>
         )}
 
         {rest.length > 0 && (

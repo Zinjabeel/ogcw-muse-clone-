@@ -1,17 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, formatPrice, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData } from "@/data/content";
+import { article, ARTICLES, formatPrice, SHOPS, SONGS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData, type Song } from "@/data/content";
 import { ExploreMix } from "./explore-mix";
 import { CultureDeck } from "./culture-deck";
 import { ShopCard } from "./cards";
+import { UpcomingEvents } from "./upcoming-events";
+import { ContentOfTheMonth } from "./content-of-the-month";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
 // system (Source Serif 4 headlines and text, Inter labels, accent colour).
 // Six headline stories (three down the left side, the lead, two on the
-// right) beside the Briefing rail, then the More news carousel, the
-// trendiest streamers, the shop and the Explore mix.
+// right) beside the Upcoming events rail, then the More news carousel,
+// Content of the month, the shop and the Explore mix.
 
 const sections = [
   { label: "All news", to: "/news" },
@@ -27,13 +29,10 @@ const sections = [
 const lead = article("vmas-2026-winners");
 const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
 const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"].map(article);
-// Every other story, newest first, dealt in turn to the More news carousel
-// and the Briefing, so both run from this week back and nothing repeats
+// Every other story, newest first, runs in the More news carousel
 const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
-const rest = ARTICLES.filter((a) => !onFront.has(a.slug));
-const moreNews = rest.filter((_, index) => index % 2 === 0);
-const briefing = rest.filter((_, index) => index % 2 === 1);
-const song = SONGS[0]!;
+const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug));
+const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
 // For the shop call-to-action card: one product from three of the shops
 const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
 const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0);
@@ -41,8 +40,6 @@ const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0)
 // the fifth from two, so none repeat the three shown on the shop cards
 const alsoInEdit = [...SHOPS.map((shop) => shop.products[3]!), SHOPS[1]!.products[4]!, SHOPS[3]!.products[4]!];
 const lowestPrice = Math.min(...SHOPS.flatMap((shop) => shop.products.map((product) => product.price)));
-
-const shortDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 
 function ReadTime({ children }: { children: string }) {
   return (
@@ -220,17 +217,38 @@ export function NewsFront() {
               <Photo photo={lead.photo} className="bs-photo-lead" />
             </Link>
 
-            <a className="bs-song bs-song-wide" href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
-              <span className="bs-song-head">Check out this song</span>
-              <span className="bs-song-media">
-                <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
-                <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
-              </span>
-              <span className="bs-song-title">{song.title}</span>
-              <span className="bs-song-artist">{song.artist}</span>
-              <span className="bs-song-note">{song.note}</span>
-              <span className="bs-read">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
-            </a>
+            {/* The song to check out, then the rest of the playlist as a short list */}
+            <div className="bs-song bs-song-wide">
+              <p className="bs-song-head">Check out this song</p>
+              <a className="bs-song-main" href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
+                <span className="bs-song-media">
+                  <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
+                  <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
+                </span>
+                <span className="bs-song-info">
+                  <span className="bs-song-title">{song.title}</span>
+                  <span className="bs-song-artist">{song.artist}</span>
+                  <span className="bs-song-note">{song.note}</span>
+                  <span className="bs-read">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
+                </span>
+              </a>
+              <p className="bs-song-sub">Up next on the playlist</p>
+              <ol className="bs-song-next">
+                {nextSongs.map((item, index) => (
+                  <li key={item.video}>
+                    <a href={youtubeUrl(item.video)} target="_blank" rel="noopener noreferrer">
+                      <span className="bs-song-num" aria-hidden="true">{index + 2}</span>
+                      <span className="bs-song-thumb"><img src={youtubeThumb(item.video)} alt="" loading="lazy" /></span>
+                      <span className="bs-song-next-text">
+                        <span className="bs-song-next-title">{item.title}</span>
+                        <span className="bs-song-next-artist">{item.artist}</span>
+                      </span>
+                      <Play size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" className="bs-song-next-play" />
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </article>
 
           <div className="bs-col bs-col-secondary">
@@ -262,33 +280,8 @@ export function NewsFront() {
             ))}
           </div>
 
-          <aside className="bs-col bs-col-rail bs-reveal" aria-labelledby="briefing-title">
-            <div className="bs-briefing">
-              <p id="briefing-title" className="bs-briefing-head">
-                <span>The OGCW Briefing</span>
-                <span className="bs-dot" aria-hidden="true" />
-              </p>
-              <div className="bs-briefing-body">
-                <p className="bs-briefing-intro">Everything else worth knowing this month, newest first.</p>
-                <ol className="bs-schedule">
-                  {briefing.map((item) => (
-                    <li key={item.slug}>
-                      <Link to="/news/$slug" params={{ slug: item.slug }}>
-                        <span className="bs-schedule-day">{shortDate(item.date)}</span>
-                        <span>
-                          <span className="bs-schedule-kicker">{item.kicker}</span>
-                          <span className="bs-schedule-title">{item.title}</span>
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-                <Link to="/news" className="bs-button">
-                  All the news
-                  <ArrowRight size={14} aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
+          <aside className="bs-col bs-col-rail bs-reveal" aria-labelledby="events-title">
+            <UpcomingEvents />
           </aside>
         </div>
         </div>
@@ -299,28 +292,9 @@ export function NewsFront() {
 
         <hr className="bs-rule bs-band bs-band-90" />
 
-        <section className="bs-band bs-band-90" aria-labelledby="streamers-title">
-          <div className="bs-section-head">
-            <h3 id="streamers-title" className="bs-eyebrow">Trendiest streamers</h3>
-            <Link to="/streaming" className="bs-more">More streaming</Link>
-          </div>
-          <div className="bs-opinion bs-streamers">
-            {STREAMERS.map((streamer) => (
-              <article key={streamer.name} className="bs-reveal">
-                <a className="bs-card bs-video-card" href={youtubeUrl(streamer.video)} target="_blank" rel="noopener noreferrer">
-                  <span className="bs-video-thumb">
-                    <img src={youtubeThumb(streamer.video)} alt="" loading="lazy" />
-                    <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
-                    <span className="bs-video-platform">{streamer.platform}</span>
-                  </span>
-                  <h4 className="bs-title">{streamer.name}</h4>
-                  <p className="bs-deck bs-deck-sm">{streamer.note}</p>
-                  <span className="bs-read"><span className="sr-only">Watch: </span>{streamer.videoTitle} <ArrowUpRight size={13} aria-hidden="true" /></span>
-                </a>
-              </article>
-            ))}
-          </div>
-        </section>
+        <div className="bs-band bs-band-90">
+          <ContentOfTheMonth />
+        </div>
 
         <hr className="bs-rule bs-band bs-band-90" />
 

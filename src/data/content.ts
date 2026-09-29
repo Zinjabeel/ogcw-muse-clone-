@@ -11,7 +11,6 @@ import btsSwimPhoto from "../assets/news/bts-arirang-paris-swim.jpg";
 import btsStadiumPhoto from "../assets/news/bts-arirang-paris-stadium.jpg";
 import tgsPhoto from "../assets/news/tokyo-game-show-2026.jpg";
 import blizzconPhoto from "../assets/news/blizzcon-anaheim.jpg";
-import miamiPhoto from "../assets/news/miami-beach-neon.jpg";
 import zeratorPhoto from "../assets/news/zerator-zevent.jpg";
 import twitchconPhoto from "../assets/news/twitchcon-block-party.jpg";
 import runwayPhoto from "../assets/news/runway-mcqueen.jpg";
@@ -97,10 +96,11 @@ export const ARTICLES: Article[] = [
     author: "Jonah Reyes",
     date: "2026-09-29",
     read: "3 min read",
-    photo: { src: miamiPhoto, alt: "The red neon sign of the Boulevard Hotel in Miami Beach at night", credit: "Radomianin, public domain", crop: { pos: "50% 45%" } },
+    photo: { src: youtubeThumb("VQRLujxTm3c"), alt: "Official Grand Theft Auto VI artwork: Jason and Lucia on a dock in Vice City", credit: "Rockstar Games, Trailer 2", crop: { pos: "50% 40%" } },
     body: [
       { type: "p", text: "Grand Theft Auto VI is on track for 19 November 2026 on PlayStation 5 and Xbox Series X|S, and pre-orders are open on both consoles’ digital stores." },
       { type: "p", text: "The game takes the series back to Leonida, Rockstar’s version of Florida, with Vice City at its centre and two leads, Jason and Lucia, introduced in the second trailer in May 2025." },
+      { type: "image", photo: { src: youtubeThumb("QdBZY2fkU-0"), alt: "Official Grand Theft Auto VI artwork: Lucia and Jason on a car under Vice City palms", credit: "Rockstar Games, Trailer 1", crop: { pos: "50% 45%" } }, caption: "The key art from Trailer 1, which confirmed the return to Vice City in December 2023." },
       { type: "h2", text: "What is still missing" },
       { type: "p", text: "There is still no PC date. Take-Two has said Rockstar will announce other platforms in its own time, and the game will not arrive on Game Pass on day one." },
       { type: "quote", text: "No third trailer yet, and no PC date either." },
@@ -109,6 +109,7 @@ export const ARTICLES: Article[] = [
     sources: [
       { name: "PCGamesN: GTA 6 release date and latest news", url: "https://www.pcgamesn.com/grand-theft-auto-vi/gta-6-release-date-setting-map-characters-gameplay-trailers" },
       { name: "Beebom: When will GTA 6 Trailer 3 come out?", url: "https://beebom.com/when-will-gta-6-trailer-3-come-out/" },
+      { name: "Rockstar Games: Grand Theft Auto VI Trailer 2", url: "https://www.youtube.com/watch?v=VQRLujxTm3c" },
     ],
   },
   {
@@ -579,7 +580,8 @@ export const READING_LISTS = [
 ];
 
 // ---------------------------------------------------------------- Streamers
-// The "Trendiest streamers" row: each with a recent video from their own channel.
+// Streamers to watch (the Streaming front and Explore): each with a recent
+// video from their own channel.
 
 export type Streamer = { name: string; platform: "Twitch" | "YouTube"; channel: string; note: string; video: string; videoTitle: string };
 export const STREAMERS: Streamer[] = [
@@ -589,6 +591,58 @@ export const STREAMERS: Streamer[] = [
   { name: "Jynxzi", platform: "Twitch", channel: "https://www.twitch.tv/jynxzi", note: "78 million hours watched on Twitch in 2026 so far.", video: "FDXpzsK0KI4", videoTitle: "YOU vs The RANK You “Deserve”… (Rainbow Six Siege)" },
   { name: "ZeratoR", platform: "Twitch", channel: "https://www.twitch.tv/zerator", note: "Closed the final Z Event with €32.9 million raised for charity.", video: "UlXf1lsiQPw", videoTitle: "MON ZEVENT 2026 – Best of ZeratoR #507" },
   { name: "Neuro-sama", platform: "Twitch", channel: "https://www.twitch.tv/vedal987", note: "The AI VTuber behind Twitch’s record hype trains has a new single out.", video: "xWDfREk0ZLs", videoTitle: "Pattern Recognition – Neuro-sama x ODDEEO (Official Video)" },
+];
+
+// ---------------------------------------------------------------- Content of the month
+// The creators who won the year's top streaming awards (The Streamer Awards,
+// 6 December 2025), ranked: Streamer of the Year first, then by awards won.
+// Each shows a recent video from their own channel.
+
+export type RankedCreator = {
+  rank: number;
+  name: string;
+  honour: string; // the headline award
+  awards: string[]; // everything they won
+  channel: string;
+  channelName: string;
+  video: string;
+  videoTitle: string;
+};
+export const CONTENT_OF_THE_MONTH: RankedCreator[] = [
+  { rank: 1, name: "IShowSpeed", honour: "Streamer of the Year", awards: ["Streamer of the Year, second year running", "Best IRL Streamer"], channel: "https://www.youtube.com/@IShowSpeed", channelName: "IShowSpeed on YouTube", video: "4zVFht1KbnY", videoTitle: "World Talent Show" },
+  { rank: 2, name: "Kai Cenat", honour: "Four awards", awards: ["Best Just Chatting Streamer", "Best Streamed Event: Streamer University", "Best Marathon: Mafiathon 3", "Best Collab, with LeBron James"], channel: "https://www.youtube.com/@KaiCenat", channelName: "Kai Cenat on YouTube", video: "Dt36OGjw26Y", videoTitle: "Don’t Quit" },
+  { rank: 3, name: "CaseOh", honour: "Gamer of the Year", awards: ["Gamer of the Year", "Best Variety Streamer"], channel: "https://www.youtube.com/@MoreCaseOh", channelName: "MoreCaseOh on YouTube", video: "upPT0i8MTrE", videoTitle: "CaseOh Returns To The Buckshot Arena Yet Again!" },
+  { rank: 4, name: "TheBurntPeanut", honour: "Best VTuber", awards: ["Best VTuber", "Best FPS Streamer"], channel: "https://www.youtube.com/@TheBurntPeanut", channelName: "TheBurntPeanut on YouTube", video: "D-gZx4lbGbo", videoTitle: "Peanut Absolutely Loses It In WARDOGS" },
+  { rank: 5, name: "Adapt", honour: "Breakout Streamer", awards: ["Best Breakout Streamer"], channel: "https://www.youtube.com/@FaZeAdaptLive", channelName: "Adapt Live on YouTube", video: "pqvIG2V7fII", videoTitle: "I Spent $1000 on Action Figures.." },
+];
+export const AWARDS_SOURCE = { name: "Wikipedia: 2025 Streamer Awards", url: "https://en.wikipedia.org/wiki/2025_Streamer_Awards" };
+
+// ---------------------------------------------------------------- Upcoming events
+// What is coming up across music, games, film, fashion and streaming, in date
+// order. `slug` links an event to the story that covers it; `to` to a section.
+
+export type EventCategory = "Music" | "Games" | "Film" | "Fashion" | "Streaming";
+export type UpcomingEvent = { date: string; end?: string; category: EventCategory; title: string; detail: string; slug?: string };
+export const EVENTS: UpcomingEvent[] = [
+  { date: "2026-10-02", category: "Games", title: "Ace Combat 8: Wings of Theve", detail: "Bandai Namco’s flight combat game, playable at Tokyo Game Show" },
+  { date: "2026-10-02", end: "2026-10-03", category: "Music", title: "BTS in Bogotá", detail: "The Arirang World Tour opens its Latin America leg", slug: "bts-arirang-world-tour-latin-america" },
+  { date: "2026-10-06", category: "Fashion", title: "Louis Vuitton closes Paris Fashion Week", detail: "The last show of the spring/summer 2027 season", slug: "paris-fashion-week-ss27" },
+  { date: "2026-10-16", category: "Film", title: "Whalefall", detail: "20th Century Studios’ adaptation of Daniel Kraus’s novel" },
+  { date: "2026-10-16", end: "2026-10-18", category: "Music", title: "Miley Cyrus at the Hollywood Bowl", detail: "Two rare shows, with Model/Actriz opening", slug: "miley-cyrus-bass-persuades-number-one" },
+  { date: "2026-10-20", category: "Games", title: "Hearthstone: Reign of the Black Empire", detail: "The next expansion, announced at BlizzCon", slug: "blizzcon-2026-diablo-v-starcraft" },
+  { date: "2026-10-22", category: "Music", title: "Mercury Prize 2026", detail: "The winner is named live in Newcastle", slug: "mercury-prize-2026-shortlist" },
+  { date: "2026-10-23", category: "Film", title: "Klara and the Sun", detail: "Taika Waititi adapts Kazuo Ishiguro’s novel" },
+  { date: "2026-11-04", category: "Games", title: "World of Warcraft: Forever", detail: "Blizzard’s new way to play launches", slug: "blizzcon-2026-diablo-v-starcraft" },
+  { date: "2026-11-06", category: "Film", title: "The Cat in the Hat", detail: "Warner Bros.’ animated musical" },
+  { date: "2026-11-12", category: "Streaming", title: "The Streamer Awards 2026", detail: "Streaming’s big night, in Los Angeles" },
+  { date: "2026-11-13", end: "2026-11-15", category: "Streaming", title: "TwitchCon San Diego", detail: "Three days at the San Diego Convention Center", slug: "twitch-state-of-gaming-2026" },
+  { date: "2026-11-19", category: "Games", title: "Grand Theft Auto VI", detail: "Out on PS5 and Xbox Series X|S at midnight", slug: "gta-vi-countdown" },
+  { date: "2026-11-20", category: "Film", title: "The Hunger Games: Sunrise on the Reaping", detail: "Haymitch’s Games, 24 years before the first film" },
+  { date: "2026-11-25", category: "Film", title: "Hexe", detail: "Disney’s original animated film, starring Hailee Steinfeld" },
+  { date: "2026-12-04", category: "Film", title: "Violent Night 2", detail: "David Harbour returns as Santa" },
+  { date: "2026-12-10", category: "Games", title: "The Game Awards 2026", detail: "Live from the Peacock Theater, Los Angeles" },
+  { date: "2026-12-18", category: "Film", title: "Avengers: Doomsday", detail: "Marvel’s next Avengers film" },
+  { date: "2026-12-19", category: "Streaming", title: "Neuro-sama & Evil Neuro live", detail: "The AI twins’ first concert, with a live band in LA", slug: "neuro-sama-pattern-recognition-first-concert" },
 ];
 
 // ---------------------------------------------------------------- Songs to check out
