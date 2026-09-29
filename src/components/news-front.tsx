@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Clapperboard, ShoppingBag } from "lucide-react";
 import { article, EPISODES, SHOPS, type Photo as PhotoData } from "@/data/content";
 import { Explore } from "./explore";
+import { CultureDeck } from "./culture-deck";
 import { Poster } from "./cards";
 import { GlowCard } from "@/components/ui/spotlight-card";
 
@@ -185,6 +186,10 @@ export function NewsFront() {
         <hr className="bs-rule" />
 
         <Explore />
+
+        <hr className="bs-rule" />
+
+        <CultureDeck />
       </div>
     </section>
   );
