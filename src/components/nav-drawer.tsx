@@ -49,7 +49,7 @@ function DrawerCard({ item, onGo, large = false }: { item: Item; onGo: () => voi
       <Link to="/news/$slug" params={{ slug: a.slug }} className={className} onClick={onGo}>
         <Thumb photo={a.photo} />
         <span className="drawer-card-title">{a.title}</span>
-        <span className="drawer-card-sub">{a.kicker} / {a.read}</span>
+        <span className="drawer-card-sub">{a.kicker} · {a.read}</span>
       </Link>
     );
   }
@@ -59,7 +59,7 @@ function DrawerCard({ item, onGo, large = false }: { item: Item; onGo: () => voi
       <Link to="/originals/$slug" params={{ slug: e.slug }} className={className} onClick={onGo}>
         <span className="drawer-thumb drawer-thumb-poster"><Poster episode={e} play={false} /></span>
         <span className="drawer-card-title">{e.title}</span>
-        <span className="drawer-card-sub">{e.series} / {e.length}</span>
+        <span className="drawer-card-sub">{e.series} · {e.length}</span>
       </Link>
     );
   }
@@ -123,6 +123,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
     >
       <div className="drawer-inner">
         <div className="drawer-top">
+          <Link to="/" className="drawer-logo" aria-label="OGCW home" onClick={() => close()}>OGCW</Link>
           <button type="button" className="drawer-close" aria-label="Close menu" onClick={() => close()}>
             <X size={20} strokeWidth={1.75} aria-hidden="true" />
           </button>

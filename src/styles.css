@@ -491,7 +491,7 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 @keyframes drawer-fade-out { from { opacity: 1; } to { opacity: 0; } }
 
 .drawer-inner { display: flex; flex-direction: column; height: 100%; }
-.drawer-top { flex: none; display: flex; align-items: center; justify-content: flex-end; height: 60px; padding: 0 16px; border-bottom: 1px solid var(--ogcw-border); }
+.drawer-top { flex: none; display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 16px; border-bottom: 1px solid var(--ogcw-border); }
 .drawer-close { display: grid; place-items: center; width: 40px; height: 40px; margin-right: -8px; border-radius: 50%; transition: background-color .2s ease; }
 .drawer-close:hover, .drawer-close:focus-visible { background: var(--ogcw-surface); outline: none; }
 
@@ -641,7 +641,8 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .drawer-tabs .vtab:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: -2px; }
 
 .drawer-featured { margin-top: 8px; padding: 16px 0 20px; border-top: 1px solid var(--ogcw-border); }
-.drawer-label { padding: 0 16px 12px; font-size: 12px; color: var(--ogcw-text-2); }
+.drawer-label { padding: 0 16px 12px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.drawer-logo { font-family: var(--ogcw-display); font-size: 1.375rem; font-weight: 600; line-height: 1; letter-spacing: .06em; }
 .drawer-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 10px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; scrollbar-width: none; }
 .drawer-strip::-webkit-scrollbar { display: none; }
 .drawer-strip li { scroll-snap-align: start; }
@@ -649,9 +650,9 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .drawer-thumb { display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--ogcw-surface); }
 .drawer-thumb img { width: 100%; height: 100%; object-fit: cover; transform: scale(var(--zoom, 1)); transform-origin: var(--origin, center); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
 .drawer-card:hover .drawer-thumb img { transform: scale(calc(var(--zoom, 1) * 1.05)); }
-.drawer-card-title { margin-top: 6px; font-size: 12px; font-weight: 600; line-height: 1.3; }
+.drawer-card-title { margin-top: 6px; font-family: var(--ogcw-display); font-size: 15px; font-weight: 400; line-height: 1.25; }
 .drawer-card-sub { font-size: 12px; color: var(--ogcw-text-2); }
-.drawer-card:hover .drawer-card-title, .drawer-card:focus-visible .drawer-card-title { text-decoration: underline; text-underline-offset: 3px; }
+.drawer-card:hover .drawer-card-title, .drawer-card:focus-visible .drawer-card-title { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .drawer-card:focus-visible { outline: none; }
 
 .drawer-utility { padding: 12px 0 28px; border-top: 1px solid var(--ogcw-border); }
@@ -679,13 +680,13 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .search-bar input::-webkit-search-cancel-button { display: none; }
 .search-close { display: grid; place-items: center; flex: none; width: 44px; height: 44px; margin-right: -8px; border-radius: 50%; transition: background-color .2s ease; }
 .search-close:hover, .search-close:focus-visible { background: var(--ogcw-surface); outline: none; }
-.search-label { padding: 24px 0 12px; font-size: 12px; color: var(--ogcw-text-2); text-transform: uppercase; letter-spacing: .08em; }
+.search-label { padding: 24px 0 12px; font-size: 11px; font-weight: 700; color: var(--ogcw-text-2); text-transform: uppercase; letter-spacing: .12em; }
 .search-results li { border-bottom: 1px solid var(--ogcw-border); }
 .search-result { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 16px; padding: 12px 0; }
 .search-result .drawer-thumb { aspect-ratio: 1; }
-.search-result-title { display: block; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.search-result-title { display: block; font-family: var(--ogcw-display); font-size: 19px; font-weight: 400; line-height: 1.25; }
 .search-result-sub { display: block; margin-top: 4px; font-size: 12px; color: var(--ogcw-text-2); }
-.search-result:hover .search-result-title, .search-result:focus-visible .search-result-title { text-decoration: underline; text-underline-offset: 3px; }
+.search-result:hover .search-result-title, .search-result:focus-visible .search-result-title { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 4px; }
 .search-result:focus-visible { outline: none; }
 /* Every font-display heading on the site is Source Serif 4, regular weight */
 .font-display { font-weight: 400; letter-spacing: -.01em; }
@@ -896,15 +897,16 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
   position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; padding-block: 32px 8px; text-align: center; font-family: var(--ogcw-ui);
 }
 .deck::before { content: ""; position: absolute; inset: -40px 0 auto; z-index: -1; height: 70%; pointer-events: none; background: radial-gradient(ellipse 60% 70% at 50% 0%, color-mix(in srgb, var(--ogcw-text) 7%, transparent), transparent 70%); }
-.deck-badge { padding: 4px 12px; border: 1px solid var(--glass-line); border-radius: 100px; background: color-mix(in srgb, var(--ogcw-text) 2%, transparent); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); }
-.deck-title { margin-top: 32px; padding-bottom: .12em; margin-bottom: -.12em; font-family: var(--ogcw-ui); font-size: clamp(44px, 6.4vw, 84px); font-weight: 600; line-height: .95; letter-spacing: -.05em; background: linear-gradient(to bottom, var(--ogcw-text) 40%, var(--ogcw-text-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.deck-sub { max-width: 540px; margin-top: 24px; font-size: 18px; line-height: 1.6; color: var(--ogcw-text-2); }
+.deck-badge { padding: 4px 12px; border: 1px solid var(--glass-line); border-radius: 100px; background: color-mix(in srgb, var(--ogcw-text) 2%, transparent); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.deck-title { margin-top: 28px; font-family: var(--ogcw-display); font-size: clamp(44px, 6.4vw, 88px); font-weight: 400; line-height: 1; letter-spacing: -.025em; color: var(--ogcw-text); }
+.deck-title em { font-style: italic; color: var(--ogcw-text-2); }
+.deck-sub { max-width: 540px; margin-top: 24px; font-family: var(--ogcw-serif); font-size: 18px; line-height: 1.6; color: var(--ogcw-text-2); }
 .deck-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 44px; }
-.deck-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 28px; border: 1px solid var(--glass-line); border-radius: 8px; font-size: 14px; font-weight: 500; transition: transform .3s var(--ease-out-expo), box-shadow .3s var(--ease-out-expo), background-color .3s ease, border-color .3s ease; }
-.deck-btn-primary { background: var(--ogcw-text); border-color: var(--ogcw-text); color: var(--ogcw-bg); }
-.deck-btn-primary:hover, .deck-btn-primary:focus-visible { transform: translateY(-2px); box-shadow: 0 10px 20px color-mix(in srgb, var(--ogcw-text) 12%, transparent); outline: none; }
-.deck-btn-secondary { background: color-mix(in srgb, var(--ogcw-text) 3%, transparent); color: var(--ogcw-text); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-.deck-btn-secondary:hover, .deck-btn-secondary:focus-visible { background: color-mix(in srgb, var(--ogcw-text) 6%, transparent); border-color: color-mix(in srgb, var(--ogcw-text) 20%, transparent); outline: none; }
+.deck-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px; border: 1px solid var(--glass-line); font-size: 12px; font-weight: 700; line-height: 1; letter-spacing: .08em; text-transform: uppercase; transition: transform .3s var(--ease-out-expo), box-shadow .3s var(--ease-out-expo), background-color .3s ease, border-color .3s ease; }
+.deck-btn-primary { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
+.deck-btn-primary:hover, .deck-btn-primary:focus-visible { background: var(--ogcw-text); border-color: var(--ogcw-text); outline: none; }
+.deck-btn-secondary { border-color: var(--ogcw-border); color: var(--ogcw-text); }
+.deck-btn-secondary:hover, .deck-btn-secondary:focus-visible { border-color: var(--ogcw-text); outline: none; }
 
 /* Tiles: the slot places, tilts and leans; the float layer drifts; the card lifts on hover */
 .deck-field { position: relative; width: 100%; max-width: 1200px; height: 400px; margin: 76px 0 0; padding: 0; list-style: none; }
@@ -924,7 +926,7 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .deck-card:focus-visible { box-shadow: 0 0 0 2px var(--ogcw-accent); }
 .deck-icon { width: 32px; height: 32px; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: color .3s ease, transform .3s var(--ease-physics); }
 .deck-card:hover .deck-icon, .deck-card:focus-visible .deck-icon { color: var(--ogcw-accent); }
-.deck-label { position: absolute; bottom: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 9px; letter-spacing: .05em; text-transform: uppercase; color: var(--ogcw-text-2); opacity: .7; transition: opacity .3s ease; }
+.deck-label { position: absolute; bottom: 12px; font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); opacity: .8; transition: opacity .3s ease; }
 .deck-card:hover .deck-label, .deck-card:focus-visible .deck-label { opacity: 1; }
 
 /* Each icon's own hover motion */
@@ -975,9 +977,6 @@ html:has(dialog.drawer[open]), html:has(dialog.search[open]) { overflow: hidden;
 .ogcw-connect-title { margin-top: 12px; font-family: var(--ogcw-serif); font-size: 30px; font-weight: 400; line-height: 1.1; letter-spacing: -.01em; }
 .ogcw-connect-copy { margin-top: 14px; max-width: 34rem; font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.6; color: var(--ogcw-text-2); }
 
-.ogcw-connect-socials { display: flex; gap: 8px; margin-top: 24px; }
-.ogcw-connect-socials a { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--ogcw-border); border-radius: 50%; color: var(--ogcw-text); transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
-.ogcw-connect-socials a:hover, .ogcw-connect-socials a:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
 .ogcw-connect-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding-bottom: 4px; border-bottom: 2px solid var(--ogcw-accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: gap .2s ease; }
 .ogcw-connect-link:hover { gap: 12px; }
 
@@ -1020,11 +1019,18 @@ main:has(> .ogcw-connect:last-child) + .site-footer { border-top-color: transpar
 /* Footer (src/components/ui/footer-2.tsx): white links that glow on hover */
 .footer-link { color: var(--ogcw-text); transition: text-shadow .25s ease, color .25s ease; }
 .footer-link:hover, .footer-link:focus-visible { color: var(--ogcw-text); text-shadow: 0 0 6px color-mix(in srgb, var(--ogcw-glow) 90%, transparent), 0 0 16px color-mix(in srgb, var(--ogcw-glow) 55%, transparent), 0 0 28px color-mix(in srgb, var(--ogcw-glow) 30%, transparent); outline: none; }
-.footer-social { color: var(--ogcw-text); }
-.footer-social:hover, .footer-social:focus-visible { border-color: var(--ogcw-accent); }
+/* Footer masthead: the wordmark and line on the left, socials on the right */
+.footer-brand { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; padding-block: 48px 36px; border-bottom: 1px solid var(--ogcw-border); }
+.footer-wordmark { font-family: var(--ogcw-display); font-size: 44px; font-weight: 600; line-height: 1; letter-spacing: .06em; }
+.footer-tagline { margin-top: 10px; font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.5; color: var(--ogcw-text-2); }
+.footer-socials { display: flex; gap: 8px; }
+.footer-social { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--ogcw-border); border-radius: 50%; color: var(--ogcw-text); transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.footer-social:hover, .footer-social:focus-visible { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
+.footer-heading { margin-bottom: 16px; font-family: var(--ogcw-ui); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.footer-base { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-block: 20px 28px; border-top: 1px solid var(--ogcw-border); font-size: 12px; color: var(--ogcw-text-2); }
 
-/* Footer app badges: light pills like the store badges, not links yet */
-.app-badge { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px 0 12px; border-radius: 8px; background: var(--ogcw-text); color: var(--ogcw-bg); cursor: default; user-select: none; }
+/* Footer app badges: quiet outlined pills, not links until the app exists */
+.app-badge { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px 0 11px; border: 1px solid var(--ogcw-border); border-radius: 8px; color: var(--ogcw-text-2); cursor: default; user-select: none; }
 
 /* Footer info pages (src/routes/info.$slug.tsx): a readable text column */
 /* Info pages: the text, and beside it the other help and company pages */

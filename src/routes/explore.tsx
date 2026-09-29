@@ -70,7 +70,7 @@ function ExplorePage() {
           <div className="og-lists">
             {READING_LISTS.map((list, index) => (
               <article key={list.id} className="og-list">
-                <Img photo={list.items[0]!.photo} className="og-list-cover" />
+                <Img photo={list.cover ?? list.items[0]!.photo} className="og-list-cover" />
                 <p className="og-kicker">Reading list {String(index + 1).padStart(2, "0")} · {list.items.length} stories</p>
                 <h3 className="og-list-title">{list.title}</h3>
                 <p className="og-list-note">{list.note}</p>

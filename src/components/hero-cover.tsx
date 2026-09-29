@@ -46,8 +46,6 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
 }
 
 export function HeroCover() {
-  const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
-
   return (
     <section className="cover" aria-labelledby="cover-title">
       <div className="cover-glow" aria-hidden="true" />
@@ -58,9 +56,9 @@ export function HeroCover() {
       <p className="cover-credit">Central Cee · Photo: 200izo, CC BY-SA 4.0</p>
 
       <div className="cover-inner">
+        {/* The date lives in the OGCW News masthead just below */}
         <div className="cover-top">
           <p>Welcome to One Great Culture World</p>
-          <time suppressHydrationWarning>{today}</time>
         </div>
 
         <div className="cover-copy">

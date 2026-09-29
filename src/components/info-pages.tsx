@@ -33,7 +33,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <dt>What is OGCW?</dt>
         <dd>OGCW, One Great Culture World, is an independent platform for culture and the stories around it. The idea is to bring culture and what’s happening right now, from all over the world, together in one place.</dd>
         <dt>What do you cover?</dt>
-        <dd>Music, from rap to rumba, and culture: style, design, nightlife, architecture and print. Plus OGCW Originals, our own interviews, reportage, lists and short documentaries, and the OGCW Shop.</dd>
+        <dd>Music, fashion, film &amp; TV, sport and pop culture, plus OGCW Originals: our own interviews, reportage, lists and analysis.</dd>
         <dt>How do I send you a story or a tip?</dt>
         <dd>Email <Mail subject="Submit a story">{BUSINESS_EMAIL}</Mail> with “Submit a story” in the subject.</dd>
         <dt>I’m an artist or a label. Can I send you music?</dt>

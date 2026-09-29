@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { SOCIALS, SocialIcon } from "./socials";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 
 // Three columns under the news front (requirements doc):
-// About OGCW (who we are, vision, what we cover, social links),
+// About OGCW (who we are, vision, what we cover; the social links sit in
+// the footer just below),
 // Newsletter (sign-up with the doc’s CTA and what’s in it), and
 // Business, Partnerships & Contact (Work With OGCW areas + business email).
 
@@ -52,13 +52,6 @@ export function ConnectSection() {
           <p className="ogcw-connect-copy">
             Our idea is simple: bring culture and what’s happening right now, from all over the world, together in one place.
           </p>
-          <nav className="ogcw-connect-socials" aria-label="Follow OGCW">
-            {SOCIALS.map((social) => (
-              <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`OGCW on ${social.name}`} title={social.name}>
-                <SocialIcon path={social.path} size={16} />
-              </a>
-            ))}
-          </nav>
           <Link to="/about" className="ogcw-connect-link">More about OGCW <ArrowRight size={14} aria-hidden="true" /></Link>
         </section>
 

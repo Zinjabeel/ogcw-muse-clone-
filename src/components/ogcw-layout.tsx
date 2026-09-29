@@ -26,7 +26,7 @@ const more = [
   { label: "Press", note: "News and assets for journalists", info: "press" },
   { label: "Brand", note: "Logo, colours and type", info: "brand" },
   { label: "FAQ", note: "Common questions", info: "faq" },
-  { label: "Help", note: "Account, newsletter and contact", info: "help" },
+  { label: "Help", note: "Newsletter, submissions and contact", info: "help" },
 ] as const;
 
 const isCurrent = (pathname: string, to: string) => pathname === to || pathname.startsWith(`${to}/`);

@@ -67,7 +67,7 @@ function BodyBlock({ block, first }: { block: Block; first: boolean }) {
       return (
         <figure className="og-inline">
           <Img photo={block.photo} className="og-inline-photo" />
-          <figcaption>{block.caption}</figcaption>
+          <figcaption>{block.caption}{block.photo.credit && ` Photo: ${block.photo.credit}.`}</figcaption>
         </figure>
       );
   }

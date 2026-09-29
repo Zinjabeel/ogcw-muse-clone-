@@ -2,13 +2,12 @@
 
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { buttonVariants } from "@/components/ui/button";
 import { SOCIALS, SocialIcon } from "@/components/socials";
 import type { InfoSlug } from "@/components/info-pages";
-import { BUSINESS_EMAIL, mail } from "@/lib/contact";
+import { mail } from "@/lib/contact";
 
-// Site footer, based on the "Footer 2" component: four link columns, a
-// divider, social buttons + app badges, another divider and the copyright.
+// Site footer, based on the "Footer 2" component: the OGCW wordmark and
+// social channels, four link columns, then the copyright and app badges.
 // Filled with OGCW’s own links; the template’s Linktree items don’t apply.
 // Lucide’s brand icons are swapped for the site’s Instagram, TikTok,
 // YouTube and X icons (lucide has no TikTok). OGCW has no app yet, so the
@@ -55,7 +54,6 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
       { label: "Contact us", href: mail("General") },
       { label: "Advertising", href: mail("Advertising") },
       { label: "Partnerships", href: mail("Partnerships") },
-      { label: BUSINESS_EMAIL, href: `mailto:${BUSINESS_EMAIL}` },
     ],
   },
   {
@@ -94,10 +92,10 @@ const storeLogos = {
 function AppBadge({ store }: { store: "apple" | "google" }) {
   return (
     <span className="app-badge" aria-label={`${store === "apple" ? "App Store" : "Google Play"}: coming soon`}>
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="currentColor" aria-hidden="true"><path d={storeLogos[store]} /></svg>
-      <span className="grid leading-none">
-        <span className="text-[10px] font-medium">Coming soon on</span>
-        <span className="text-base font-semibold">{store === "apple" ? "App Store" : "Google Play"}</span>
+      <svg viewBox="0 0 24 24" width={18} height={18} fill="currentColor" aria-hidden="true"><path d={storeLogos[store]} /></svg>
+      <span className="grid gap-0.5 leading-none">
+        <span className="text-[9px] font-medium uppercase tracking-[.08em] opacity-70">Coming soon on</span>
+        <span className="text-[13px] font-semibold">{store === "apple" ? "App Store" : "Google Play"}</span>
       </span>
     </span>
   );
@@ -136,11 +134,25 @@ export function Footer2() {
   return (
     <footer ref={reveal.ref} data-reveal={reveal.state} className="site-footer border-t bg-background text-foreground font-sans">
       <div className="page-wrap">
-        {/* Grid container with headings and links */}
+        {/* Masthead: the wordmark and line, with the social channels */}
+        <div className="footer-reveal footer-brand" style={{ ["--i" as string]: 0 }}>
+          <div>
+            <Link to="/" className="footer-wordmark" aria-label="OGCW home">OGCW</Link>
+            <p className="footer-tagline">One Great Culture World. Culture, reported from the inside.</p>
+          </div>
+          <div className="footer-socials">
+            {SOCIALS.map((social) => (
+              <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`OGCW on ${social.name}`} title={social.name} className="footer-social">
+                <SocialIcon path={social.path} size={16} />
+              </a>
+            ))}
+          </div>
+        </div>
+        {/* Link columns */}
         <div className="grid grid-cols-2 gap-8 py-12 md:grid-cols-4">
           {footerLinks.map((item, index) => (
-            <div key={item.title} className="footer-reveal" style={{ ["--i" as string]: index }}>
-              <h3 className="mb-4 text-xs font-medium text-foreground">{item.title}</h3>
+            <div key={item.title} className="footer-reveal" style={{ ["--i" as string]: index + 1 }}>
+              <h3 className="footer-heading">{item.title}</h3>
               <ul className="space-y-2 text-sm">
                 {item.links.map((link) => (
                   <li key={link.label}><FooterItem link={link} /></li>
@@ -149,35 +161,16 @@ export function Footer2() {
             </div>
           ))}
         </div>
-        <div className="footer-reveal h-px bg-border" style={{ ["--i" as string]: 4 }} />
-        {/* Social buttons + app badges */}
-        <div className="footer-reveal flex flex-wrap items-center justify-between gap-4 py-5" style={{ ["--i" as string]: 4 }}>
-          <div className="flex items-center gap-2">
-            {SOCIALS.map((social) => (
-              <a
-                key={social.name}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`OGCW on ${social.name}`}
-                title={social.name}
-                className={`${buttonVariants({ variant: "outline", size: "icon" })} footer-social`}
-              >
-                <SocialIcon path={social.path} size={16} />
-              </a>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <AppBadge store="apple" />
-            <AppBadge store="google" />
-          </div>
-        </div>
-        <div className="footer-reveal h-px bg-border" style={{ ["--i" as string]: 5 }} />
-        <div className="footer-reveal py-4 text-center text-xs text-foreground" style={{ ["--i" as string]: 5 }}>
+        {/* Copyright + app badges */}
+        <div className="footer-reveal footer-base" style={{ ["--i" as string]: 5 }}>
           <p>
             © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
             <Link to="/" className="footer-link">One Great Culture World</Link>. All rights reserved.
           </p>
+          <div className="flex flex-wrap gap-2">
+            <AppBadge store="apple" />
+            <AppBadge store="google" />
+          </div>
         </div>
       </div>
     </footer>
