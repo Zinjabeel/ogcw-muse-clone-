@@ -1,6 +1,73 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageIntro, SiteShell, StoryLink } from "../components/ogcw-layout";
-import musicHero from "../assets/ogcw-hero-music.jpg";
-import cartiPhoto from "../assets/playboi-carti.jpg";
-export const Route = createFileRoute("/blog")({ head:()=>({meta:[{title:"Journal — OGCW"},{name:"description",content:"Essays, interviews and visual stories from One Great Culture World."},{property:"og:title",content:"Journal — OGCW"},{property:"og:description",content:"Essays, interviews and visual stories from One Great Culture World."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}), component: Blog });
-function Blog(){return <SiteShell><PageIntro kicker="The OGCW journal" title="DEEP DIVES" copy="Long-form essays and conversations that make room for context, contradiction and original voices."/><main className="page-wrap pb-24"><article className="grid border border-border bg-card text-foreground lg:grid-cols-2"><img src={musicHero} alt="Artist performing under a single light" width={1920} height={1088} className="h-full min-h-96 w-full object-cover"/><div className="flex flex-col justify-end p-7 sm:p-12"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-accent">Cover essay / Sound</p><h2 className="mt-4 font-display text-5xl leading-[.9] sm:text-7xl">THE VALUE OF A ROOM THAT HASN’T BEEN DISCOVERED YET</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground">On small stages, accidental communities and why cultural spaces need time before they need scale.</p><div className="mt-7"><StoryLink to="/blog">Read 11 min</StoryLink></div></div></article><div className="mt-12 grid gap-8 md:grid-cols-2"><article><img src={cartiPhoto} alt="Playboi Carti performing at Clout Festival 2024" loading="lazy" width={1920} height={1280} className="aspect-[16/10] w-full object-cover saturate-[.65] contrast-110"/><p className="mt-5 text-[10px] font-bold uppercase tracking-widest text-accent">Photo essay / Rap</p><h3 className="mt-2 font-display text-4xl">THE BODY BECOMES PART OF THE STAGE</h3></article><article className="border-t-2 border-foreground pt-6 md:mt-24"><p className="section-kicker">Notebook</p><h3 className="mt-10 font-display text-5xl leading-none">WHO GETS TO WRITE THE HISTORY OF A SCENE?</h3><p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground">A conversation about memory, documentation and the politics of being first.</p></article></div></main></SiteShell>}
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight } from "lucide-react";
+import { PageIntro, SiteShell } from "../components/ogcw-layout";
+import { Img, SectionHead, StoryCard } from "../components/cards";
+import { ARTICLES, formatDate } from "../data/content";
+
+export const Route = createFileRoute("/blog")({
+  head: () => ({
+    meta: [
+      { title: "Journal — OGCW" },
+      { name: "description", content: "Essays, interviews and visual stories from One Great Culture World." },
+      { property: "og:title", content: "Journal — OGCW" },
+      { property: "og:description", content: "Essays, interviews and visual stories from One Great Culture World." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Blog,
+});
+
+// The journal: OGCW’s longest reads, longest first, then the essays in progress
+const minutes = (read: string) => Number.parseInt(read, 10) || 0;
+const [cover, ...longReads] = [...ARTICLES].sort((a, b) => minutes(b.read) - minutes(a.read)).slice(0, 4);
+
+const IN_THE_WORKS = [
+  { kind: "Essay · Sound", title: "The value of a room that hasn’t been discovered yet", note: "On small stages, accidental communities and why cultural spaces need time before they need scale." },
+  { kind: "Photo essay · Rap", title: "The body becomes part of the stage", note: "What happens to a performer, and a crowd, when the show is built for movement rather than songs." },
+  { kind: "Notebook", title: "Who gets to write the history of a scene?", note: "A conversation about memory, documentation and the politics of being first." },
+];
+
+function Blog() {
+  if (!cover) return null;
+  return (
+    <SiteShell>
+      <PageIntro kicker="The OGCW journal" title="Deep dives" copy="Long-form essays and conversations that make room for context, contradiction and original voices." />
+      <main className="page-wrap pb-24">
+        <Link to="/news/$slug" params={{ slug: cover.slug }} className="journal-cover">
+          <Img photo={cover.photo} className="journal-cover-photo" eager />
+          <span className="journal-cover-text">
+            <span className="og-kicker">Cover read · {cover.kicker}</span>
+            <span className="og-lead-title">{cover.title}</span>
+            <span className="og-lead-deck">{cover.deck}</span>
+            <span className="og-meta">By {cover.author} · {formatDate(cover.date)} · {cover.read}</span>
+            <span className="og-cta">Read it <ArrowRight size={16} aria-hidden="true" /></span>
+          </span>
+        </Link>
+
+        <section className="og-block" aria-labelledby="long-reads">
+          <SectionHead id="long-reads" title="More long reads">
+            <Link to="/news" className="og-more-link">All stories</Link>
+          </SectionHead>
+          <div className="og-grid-3">
+            {longReads.map((story) => <StoryCard key={story.slug} story={story} showDeck />)}
+          </div>
+        </section>
+
+        <section className="og-block" aria-labelledby="in-the-works">
+          <SectionHead id="in-the-works" title="In the works" />
+          <ol className="journal-works">
+            {IN_THE_WORKS.map((piece) => (
+              <li key={piece.title}>
+                <span className="og-kicker">{piece.kind}</span>
+                <span className="journal-works-title">{piece.title}</span>
+                <span className="journal-works-note">{piece.note}</span>
+                <span className="og-meta">Coming to the journal soon</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </main>
+    </SiteShell>
+  );
+}
