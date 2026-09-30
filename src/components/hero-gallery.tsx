@@ -28,10 +28,10 @@ const photo = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit
 
 export const CARDS: Card[] = [
   { id: "about", label: "About OGCW", title: "One Great Culture World", copy: "Who we are, what we cover and the people behind the stories.", cta: "Meet OGCW", dest: { to: "/about" }, photo: photo("photo-1470229722913-7c0e2dbbafd3"), alt: "A crowd with hands raised in front of a stage glowing orange", tone: "#8c5e4a" },
-  { id: "news", label: "News", title: "Today’s news", copy: "Music, games, streaming and culture, reported every day with the sources linked.", cta: "Read the news", dest: { to: "/news" }, photo: photo("photo-1504711434969-e33886168f5c"), alt: "A stack of folded newspapers", tone: "#6f8499" },
+  { id: "news", label: "News", title: "Today’s news", copy: "Music, games, streaming and culture, reported every day with the sources linked.", cta: "Read the news", dest: { to: "/news" }, photo: photo("photo-1548495010-25018cf4d1a3"), alt: "A wall of giant lit billboards at night, the Glico running man in the middle", tone: "#4d749b" },
   { id: "shop", label: "Shop", title: "The OGCW Shop", copy: "Our picks from Nike, Adidas, StockX and Uniqlo, bought straight from the retailer.", cta: "Visit the shop", dest: { to: "/shop" }, photo: photo("photo-1542291026-7eec264c27ff"), alt: "A red Nike running shoe against a red background", tone: "#a91728" },
-  { id: "blog", label: "Blog", title: "Check out our blog", copy: "Long reads and deep dives from the OGCW desk, for when a headline isn’t enough.", cta: "Read the blog", dest: { to: "/blog" }, photo: photo("photo-1455390582262-044cdead277a"), alt: "A fountain pen writing on a sheet of paper", tone: "#7b6f5a" },
-  { id: "subscribe", label: "Newsletter", title: "Subscribe for daily news", copy: "The day’s biggest stories in your inbox every morning. Free, and one tap to leave.", cta: "Subscribe", dest: { hash: "newsletter-title" }, photo: photo("photo-1511707171634-5f897ff02aa9"), alt: "A smartphone lying on a white desk", tone: "#4f8aa3" },
+  { id: "blog", label: "Blog", title: "Check out our blog", copy: "Long reads and deep dives from the OGCW desk, for when a headline isn’t enough.", cta: "Read the blog", dest: { to: "/blog" }, photo: photo("photo-1552146334-354db0c44c97"), alt: "A man reading an illustrated magazine by a café window", tone: "#857f75" },
+  { id: "subscribe", label: "Newsletter", title: "Subscribe for daily news", copy: "The day’s biggest stories in your inbox every morning. Free, and one tap to leave.", cta: "Subscribe", dest: { hash: "newsletter-title" }, photo: photo("photo-1743184437508-f1b3b793922b"), alt: "Scrolling the news on a phone beside a red coffee cup", tone: "#8f4a44" },
 ];
 
 const DURATION = 5500; // ms per card
