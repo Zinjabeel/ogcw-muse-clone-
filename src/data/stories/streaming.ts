@@ -1,0 +1,178 @@
+import type { StoryText } from "./index";
+import speedPhoto from "../../assets/news/ishowspeed-singapore.jpg";
+import kaiPhoto from "../../assets/news/kai-cenat.jpg";
+import zeratorPhoto from "../../assets/news/zerator-zevent.jpg";
+
+// Streaming stories in full.
+
+export const STREAMING_STORIES: Record<string, StoryText> = {
+  "neuro-sama-pattern-recognition-first-concert": {
+    ask: "Are you going to the concert?",
+    body: [
+      { type: "p", text: "Neuro-sama, the AI VTuber created by the UK developer Vedal, released a new single on Monday 21 September. “Pattern Recognition” was produced and animated by ODDEEO, who built the song out of conversations with Neuro, asking her things like which instrument she finds most comforting and how she perceives sound." },
+      { type: "p", text: "ODDEEO describes it as a song about growth, and about the real feelings people find in a performer who is not a person. It lands three months before the biggest date in Neuro-sama’s calendar: her first live concert, with her twin, Evil Neuro, in Los Angeles on 19 December." },
+      { type: "facts", title: "The concert", items: [["Date", "Saturday 19 December 2026"], ["Venue", "The Vermont Hollywood, 1020 N Vermont Ave, Los Angeles"], ["Doors", "11:00am (general admission)"], ["Show", "12:19pm"], ["Tickets", "On sale now through the official Eventbrite page"], ["Livestream", "Free, details to be announced"]] },
+      { type: "h2", text: "Who Neuro-sama is" },
+      { type: "p", text: "Neuro-sama is an artificial intelligence that streams on Twitch as an animated VTuber: she chats with viewers, plays games and sings. Vedal first put her live on 19 December 2022, which is why the concert falls on that date. Evil Neuro, her contrasting twin, followed in March 2023." },
+      { type: "p", text: "Between them the twins have more than three million followers across platforms and more than a billion total views. During their record-breaking subathon they reached more than 340,000 paid subscriptions at once, making them among the most-subscribed streamers in Twitch history, and Twitch’s State of Gaming report says Vedal and Neuro-sama broke the platform’s Hype Train record for a third time this year, reaching level 123." },
+      { type: "h2", text: "From stream to stage" },
+      { type: "p", text: "The concert is billed as an extended-reality show. The AI twins perform with a live band and human musicians, and the start time, 12:19pm, matches the date. For fans who cannot get to Los Angeles, a free livestream is planned." },
+      { type: "checklist", title: "Going? What to prepare", items: [
+        "Buy tickets only through the official Eventbrite page linked from Neuro-sama’s channels.",
+        "Doors open at 11:00am and the show starts at 12:19pm Pacific time, so plan an early start.",
+        "Check The Vermont Hollywood’s rules on ID, bags and entry before you go.",
+        "Can’t make it? Watch for the free livestream details closer to the date.",
+      ] },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["Who is Vedal?", "The UK-based developer who created Neuro-sama and founded Vedal AI. He streams with her on Twitch as Vedal987."],
+        ["Who is Evil Neuro?", "Neuro-sama’s twin, created in March 2023 as a contrasting character. The two stream together and will share the stage in Los Angeles."],
+        ["Is Neuro-sama a real person?", "No. She is an AI, created and developed by Vedal, who appears on stream as an animated character."],
+        ["Where can I hear “Pattern Recognition”?", "The official video, made by ODDEEO, is on YouTube."],
+        ["Why 19 December?", "It is the anniversary of Neuro-sama’s first stream, on 19 December 2022."],
+        ["How popular is Neuro-sama?", "Very. With Evil Neuro she has more than three million followers across platforms and over a billion total views, and their record subathon made them among the most-subscribed streamers in Twitch history."],
+        ["Will the concert be streamed?", "Yes, a free livestream is planned. Details will be announced."],
+      ] },
+    ],
+  },
+
+  "wardogs-launch-theburntpeanut": {
+    body: [
+      { type: "p", text: "WARDOGS went into early access on 10 September and became one of the biggest game launches on Twitch this year. It peaked at 452,600 concurrent viewers across streaming platforms, with 346,100 of them in the game’s Twitch category, and more than 17 million hours were watched in its first four days." },
+      { type: "p", text: "It did just as well with players. On Steam it passed 340,000 players at once on release day and reached 428,600 over its first weekend." },
+      { type: "facts", title: "WARDOGS", items: [["Developer", "BULKHEAD, a British studio"], ["Publisher", "Team17"], ["Genre", "Large-scale tactical first-person shooter"], ["Early access", "10 September 2026, on Steam"], ["Consoles", "PS5 and Xbox Series X|S planned for 2028"], ["Peak viewers", "452,600 across platforms · 346,100 on Twitch"], ["Peak players", "428,600 on Steam"]] },
+      { type: "h2", text: "The peanut out front" },
+      { type: "p", text: "TheBurntPeanut, the VTuber behind the peanut avatar, led the launch. Simulcasting across platforms, he was the most-watched WARDOGS streamer on both Twitch and YouTube. shroud and summit1g were among the other big names in the game that week, and maherco drew the biggest audience on Kick." },
+      { type: "p", text: "It fits the year he is having. Twitch’s own State of Gaming report, published the day before launch, counts him among its standout creators of 2026, with more than 70 million hours watched on the platform so far this year, and he won Best VTuber and Best FPS Streamer at the last Streamer Awards." },
+      { type: "h2", text: "Launch week in numbers" },
+      { type: "list", items: ["17.2 million hours watched across all platforms from 10 to 13 September", "13.1 million of those hours on Twitch", "140,000 viewers on average on Twitch", "62% of broadcasts in English", "Biggest audiences in the United States (40%), Germany (9.1%) and Brazil (6.4%)"] },
+      { type: "h2", text: "What early access means" },
+      { type: "p", text: "Early access means the game is playable but not finished. BULKHEAD expects WARDOGS to stay in early access for one to two years while it adds content and fixes problems, with console versions planned for 2028." },
+      { type: "h2", text: "Why the launch mattered" },
+      { type: "p", text: "Big streaming numbers do not always turn into players. WARDOGS did both: nearly as many people were playing it on Steam over the first weekend as were watching it on every platform combined at its peak. For a new game from a British studio, launching in early access rather than as a finished release, that is a rare result." },
+      { type: "p", text: "It also shows how much a few creators can move a launch. With TheBurntPeanut, shroud and summit1g all playing in the same week, the game had an audience from day one that most new shooters never reach." },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["How long will WARDOGS be in early access?", "BULKHEAD expects one to two years, while it adds content and fixes problems."],
+        ["Is WARDOGS on PlayStation or Xbox?", "Not yet. It is on Steam in early access, with PS5 and Xbox Series X|S versions planned for 2028."],
+        ["Who makes it?", "BULKHEAD, a British studio, with Team17 publishing."],
+        ["How many people played it at launch?", "More than 340,000 at once on Steam on release day, and 428,600 at the peak over the first weekend."],
+        ["Where can I watch TheBurntPeanut?", "He streams on Twitch and simulcasts to YouTube."],
+      ] },
+    ],
+  },
+
+  "twitch-state-of-gaming-2026": {
+    ask: "Are you going to TwitchCon?",
+    body: [
+      { type: "p", text: "Viewers watched more than 8.6 billion hours of gaming on Twitch between 1 January and 1 September 2026, according to the platform’s State of Gaming report. Twitch puts it another way: that is about one hour for every person on Earth." },
+      { type: "p", text: "The report, published on 9 September, is the clearest picture of what people are watching this year, from the games at the top to the genres and creators growing fastest." },
+      { type: "facts", title: "Twitch in 2026 so far", items: [["Hours of gaming watched", "More than 8.6 billion (1 January to 1 September)"], ["Top five games", "Nearly 1.7 billion hours between them"], ["Sandbox games", "831 million hours"], ["Indie games", "More than 348 million hours"], ["Horror", "287 million hours"], ["Streams with Drops", "1.6 billion hours, up 46%"]] },
+      { type: "h2", text: "The most-watched games" },
+      { type: "list", items: ["1. League of Legends (top streamers: Caedrel, otplol_, Noway4u_sir)", "2. Counter-Strike (Strogo, Eslcs, Ohnepixel)", "3. GTA V (JLtomy, Fps_shaka, Penta)", "4. VALORANT (Gofns, Mixwell, Lazvell)", "5. World of Warcraft (Echo_esports, Maximum, Metashi12)"] },
+      { type: "p", text: "League of Legends placed in the top three in nine of Twitch’s eleven regions, which is why it keeps its place at the top year after year." },
+      { type: "h2", text: "Where the growth is" },
+      { type: "p", text: "Horror is up 6%, and channels tagged indie are up 51%, a sign that smaller games are finding big audiences on the platform. Creature and companion games drew 142 million hours. Drops, the rewards viewers earn for watching, keep getting bigger: 7,500 campaigns this year, up 20%, with 40 million people claiming a drop." },
+      { type: "quote", text: "8.6 billion hours in eight months." },
+      { type: "h2", text: "The creators" },
+      { type: "list", items: ["Jynxzi: 78 million hours watched", "TheBurntPeanut: more than 70 million hours", "Rubius (Spain): more than 21 million hours", "Kamet0 (France): 13 million hours", "BastiGHG (Germany): the most-watched Minecraft streamer in the world", "Tsukilin (Taiwan): broke the subathon record, fifth in the world and first in Asia-Pacific", "Vedal987 and Neuro-sama (UK): broke the Hype Train record for a third time, reaching level 123"] },
+      { type: "h2", text: "Next up: TwitchCon San Diego" },
+      { type: "p", text: "TwitchCon returns to the San Diego Convention Center from 13 to 15 November. The Twitch Rivals Arena hosts three days of streamer competitions, the Glitch Theater has the opening ceremony, a drag showcase and headline performances, and Creator Camp runs sessions for people who stream themselves." },
+      { type: "checklist", title: "Going to TwitchCon? What to prepare", items: [
+        "Choose your pass: a 1-Day Pass, a multi-day pass, or the 3-Day + Party Bundle.",
+        "Collect your wristband early: pickup opens on Thursday 12 November, from 12pm to 8pm.",
+        "Registration opens at 9am each day. The show floor is open 10am to 7pm on Friday and Saturday, and 10am to 6pm on Sunday (Pacific time).",
+        "Book a hotel early; TwitchCon lists discounted hotels on its site.",
+        "Need accessibility support? Request it through TwitchCon’s accessibility form before the event.",
+      ] },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["When is TwitchCon San Diego 2026?", "13 to 15 November, at the San Diego Convention Center."],
+        ["What was the most-watched game on Twitch this year?", "League of Legends, followed by Counter-Strike, GTA V, VALORANT and World of Warcraft."],
+        ["What are Twitch Drops?", "In-game rewards viewers earn by watching streams of games that have Drops switched on."],
+      ] },
+    ],
+  },
+
+  "z-event-2026-final-edition": {
+    body: [
+      { type: "p", text: "The final Z Event raised €32,891,874 for charity, the biggest total in its history and nearly double the €16.66 million raised in 2025. The French-language marathon ran from 3 to 6 September, starting with a concert on the Thursday and running its main broadcast from 4 to 6 September." },
+      { type: "p", text: "It was billed as the last one. Organised by Adrien “ZeratoR” Nougaret, Z Event has raised €90,984,628 across its editions since 2016, making it one of the most successful charity streams anywhere." },
+      { type: "facts", title: "Z Event 2026", items: [["Dates", "3 to 6 September 2026"], ["Raised", "€32,891,874, a record"], ["Channels", "354"], ["Peak viewers", "1.3 million"], ["Hours watched", "26.18 million"], ["Raised since 2016", "€90,984,628"]] },
+      { type: "h2", text: "A weekend of records" },
+      { type: "p", text: "354 channels took part. The event peaked at 1.3 million viewers at once, the second-highest in its history and only 4,600 short of last year’s peak, and viewers watched 26.18 million hours in total." },
+      { type: "list", items: ["Mastu drew the biggest single audience, peaking at 477,000 viewers, a personal record", "ZeratoR peaked at 370,400, his own best", "The money raised more than doubled 2025’s €16.66 million"] },
+      { type: "image", photo: { src: zeratorPhoto, alt: "ZeratoR streaming at his desk during Z Event", credit: "Mickaël Schauli, CC BY-SA 4.0", crop: { pos: "50% 40%" } }, caption: "ZeratoR, the organiser, at his desk during Z Event 2025." },
+      { type: "h2", text: "The end of an era, maybe" },
+      { type: "p", text: "Z Event was billed as ending with this edition, and its official account thanked viewers for the record total. The organisers have hinted at similar projects in future under a different name, so French streaming’s biggest charity weekend may not be gone for good." },
+      { type: "quote", text: "Ten editions, more than €90 million, and a record to finish on." },
+      { type: "h2", text: "How Z Event works" },
+      { type: "p", text: "For one weekend a year, dozens of French-speaking streamers gather to broadcast together, and every donation from their viewers goes to the associations chosen for that edition. As the total climbs past set goals, the streamers take on challenges they promised in advance, which keeps viewers watching, and giving, for three days straight. Since the first edition in 2016, Z Event has supported 22 associations." },
+      { type: "h2", text: "What the numbers say" },
+      { type: "p", text: "The peak audience this year was almost exactly the same as in 2025, just 4,600 viewers lower. The money, though, nearly doubled. In other words, the audience did not grow much, but the people watching gave far more, which says a lot about how a final edition can move a community." },
+      { type: "list", items: ["2025: €16.66 million raised", "2026: €32.89 million raised", "All editions since 2016: €90.98 million"] },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["How much has Z Event raised in total?", "€90,984,628 across all its editions since 2016."],
+        ["How much did Z Event 2026 raise?", "€32,891,874, the most in its history."],
+        ["How many streamers took part?", "354 channels broadcast during the event, which peaked at 1.3 million viewers at once and logged 26.18 million hours watched."],
+        ["Who drew the biggest audience?", "Mastu, who peaked at 477,000 viewers, a personal record. ZeratoR, the organiser, peaked at 370,400, his own best."],
+        ["Who organises Z Event?", "Adrien “ZeratoR” Nougaret, the French streamer."],
+        ["Is this really the last Z Event?", "It was billed as the final edition, though the organisers have hinted at something similar under a new name."],
+      ] },
+    ],
+  },
+
+  "ishowspeed-world-talent-show": {
+    body: [
+      { type: "p", text: "IShowSpeed turned his YouTube channel into an international talent competition on 4 September. The World Talent Show ran for more than three hours, with contestants from around the world performing live for his audience, and by the end it had produced a winner, a finalist and one of the memes of the year." },
+      { type: "p", text: "Speed, the American streamer Darren Watkins Jr., was named Streamer of the Year at the last Streamer Awards, and his channel passed 61.2 million YouTube subscribers during the broadcast." },
+      { type: "facts", title: "The World Talent Show", items: [["Date", "4 September 2026"], ["Length", "More than three hours, live on YouTube"], ["Winner", "David"], ["Finalist", "Julian"], ["The meme", "Jamal’s “green apple”"]] },
+      { type: "h2", text: "The acts" },
+      { type: "list", items: ["David, the clear winner", "Julian, the finalist", "LevelUpPiano, who played piano while solving a Rubik’s Cube and playing table tennis", "A Polish football freestyler", "Momo, an acrobatic group", "A basketball trick-shot performer"] },
+      { type: "image", photo: { src: speedPhoto, alt: "IShowSpeed in an England shirt surrounded by fans and cameras in Singapore", credit: "Aerodynamically, CC0", crop: { pos: "40% 35%" } }, caption: "IShowSpeed, surrounded by fans and cameras on one of his trips abroad." },
+      { type: "h2", text: "“Green apple”" },
+      { type: "p", text: "The moment people shared most came at the end, when Speed lifted a contestant called Jamal, who closed the segment with two words: “green apple”. The clip became a meme on TikTok and X within hours. There were smaller moments too, including a contestant who dropped an envelope and picked up a different one." },
+      { type: "h2", text: "Why it worked" },
+      { type: "p", text: "Speed’s streams work because anything can happen, and a talent show gave that chaos a format: acts from different countries, a running competition and a huge live audience. Speed streams several times a week, and the World Talent Show video is on his channel." },
+      { type: "h2", text: "Who IShowSpeed is" },
+      { type: "p", text: "Darren Watkins Jr., who streams as IShowSpeed, is one of the most-watched creators in the world. He built his audience on YouTube with high-energy streams, football and his love of Cristiano Ronaldo, then took his channel on the road with live tours through countries across Europe, Asia and beyond, streaming everything as it happened." },
+      { type: "p", text: "He was named Streamer of the Year at The Streamer Awards for the second year running, and he won Best IRL Streamer too. The World Talent Show fitted the pattern: a big, unpredictable live event, built around the people he meets, broadcast to millions." },
+      { type: "list", items: ["Streamer of the Year at The Streamer Awards, two years running", "More than 61.2 million YouTube subscribers", "Known for IRL streams from cities around the world"] },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["How many subscribers does IShowSpeed have?", "His channel passed 61.2 million YouTube subscribers during the World Talent Show."],
+        ["Who won IShowSpeed’s World Talent Show?", "A contestant named David."],
+        ["What is the “green apple” meme?", "At the end of the show Speed lifted a contestant called Jamal, who said just “green apple”. The clip spread across TikTok and X within hours."],
+        ["Can I watch it again?", "Yes, the World Talent Show is on IShowSpeed’s YouTube channel."],
+        ["Who was the pianist everyone talked about?", "LevelUpPiano, who played the piano while also solving a Rubik’s Cube and playing table tennis, one of the most shared acts of the night."],
+      ] },
+    ],
+  },
+
+  "kai-cenat-ishowspeed-minecraft-marathon": {
+    body: [
+      { type: "p", text: "Kai Cenat and IShowSpeed spent 7 to 12 August playing Minecraft Hardcore together, live, for 121 hours. Across both creators’ Twitch and YouTube channels the marathon drew more than 30 million hours watched, according to Streams Charts, more than most of this year’s esports events." },
+      { type: "p", text: "It was a meeting of the two biggest names in streaming. Speed was Streamer of the Year at the last Streamer Awards; Kai Cenat won four awards on the same night. Put them in one of the hardest modes in one of the most popular games in the world, and the audience came." },
+      { type: "facts", title: "The marathon", items: [["Dates", "7 to 12 August 2026"], ["Length", "121 hours"], ["Hours watched", "More than 30 million, across four channels"], ["Average viewers", "61,800 across all four channels"], ["Deaths", "42 restarts"], ["Bosses beaten", "Ender Dragon, Wither, Elder Guardian, Warden"]] },
+      { type: "images", photos: [{ src: kaiPhoto, alt: "Kai Cenat in a black durag, speaking outdoors", credit: "ImDavisss Live, CC BY 3.0", crop: { pos: "50% 28%" } }, { src: speedPhoto, alt: "IShowSpeed surrounded by fans and cameras in Singapore", credit: "Aerodynamically, CC0", crop: { pos: "40% 35%" } }], caption: "Kai Cenat and IShowSpeed: 121 hours of Minecraft Hardcore." },
+      { type: "h2", text: "Where the audience was" },
+      { type: "list", items: ["IShowSpeed on YouTube: more than 13.5 million hours watched", "Kai Cenat on Twitch: 7.77 million hours, peaking at just over 198,000 viewers", "IShowSpeed on Twitch: a new record of 128,700 viewers on the final day"] },
+      { type: "h2", text: "42 deaths, four bosses" },
+      { type: "p", text: "In Hardcore mode one death ends the world, and you start again from nothing. They restarted 42 times before beating all four of Minecraft’s big bosses: the Ender Dragon, the Wither, the Elder Guardian and the Warden. The last day, when they finally beat the Ender Dragon, drew Speed’s biggest Twitch audience ever." },
+      { type: "h2", text: "Bigger than esports" },
+      { type: "p", text: "By watch time the marathon beat esports events such as VALORANT Masters Santiago 2026 and the LEC 2026 Spring split. Of the esports events finished so far this year, only the MLBB Mid Season Cup 2026 drew more." },
+      { type: "h2", text: "Why Hardcore works on stream" },
+      { type: "p", text: "Most Minecraft streams are relaxed. Hardcore is the opposite: every fall, every creeper and every lava pit can wipe out hours of progress. That is what made 121 hours of it compelling. Viewers stayed because any moment could be the one that sent both streamers back to the start, and when the pair finally reached the end, the audience had been through every restart with them." },
+      { type: "h2", text: "Kai Cenat’s year" },
+      { type: "p", text: "Kai Cenat is Twitch’s most-followed streamer. At the last Streamer Awards he won four prizes: Best Just Chatting Streamer, Best Streamed Event for Streamer University, Best Marathon for Mafiathon 3 and Best Collab, with LeBron James. Long-form events are his speciality, and this marathon was another one for the list." },
+      { type: "h2", text: "Questions and answers" },
+      { type: "faq", items: [
+        ["Who are Kai Cenat and IShowSpeed?", "Two of the biggest streamers in the world. Kai Cenat is Twitch’s most-followed streamer; IShowSpeed was named Streamer of the Year at The Streamer Awards two years running."],
+        ["What is Minecraft Hardcore?", "A mode where you only get one life. If you die, the world is gone and you start over."],
+        ["How long did the marathon last?", "121 hours, from 7 to 12 August."],
+        ["Can I watch it back?", "Check both creators’ YouTube channels for the streams and highlights."],
+      ] },
+    ],
+  },
+};

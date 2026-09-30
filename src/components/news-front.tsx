@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, formatPrice, SHOPS, SONGS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData, type Song } from "@/data/content";
+import { article, ARTICLES, formatPrice, SHOPS, SONGS, spotifyTrack, type Article, type Photo as PhotoData, type Song } from "@/data/content";
+import { SpotifyIcon } from "./spotify";
 import { ExploreMix } from "./explore-mix";
 import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
 import { ShopCard } from "./cards";
@@ -219,33 +220,35 @@ export function NewsFront() {
               <Photo photo={lead.photo} className="bs-photo-lead" />
             </Link>
 
-            {/* The song to check out, then the rest of the playlist as a short list */}
+            {/* The song to check out, then the rest of the playlist as a short
+                list. Every song opens on Spotify, shown with its album cover. */}
             <div className="bs-song bs-song-wide">
               <p className="bs-song-head">Check out this song</p>
-              <a className="bs-song-main" href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
+              <a className="bs-song-main" href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
                 <span className="bs-song-media">
-                  <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
+                  <img src={song.cover} alt="" loading="lazy" />
                   <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
                 </span>
                 <span className="bs-song-info">
                   <span className="bs-song-title">{song.title}</span>
                   <span className="bs-song-artist">{song.artist}</span>
+                  <span className="bs-song-album">{song.album} · {song.year}</span>
                   <span className="bs-song-note">{song.note}</span>
-                  <span className="bs-read">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
+                  <span className="bs-spotify"><SpotifyIcon size={15} /> Play on Spotify <ArrowUpRight size={13} aria-hidden="true" /></span>
                 </span>
               </a>
               <p className="bs-song-sub">Up next on the playlist</p>
               <ol className="bs-song-next">
                 {nextSongs.map((item, index) => (
-                  <li key={item.video}>
-                    <a href={youtubeUrl(item.video)} target="_blank" rel="noopener noreferrer">
+                  <li key={item.spotify}>
+                    <a href={spotifyTrack(item.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${item.title} by ${item.artist}, on Spotify`}>
                       <span className="bs-song-num" aria-hidden="true">{index + 2}</span>
-                      <span className="bs-song-thumb"><img src={youtubeThumb(item.video)} alt="" loading="lazy" /></span>
+                      <span className="bs-song-thumb"><img src={item.cover} alt="" loading="lazy" /></span>
                       <span className="bs-song-next-text">
                         <span className="bs-song-next-title">{item.title}</span>
                         <span className="bs-song-next-artist">{item.artist}</span>
                       </span>
-                      <Play size={13} fill="currentColor" strokeWidth={0} aria-hidden="true" className="bs-song-next-play" />
+                      <span className="bs-song-next-play"><SpotifyIcon size={16} /></span>
                     </a>
                   </li>
                 ))}

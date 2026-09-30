@@ -1,5 +1,6 @@
 import { Check, GalleryHorizontal, LayoutPanelTop, PanelsTopLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { storePreference } from "@/lib/consent";
 
 // Hero switcher in the header, beside the colour switcher and built the same
 // way: "Gallery" (the default, hero-gallery.tsx) is five cards into OGCW,
@@ -25,11 +26,7 @@ function applyHero(id: HeroId) {
   const root = document.documentElement;
   if (id === "gallery") delete root.dataset["hero"];
   else root.dataset["hero"] = id;
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // private mode or storage blocked: the hero still changes for this visit
-  }
+  storePreference(STORAGE_KEY, id); // remembered only if the reader allows preferences
 }
 
 export function HeroSwitcher() {

@@ -15,7 +15,6 @@ import zeratorPhoto from "../assets/news/zerator-zevent.jpg";
 import twitchconPhoto from "../assets/news/twitchcon-block-party.jpg";
 import runwayPhoto from "../assets/news/runway-mcqueen.jpg";
 import wylePhoto from "../assets/news/noah-wyle.jpg";
-import seehornPhoto from "../assets/news/rhea-seehorn.jpg";
 import barbicanPhoto from "../assets/news/barbican-lakeside.jpg";
 import mileyPhoto from "../assets/news/miley-cyrus-primavera.jpg";
 import skarsgardPhoto from "../assets/news/bill-skarsgard.jpg";
@@ -34,6 +33,8 @@ import jhenePhoto from "../assets/news/jhene-aiko.jpg";
 import kaiPhoto from "../assets/news/kai-cenat.jpg";
 import benziesPhoto from "../assets/news/leslie-benzies.jpg";
 import fortnitePhoto from "../assets/news/fortnite-gdc.jpg";
+import { unsplash, youtubeThumb, youtubeUrl } from "./media";
+import { STORY_BODIES } from "./stories";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
@@ -48,11 +49,20 @@ export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
 };
 export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 
+// What a story's body is made of: paragraphs, subheads, pull quotes, photos
+// (one, or two side by side), bullet lists, a key-facts box, a checklist
+// ("what to prepare") and questions and answers.
 export type Block =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
   | { type: "quote"; text: string }
-  | { type: "image"; photo: Photo; caption: string };
+  | { type: "image"; photo: Photo; caption: string }
+  | { type: "images"; photos: [Photo, Photo]; caption: string }
+  | { type: "list"; items: string[] }
+  | { type: "facts"; title: string; items: [string, string][] }
+  | { type: "checklist"; title: string; items: string[] }
+  | { type: "faq"; items: [string, string][] }
+  | { type: "link"; label: string; href: string };
 
 export type Article = {
   slug: string;
@@ -66,15 +76,30 @@ export type Article = {
   photo: Photo;
   body: Block[];
   sources: Source[];
+  ask?: string; // the yes/no question at the end ("Are you going?"); "Was this helpful?" when unset
 };
 
-const unsplash = (id: string, w = 1200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`;
-export const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
-export const youtubeUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
+export { youtubeThumb, youtubeUrl, spotifyTrack } from "./media";
+
+// Words in a story, for its reading time (about 230 a minute)
+const blockWords = (block: Block): string[] => {
+  switch (block.type) {
+    case "p": case "h2": case "quote": return [block.text];
+    case "image": case "images": return [block.caption];
+    case "list": return block.items;
+    case "facts": return [block.title, ...block.items.flat()];
+    case "checklist": return [block.title, ...block.items];
+    case "faq": return block.items.flat();
+    case "link": return [];
+  }
+};
+export const wordCount = (body: Block[]) => body.flatMap(blockWords).join(" ").split(/\s+/).filter(Boolean).length;
 
 // ---------------------------------------------------------------- Stories (newest first)
+// Each story's details are here; its full text lives in src/data/stories,
+// one file per section, and its reading time is worked out from that text.
 
-export const ARTICLES: Article[] = [
+const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
   {
     slug: "rap-number-ones-2026",
     section: "music",
@@ -83,22 +108,7 @@ export const ARTICLES: Article[] = [
     deck: "A record Grammy night, three albums in the top three at once and a 12th number one. The case for each name in our No. 1 rapper vote.",
     author: "Sana Lind",
     date: "2026-09-30",
-    read: "3 min read",
     photo: { src: coleArenaPhoto, alt: "J. Cole on stage in a packed arena under white spotlights", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Who is the number one rapper right now? We have put the question to you on the OGCW front page, with five names on the ballot. Here is what each of them has done in 2026 so far." },
-      { type: "h2", text: "Kendrick Lamar" },
-      { type: "p", text: "GNX won Best Rap Album at the Grammys on 1 February, his fourth win in a row in that category. He took five awards on the night, including Record of the Year, which brought him to 27 Grammys: more than any other rapper, Jay-Z included." },
-      { type: "h2", text: "Drake" },
-      { type: "p", text: "On 15 May he released three albums at once. ICEMAN opened at number one on the Billboard 200 with 463,000 units, and HABIBTI and MAID OF HONOUR came in at two and three: the first time any act has held the top three places at the same time." },
-      { type: "h2", text: "J. Cole" },
-      { type: "p", text: "The Fall-Off, released on 6 February, went straight to number one on the Billboard 200." },
-      { type: "h2", text: "Future" },
-      { type: "p", text: "The Real Me opened at number one on the chart dated 25 July, with 131,000 units. It was his 12th number-one album, one more than Eminem. Among rappers, only Jay-Z and Drake have more." },
-      { type: "h2", text: "Cardi B" },
-      { type: "p", text: "“Safe”, her song with Kehlani, won Best Hip-Hop at the MTV Video Music Awards on 27 September." },
-      { type: "quote", text: "Five cases, one vote. Yours is on the front page." },
-    ],
     sources: [
       { name: "XXL: Kendrick Lamar’s GNX wins Best Rap Album at the 2026 Grammys", url: "https://www.xxlmag.com/kendrick-lamar-gnx-best-rap-album-2026-grammy-awards/" },
       { name: "HotNewHipHop: Drake tops the Billboard 200 with the ICEMAN trilogy", url: "https://www.hotnewhiphop.com/996118-drake-tops-billboard-200-iceman-trilogy-first-week-sales" },
@@ -114,17 +124,7 @@ export const ARTICLES: Article[] = [
     deck: "After a Song of the Year win at the VMAs, the stadium tour heads to Bogotá, Lima, Santiago, La Plata and São Paulo through October.",
     author: "Nia Vale",
     date: "2026-09-29",
-    read: "3 min read",
     photo: { src: btsSwimPhoto, alt: "BTS performing “Swim” to a full stadium in Paris", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 45%" } },
-    body: [
-      { type: "p", text: "BTS head to South America this week as the Arirang World Tour, their first since the members completed military service, moves into its Latin American leg. It opens at Estadio El Campín in Bogotá on 2 and 3 October." },
-      { type: "p", text: "From there the tour plays Lima from 7 to 10 October, Santiago from 14 to 17 October, La Plata outside Buenos Aires from 21 to 24 October and São Paulo’s Estádio MorumBIS from 28 to 31 October. It then crosses to Asia, starting in Kaohsiung, Taiwan, on 19 November." },
-      { type: "h2", text: "A tour built around “Swim”" },
-      { type: "p", text: "The all-stadium run began in Goyang, South Korea, on 9 April and covers 88 shows in 34 cities across 23 countries. Its centrepiece is “Swim”, the lead single from the album Arirang, which debuted at number one on the Billboard Hot 100 and on Sunday won Song of the Year and Best K-Pop at the MTV VMAs." },
-      { type: "quote", text: "Eighty-eight shows, 34 cities, one song leading the way." },
-      { type: "image", photo: { src: btsStadiumPhoto, alt: "The stadium in Paris filling up before BTS take the stage", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 60%" } }, caption: "The Paris stop of the Arirang World Tour on 17 July." },
-      { type: "p", text: "After the Asia-Pacific dates, including Thailand, Malaysia, Singapore and Indonesia in December and Australia in February, the tour finishes in the Philippines in March 2027." },
-    ],
     sources: [
       { name: "Wikipedia: Arirang World Tour", url: "https://en.wikipedia.org/wiki/Arirang_World_Tour" },
       { name: "Wikipedia: Swim (BTS song)", url: "https://en.wikipedia.org/wiki/Swim_(BTS_song)" },
@@ -138,17 +138,7 @@ export const ARTICLES: Article[] = [
     deck: "Rockstar’s return to Vice City is on track for 19 November on PS5 and Xbox Series X|S. Pre-orders are open; a PC date is not.",
     author: "Jonah Reyes",
     date: "2026-09-29",
-    read: "3 min read",
     photo: { src: youtubeThumb("VQRLujxTm3c"), alt: "Official Grand Theft Auto VI artwork: Jason and Lucia on a dock in Vice City", credit: "Rockstar Games, Trailer 2", crop: { pos: "50% 40%" } },
-    body: [
-      { type: "p", text: "Grand Theft Auto VI is on track for 19 November 2026 on PlayStation 5 and Xbox Series X|S, and pre-orders are open on both consoles’ digital stores." },
-      { type: "p", text: "The game takes the series back to Leonida, Rockstar’s version of Florida, with Vice City at its centre and two leads, Jason and Lucia, introduced in the second trailer in May 2025." },
-      { type: "image", photo: { src: youtubeThumb("QdBZY2fkU-0"), alt: "Official Grand Theft Auto VI artwork: Lucia and Jason on a car under Vice City palms", credit: "Rockstar Games, Trailer 1", crop: { pos: "50% 45%" } }, caption: "The key art from Trailer 1, which confirmed the return to Vice City in December 2023." },
-      { type: "h2", text: "What is still missing" },
-      { type: "p", text: "There is still no PC date. Take-Two has said Rockstar will announce other platforms in its own time, and the game will not arrive on Game Pass on day one." },
-      { type: "quote", text: "No third trailer yet, and no PC date either." },
-      { type: "p", text: "Rockstar has not announced a third trailer. If it follows the pattern of past launches, a launch trailer should arrive in the week before release, around the time pre-loads open." },
-    ],
     sources: [
       { name: "PCGamesN: GTA 6 release date and latest news", url: "https://www.pcgamesn.com/grand-theft-auto-vi/gta-6-release-date-setting-map-characters-gameplay-trailers" },
       { name: "Beebom: When will GTA 6 Trailer 3 come out?", url: "https://beebom.com/when-will-gta-6-trailer-3-come-out/" },
@@ -163,16 +153,7 @@ export const ARTICLES: Article[] = [
     deck: "CD Projekt Red’s overhaul arrived on 29 September with new combat, a revamped skill tree and both expansions free for current owners.",
     author: "Jonah Reyes",
     date: "2026-09-29",
-    read: "3 min read",
     photo: { src: youtubeThumb("OlmuIckOX0c"), alt: "A scene from the official launch trailer for The Witcher 3: Wild Hunt — Remastered", credit: "CD Projekt Red, official launch trailer", crop: { pos: "50% 16%", zoom: 1.35 } },
-    body: [
-      { type: "p", text: "The Witcher 3: Wild Hunt — Remastered went live on 29 September on PC, PlayStation 5, Xbox Series X|S and Nintendo Switch 2. Anyone who already owns the game on a qualifying platform gets it as a free upgrade." },
-      { type: "p", text: "It is more than a new coat of paint. CD Projekt Red lists upgraded visuals, reworked combat, better traversal and horse handling, smarter monsters, new sign effects and finishers, transmogrification, a bigger photo mode and a revamped skill tree." },
-      { type: "h2", text: "Both expansions, free" },
-      { type: "p", text: "Hearts of Stone and Blood and Wine are now free for every current owner. The remaster was made with Fool’s Theory, a studio led by Witcher 3 veterans, and Yigsoft, and a partnership with Blizzard puts the game on Battle.net." },
-      { type: "p", text: "There is more to come. Songs of the Past, a paid expansion due in 2027, sends Geralt to Letten, a peaceful-looking region with a dark secret, and gives him a chain as a new weapon." },
-      { type: "quote", text: "Eleven years on, Geralt is back on the road." },
-    ],
     sources: [
       { name: "CD Projekt Red: The Witcher 3: Wild Hunt — Remastered announced", url: "https://press.cdprojektred.com/en/news/1839/the-witcher-3-wild-hunt-remastered-announced-songs-of-the-past-gets-first-look" },
       { name: "YouTube: The Witcher 3: Wild Hunt — Remastered, official launch trailer", url: youtubeUrl("OlmuIckOX0c") },
@@ -186,15 +167,7 @@ export const ARTICLES: Article[] = [
     deck: "Mojang and Double Eleven’s sequel launched on 29 September with four-player co-op, a new dimension and a lot more loot, from €29.99.",
     author: "Nia Vale",
     date: "2026-09-29",
-    read: "2 min read",
     photo: { src: youtubeThumb("nHW7oH_kZd4"), alt: "A scene from the official launch trailer for Minecraft Dungeons II", credit: "Mojang Studios, official launch trailer", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Minecraft Dungeons II launched on 29 September. Mojang Studios made it with Double Eleven, and Xbox Game Studios publishes it." },
-      { type: "p", text: "The sequel adds the Sift, a new dimension full of threats and mysteries. Enemies get tougher the deeper you go, and legendary weapons, armour and artifacts let you build your hero your way." },
-      { type: "h2", text: "Bring three friends" },
-      { type: "p", text: "Up to four players can team up on the same couch, online or through matchmaking, with cross-platform play. The standard edition costs €29.99 on Steam; the €49.99 Deluxe Edition adds cosmetics and future downloadable content." },
-      { type: "p", text: "Early Steam reviews are mixed: 58% of the first 2,014 player reviews were positive." },
-    ],
     sources: [
       { name: "Steam: Minecraft Dungeons II", url: "https://store.steampowered.com/app/1912410/Minecraft_Dungeons_II/" },
       { name: "YouTube: Minecraft Dungeons II, official launch trailer", url: youtubeUrl("nHW7oH_kZd4") },
@@ -208,17 +181,7 @@ export const ARTICLES: Article[] = [
     deck: "Madonna was named Artist of the Year, BTS won Song of the Year and the show drew its biggest audience since 2015.",
     author: "Jonah Reyes",
     date: "2026-09-28",
-    read: "4 min read",
     photo: { src: madonnaPhoto, alt: "Madonna on stage during The Celebration Tour, dancers and screens around her", credit: "Ronald Woan, CC BY 4.0", crop: { pos: "50% 40%" } },
-    body: [
-      { type: "p", text: "The 2026 MTV Video Music Awards went to the two biggest names in the room. Taylor Swift won Video of the Year for “The Fate of Ophelia” on Sunday night at the Peacock Theater in Los Angeles, while Madonna left with seven awards from 13 nominations, including Artist of the Year." },
-      { type: "p", text: "Snoop Dogg hosted. The broadcast drew 8.43 million viewers, the most-watched VMAs since 2015." },
-      { type: "h2", text: "The rest of the winners" },
-      { type: "p", text: "BTS won Song of the Year and Best K-Pop for “Swim”. Lisa took Best Pop for “Dream” with Kentaro Sakaguchi, Cardi B and Kehlani won Best Hip-Hop for “Safe”, and Bad Bunny won Best Latin for “Nuevayol”. Sienna Spiro was named Best New Artist." },
-      { type: "quote", text: "Madonna’s 13 nominations matched Lady Gaga’s record from 2010." },
-      { type: "h2", text: "Honours and a premiere" },
-      { type: "p", text: "Swift also won Best Direction for “Opalite” and received the first MTV VMA Artist Director Honors. Her video for “Patient Zero”, starring Colin Farrell and Dakota Johnson, premiered during the show. Nirvana received the Video Vanguard Award." },
-    ],
     sources: [
       { name: "Wikipedia: 2026 MTV Video Music Awards", url: "https://en.wikipedia.org/wiki/2026_MTV_Video_Music_Awards" },
       { name: "The Hollywood Reporter: MTV VMAs 2026 winners list", url: "https://www.hollywoodreporter.com/lists/mtv-vmas-2026-winners-list/" },
@@ -232,16 +195,7 @@ export const ARTICLES: Article[] = [
     deck: "Around 100 houses show spring/summer 2027 between 28 September and 6 October, with debuts at Courrèges and Carven.",
     author: "Sana Lind",
     date: "2026-09-28",
-    read: "3 min read",
     photo: { src: runwayPhoto, alt: "Models walking the runway at an Alexander McQueen show, seen from behind", credit: "Christopher Macsurak, CC BY 2.0", crop: { pos: "50% 35%" } },
-    body: [
-      { type: "p", text: "Paris Fashion Week opened on Monday 28 September with around 100 houses on the spring/summer 2027 calendar, roughly two-thirds of them staging runway shows. Belgian designer Julie Kegels opened the week." },
-      { type: "p", text: "Tuesday is the heaviest day of the schedule, with Christian Dior in the afternoon and Saint Laurent closing the evening." },
-      { type: "h2", text: "Two debuts" },
-      { type: "p", text: "The season’s newcomers show midweek. Drew Henry, the South African designer who previously worked at Burberry and JW Anderson, presents his first Courrèges collection on Wednesday 30 September. Kai Nesselrath, formerly head of womenswear design at Saint Laurent, makes his Carven debut on Thursday 1 October." },
-      { type: "quote", text: "Two first collections, and a week that ends with Louis Vuitton." },
-      { type: "p", text: "Hermès, Givenchy, Chloé, Miu Miu and Maison Margiela are also on the calendar. Louis Vuitton closes the week on Tuesday 6 October." },
-    ],
     sources: [
       { name: "Luxury.it: Paris Fashion Week SS27", url: "https://luxury.it/fashion/paris-fashion-week-ss27/" },
       { name: "Fédération de la Haute Couture et de la Mode: Paris Fashion Week", url: "https://www.fhcm.paris/en/paris-fashion-week" },
@@ -255,15 +209,7 @@ export const ARTICLES: Article[] = [
     deck: "The Encore re-release took $26.1 million to top the US box office, the first re-release to do it since The Lion King in 2011.",
     author: "Jonah Reyes",
     date: "2026-09-28",
-    read: "2 min read",
     photo: { src: unsplash("photo-1489599849927-2ee91cede3ba", 1600), alt: "Rows of red seats in a dark cinema", credit: "Unsplash", crop: { pos: "50% 60%" } },
-    body: [
-      { type: "p", text: "Avengers: Endgame is back at the top of the North American box office. The Encore re-release took $26.1 million over the weekend of 25 to 27 September, making it the first re-release to finish number one since The Lion King in 3D in 2011." },
-      { type: "p", text: "It was a strong weekend all round, with three films taking more than $20 million each." },
-      { type: "h2", text: "A record for Spider-Man" },
-      { type: "p", text: "The week before, Resident Evil opened at number one with $60.2 million. In the same week, Spider-Man: Brand New Day passed the $936.6 million of Star Wars: The Force Awakens to become the highest-grossing film ever in the United States and Canada." },
-      { type: "quote", text: "A seven-year-old film, back at number one." },
-    ],
     sources: [
       { name: "Wikipedia: 2026 box office number-one films in the United States", url: "https://en.wikipedia.org/wiki/List_of_2026_box_office_number-one_films_in_the_United_States" },
       { name: "Deadline: Weekend box office, 25–27 September", url: "https://deadline.com/2026/09/box-office-avengers-endgame-primetime-heart-of-the-beast-1237111302/" },
@@ -277,15 +223,7 @@ export const ARTICLES: Article[] = [
     deck: "Her tenth album opened at the top of the Billboard 200 with 61,000 units. Two Hollywood Bowl nights follow in October.",
     author: "Sana Lind",
     date: "2026-09-27",
-    read: "2 min read",
     photo: { src: mileyPhoto, alt: "Miley Cyrus on stage at Primavera Sound in Barcelona, lit green and red", credit: "Jwslubbock, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Bass Persuades, Miley Cyrus’s tenth studio album, has debuted at number one on the Billboard 200 with 61,000 album-equivalent units, 47,000 of them in sales. It also topped the chart in Wallonia and reached the top ten across Europe, Australia and Canada." },
-      { type: "p", text: "The album came out on 18 September on Atlantic Records. Its title track arrived as the lead single on 3 September, and “Let’s Get Married” followed on release day. For this era she goes by a single name: Miley." },
-      { type: "h2", text: "Who’s on it" },
-      { type: "p", text: "The record runs to ten tracks, with a bonus track, “Smile”, on some editions. The New York band Model/Actriz appear on two songs, and Andrew Wyatt of Miike Snow on another." },
-      { type: "p", text: "Cyrus plays two nights at the Hollywood Bowl in Los Angeles on 16 and 18 October, with Model/Actriz opening. Live shows from her are rare, which makes these two among the hottest tickets of the autumn." },
-    ],
     sources: [
       { name: "Wikipedia: Bass Persuades", url: "https://en.wikipedia.org/wiki/Bass_Persuades" },
       { name: "Variety: Miley Cyrus announces Bass Persuades and Hollywood Bowl shows", url: "https://variety.com/2026/music/news/miley-cyrus-new-album-bass-persuades-hollywood-bowl-1236847024/" },
@@ -299,15 +237,7 @@ export const ARTICLES: Article[] = [
     deck: "A busy end to the month, from Jordan retros to a recovery slide made with Hyperice.",
     author: "Jonah Reyes",
     date: "2026-09-26",
-    read: "2 min read",
     photo: { src: unsplash("photo-1556906781-9a412961c28c", 1600), alt: "A pair of Air Jordan 1 sneakers dangling over the edge of a rooftop", credit: "Unsplash", crop: { pos: "50% 55%" } },
-    body: [
-      { type: "p", text: "September ends with one of the busiest release weeks of the year. On Friday 25 September the Air Jordan 5 “Sunset” arrived alongside Rayasianboy’s adidas Harden Vol. 10 “RUEI”." },
-      { type: "p", text: "Saturday brought Bad Bunny’s adidas BadBo 1.0 in “Night Navy”, the Air Jordan 1 Low OG “Last Dance at the Garden” and a Mowalola x Air Jordan 14." },
-      { type: "h2", text: "Still to come" },
-      { type: "p", text: "On Tuesday 29 September Nike reissues the Air Bakin OG in “Varsity Red” and releases the Hyperslides, a recovery slide made with Hyperice. Earlier in the month, Anthony Edwards’ adidas AE 3 made its debut on 18 September." },
-      { type: "p", text: "Want the classics instead? The OGCW Shop has our picks from Nike, Adidas, StockX and Uniqlo." },
-    ],
     sources: [
       { name: "House of Heat: September 2026 sneaker releases", url: "https://houseofheat.co/upcoming-sneaker-releases-september-2026" },
     ],
@@ -320,15 +250,7 @@ export const ARTICLES: Article[] = [
     deck: "Leslie Benzies’s Edinburgh studio, founded after he left Rockstar North, has collapsed 15 months after MindsEye’s troubled launch.",
     author: "Jonah Reyes",
     date: "2026-09-25",
-    read: "2 min read",
     photo: { src: benziesPhoto, alt: "Leslie Benzies, founder of Build A Rocket Boy, in a black-and-white portrait", credit: "Austin Hargrave, CC BY-SA 3.0", crop: { pos: "50% 22%" } },
-    body: [
-      { type: "p", text: "Build A Rocket Boy, the Edinburgh studio behind MindsEye, is in administration. Companies House listed it as “In Administration” on 25 September, after a final round of layoffs and reports that it was closing." },
-      { type: "p", text: "The studio was founded in 2016 by Leslie Benzies, the former Rockstar North president known for his work on Grand Theft Auto. It raised more than $110 million in a funding round in January 2024." },
-      { type: "h2", text: "A launch it never recovered from" },
-      { type: "p", text: "MindsEye came out on 10 June 2025 on PlayStation 5, PC and Xbox Series X|S and was panned, with Metacritic scores between 28 and 37 out of 100. By July 2025 about 300 staff had been given redundancy notices." },
-      { type: "p", text: "In March 2026 IO Interactive ended its publishing partnership, and a planned Hitman crossover was cancelled. A major update, Blacklist, followed in April, but it was not enough to keep the studio going." },
-    ],
     sources: [
       { name: "Wolf’s Gaming Blog: MindsEye developer Build A Rocket Boy enters administration", url: "https://wolfsgamingblog.com/2026/09/25/mindseye-developer-build-a-rocket-boy-enters-administration/" },
       { name: "Wikipedia: MindsEye", url: "https://en.wikipedia.org/wiki/MindsEye" },
@@ -342,16 +264,7 @@ export const ARTICLES: Article[] = [
     deck: "“Patient Zero”, “Cleveland!”, “Pink Clouding” and “Babylon” extend last year’s record-breaking album.",
     author: "Sana Lind",
     date: "2026-09-25",
-    read: "3 min read",
     photo: { src: taylorPhoto, alt: "A packed stadium lit orange during Taylor Swift’s Eras Tour in London", credit: "BrigidLIS, CC BY 4.0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Taylor Swift has gone back to The Life of a Showgirl with four new songs. The Encore, released on Friday 25 September, extends last year’s album with “Patient Zero”, “Cleveland!”, “Pink Clouding” and “Babylon”." },
-      { type: "p", text: "Swift wrote the new tracks with Max Martin and Shellback, the Swedish producers behind the original album, during a trip to Sweden to celebrate its success. The Life of a Showgirl had the biggest first week of any album in history." },
-      { type: "h2", text: "The single" },
-      { type: "p", text: "“Patient Zero” leads the set. The song is addressed to the woman now dating Swift’s ex, and its video, starring Colin Farrell and Dakota Johnson, premiered during Sunday’s MTV VMAs, where Swift also won Video of the Year." },
-      { type: "quote", text: "Four songs, written in Sweden, released with a week’s notice." },
-      { type: "p", text: "Swift first mentioned a new song on 22 September and announced the full encore less than a day later." },
-    ],
     sources: [
       { name: "UPI: Taylor Swift releases “Showgirl” encore with new single “Patient Zero”", url: "https://www.upi.com/Entertainment_News/Music/2026/09/25/taylor-swift-showgirl-encore-patient-zero/7621790339274/" },
       { name: "Billboard: All 4 new songs on The Encore ranked", url: "https://www.billboard.com/lists/taylor-swift-life-of-showgirl-encore-tracks-ranked/" },
@@ -365,16 +278,7 @@ export const ARTICLES: Article[] = [
     deck: "SMC says the Item Shop’s countdown timers and V-Bucks pushed young players into spending they regret. Epic points to its parental controls.",
     author: "Nia Vale",
     date: "2026-09-24",
-    read: "2 min read",
     photo: { src: fortnitePhoto, alt: "The Fortnite Battle Royale booth at the Game Developers Conference 2018", credit: "Official GDC, CC BY 2.0", crop: { pos: "50% 40%" } },
-    body: [
-      { type: "p", text: "Stichting Massaschade & Consument (SMC), a Dutch consumer foundation, is going after Epic Games over Fortnite. It wants more than €100 million in refunds and damages for young players in the Netherlands, and compensation over the collection of children’s data without their parents’ consent." },
-      { type: "p", text: "The case targets how Fortnite sells: V-Bucks, the Item Shop’s countdown timers and wording SMC says plays on young players’ spending habits." },
-      { type: "h2", text: "What the research found" },
-      { type: "p", text: "SMC cites its own study of Dutch players aged 16 to 19. Six in ten said buying V-Bucks didn’t feel like spending real money, and about half regretted a purchase made under time pressure." },
-      { type: "p", text: "It is not Epic’s first run-in with the Dutch authorities. In 2024 the Authority for Consumers and Markets fined the company €1,125,000 over “buy it now” wording and countdown timers, and a court later confirmed it." },
-      { type: "p", text: "Epic says it offers parental controls, a PIN for players under 18, purchase limits and refunds. SMC has served a formal notice of liability and says it will go to court if settlement talks fail." },
-    ],
     sources: [
       { name: "DualShockers: Dutch consumer group sues Epic over Fortnite practices", url: "https://www.dualshockers.com/dutch-consumer-group-sues-epic-for-misleading-fortnite-practices/" },
     ],
@@ -387,16 +291,7 @@ export const ARTICLES: Article[] = [
     deck: "Nia Archives and Suede lead a shortlist that also has Dave, RAYE, Olivia Dean and Paul McCartney. The winner is named in Newcastle on 22 October.",
     author: "Nia Vale",
     date: "2026-09-24",
-    read: "3 min read",
     photo: { src: niaPhoto, alt: "Nia Archives singing on stage in Amsterdam under pink light", credit: "Michielderoo, CC0", crop: { pos: "50% 30%" } },
-    body: [
-      { type: "p", text: "The 2026 Mercury Prize, the award for the best album from the UK and Ireland, will be announced on Thursday 22 October at the Utilita Arena in Newcastle. With four weeks to go, the jungle producer Nia Archives and the band Suede are joint favourites." },
-      { type: "h2", text: "The twelve albums" },
-      { type: "p", text: "Nia Archives is shortlisted for Emotional Junglist and Suede for Antidepressants. They are up against Dave’s The Boy Who Played the Harp, RAYE’s THIS MUSIC MAY CONTAIN HOPE., Olivia Dean’s The Art of Loving and Paul McCartney’s The Boys of Dungeon Lane." },
-      { type: "p", text: "The rest of the list is Florence + The Machine’s Everybody Scream, JADE’s THAT’S SHOWBIZ BABY!, Kojey Radical’s Don’t Look Down, Knats’ A Great Day In Newcastle, Dove Ellis’s Blizzard and HELP(2), the War Child Records compilation." },
-      { type: "quote", text: "A jungle record and a Britpop band, level at the top." },
-      { type: "p", text: "Two of the twelve have won before: Suede, in 1993 with their debut album, and Dave, in 2019 for Psychodrama." },
-    ],
     sources: [
       { name: "Mercury Prize: 2026 Albums of the Year revealed", url: "https://www.mercuryprize.com/news/2026/2026-mercury-prize-albums-of-the-year-revealed/" },
       { name: "Billboard: 2026 Mercury Prize nominees", url: "https://www.billboard.com/music/awards/mercury-prize-2026-nominees-shortlist-raye-mccartney-1236304222/" },
@@ -410,15 +305,7 @@ export const ARTICLES: Article[] = [
     deck: "The AI streamer’s new single with ODDEEO is out, and she and Evil Neuro play Los Angeles with a live band on 19 December.",
     author: "Jonah Reyes",
     date: "2026-09-22",
-    read: "2 min read",
     photo: { src: youtubeThumb("xWDfREk0ZLs"), alt: "Artwork from the “Pattern Recognition” video: an anime-style girl in pink light", credit: "Neuro-sama, YouTube", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Neuro-sama, the AI VTuber created by the UK developer Vedal, released a new single on Monday 21 September. “Pattern Recognition” was produced and animated by ODDEEO, who built the song from conversations with Neuro, asking her things like which instrument she finds most comforting." },
-      { type: "p", text: "ODDEEO describes it as a song about growth, and about the real feelings people find in a virtual performer." },
-      { type: "h2", text: "From stream to stage" },
-      { type: "p", text: "Neuro-sama and her twin, Evil Neuro, will play their first live concert on 19 December at The Vermont Hollywood in Los Angeles: an extended-reality show with a live band, on the date Neuro-sama first went live in 2022." },
-      { type: "p", text: "The twins have more than three million followers between them, and their channel is among the most-subscribed in Twitch history after a record-breaking subathon." },
-    ],
     sources: [
       { name: "BroadwayWorld: AI twins Neuro and Evil to perform first-ever live concert", url: "https://www.broadwayworld.com/bwwmusic/article/Photos-AI-Twins-Neuro-and-Evil-to-Perform-First-Ever-Live-Concert-at-Vermont-Hollywood-20260921" },
       { name: "YouTube: Pattern Recognition – Neuro-sama x ODDEEO (official video)", url: "https://www.youtube.com/watch?v=xWDfREk0ZLs" },
@@ -432,16 +319,7 @@ export const ARTICLES: Article[] = [
     deck: "Insomniac’s single-player action game topped the UK chart after its 15 September launch on PS5.",
     author: "Nia Vale",
     date: "2026-09-22",
-    read: "3 min read",
     photo: { src: unsplash("photo-1753297514865-016ed7975966", 1600), alt: "A PlayStation 5 controller on a black surface", credit: "User_Pascal, Unsplash", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Marvel’s Wolverine sold around 1.9 million copies in its first three days on PlayStation 5, bringing in more than $130 million after its launch on 15 September." },
-      { type: "p", text: "The Insomniac Games title opened at number one on the UK physical chart for the week ending 20 September, and at number one in Switzerland." },
-      { type: "h2", text: "Critics were less sure" },
-      { type: "p", text: "Reviews averaged 76 on Metacritic, and 66 percent of critics on OpenCritic recommended it. Praise went to the performances and the character at its centre; the complaints were about combat that wears thin and a messy story. Insomniac has said it is listening to the feedback." },
-      { type: "quote", text: "Strong sales, softer reviews." },
-      { type: "p", text: "The game costs $69.99, or $79.99 for the Digital Deluxe Edition." },
-    ],
     sources: [
       { name: "Wikipedia: Marvel’s Wolverine", url: "https://en.wikipedia.org/wiki/Marvel's_Wolverine" },
     ],
@@ -454,14 +332,7 @@ export const ARTICLES: Article[] = [
     deck: "The album, with Kendrick Lamar, Ab-Soul, Larry June and Tyga among its guests, opened at the top of the Billboard 200 with 74,000 units.",
     author: "Nia Vale",
     date: "2026-09-21",
-    read: "2 min read",
     photo: { src: jhenePhoto, alt: "Jhené Aiko singing into a microphone in an orange cap", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 30%" } },
-    body: [
-      { type: "p", text: "Westside Whimsy has given Jhené Aiko the first number-one album of her career. It debuted at the top of the Billboard 200 with 74,000 album-equivalent units: 70,000 from 71.33 million streams, 3,500 in sales and 500 from track sales." },
-      { type: "p", text: "The album came out on 11 September through ArtClub International and Def Jam. Ab-Soul, Kendrick Lamar, Larry June, Ohma and Tyga are among the guests." },
-      { type: "h2", text: "Kendrick on the new single" },
-      { type: "p", text: "“So Good”, with Kendrick Lamar, followed as a single on 25 September. The first single, “Break”, came out in November 2025." },
-    ],
     sources: [
       { name: "Wikipedia: Westside Whimsy", url: "https://en.wikipedia.org/wiki/Westside_Whimsy" },
     ],
@@ -474,15 +345,7 @@ export const ARTICLES: Article[] = [
     deck: "The 30th-anniversary show cancelled its final day, the 21 September public holiday, as the storm approached.",
     author: "Sana Lind",
     date: "2026-09-21",
-    read: "2 min read",
     photo: { src: tgsPhoto, alt: "Crowds in the halls of Tokyo Game Show 2026 at Makuhari Messe", credit: "Syced, CC0", crop: { pos: "50% 60%" } },
-    body: [
-      { type: "p", text: "Tokyo Game Show 2026 was meant to be the longest in the event’s history: five days at Makuhari Messe in Chiba for its 30th anniversary, running through the Monday public holiday on 21 September." },
-      { type: "p", text: "It ended a day early. With Typhoon Dujuan, Japan’s Typhoon No. 25, approaching the Kanto region, the organisers cancelled Monday on safety grounds and refunded tickets for that day. Sunday went ahead as planned." },
-      { type: "h2", text: "Who it affected" },
-      { type: "p", text: "Sony cancelled the PlayStation hands-on demos and streams scheduled for the final day, and exhibitors who had booked booths for all five days were left waiting to hear about compensation." },
-      { type: "quote", text: "The show was extended to five days because of the holiday. The holiday is the day it lost." },
-    ],
     sources: [
       { name: "Kotaku: Typhoon Dujuan forces Tokyo Game Show 2026 to shut down a day early", url: "https://kotaku.com/typhoon-dujuan-forces-tokyo-game-show-2026-to-shut-down-a-day-early-2000735879" },
       { name: "Anime News Network: Tokyo Game Show 2026 cancels final day", url: "https://www.animenewsnetwork.com/news/2026-09-19/tokyo-game-show-2026-cancels-final-day-on-monday-due-to-approaching-typhoon/.241974" },
@@ -496,15 +359,7 @@ export const ARTICLES: Article[] = [
     deck: "Hideo Kojima named his lead at the Xbox Tokyo Game Show broadcast, a week after Xbox picked up the spy game.",
     author: "Nia Vale",
     date: "2026-09-18",
-    read: "2 min read",
     photo: { src: skarsgardPhoto, alt: "Bill Skarsgård listening on a convention panel", credit: "Gage Skidmore, CC BY-SA 2.0", crop: { pos: "60% 35%" } },
-    body: [
-      { type: "p", text: "Hideo Kojima has cast Bill Skarsgård as the lead in PHYSINT, the action-espionage game from Kojima Productions. The news came during the Xbox Tokyo Game Show broadcast on 17 September, along with a new poster of Skarsgård and Charlee Fraser that Kojima photographed himself." },
-      { type: "p", text: "Fraser, Don Lee and Minami Hamabe are also in the cast. Kojima says the game is making steady progress and has described it as a spiritual successor to Metal Gear Solid." },
-      { type: "h2", text: "A new home" },
-      { type: "p", text: "Xbox will publish PHYSINT, a week after taking on the project that PlayStation Studios cancelled in June. It extends a partnership that already includes Kojima’s horror game OD, and Xbox says the two companies will now work together on film and television too." },
-      { type: "quote", text: "No platforms and no release date yet, but finally a face." },
-    ],
     sources: [
       { name: "Xbox Wire: Bill Skarsgård cast as the lead role in PHYSINT", url: "https://news.xbox.com/en-us/2026/09/17/physint-lead-role-bill-skarsgard-kojima-productions-xbox/" },
       { name: "Kotaku: PHYSINT’s lead will be played by Bill Skarsgård", url: "https://kotaku.com/kojima-says-physint-is-making-steady-progress-and-stars-bill-skarsgard-in-first-update-since-switching-to-xbox-2000735260" },
@@ -518,16 +373,7 @@ export const ARTICLES: Article[] = [
     deck: "Widow’s Bay took best comedy, DTF St. Louis best limited series, and Rhea Seehorn won her first Emmy.",
     author: "Nia Vale",
     date: "2026-09-15",
-    read: "3 min read",
     photo: { src: wylePhoto, alt: "Noah Wyle smiling at his Hollywood Walk of Fame ceremony", credit: "Kevin Paul, CC BY 4.0", crop: { pos: "50% 30%" } },
-    body: [
-      { type: "p", text: "The Pitt won Outstanding Drama Series for the second year running at the 78th Primetime Emmy Awards on 14 September, and Noah Wyle again won Lead Actor in a Drama Series." },
-      { type: "p", text: "Mariska Hargitay hosted the ceremony at the Peacock Theater in Los Angeles." },
-      { type: "h2", text: "The rest of the night" },
-      { type: "p", text: "Apple TV’s Widow’s Bay won Outstanding Comedy Series, and its star Matthew Rhys won Lead Actor in a Comedy Series. Rhys also won Lead Actor in a Limited Series for The Beast in Me. HBO’s DTF St. Louis was named Outstanding Limited or Anthology Series." },
-      { type: "image", photo: { src: seehornPhoto, alt: "Rhea Seehorn speaking on a convention panel", credit: "Gage Skidmore, CC BY-SA 2.0", crop: { pos: "55% 30%" } }, caption: "Rhea Seehorn won her first Emmy, for Pluribus." },
-      { type: "p", text: "Rhea Seehorn won Lead Actress in a Drama Series for Pluribus, her first Emmy. Jean Smart won again for Hacks, and Sally Field won Lead Actress in a Limited Series for Remarkably Bright Creatures." },
-    ],
     sources: [
       { name: "Wikipedia: 78th Primetime Emmy Awards", url: "https://en.wikipedia.org/wiki/78th_Primetime_Emmy_Awards" },
       { name: "NPR: Emmys 2026, the complete list of winners", url: "https://www.npr.org/2026/09/14/nx-s1-5957565/emmys-2026-winners" },
@@ -541,16 +387,7 @@ export const ARTICLES: Article[] = [
     deck: "The Danish post-war thriller also won best actress for Mathilde Arcel. John Malkovich took best actor.",
     author: "Sana Lind",
     date: "2026-09-13",
-    read: "3 min read",
     photo: { src: venicePhoto, alt: "The red carpet and a row of flags outside the Palazzo del Cinema in Venice", credit: "Pietro Luca Cassarino, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Woman Unknown, directed by May el-Toukhy, won the Golden Lion at the 83rd Venice Film Festival on 12 September. The psychological thriller is set in Denmark in the summer of 1945, and it was one of only two films directed by women in the main competition." },
-      { type: "p", text: "Mathilde Arcel, who plays the nanny and housemaid Marie, won the Volpi Cup for best actress. Accepting the top prize, el-Toukhy spoke about the lack of equal opportunities for women making films." },
-      { type: "h2", text: "The other winners" },
-      { type: "p", text: "The Grand Jury Prize went to Lee Chang-dong’s Possible Love, and the Silver Lion for best director to Ilya Khrzhanovsky for DAU. John Malkovich won best actor for Wild Horse Nine. Maggie Gyllenhaal led the jury." },
-      { type: "quote", text: "One of two films by women in competition, and the one that won." },
-      { type: "p", text: "The festival opened on 2 September with Danny Boyle’s Ink, and gave lifetime achievement Golden Lions to Ellen Burstyn and George Clooney." },
-    ],
     sources: [
       { name: "Wikipedia: 83rd Venice International Film Festival", url: "https://en.wikipedia.org/wiki/83rd_Venice_International_Film_Festival" },
       { name: "Screen Daily: Woman Unknown wins Golden Lion", url: "https://www.screendaily.com/news/woman-unknown-wins-golden-lion-at-venice-film-festival-2026/5220360.article" },
@@ -564,15 +401,7 @@ export const ARTICLES: Article[] = [
     deck: "Blizzard looked years ahead in Anaheim, with a Netflix Diablo series and a new Overwatch hero for now.",
     author: "Jonah Reyes",
     date: "2026-09-13",
-    read: "3 min read",
     photo: { src: blizzconPhoto, alt: "Fans outside the Anaheim Convention Center during BlizzCon", credit: "tofuprod, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Blizzard used the BlizzCon 2026 opening ceremony in Anaheim to look years ahead. Diablo V is in development for spring 2029, and a new StarCraft, an open-world shooter rather than a strategy game, is planned for spring 2030. Netflix is making an animated Diablo series." },
-      { type: "h2", text: "Sooner than that" },
-      { type: "p", text: "Diablo IV reached Nintendo Switch 2 on 15 September alongside its Season of Hell’s Legacy, with an Amazon class due in the first half of 2027. Overwatch revealed Doctrine, a vampire-inspired support hero, with reworks for Sombra and Roadhog in Season 5." },
-      { type: "quote", text: "A Diablo for 2029, a StarCraft for 2030 and a lot to play before then." },
-      { type: "p", text: "Heroes of the Storm gets a new hero, Xal’atath, on 28 September, and Hearthstone’s Reign of the Black Empire expansion lands on 20 October. World of Warcraft players get WoW: Forever on 4 November, with details of The Last Titan expansion promised for early 2027." },
-    ],
     sources: [
       { name: "Blizzard: Everything announced at the BlizzCon 2026 opening ceremony", url: "https://news.blizzard.com/en-us/article/24301453/everything-announced-at-blizzcon-2026-opening-ceremony" },
       { name: "GameSpot: BlizzCon 2026 opening ceremony", url: "https://www.gamespot.com/articles/blizzcon-2026-opening-ceremony-all-the-biggest-announcements-and-games/" },
@@ -586,15 +415,7 @@ export const ARTICLES: Article[] = [
     deck: "A Los Angeles federal jury cleared the Chicago rapper of every charge on 11 September. He stays in custody ahead of a separate racketeering trial.",
     author: "Nia Vale",
     date: "2026-09-12",
-    read: "3 min read",
     photo: { src: durkPhoto, alt: "Lil Durk in a black jumper and a gold chain with a cross", credit: "Daniel X. O’Neil, CC BY 2.0", crop: { pos: "50% 18%" } },
-    body: [
-      { type: "p", text: "A federal jury in Los Angeles found Lil Durk, born Durk Banks, not guilty on 11 September of every charge he faced: conspiracy, stalking and murder for hire. The jury had started deliberating two days earlier." },
-      { type: "p", text: "Prosecutors said Banks paid for a hit on the rival rapper Quando Rondo in August 2022, in revenge for the killing of his friend King Von in 2020. Gunmen fired at least 18 rounds at an Escalade near the Beverly Center, killing Rondo’s cousin, Saviay’a Robinson, who was 24." },
-      { type: "p", text: "The defence argued that Kavon Grant, Banks’s former assistant, organised the attack to impress his boss. Two co-defendants, Deandre Wilson and David Lindsey, were convicted of conspiracy to commit stalking and of stalking, but acquitted of murder for hire." },
-      { type: "h2", text: "Not free yet" },
-      { type: "p", text: "“The shackles must come off, and he must walk free,” his lawyer said after the verdict. For now Banks stays in federal custody: he faces separate racketeering and murder charges, with that trial set for 5 October." },
-    ],
     sources: [
       { name: "NBC New York: Jury finds rapper Lil Durk not guilty in murder-for-hire case", url: "https://www.nbcnewyork.com/news/national-international/verdict-lil-durk-murder-trial-beverly-center-shooting/6546871/" },
     ],
@@ -607,14 +428,7 @@ export const ARTICLES: Article[] = [
     deck: "The shooter’s early access release on 10 September became one of Twitch’s biggest game launches of the year.",
     author: "Sana Lind",
     date: "2026-09-11",
-    read: "2 min read",
     photo: { src: youtubeThumb("D-gZx4lbGbo"), alt: "Thumbnail from TheBurntPeanut’s WARDOGS video", credit: "TheBurntPeanut, YouTube", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "WARDOGS went into early access on 10 September and peaked at 452,600 concurrent viewers across streaming platforms, with 346,100 of them in the game’s Twitch category." },
-      { type: "p", text: "TheBurntPeanut, the VTuber behind the peanut avatar, led the launch. Simulcasting across platforms, he was the most-watched WARDOGS streamer on both Twitch and YouTube. shroud and summit1g were among the other big names in the game that week, and maherco drew the biggest audience on Kick." },
-      { type: "h2", text: "One of the year’s biggest channels" },
-      { type: "p", text: "Twitch’s own State of Gaming report, published the day before, counts TheBurntPeanut among its standout creators of 2026, with more than 70 million hours watched on the platform so far this year." },
-    ],
     sources: [
       { name: "Streams Charts: WARDOGS viewership statistics", url: "https://streamscharts.com/news/wardogs-viewership-statistics" },
       { name: "Twitch: State of Gaming 2026", url: "https://blog.twitch.tv/en/2026/09/09/twitch-state-of-gaming-2026/" },
@@ -628,16 +442,7 @@ export const ARTICLES: Article[] = [
     deck: "League of Legends leads again, horror and indie games are growing, and Jynxzi and TheBurntPeanut stand out among creators.",
     author: "Jonah Reyes",
     date: "2026-09-09",
-    read: "3 min read",
     photo: { src: twitchconPhoto, alt: "Crowds and stage lights at the TwitchCon block party at night", credit: "Succubussy, CC0", crop: { pos: "50% 55%" } },
-    body: [
-      { type: "p", text: "Viewers watched more than 8.6 billion hours of gaming on Twitch between 1 January and 1 September 2026, according to the platform’s State of Gaming report." },
-      { type: "p", text: "The five most-watched games, League of Legends, Counter-Strike, GTA V, VALORANT and World of Warcraft, accounted for nearly 1.7 billion of those hours. League of Legends placed in the top three in nine of eleven regions." },
-      { type: "h2", text: "Where the growth is" },
-      { type: "p", text: "Sandbox games drew 831 million hours, horror 287 million (up 6 percent) and indie games more than 348 million, with channels tagged indie up 51 percent. Streams with Drops enabled reached 1.6 billion hours, up 46 percent, and 40 million people claimed a Drop." },
-      { type: "quote", text: "8.6 billion hours in eight months." },
-      { type: "p", text: "Among the creators the report highlights, Jynxzi drew 78 million hours watched and TheBurntPeanut more than 70 million. TwitchCon returns to San Diego from 13 to 15 November." },
-    ],
     sources: [
       { name: "Twitch: State of Gaming 2026", url: "https://blog.twitch.tv/en/2026/09/09/twitch-state-of-gaming-2026/" },
       { name: "TwitchCon San Diego 2026", url: "https://www.twitchcon.com/san-diego-2026/" },
@@ -651,15 +456,7 @@ export const ARTICLES: Article[] = [
     deck: "ZeratoR’s French charity marathon doubled last year’s total in its tenth and final edition.",
     author: "Nia Vale",
     date: "2026-09-07",
-    read: "2 min read",
     photo: { src: zeratorPhoto, alt: "ZeratoR streaming at his desk during Z Event", credit: "Mickaël Schauli, CC BY-SA 4.0", crop: { pos: "50% 40%" } },
-    body: [
-      { type: "p", text: "The final Z Event raised €32,891,874 for 22 charities, more than double the record set the year before. The French-language marathon ran from 3 to 6 September, with the main broadcast from 4 to 6 September." },
-      { type: "p", text: "Organised by Adrien “ZeratoR” Nougaret, this year’s edition brought together 354 channels, peaked at 1.3 million concurrent viewers and logged 26.18 million hours watched." },
-      { type: "h2", text: "The end of an era" },
-      { type: "p", text: "ZeratoR had announced that 2026 would be the last Z Event. Across ten editions since 2016 it has raised more than €90 million. Mastu drew the biggest single audience of the weekend, peaking at 477,000 viewers." },
-      { type: "quote", text: "Ten editions, more than €90 million, and a record to finish on." },
-    ],
     sources: [
       { name: "Streams Charts: Z Event 2026 recap", url: "https://streamscharts.com/news/z-event-2026-recap" },
     ],
@@ -672,15 +469,7 @@ export const ARTICLES: Article[] = [
     deck: "Capcom’s revival of its samurai series is out on Switch 2, PS5, PC and Xbox, and critics are calling it one of the best action games of the year.",
     author: "Jonah Reyes",
     date: "2026-09-05",
-    read: "3 min read",
     photo: { src: youtubeThumb("Gbmd6YFm5oU"), alt: "A frame from the Onimusha: Way of the Sword launch trailer", credit: "Capcom, YouTube", crop: { pos: "50% 40%" } },
-    body: [
-      { type: "p", text: "Capcom’s Onimusha: Way of the Sword sold more than a million copies on its launch day, 4 September, on Nintendo Switch 2, PlayStation 5, PC and Xbox Series X|S. It is the first new game in the series since 2006." },
-      { type: "p", text: "It is set in a dark-fantasy version of Kyoto in the Edo period. Its hero is the swordsman Miyamoto Musashi, modelled on the actor Toshiro Mifune." },
-      { type: "h2", text: "Reviews to match" },
-      { type: "p", text: "Critics have been generous. The Switch 2 version scores 90 on Metacritic, the PS5 version 85, and 95 percent of critics on OpenCritic recommend it. Reviewers praised the slower, more deliberate sword fighting as a fresh direction that still feels like Onimusha." },
-      { type: "quote", text: "Twenty years later, the duel is back." },
-    ],
     sources: [
       { name: "Wikipedia: Onimusha: Way of the Sword", url: "https://en.wikipedia.org/wiki/Onimusha:_Way_of_the_Sword" },
       { name: "Nintendo Life: The reviews for Onimusha: Way of the Sword are in", url: "https://www.nintendolife.com/news/2026/09/round-up-the-reviews-for-onimusha-way-of-the-sword-are-in" },
@@ -694,15 +483,7 @@ export const ARTICLES: Article[] = [
     deck: "Three hours of acts from around the world, one clear winner and a meme that spread before the stream was over.",
     author: "Nia Vale",
     date: "2026-09-05",
-    read: "2 min read",
     photo: { src: speedPhoto, alt: "IShowSpeed in an England shirt surrounded by fans and cameras in Singapore", credit: "Aerodynamically, CC0", crop: { pos: "40% 35%" } },
-    body: [
-      { type: "p", text: "IShowSpeed turned his YouTube channel into an international talent competition on 4 September. The World Talent Show ran for more than three hours, with contestants from around the world performing live for his audience." },
-      { type: "p", text: "Viewers crowned a contestant named David the clear winner. A Polish football freestyler and the acrobatic group Momo were among the other favourites." },
-      { type: "h2", text: "“Green apple”" },
-      { type: "p", text: "The moment people shared most came at the end, when Speed lifted a contestant called Jamal, who closed the segment with two words: “green apple”. The clip became a meme on TikTok and X within hours." },
-      { type: "p", text: "Speed has more than 61 million subscribers on YouTube and streams several times a week." },
-    ],
     sources: [
       { name: "TubioNews: IShowSpeed’s World Talent Show", url: "https://tubionews.com/news/ishowspeed-world-talent-show-september-2026" },
       { name: "YouTube: IShowSpeed, World Talent Show", url: "https://www.youtube.com/watch?v=4zVFht1KbnY" },
@@ -716,15 +497,7 @@ export const ARTICLES: Article[] = [
     deck: "PlayStation’s September show also dated Metro 2039 and Until Dawn 2, and revealed Maneater 2.",
     author: "Sana Lind",
     date: "2026-09-04",
-    read: "3 min read",
     photo: { src: youtubeThumb("KpXesINIQc4"), alt: "The title card of PlayStation’s State of Play broadcast for 3 September 2026", credit: "PlayStation, YouTube", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Final Fantasy VII Revelation, the last part of Square Enix’s remake trilogy, comes to PlayStation 5 on 8 April 2027. The date came at PlayStation’s State of Play on 3 September, with about ten minutes of new gameplay showing the Highwind airship, chocobos and a grappling hook." },
-      { type: "h2", text: "More dates" },
-      { type: "p", text: "Metro 2039 showed its first console gameplay, captured on PS5 Pro, and is out on 4 February 2027. Until Dawn 2 follows on 28 January 2027, and Maneater 2 was a surprise reveal. For GTA VI fans there are two limited-edition DualSense controllers." },
-      { type: "quote", text: "Three dates, all in early 2027." },
-      { type: "p", text: "A State of Play Japan broadcast followed straight after. Across the two shows, PlayStation featured more than 30 games, and the main stream peaked at 982,400 viewers." },
-    ],
     sources: [
       { name: "Streams Charts: State of Play September 2026 viewership", url: "https://streamscharts.com/news/state-play-september-2026-viewership" },
       { name: "Techloy: State of Play September 2026, everything announced", url: "https://www.techloy.com/playstation-state-of-play-september-2026-everything-announced/" },
@@ -738,15 +511,7 @@ export const ARTICLES: Article[] = [
     deck: "A Las Vegas jury convicted Duane Davis of first-degree murder on 31 August. He faces life in prison when he is sentenced on 13 October.",
     author: "Sana Lind",
     date: "2026-09-01",
-    read: "3 min read",
     photo: { src: tupacStarPhoto, alt: "Tupac Shakur’s star on the Hollywood Walk of Fame", credit: "Alexis Doine, CC0", crop: { pos: "50% 50%" } },
-    body: [
-      { type: "p", text: "Nearly 30 years after Tupac Shakur was shot in Las Vegas, a jury has convicted the man accused of orchestrating it. Duane “Keffe D” Davis was found guilty on Monday 31 August of first-degree murder with use of a deadly weapon, after a trial of nearly two weeks." },
-      { type: "p", text: "Davis was not accused of firing the gun. Prosecutors described him as a shot-caller for the South Side Compton Crips who went after Shakur and Suge Knight in revenge for a fight involving his nephew at the MGM Grand earlier that night. He was, they said, the only person still alive who rode in the car with the shooter." },
-      { type: "h2", text: "The defence" },
-      { type: "p", text: "His lawyer, Michael Sanft, argued that Davis had made up details for money and notoriety, pointing to his conflicting accounts over the years and to the lack of physical evidence placing him at the scene." },
-      { type: "p", text: "Shakur was shot on 7 September 1996 and died six days later, aged 25. Knight survived. Davis will be sentenced on 13 October and faces life in prison." },
-    ],
     sources: [
       { name: "NBC News: Duane ‘Keffe D’ Davis found guilty in Tupac Shakur’s 1996 killing", url: "https://www.nbcnews.com/news/us-news/verdict-trial-tupac-shakurs-killing-former-gang-leader-found-guilty-rcna594859" },
     ],
@@ -759,20 +524,18 @@ export const ARTICLES: Article[] = [
     deck: "Five days, 121 hours and 42 deaths later, they beat the Ender Dragon, and out-watched most of this year’s esports events.",
     author: "Jonah Reyes",
     date: "2026-08-13",
-    read: "2 min read",
     photo: { src: kaiPhoto, alt: "Kai Cenat in a black durag, speaking outdoors", credit: "ImDavisss Live, CC BY 3.0", crop: { pos: "50% 28%" } },
-    body: [
-      { type: "p", text: "Kai Cenat and IShowSpeed spent 7 to 12 August playing Minecraft Hardcore together, live, for 121 hours. Across both creators’ Twitch and YouTube channels the marathon drew more than 30 million hours watched, according to Streams Charts." },
-      { type: "p", text: "Speed’s YouTube channel did most of the work, with more than 13.5 million hours watched on its own. Kai’s Twitch channel added 7.77 million hours and peaked at just over 198,000 viewers." },
-      { type: "h2", text: "42 deaths, four bosses" },
-      { type: "p", text: "In Hardcore one death ends the world. They restarted 42 times before beating the Ender Dragon, the Wither, the Elder Guardian and the Warden, and on the final day Speed’s Twitch channel set a new record of 128,700 viewers." },
-      { type: "p", text: "By watch time the marathon beat esports events such as VALORANT Masters Santiago 2026 and the LEC 2026 Spring split. Of the esports events finished so far this year, only the MLBB Mid Season Cup 2026 drew more." },
-    ],
     sources: [
       { name: "Streams Charts: Kai Cenat & IShowSpeed Minecraft marathon recap", url: "https://streamscharts.com/news/kai-cenat-ishowspeed-2026-minecraft-marathon-recap" },
     ],
   },
 ];
+
+export const ARTICLES: Article[] = RAW_ARTICLES.map((story) => {
+  const full = STORY_BODIES[story.slug];
+  const body = full?.body ?? [];
+  return { ...story, body, read: `${Math.max(2, Math.round(wordCount(body) / 230))} min read`, ...(full?.ask ? { ask: full.ask } : {}) };
+});
 
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.slug === slug);
 export const articlesIn = (section: SectionId) => ARTICLES.filter((a) => a.section === section);
@@ -882,13 +645,16 @@ export const EVENTS: UpcomingEvent[] = [
 
 // ---------------------------------------------------------------- Songs to check out
 
-export type Song = { artist: string; title: string; note: string; video: string; kind: string };
+// Each song opens on Spotify, shown with its album cover (Spotify's own
+// artwork, from the track's public page).
+export type Song = { artist: string; title: string; album: string; year: number; note: string; spotify: string; cover: string };
+const spotifyCover = (id: string) => `https://i.scdn.co/image/ab67616d0000b273${id}`;
 export const SONGS: Song[] = [
-  { artist: "Taylor Swift", title: "Patient Zero", note: "The lead single from The Life of a Showgirl: The Encore, out 25 September.", video: "BpR280fXISA", kind: "Official lyric video" },
-  { artist: "BTS", title: "Swim", note: "Song of the Year at the 2026 VMAs, and the centrepiece of the Arirang tour.", video: "b4iVv91Z6lY", kind: "Official video" },
-  { artist: "Cardi B feat. Kehlani", title: "Safe", note: "Best Hip-Hop at the 2026 VMAs.", video: "E_0y8bmIATM", kind: "Official video" },
-  { artist: "Bad Bunny", title: "NUEVAYoL", note: "Best Latin at the 2026 VMAs.", video: "KU5V5WZVcVE", kind: "Official video" },
-  { artist: "LISA feat. Kentaro Sakaguchi", title: "Dream", note: "Best Pop at the 2026 VMAs, shot as a short film.", video: "FMX98ROVRCE", kind: "Official short film" },
+  { artist: "Taylor Swift", title: "Patient Zero", album: "The Life of a Showgirl: The Encore", year: 2026, note: "The lead single from The Life of a Showgirl: The Encore, out 25 September.", spotify: "49JeKZqejPtqJKpK7x9Ew4", cover: spotifyCover("b2de0f5e12f0b369fde79953") },
+  { artist: "BTS", title: "Swim", album: "ARIRANG", year: 2026, note: "Song of the Year at the 2026 VMAs, and the centrepiece of the Arirang tour.", spotify: "68lbSrXDORS51pmyjZv712", cover: spotifyCover("dfa17fad7f190c901603270e") },
+  { artist: "Cardi B feat. Kehlani", title: "Safe", album: "AM I THE DRAMA?", year: 2025, note: "Best Hip-Hop at the 2026 VMAs.", spotify: "5q9I5RmmrLC4U2mW2BnF3K", cover: spotifyCover("4449c12628ef639dd6500c4a") },
+  { artist: "Bad Bunny", title: "NUEVAYoL", album: "DeBÍ TiRAR MáS FOToS", year: 2025, note: "Best Latin at the 2026 VMAs.", spotify: "5TFD2bmFKGhoCRbX61nXY5", cover: spotifyCover("bbd45c8d36e0e045ef640411") },
+  { artist: "LISA", title: "Dream", album: "Alter Ego", year: 2025, note: "Best Pop at the 2026 VMAs, for the short film with Kentaro Sakaguchi.", spotify: "5fFdUV9NMDxPjgkS54My63", cover: spotifyCover("4a5dbcceaff49f85a1f1e756") },
 ];
 
 // The live listing on the Music front

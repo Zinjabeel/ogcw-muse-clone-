@@ -4,7 +4,8 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SOCIALS, SocialIcon } from "@/components/socials";
 import type { InfoSlug } from "@/components/info-pages";
-import { mail } from "@/lib/contact";
+import { CookieSettingsButton } from "@/components/cookie-settings-button";
+import { LanguagePicker } from "@/components/cookie-consent";
 
 // Site footer, based on the "Footer 2" component: the OGCW wordmark and
 // social channels, four link columns, then the copyright and app badges.
@@ -29,8 +30,8 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
       { label: "Press", info: "press" },
       { label: "Brand", info: "brand" },
       { label: "Testimonials", info: "testimonials" },
-      { label: "Work with OGCW", home: "work-title" },
-      { label: "Newsletter", home: "newsletter-title" },
+      { label: "Work with OGCW", info: "work-with-us" },
+      { label: "Newsletter", info: "newsletter" },
     ],
   },
   {
@@ -51,11 +52,11 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "Help", info: "help" },
       { label: "FAQ", info: "faq" },
-      { label: "Submit a story", href: mail("Submit a story") },
-      { label: "Music submissions", href: mail("Music submissions") },
-      { label: "Contact us", href: mail("General") },
-      { label: "Advertising", href: mail("Advertising") },
-      { label: "Partnerships", href: mail("Partnerships") },
+      { label: "Contact us", info: "contact" },
+      { label: "Submit a story", info: "submissions" },
+      { label: "Music submissions", info: "submissions" },
+      { label: "Advertising", info: "work-with-us" },
+      { label: "Partnerships", info: "work-with-us" },
     ],
   },
   {
@@ -65,7 +66,7 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
       { label: "Privacy Policy", info: "privacy" },
       { label: "Cookie Policy", info: "cookies" },
       { label: "Legal notice", info: "legal" },
-      { label: "Copyright / Content removal", href: mail("Copyright / Content removal") },
+      { label: "Copyright / Content removal", info: "copyright" },
       { label: "Photo credits", info: "credits" },
     ],
   },
@@ -159,6 +160,7 @@ export function Footer2() {
                 {item.links.map((link) => (
                   <li key={link.label}><FooterItem link={link} /></li>
                 ))}
+                {item.title === "Legal" && <li><CookieSettingsButton className={`${linkClass} footer-button`} /></li>}
               </ul>
             </div>
           ))}
@@ -169,7 +171,8 @@ export function Footer2() {
             © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
             <Link to="/" className="footer-link">One Great Culture World</Link>. All rights reserved.
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <LanguagePicker />
             <AppBadge store="apple" />
             <AppBadge store="google" />
           </div>

@@ -25,6 +25,7 @@ import { Route as OriginalsIndexRouteImport } from './routes/originals.index'
 import { Route as OriginalsSlugRouteImport } from './routes/originals.$slug'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as TourBtsArirangRouteImport } from './routes/tour.bts-arirang'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -106,6 +107,11 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/shop/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TourBtsArirangRoute = TourBtsArirangRouteImport.update({
+  id: '/tour/bts-arirang',
+  path: '/tour/bts-arirang',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news': typeof NewsIndexRoute
   '/originals': typeof OriginalsIndexRoute
   '/shop': typeof ShopIndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/tour/bts-arirang'
     | '/news/'
     | '/originals/'
     | '/shop/'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/tour/bts-arirang'
     | '/news'
     | '/originals'
     | '/shop'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/tour/bts-arirang'
     | '/news/'
     | '/originals/'
     | '/shop/'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
   OriginalsSlugRoute: typeof OriginalsSlugRoute
   ShopSlugRoute: typeof ShopSlugRoute
+  TourBtsArirangRoute: typeof TourBtsArirangRoute
   NewsIndexRoute: typeof NewsIndexRoute
   OriginalsIndexRoute: typeof OriginalsIndexRoute
   ShopIndexRoute: typeof ShopIndexRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tour/bts-arirang': {
+      id: '/tour/bts-arirang'
+      path: '/tour/bts-arirang'
+      fullPath: '/tour/bts-arirang'
+      preLoaderRoute: typeof TourBtsArirangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewsSlugRoute: NewsSlugRoute,
   OriginalsSlugRoute: OriginalsSlugRoute,
   ShopSlugRoute: ShopSlugRoute,
+  TourBtsArirangRoute: TourBtsArirangRoute,
   NewsIndexRoute: NewsIndexRoute,
   OriginalsIndexRoute: OriginalsIndexRoute,
   ShopIndexRoute: ShopIndexRoute,

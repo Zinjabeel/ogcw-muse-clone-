@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { storePreference } from "@/lib/consent";
 
 // Colour-theme switcher in the header. "Night" is the original black and
 // yellow; "Gold" is white and gold; "Navy" is navy, off-white and creamy
@@ -9,9 +10,9 @@ import { useEffect, useRef, useState } from "react";
 // browser (localStorage) and applied before the page paints by themeInitScript.
 
 const THEMES = [
-  { id: "night", name: "Night", note: "Black & yellow", swatch: ["#0d0d0d", "#ffe600", "#f5f5f5"] },
-  { id: "gold", name: "Gold", note: "White & gold", swatch: ["#ffffff", "#94701b", "#15130f"] },
-  { id: "navy", name: "Navy", note: "Navy, off-white & cream", swatch: ["#0e1a33", "#f2dc8c", "#f5f1e6"] },
+  { id: "night", name: "Night", note: "Black & yellow", swatch: ["#0d0d0d", "#ffe600", "#e4e1da"] },
+  { id: "gold", name: "Gold", note: "White & gold", swatch: ["#f8f6f1", "#94701b", "#15130f"] },
+  { id: "navy", name: "Navy", note: "Navy, off-white & cream", swatch: ["#0e1a33", "#f2dc8c", "#e8e2d4"] },
   { id: "aurora", name: "Aurora", note: "Pastel glow & violet", swatch: ["#f7eaff", "#7a3fd6", "#1d1426"] },
 ] as const;
 type ThemeId = (typeof THEMES)[number]["id"];
@@ -31,11 +32,7 @@ function applyTheme(id: ThemeId) {
   }
   if (id === "night") delete root.dataset["theme"];
   else root.dataset["theme"] = id;
-  try {
-    localStorage.setItem(STORAGE_KEY, id);
-  } catch {
-    // private mode or storage blocked: the theme still applies for this visit
-  }
+  storePreference(STORAGE_KEY, id); // remembered only if the reader allows preferences
 }
 
 function Swatch({ colors, size = 18 }: { colors: readonly string[]; size?: number }) {

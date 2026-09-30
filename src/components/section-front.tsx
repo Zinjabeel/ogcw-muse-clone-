@@ -59,10 +59,10 @@ export function SectionFront({ section }: { section: SectionId }) {
           <section className="og-block" aria-labelledby="music-songs">
             <div className="og-section-head">
               <h2 id="music-songs" className="og-section-title">Songs to check out</h2>
-              <span className="og-more-link">Official videos on YouTube</span>
+              <span className="og-more-link">Listen on Spotify</span>
             </div>
             <ul className="og-songs">
-              {SONGS.map((song) => <li key={song.video}><SongCard song={song} /></li>)}
+              {SONGS.map((song) => <li key={song.spotify}><SongCard song={song} /></li>)}
             </ul>
           </section>
         )}

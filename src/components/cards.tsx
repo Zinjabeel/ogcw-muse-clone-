@@ -3,7 +3,8 @@ import { ArrowRight, ArrowUpRight, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song } from "@/data/content";
-import { formatDate, formatPrice, SECTIONS, youtubeThumb, youtubeUrl } from "@/data/content";
+import { formatDate, formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
+import { SpotifyIcon } from "./spotify";
 
 /** Where each section's front lives */
 export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture" } as const satisfies Record<SectionId, string>;
@@ -125,19 +126,20 @@ export function WatchNext({ episode }: { episode: Episode }) {
   );
 }
 
-/** A song to check out, opening its official video on YouTube. */
+/** A song to check out: its album cover, and a link that opens it on Spotify. */
 export function SongCard({ song, size = "md" }: { song: Song; size?: "md" | "sm" }) {
   return (
-    <a className={`og-song og-song-${size}`} href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
-      <span className="og-thumb">
-        <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
-        <span className="og-thumb-play" aria-hidden="true"><Play size={14} fill="currentColor" strokeWidth={0} /></span>
+    <a className={`og-song og-song-${size}`} href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
+      <span className="og-cover">
+        <img src={song.cover} alt="" loading="lazy" />
+        <span className="og-cover-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
       </span>
       <span className="og-song-text">
         <span className="og-song-title">{song.title}</span>
         <span className="og-song-artist">{song.artist}</span>
+        <span className="og-song-album">{song.album} · {song.year}</span>
         {size === "md" && <span className="og-song-note">{song.note}</span>}
-        <span className="og-meta">{song.kind} on YouTube <ArrowUpRight size={13} aria-hidden="true" /></span>
+        <span className="og-spotify"><SpotifyIcon size={15} /> Play on Spotify <ArrowUpRight size={13} aria-hidden="true" /></span>
       </span>
     </a>
   );

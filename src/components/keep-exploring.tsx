@@ -3,6 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { article, RAP_POLL, RAP_POLL_CHOICES, SECTIONS, type Article, type RapPollChoice } from "@/data/content";
 import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
+import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
 
 // Keep exploring: the Explore grid carries straight on into nine more
@@ -67,11 +68,7 @@ function RapPoll() {
       setMine(choice);
       setCounts(result);
       setStatus("idle");
-      try {
-        localStorage.setItem(STORAGE_KEY, choice);
-      } catch {
-        // not remembered: the results still show for this visit
-      }
+      storePreference(STORAGE_KEY, choice); // remembered only if the reader allows preferences
     } catch {
       setStatus("error");
     }

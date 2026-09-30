@@ -3,6 +3,7 @@ import { ArrowRight, Search, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { ARTICLES, articlesIn, EPISODES, EVENTS, LISTS, SHOPS, type Article, type Episode, type Photo, type Shop, type UpcomingEvent } from "@/data/content";
 import { SOCIALS, SocialIcon } from "./socials";
+import { openConsent } from "@/lib/consent";
 
 // Site menu: "The OGCW Index", a full-screen contents page that drops down
 // over the site. Each section is a numbered line in large serif type with
@@ -33,11 +34,17 @@ const SECTIONS: Section[] = [
 ];
 
 const PAGES = [
-  { label: "Explore", to: "/explore" },
+  { label: "About", to: "/about" },
   { label: "FAQ", info: "faq" },
   { label: "Help", info: "help" },
-  { label: "Press", info: "press" },
-  { label: "Brand", info: "brand" },
+  { label: "Contact", info: "contact" },
+  { label: "Explore", to: "/explore" },
+] as const;
+const LEGAL = [
+  { label: "Terms", info: "terms" },
+  { label: "Privacy", info: "privacy" },
+  { label: "Cookies", info: "cookies" },
+  { label: "Legal notice", info: "legal" },
 ] as const;
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -261,6 +268,15 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                       : <Link to="/info/$slug" params={{ slug: page.info }} onClick={go}>{page.label}</Link>}
                   </li>
                 ))}
+              </ul>
+            </nav>
+            <nav className="ix-pages" aria-labelledby="ix-legal-title">
+              <p id="ix-legal-title" className="ix-foot-head">Legal</p>
+              <ul>
+                {LEGAL.map((page) => (
+                  <li key={page.label}><Link to="/info/$slug" params={{ slug: page.info }} onClick={go}>{page.label}</Link></li>
+                ))}
+                <li><button type="button" className="ix-text-button" onClick={() => close(openConsent)}>Cookie settings</button></li>
               </ul>
             </nav>
             <div className="ix-social">

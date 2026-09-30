@@ -20,7 +20,7 @@ const workWith = [
   { label: "Music submissions", note: "New releases from artists and labels" },
 ];
 
-function NewsletterForm() {
+export function NewsletterForm() {
   const [done, setDone] = useState(false);
   // TODO: send to the newsletter provider once one is chosen; until then this stores nothing.
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {

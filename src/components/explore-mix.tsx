@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
-import { article, formatPrice, LISTS, READING_LISTS, SHOPS, SONGS, STREAMERS, youtubeThumb, youtubeUrl } from "@/data/content";
+import { article, formatPrice, LISTS, READING_LISTS, SHOPS, SONGS, spotifyTrack, STREAMERS, youtubeThumb, youtubeUrl } from "@/data/content";
 import { SOCIALS, SocialIcon } from "./socials";
+import { SpotifyIcon } from "./spotify";
 import { Img } from "./cards";
 
 // Explore: a bit of everything on OGCW in one grid. An editor's pick, what's
@@ -73,14 +74,17 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
           <span className="mix-media-note">{streamer.note}</span>
         </a>
 
-        <a className="mix-tile mix-media" href={youtubeUrl(song.video)} target="_blank" rel="noopener noreferrer">
+        <a className="mix-tile mix-media mix-song" href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
           <span className="mix-label">Song to check out</span>
-          <span className="mix-media-thumb">
-            <img src={youtubeThumb(song.video)} alt="" loading="lazy" />
-            <span className="bs-song-play" aria-hidden="true"><Play size={15} fill="currentColor" strokeWidth={0} /></span>
+          <span className="mix-song-row">
+            <span className="mix-song-cover"><img src={song.cover} alt="" loading="lazy" /></span>
+            <span className="mix-song-text">
+              <span className="mix-media-title">{song.title}</span>
+              <span className="mix-song-artist">{song.artist} · {song.album}</span>
+            </span>
           </span>
-          <span className="mix-media-title">{song.title}</span>
-          <span className="mix-media-note">{song.artist}. {song.note}</span>
+          <span className="mix-media-note">{song.note}</span>
+          <span className="bs-spotify"><SpotifyIcon size={15} /> Play on Spotify <ArrowUpRight size={13} aria-hidden="true" /></span>
         </a>
 
         {shopPicks.map(({ shop, product }) => (

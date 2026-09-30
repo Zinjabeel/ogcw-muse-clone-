@@ -7,6 +7,7 @@ import { Footer2 } from "@/components/ui/footer-2";
 import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow";
 import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
+import { CookieConsent } from "./cookie-consent";
 
 // Header navigation. The sections always show; Originals and Shop join them
 // from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
@@ -139,6 +140,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         <Footer2 />
         <NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} />
         <SearchOverlay open={searchOpen} onClose={closeSearch} />
+        <CookieConsent />
       </div>
     </SiteMenuContext.Provider>
   );
