@@ -1344,78 +1344,104 @@ a.mix-tile:hover, a.mix-tile:focus-visible { border-color: color-mix(in srgb, va
 .og-song-note { font-family: var(--ogcw-serif); font-size: 14px; line-height: 1.45; color: var(--ogcw-text-2); }
 .og-song:hover .og-song-title { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 4px; }
 
-/* Culture deck (src/components/culture-deck.tsx): the last block of the news
-   front, imported from a Variant design. Frosted tiles float, lean towards
-   the pointer and animate their icon on hover. Colours from the theme tokens. */
-.deck {
-  --ease-physics: cubic-bezier(.34, 1.56, .64, 1); --ease-out-expo: cubic-bezier(.16, 1, .3, 1);
-  --glass-line: color-mix(in srgb, var(--ogcw-text) 8%, transparent);
-  position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; padding-block: 32px 8px; text-align: center; font-family: var(--ogcw-ui);
+/* ------------------------------------------------------------------
+   Keep exploring (src/components/keep-exploring.tsx): the Explore grid
+   carries straight on into nine more stories, in the same tiles. A feature
+   (two columns by two rows) and four story tiles, then the rap desk across
+   the full width: the No. 1 rapper vote beside four stories from the rap
+   beat.
+   ------------------------------------------------------------------ */
+.kx-head { display: flex; align-items: center; gap: 16px; margin: 28px 0 16px; }
+.kx-label { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-text); white-space: nowrap; }
+.kx-rule { flex: 1; height: 1px; background: var(--ogcw-border); }
+.kx-count { font-size: 12px; color: var(--ogcw-text-2); white-space: nowrap; }
+
+.kx-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 700px) { .kx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kx-feature, .kx-rap { grid-column: 1 / -1; } }
+@media (min-width: 1100px) { .kx-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .kx-feature { grid-column: span 2; grid-row: span 2; } }
+
+/* The feature: the Explore pick's full-bleed photo, with a button */
+.kx-feature .mix-pick-photo img { transition: transform .8s cubic-bezier(.2, .8, .2, 1); }
+.kx-feature:hover .mix-pick-photo img { transform: scale(calc(var(--zoom, 1) * 1.03)); }
+.kx-feature-cta { display: inline-flex; align-items: center; gap: 8px; width: fit-content; margin-top: 6px; padding: 10px 18px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-family: var(--ogcw-ui); font-size: 13px; font-weight: 700; transition: gap .25s ease; }
+.kx-feature:hover .kx-feature-cta, .kx-feature:focus-visible .kx-feature-cta { gap: 12px; }
+/* On narrow screens the text climbs higher up the photo, so the shade does too */
+@media (max-width: 699.98px) { .kx-feature::after { background: linear-gradient(to top, rgb(8 8 8 / .92), rgb(8 8 8 / .7) 55%, rgb(8 8 8 / .15) 90%); } }
+
+/* Story tiles */
+.kx-tile-photo { aspect-ratio: 16 / 10; margin-bottom: 4px; border-radius: 10px; }
+.kx-tile:hover .kx-tile-photo img { transform: scale(calc(var(--zoom, 1) * 1.04)); }
+.kx-tile-title { font-family: var(--ogcw-display); font-size: 19px; line-height: 1.22; text-wrap: pretty; }
+.kx-meta { margin-top: auto; padding-top: 2px; font-size: 12px; color: var(--ogcw-text-2); }
+:is(.kx-tile, .kx-rap-story):is(:hover, :focus-visible) :is(.kx-tile-title, .kx-rap-title) { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* The rap desk */
+.kx-rap { display: grid; gap: 32px; padding: clamp(20px, 3vw, 36px); overflow: hidden; }
+@media (min-width: 1000px) {
+  .kx-rap { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 40px; }
+  .kx-rap-side { padding-left: 36px; border-left: 1px solid var(--ogcw-border); }
 }
-.deck::before { content: ""; position: absolute; inset: -40px 0 auto; z-index: -1; height: 70%; pointer-events: none; background: radial-gradient(ellipse 60% 70% at 50% 0%, color-mix(in srgb, var(--ogcw-text) 7%, transparent), transparent 70%); }
-.deck-badge { padding: 4px 12px; border: 1px solid var(--glass-line); border-radius: 100px; background: color-mix(in srgb, var(--ogcw-text) 2%, transparent); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ogcw-text-2); }
-.deck-title { margin-top: 28px; font-family: var(--ogcw-display); font-size: clamp(44px, 6.4vw, 88px); font-weight: 400; line-height: 1; letter-spacing: -.025em; color: var(--ogcw-text); }
-.deck-title em { font-style: italic; color: var(--ogcw-text-2); }
-.deck-sub { max-width: 540px; margin-top: 24px; font-family: var(--ogcw-serif); font-size: 18px; line-height: 1.6; color: var(--ogcw-text-2); }
-.deck-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 44px; }
-.deck-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 24px; border: 1px solid var(--glass-line); font-size: 12px; font-weight: 700; line-height: 1; letter-spacing: .08em; text-transform: uppercase; transition: transform .3s var(--ease-out-expo), box-shadow .3s var(--ease-out-expo), background-color .3s ease, border-color .3s ease; }
-.deck-btn-primary { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
-.deck-btn-primary:hover, .deck-btn-primary:focus-visible { background: var(--ogcw-text); border-color: var(--ogcw-text); outline: none; }
-.deck-btn-secondary { border-color: var(--ogcw-border); color: var(--ogcw-text); }
-.deck-btn-secondary:hover, .deck-btn-secondary:focus-visible { border-color: var(--ogcw-text); outline: none; }
+.kx-rap-question { margin-top: 10px; font-family: var(--ogcw-display); font-size: clamp(30px, 3.2vw, 46px); font-weight: 400; line-height: 1.05; letter-spacing: -.02em; text-wrap: balance; }
+.kx-rap-question em { font-style: italic; color: var(--ogcw-accent); }
+.kx-rap-intro { margin-top: 12px; font-family: var(--ogcw-serif); font-size: 15.5px; line-height: 1.5; color: var(--ogcw-text-2); }
+.kx-rap-intro-link { color: var(--ogcw-text); text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.kx-rap-intro-link:hover, .kx-rap-intro-link:focus-visible { color: var(--ogcw-accent); outline: none; }
 
-/* Tiles: the slot places, tilts and leans; the float layer drifts; the card lifts on hover */
-.deck-field { position: relative; width: 100%; max-width: 1200px; height: 400px; margin: 76px 0 0; padding: 0; list-style: none; }
-.deck-slot { position: absolute; left: var(--x); top: var(--y); transform: translate(var(--mx, 0px), var(--my, 0px)) rotate(var(--rot)); transition: transform .6s var(--ease-physics); }
-.deck-float { animation: deck-float 6s ease-in-out infinite; }
-.deck-slot:nth-child(even) .deck-float { animation-duration: 7s; animation-delay: -3s; }
-.deck-slot:nth-child(3n) .deck-float { animation-duration: 8s; animation-delay: -1.5s; }
-@keyframes deck-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(2deg); } }
-.deck-card {
-  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 110px; height: 110px;
-  border: 1px solid var(--glass-line); border-radius: 24px; background: color-mix(in srgb, var(--ogcw-text) 2%, transparent); color: var(--ogcw-text);
-  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
-  transition: transform .6s var(--ease-physics), border-color .3s ease, background-color .3s ease;
+/* The vote: five names; after voting, each one's share as a bar behind it */
+.poll { margin-top: 22px; }
+.poll-list { display: grid; gap: 8px; }
+.poll-option {
+  position: relative; isolation: isolate; display: grid; grid-template-columns: 18px 48px minmax(0, 1fr) auto; align-items: center; gap: 14px;
+  width: 100%; min-height: 70px; padding: 10px 16px 10px 14px; overflow: hidden; border: 1px solid var(--ogcw-border); border-radius: 12px;
+  background: color-mix(in srgb, var(--ogcw-bg) 55%, transparent); color: var(--ogcw-text); font: inherit; text-align: left;
+  transition: border-color .2s ease, transform .25s cubic-bezier(.2, .8, .2, 1);
 }
-.deck-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ogcw-text) 15%, transparent), transparent); }
-.deck-card:hover, .deck-card:focus-visible { transform: translateY(-8px) scale(1.05); border-color: color-mix(in srgb, var(--ogcw-text) 20%, transparent); background: color-mix(in srgb, var(--ogcw-text) 5%, transparent); outline: none; }
-.deck-card:focus-visible { box-shadow: 0 0 0 2px var(--ogcw-accent); }
-.deck-icon { width: 32px; height: 32px; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: color .3s ease, transform .3s var(--ease-physics); }
-.deck-card:hover .deck-icon, .deck-card:focus-visible .deck-icon { color: var(--ogcw-accent); }
-.deck-label { position: absolute; bottom: 12px; font-size: 9.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); opacity: .8; transition: opacity .3s ease; }
-.deck-card:hover .deck-label, .deck-card:focus-visible .deck-label { opacity: 1; }
+button.poll-option { cursor: pointer; }
+button.poll-option:hover, button.poll-option:focus-visible { border-color: var(--ogcw-accent); transform: translateX(4px); outline: none; }
+button.poll-option:disabled { cursor: progress; opacity: .7; transform: none; }
+.poll-num { font-family: var(--ogcw-display); font-size: 17px; color: var(--ogcw-text-2); text-align: center; }
+.poll-face { width: 48px; height: 48px; overflow: hidden; border-radius: 50%; background: var(--ogcw-surface); }
+.poll-face img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); transition: filter .4s ease; }
+:is(button.poll-option:hover, button.poll-option:focus-visible, .poll-option[data-mine], .poll-option[data-lead]) .poll-face img { filter: none; }
+.poll-text { display: grid; gap: 3px; min-width: 0; }
+.poll-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-family: var(--ogcw-display); font-size: 19px; line-height: 1.2; }
+.poll-case { font-size: 12.5px; line-height: 1.35; color: var(--ogcw-text-2); }
+.poll-cta { padding: 7px 15px; border: 1px solid var(--ogcw-border); border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .04em; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+:is(button.poll-option:hover, button.poll-option:focus-visible) .poll-cta { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
+.poll-bar { position: absolute; inset: 0 auto 0 0; z-index: -1; width: var(--share); background: color-mix(in srgb, var(--ogcw-text) 9%, transparent); animation: poll-grow 1.1s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i) * 70ms); }
+.poll-option[data-lead] .poll-bar { background: color-mix(in srgb, var(--ogcw-accent) 24%, transparent); }
+@keyframes poll-grow { from { width: 0; } }
+.poll-option[data-mine] { border-color: color-mix(in srgb, var(--ogcw-accent) 70%, var(--ogcw-border)); }
+.poll-share { font-family: var(--ogcw-display); font-size: 27px; line-height: 1; font-variant-numeric: tabular-nums; }
+.poll-share small { margin-left: 1px; font-size: 14px; color: var(--ogcw-text-2); }
+.poll-mine { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-family: var(--ogcw-ui); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.poll-foot { margin-top: 14px; font-size: 13px; line-height: 1.5; color: var(--ogcw-text-2); }
+.poll-foot strong { font-weight: 700; color: var(--ogcw-text); }
 
-/* Each icon's own hover motion */
-.deck-card:hover .deck-heart { animation: deck-pulse .8s var(--ease-physics); fill: color-mix(in srgb, var(--ogcw-accent) 18%, transparent); }
-@keyframes deck-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-.deck-card:hover .deck-bell { animation: deck-swing .6s var(--ease-physics); transform-origin: top center; }
-@keyframes deck-swing { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(15deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
-.deck-card:hover .deck-latest .deck-arrow { animation: deck-drop .6s var(--ease-physics); }
-@keyframes deck-drop { 0% { transform: translateY(0); opacity: 1; } 40% { transform: translateY(4px); opacity: 0; } 41% { transform: translateY(-4px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-.deck-card:hover .deck-star { animation: deck-twinkle 1s infinite alternate; }
-@keyframes deck-twinkle { from { opacity: 1; transform: scale(1); } to { opacity: .5; transform: scale(.8) rotate(10deg); } }
-.deck-pupil { transform-box: fill-box; transform-origin: center; }
-.deck-card:hover .deck-pupil { animation: deck-blink .4s var(--ease-physics); }
-@keyframes deck-blink { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.1); } }
-.deck-card:hover .deck-plus { transform: rotate(45deg); }
-.deck-shop .deck-arrow { transition: transform .3s var(--ease-physics); }
-.deck-card:hover .deck-shop .deck-arrow { transform: translate(2px, -2px); }
-.deck-card:hover .deck-music { animation: deck-bob .7s var(--ease-physics); }
-@keyframes deck-bob { 0%, 100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(-4px) rotate(-6deg); } 70% { transform: translateY(1px) rotate(3deg); } }
-.deck-flap { transform-box: fill-box; transform-origin: top center; transition: transform .3s var(--ease-physics); }
-.deck-card:hover .deck-flap { transform: scaleY(-1); }
+/* The rap beat beside it */
+.kx-rap-side { display: flex; flex-direction: column; min-width: 0; }
+.kx-rap-side-head { padding-bottom: 12px; border-bottom: 1px solid var(--ogcw-border); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.kx-rap-list li + li { border-top: 1px solid var(--ogcw-border); }
+.kx-rap-story { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 14px; padding-block: 14px; outline: none; }
+.kx-rap-thumb { aspect-ratio: 4 / 3; border-radius: 8px; }
+.kx-rap-story:hover .kx-rap-thumb img { transform: scale(calc(var(--zoom, 1) * 1.05)); }
+.kx-rap-story:focus-visible .kx-rap-thumb { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
+.kx-rap-text { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.kx-rap-title { font-family: var(--ogcw-display); font-size: 16.5px; line-height: 1.25; }
+.kx-rap-more { display: inline-flex; align-items: center; gap: 6px; width: fit-content; margin-top: auto; padding-top: 14px; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); transition: color .2s ease, gap .2s ease; }
+.kx-rap-more:hover, .kx-rap-more:focus-visible { gap: 9px; color: var(--ogcw-accent); outline: none; }
 
-/* Phones: the tiles settle into a still grid of three */
-@media (max-width: 768px) {
-  .deck-field { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; height: auto; margin-top: 48px; }
-  .deck-slot { position: static; transform: none; }
-  .deck-float { animation: none; }
-  .deck-card { width: 100%; height: 100px; }
-  .deck-cta { flex-direction: column; width: 100%; max-width: 300px; }
+@media (max-width: 519.98px) {
+  .poll-option { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; padding: 10px 12px; }
+  .poll-num { display: none; }
+  .poll-face { width: 44px; height: 44px; }
+  .poll-name { font-size: 17px; }
+  .poll-share { font-size: 22px; }
+  .kx-rap-story { grid-template-columns: 88px minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .deck-float, .deck-card:hover :is(.deck-icon, .deck-arrow, .deck-pupil) { animation: none; }
-  .deck-slot, .deck-card, .deck-icon, .deck-flap, .deck-shop .deck-arrow { transition: none; }
+  .poll-bar { animation: none; }
+  .poll-option, .poll-face img, .kx-feature .mix-pick-photo img { transition: none; }
 }
 
 /* About / Newsletter / Work with OGCW (src/components/connect-section.tsx):

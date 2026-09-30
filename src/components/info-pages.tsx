@@ -25,7 +25,9 @@ const comingSoon = (what: string, subject: string) => (
 
 const LICENCES = {
   "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
+  "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/",
   "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
   "CC BY-SA 2.0": "https://creativecommons.org/licenses/by-sa/2.0/",
   "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
   "CC0": "https://creativecommons.org/publicdomain/zero/1.0/",
@@ -50,6 +52,18 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
   ["Bill Skarsgård", "Gage Skidmore", "CC BY-SA 2.0", "Bill_Skarsgård_(8608397609).jpg"],
   ["The Venice Film Festival red carpet", "Pietro Luca Cassarino", "CC BY-SA 2.0", "Venice_2020_Red_Carpet.jpg"],
   ["IShowSpeed in Singapore", "Aerodynamically", "CC0", "IShowSpeed_at_Trifecta_Somerset,_Singapore.jpg"],
+  ["Kendrick Lamar at the 2018 Pulitzer Prizes", "Fuzheado", "CC BY-SA 4.0", "Pulitzer2018-portraits-kendrick-lamar_(cropped).jpg"],
+  ["Drake on the Summer Sixteen Tour", "The Come Up Show", "CC BY 2.0", "Drake_and_Future_2016_Summer_Sixteen_Tour_(cropped).jpg"],
+  ["J. Cole in 2010", "H D", "CC BY 2.0", "J._Cole_2010.jpg"],
+  ["J. Cole in concert, 2017", "The Come Up Show", "CC BY 2.0", "Cole_2017.jpg"],
+  ["Future in 2014", "thecomeupshow", "CC BY 2.0", "Future_(rapper)_2014_(cropped).JPG"],
+  ["Cardi B at the 2018 VMAs", "Nicole Alexander", "CC BY 3.0", "Cardi_B_VMA_2018_-_closeup.png"],
+  ["Lil Durk", "Daniel X. O’Neil", "CC BY 2.0", "Lil_Durk_and_Sonja_Marziano_(cropped).jpg"],
+  ["Tupac Shakur’s star on the Hollywood Walk of Fame", "Alexis Doine", "CC0", "Tupac_Shakur_star_(Hollywood_Walk_of_Fame_star).jpg"],
+  ["Jhené Aiko in concert", "The Come Up Show", "CC BY 2.0", "Jhené_Aiko_(28620047176).jpg"],
+  ["Kai Cenat", "ImDavisss Live", "CC BY 3.0", "Kai_Cenat_July_2025.jpg"],
+  ["Leslie Benzies", "Austin Hargrave", "CC BY-SA 3.0", "Leslie_Benzies_@_Everywhere_Game.jpg"],
+  ["Fortnite Battle Royale at GDC 2018", "Official GDC", "CC BY 2.0", "Fortnite_Battle_Royale_at_GDC_2018.jpg"],
 ];
 
 export const infoPages: Record<InfoSlug, InfoPage> = {
@@ -178,7 +192,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             </li>
           ))}
         </ul>
-        <p>Video thumbnails (streamers, music videos, and game trailers and showcases from Capcom and PlayStation) belong to the channels that published them and link to the videos on YouTube.</p>
+        <p>Video thumbnails (streamers, music videos, and game trailers and showcases from Capcom, PlayStation, CD Projekt Red and Mojang) belong to the channels that published them and link to the videos on YouTube.</p>
         <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>

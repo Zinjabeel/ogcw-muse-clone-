@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play } f
 import { useEffect, useRef } from "react";
 import { article, ARTICLES, formatPrice, SHOPS, SONGS, youtubeThumb, youtubeUrl, type Article, type Photo as PhotoData, type Song } from "@/data/content";
 import { ExploreMix } from "./explore-mix";
-import { CultureDeck } from "./culture-deck";
+import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
 import { ShopCard } from "./cards";
 import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
@@ -13,7 +13,8 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 // system (Source Serif 4 headlines and text, Inter labels, accent colour).
 // Six headline stories (three down the left side, the lead, two on the
 // right) beside the Upcoming events rail, then the More news carousel,
-// Content of the month, the shop and the Explore mix.
+// Content of the month, the shop, and the Explore mix running on into Keep
+// exploring (nine more stories and the rap desk vote).
 
 const sections = [
   { label: "All news", to: "/news" },
@@ -29,9 +30,10 @@ const sections = [
 const lead = article("vmas-2026-winners");
 const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
 const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"].map(article);
-// Every other story, newest first, runs in the More news carousel
+// Every other story, newest first, runs in the More news carousel (the ones
+// in Keep exploring, further down, are left out)
 const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
-const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug));
+const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
 // For the shop call-to-action card: one product from three of the shops
 const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
@@ -341,11 +343,9 @@ export function NewsFront() {
 
         <hr className="bs-rule" />
 
+        {/* Explore runs straight on into Keep exploring: same tiles, no rule between */}
         <ExploreMix />
-
-        <hr className="bs-rule" />
-
-        <CultureDeck />
+        <KeepExploring />
       </div>
     </section>
   );

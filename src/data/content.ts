@@ -22,6 +22,18 @@ import skarsgardPhoto from "../assets/news/bill-skarsgard.jpg";
 import speedPhoto from "../assets/news/ishowspeed-singapore.jpg";
 import venicePhoto from "../assets/news/venice-red-carpet.jpg";
 import niaPhoto from "../assets/news/nia-archives.jpg";
+import kendrickPhoto from "../assets/news/kendrick-lamar.jpg";
+import drakePhoto from "../assets/news/drake-summer-sixteen.jpg";
+import colePhoto from "../assets/news/j-cole-2010.jpg";
+import coleArenaPhoto from "../assets/news/j-cole-arena.jpg";
+import futurePhoto from "../assets/news/future-2014.jpg";
+import cardiPhoto from "../assets/news/cardi-b-vma.jpg";
+import durkPhoto from "../assets/news/lil-durk.jpg";
+import tupacStarPhoto from "../assets/news/tupac-shakur-star.jpg";
+import jhenePhoto from "../assets/news/jhene-aiko.jpg";
+import kaiPhoto from "../assets/news/kai-cenat.jpg";
+import benziesPhoto from "../assets/news/leslie-benzies.jpg";
+import fortnitePhoto from "../assets/news/fortnite-gdc.jpg";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
@@ -63,6 +75,37 @@ export const youtubeUrl = (id: string) => `https://www.youtube.com/watch?v=${id}
 // ---------------------------------------------------------------- Stories (newest first)
 
 export const ARTICLES: Article[] = [
+  {
+    slug: "rap-number-ones-2026",
+    section: "music",
+    kicker: "The rap desk",
+    title: "Five rappers, five number ones: hip-hop’s 2026 so far",
+    deck: "A record Grammy night, three albums in the top three at once and a 12th number one. The case for each name in our No. 1 rapper vote.",
+    author: "Sana Lind",
+    date: "2026-09-30",
+    read: "3 min read",
+    photo: { src: coleArenaPhoto, alt: "J. Cole on stage in a packed arena under white spotlights", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Who is the number one rapper right now? We have put the question to you on the OGCW front page, with five names on the ballot. Here is what each of them has done in 2026 so far." },
+      { type: "h2", text: "Kendrick Lamar" },
+      { type: "p", text: "GNX won Best Rap Album at the Grammys on 1 February, his fourth win in a row in that category. He took five awards on the night, including Record of the Year, which brought him to 27 Grammys: more than any other rapper, Jay-Z included." },
+      { type: "h2", text: "Drake" },
+      { type: "p", text: "On 15 May he released three albums at once. ICEMAN opened at number one on the Billboard 200 with 463,000 units, and HABIBTI and MAID OF HONOUR came in at two and three: the first time any act has held the top three places at the same time." },
+      { type: "h2", text: "J. Cole" },
+      { type: "p", text: "The Fall-Off, released on 6 February, went straight to number one on the Billboard 200." },
+      { type: "h2", text: "Future" },
+      { type: "p", text: "The Real Me opened at number one on the chart dated 25 July, with 131,000 units. It was his 12th number-one album, one more than Eminem. Among rappers, only Jay-Z and Drake have more." },
+      { type: "h2", text: "Cardi B" },
+      { type: "p", text: "“Safe”, her song with Kehlani, won Best Hip-Hop at the MTV Video Music Awards on 27 September." },
+      { type: "quote", text: "Five cases, one vote. Yours is on the front page." },
+    ],
+    sources: [
+      { name: "XXL: Kendrick Lamar’s GNX wins Best Rap Album at the 2026 Grammys", url: "https://www.xxlmag.com/kendrick-lamar-gnx-best-rap-album-2026-grammy-awards/" },
+      { name: "HotNewHipHop: Drake tops the Billboard 200 with the ICEMAN trilogy", url: "https://www.hotnewhiphop.com/996118-drake-tops-billboard-200-iceman-trilogy-first-week-sales" },
+      { name: "The Source: Future scores his 12th No. 1 album with The Real Me", url: "https://thesource.com/2026/07/21/future-the-real-me-billboard-200-number-one/" },
+      { name: "Wikipedia: 2026 in hip-hop", url: "https://en.wikipedia.org/wiki/2026_in_hip-hop" },
+    ],
+  },
   {
     slug: "bts-arirang-world-tour-latin-america",
     section: "music",
@@ -110,6 +153,51 @@ export const ARTICLES: Article[] = [
       { name: "PCGamesN: GTA 6 release date and latest news", url: "https://www.pcgamesn.com/grand-theft-auto-vi/gta-6-release-date-setting-map-characters-gameplay-trailers" },
       { name: "Beebom: When will GTA 6 Trailer 3 come out?", url: "https://beebom.com/when-will-gta-6-trailer-3-come-out/" },
       { name: "Rockstar Games: Grand Theft Auto VI Trailer 2", url: "https://www.youtube.com/watch?v=VQRLujxTm3c" },
+    ],
+  },
+  {
+    slug: "witcher-3-remastered-launch",
+    section: "games",
+    kicker: "Launch",
+    title: "The Witcher 3 Remastered is out, and it’s free if you own the game",
+    deck: "CD Projekt Red’s overhaul arrived on 29 September with new combat, a revamped skill tree and both expansions free for current owners.",
+    author: "Jonah Reyes",
+    date: "2026-09-29",
+    read: "3 min read",
+    photo: { src: youtubeThumb("OlmuIckOX0c"), alt: "A scene from the official launch trailer for The Witcher 3: Wild Hunt — Remastered", credit: "CD Projekt Red, official launch trailer", crop: { pos: "50% 16%", zoom: 1.35 } },
+    body: [
+      { type: "p", text: "The Witcher 3: Wild Hunt — Remastered went live on 29 September on PC, PlayStation 5, Xbox Series X|S and Nintendo Switch 2. Anyone who already owns the game on a qualifying platform gets it as a free upgrade." },
+      { type: "p", text: "It is more than a new coat of paint. CD Projekt Red lists upgraded visuals, reworked combat, better traversal and horse handling, smarter monsters, new sign effects and finishers, transmogrification, a bigger photo mode and a revamped skill tree." },
+      { type: "h2", text: "Both expansions, free" },
+      { type: "p", text: "Hearts of Stone and Blood and Wine are now free for every current owner. The remaster was made with Fool’s Theory, a studio led by Witcher 3 veterans, and Yigsoft, and a partnership with Blizzard puts the game on Battle.net." },
+      { type: "p", text: "There is more to come. Songs of the Past, a paid expansion due in 2027, sends Geralt to Letten, a peaceful-looking region with a dark secret, and gives him a chain as a new weapon." },
+      { type: "quote", text: "Eleven years on, Geralt is back on the road." },
+    ],
+    sources: [
+      { name: "CD Projekt Red: The Witcher 3: Wild Hunt — Remastered announced", url: "https://press.cdprojektred.com/en/news/1839/the-witcher-3-wild-hunt-remastered-announced-songs-of-the-past-gets-first-look" },
+      { name: "YouTube: The Witcher 3: Wild Hunt — Remastered, official launch trailer", url: youtubeUrl("OlmuIckOX0c") },
+    ],
+  },
+  {
+    slug: "minecraft-dungeons-ii-launch",
+    section: "games",
+    kicker: "Launch",
+    title: "Minecraft Dungeons II is out, and it takes you into the Sift",
+    deck: "Mojang and Double Eleven’s sequel launched on 29 September with four-player co-op, a new dimension and a lot more loot, from €29.99.",
+    author: "Nia Vale",
+    date: "2026-09-29",
+    read: "2 min read",
+    photo: { src: youtubeThumb("nHW7oH_kZd4"), alt: "A scene from the official launch trailer for Minecraft Dungeons II", credit: "Mojang Studios, official launch trailer", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Minecraft Dungeons II launched on 29 September. Mojang Studios made it with Double Eleven, and Xbox Game Studios publishes it." },
+      { type: "p", text: "The sequel adds the Sift, a new dimension full of threats and mysteries. Enemies get tougher the deeper you go, and legendary weapons, armour and artifacts let you build your hero your way." },
+      { type: "h2", text: "Bring three friends" },
+      { type: "p", text: "Up to four players can team up on the same couch, online or through matchmaking, with cross-platform play. The standard edition costs €29.99 on Steam; the €49.99 Deluxe Edition adds cosmetics and future downloadable content." },
+      { type: "p", text: "Early Steam reviews are mixed: 58% of the first 2,014 player reviews were positive." },
+    ],
+    sources: [
+      { name: "Steam: Minecraft Dungeons II", url: "https://store.steampowered.com/app/1912410/Minecraft_Dungeons_II/" },
+      { name: "YouTube: Minecraft Dungeons II, official launch trailer", url: youtubeUrl("nHW7oH_kZd4") },
     ],
   },
   {
@@ -225,6 +313,28 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "build-a-rocket-boy-administration",
+    section: "games",
+    kicker: "Industry",
+    title: "MindsEye studio Build A Rocket Boy goes into administration",
+    deck: "Leslie Benzies’s Edinburgh studio, founded after he left Rockstar North, has collapsed 15 months after MindsEye’s troubled launch.",
+    author: "Jonah Reyes",
+    date: "2026-09-25",
+    read: "2 min read",
+    photo: { src: benziesPhoto, alt: "Leslie Benzies, founder of Build A Rocket Boy, in a black-and-white portrait", credit: "Austin Hargrave, CC BY-SA 3.0", crop: { pos: "50% 22%" } },
+    body: [
+      { type: "p", text: "Build A Rocket Boy, the Edinburgh studio behind MindsEye, is in administration. Companies House listed it as “In Administration” on 25 September, after a final round of layoffs and reports that it was closing." },
+      { type: "p", text: "The studio was founded in 2016 by Leslie Benzies, the former Rockstar North president known for his work on Grand Theft Auto. It raised more than $110 million in a funding round in January 2024." },
+      { type: "h2", text: "A launch it never recovered from" },
+      { type: "p", text: "MindsEye came out on 10 June 2025 on PlayStation 5, PC and Xbox Series X|S and was panned, with Metacritic scores between 28 and 37 out of 100. By July 2025 about 300 staff had been given redundancy notices." },
+      { type: "p", text: "In March 2026 IO Interactive ended its publishing partnership, and a planned Hitman crossover was cancelled. A major update, Blacklist, followed in April, but it was not enough to keep the studio going." },
+    ],
+    sources: [
+      { name: "Wolf’s Gaming Blog: MindsEye developer Build A Rocket Boy enters administration", url: "https://wolfsgamingblog.com/2026/09/25/mindseye-developer-build-a-rocket-boy-enters-administration/" },
+      { name: "Wikipedia: MindsEye", url: "https://en.wikipedia.org/wiki/MindsEye" },
+    ],
+  },
+  {
     slug: "taylor-swift-the-life-of-a-showgirl-the-encore",
     section: "music",
     kicker: "New music",
@@ -245,6 +355,28 @@ export const ARTICLES: Article[] = [
     sources: [
       { name: "UPI: Taylor Swift releases “Showgirl” encore with new single “Patient Zero”", url: "https://www.upi.com/Entertainment_News/Music/2026/09/25/taylor-swift-showgirl-encore-patient-zero/7621790339274/" },
       { name: "Billboard: All 4 new songs on The Encore ranked", url: "https://www.billboard.com/lists/taylor-swift-life-of-showgirl-encore-tracks-ranked/" },
+    ],
+  },
+  {
+    slug: "epic-fortnite-dutch-class-action",
+    section: "games",
+    kicker: "Courts",
+    title: "Dutch consumer group seeks more than €100 million from Epic over Fortnite",
+    deck: "SMC says the Item Shop’s countdown timers and V-Bucks pushed young players into spending they regret. Epic points to its parental controls.",
+    author: "Nia Vale",
+    date: "2026-09-24",
+    read: "2 min read",
+    photo: { src: fortnitePhoto, alt: "The Fortnite Battle Royale booth at the Game Developers Conference 2018", credit: "Official GDC, CC BY 2.0", crop: { pos: "50% 40%" } },
+    body: [
+      { type: "p", text: "Stichting Massaschade & Consument (SMC), a Dutch consumer foundation, is going after Epic Games over Fortnite. It wants more than €100 million in refunds and damages for young players in the Netherlands, and compensation over the collection of children’s data without their parents’ consent." },
+      { type: "p", text: "The case targets how Fortnite sells: V-Bucks, the Item Shop’s countdown timers and wording SMC says plays on young players’ spending habits." },
+      { type: "h2", text: "What the research found" },
+      { type: "p", text: "SMC cites its own study of Dutch players aged 16 to 19. Six in ten said buying V-Bucks didn’t feel like spending real money, and about half regretted a purchase made under time pressure." },
+      { type: "p", text: "It is not Epic’s first run-in with the Dutch authorities. In 2024 the Authority for Consumers and Markets fined the company €1,125,000 over “buy it now” wording and countdown timers, and a court later confirmed it." },
+      { type: "p", text: "Epic says it offers parental controls, a PIN for players under 18, purchase limits and refunds. SMC has served a formal notice of liability and says it will go to court if settlement talks fail." },
+    ],
+    sources: [
+      { name: "DualShockers: Dutch consumer group sues Epic over Fortnite practices", url: "https://www.dualshockers.com/dutch-consumer-group-sues-epic-for-misleading-fortnite-practices/" },
     ],
   },
   {
@@ -312,6 +444,26 @@ export const ARTICLES: Article[] = [
     ],
     sources: [
       { name: "Wikipedia: Marvel’s Wolverine", url: "https://en.wikipedia.org/wiki/Marvel's_Wolverine" },
+    ],
+  },
+  {
+    slug: "jhene-aiko-westside-whimsy-number-one",
+    section: "music",
+    kicker: "Charts",
+    title: "Jhené Aiko gets her first number one with Westside Whimsy",
+    deck: "The album, with Kendrick Lamar, Ab-Soul, Larry June and Tyga among its guests, opened at the top of the Billboard 200 with 74,000 units.",
+    author: "Nia Vale",
+    date: "2026-09-21",
+    read: "2 min read",
+    photo: { src: jhenePhoto, alt: "Jhené Aiko singing into a microphone in an orange cap", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 30%" } },
+    body: [
+      { type: "p", text: "Westside Whimsy has given Jhené Aiko the first number-one album of her career. It debuted at the top of the Billboard 200 with 74,000 album-equivalent units: 70,000 from 71.33 million streams, 3,500 in sales and 500 from track sales." },
+      { type: "p", text: "The album came out on 11 September through ArtClub International and Def Jam. Ab-Soul, Kendrick Lamar, Larry June, Ohma and Tyga are among the guests." },
+      { type: "h2", text: "Kendrick on the new single" },
+      { type: "p", text: "“So Good”, with Kendrick Lamar, followed as a single on 25 September. The first single, “Break”, came out in November 2025." },
+    ],
+    sources: [
+      { name: "Wikipedia: Westside Whimsy", url: "https://en.wikipedia.org/wiki/Westside_Whimsy" },
     ],
   },
   {
@@ -424,6 +576,27 @@ export const ARTICLES: Article[] = [
     sources: [
       { name: "Blizzard: Everything announced at the BlizzCon 2026 opening ceremony", url: "https://news.blizzard.com/en-us/article/24301453/everything-announced-at-blizzcon-2026-opening-ceremony" },
       { name: "GameSpot: BlizzCon 2026 opening ceremony", url: "https://www.gamespot.com/articles/blizzcon-2026-opening-ceremony-all-the-biggest-announcements-and-games/" },
+    ],
+  },
+  {
+    slug: "lil-durk-not-guilty-murder-for-hire",
+    section: "music",
+    kicker: "Courts",
+    title: "Lil Durk found not guilty in his murder-for-hire trial",
+    deck: "A Los Angeles federal jury cleared the Chicago rapper of every charge on 11 September. He stays in custody ahead of a separate racketeering trial.",
+    author: "Nia Vale",
+    date: "2026-09-12",
+    read: "3 min read",
+    photo: { src: durkPhoto, alt: "Lil Durk in a black jumper and a gold chain with a cross", credit: "Daniel X. O’Neil, CC BY 2.0", crop: { pos: "50% 18%" } },
+    body: [
+      { type: "p", text: "A federal jury in Los Angeles found Lil Durk, born Durk Banks, not guilty on 11 September of every charge he faced: conspiracy, stalking and murder for hire. The jury had started deliberating two days earlier." },
+      { type: "p", text: "Prosecutors said Banks paid for a hit on the rival rapper Quando Rondo in August 2022, in revenge for the killing of his friend King Von in 2020. Gunmen fired at least 18 rounds at an Escalade near the Beverly Center, killing Rondo’s cousin, Saviay’a Robinson, who was 24." },
+      { type: "p", text: "The defence argued that Kavon Grant, Banks’s former assistant, organised the attack to impress his boss. Two co-defendants, Deandre Wilson and David Lindsey, were convicted of conspiracy to commit stalking and of stalking, but acquitted of murder for hire." },
+      { type: "h2", text: "Not free yet" },
+      { type: "p", text: "“The shackles must come off, and he must walk free,” his lawyer said after the verdict. For now Banks stays in federal custody: he faces separate racketeering and murder charges, with that trial set for 5 October." },
+    ],
+    sources: [
+      { name: "NBC New York: Jury finds rapper Lil Durk not guilty in murder-for-hire case", url: "https://www.nbcnewyork.com/news/national-international/verdict-lil-durk-murder-trial-beverly-center-shooting/6546871/" },
     ],
   },
   {
@@ -557,6 +730,48 @@ export const ARTICLES: Article[] = [
       { name: "Techloy: State of Play September 2026, everything announced", url: "https://www.techloy.com/playstation-state-of-play-september-2026-everything-announced/" },
     ],
   },
+  {
+    slug: "keffe-d-guilty-tupac-shakur-murder",
+    section: "music",
+    kicker: "Courts",
+    title: "Keffe D found guilty of Tupac Shakur’s murder, 30 years on",
+    deck: "A Las Vegas jury convicted Duane Davis of first-degree murder on 31 August. He faces life in prison when he is sentenced on 13 October.",
+    author: "Sana Lind",
+    date: "2026-09-01",
+    read: "3 min read",
+    photo: { src: tupacStarPhoto, alt: "Tupac Shakur’s star on the Hollywood Walk of Fame", credit: "Alexis Doine, CC0", crop: { pos: "50% 50%" } },
+    body: [
+      { type: "p", text: "Nearly 30 years after Tupac Shakur was shot in Las Vegas, a jury has convicted the man accused of orchestrating it. Duane “Keffe D” Davis was found guilty on Monday 31 August of first-degree murder with use of a deadly weapon, after a trial of nearly two weeks." },
+      { type: "p", text: "Davis was not accused of firing the gun. Prosecutors described him as a shot-caller for the South Side Compton Crips who went after Shakur and Suge Knight in revenge for a fight involving his nephew at the MGM Grand earlier that night. He was, they said, the only person still alive who rode in the car with the shooter." },
+      { type: "h2", text: "The defence" },
+      { type: "p", text: "His lawyer, Michael Sanft, argued that Davis had made up details for money and notoriety, pointing to his conflicting accounts over the years and to the lack of physical evidence placing him at the scene." },
+      { type: "p", text: "Shakur was shot on 7 September 1996 and died six days later, aged 25. Knight survived. Davis will be sentenced on 13 October and faces life in prison." },
+    ],
+    sources: [
+      { name: "NBC News: Duane ‘Keffe D’ Davis found guilty in Tupac Shakur’s 1996 killing", url: "https://www.nbcnews.com/news/us-news/verdict-trial-tupac-shakurs-killing-former-gang-leader-found-guilty-rcna594859" },
+    ],
+  },
+  {
+    slug: "kai-cenat-ishowspeed-minecraft-marathon",
+    section: "streaming",
+    kicker: "Records",
+    title: "Kai Cenat and IShowSpeed’s Minecraft marathon passed 30 million hours watched",
+    deck: "Five days, 121 hours and 42 deaths later, they beat the Ender Dragon, and out-watched most of this year’s esports events.",
+    author: "Jonah Reyes",
+    date: "2026-08-13",
+    read: "2 min read",
+    photo: { src: kaiPhoto, alt: "Kai Cenat in a black durag, speaking outdoors", credit: "ImDavisss Live, CC BY 3.0", crop: { pos: "50% 28%" } },
+    body: [
+      { type: "p", text: "Kai Cenat and IShowSpeed spent 7 to 12 August playing Minecraft Hardcore together, live, for 121 hours. Across both creators’ Twitch and YouTube channels the marathon drew more than 30 million hours watched, according to Streams Charts." },
+      { type: "p", text: "Speed’s YouTube channel did most of the work, with more than 13.5 million hours watched on its own. Kai’s Twitch channel added 7.77 million hours and peaked at just over 198,000 viewers." },
+      { type: "h2", text: "42 deaths, four bosses" },
+      { type: "p", text: "In Hardcore one death ends the world. They restarted 42 times before beating the Ender Dragon, the Wither, the Elder Guardian and the Warden, and on the final day Speed’s Twitch channel set a new record of 128,700 viewers." },
+      { type: "p", text: "By watch time the marathon beat esports events such as VALORANT Masters Santiago 2026 and the LEC 2026 Spring split. Of the esports events finished so far this year, only the MLBB Mid Season Cup 2026 drew more." },
+    ],
+    sources: [
+      { name: "Streams Charts: Kai Cenat & IShowSpeed Minecraft marathon recap", url: "https://streamscharts.com/news/kai-cenat-ishowspeed-2026-minecraft-marathon-recap" },
+    ],
+  },
 ];
 
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.slug === slug);
@@ -616,6 +831,26 @@ export const CONTENT_OF_THE_MONTH: RankedCreator[] = [
   { rank: 5, name: "Adapt", honour: "Breakout Streamer", awards: ["Best Breakout Streamer"], channel: "https://www.youtube.com/@FaZeAdaptLive", channelName: "Adapt Live on YouTube", video: "pqvIG2V7fII", videoTitle: "I Spent $1000 on Action Figures.." },
 ];
 export const AWARDS_SOURCE = { name: "Wikipedia: 2025 Streamer Awards", url: "https://en.wikipedia.org/wiki/2025_Streamer_Awards" };
+
+// ---------------------------------------------------------------- The No. 1 rapper vote
+// The poll on the rap desk (home page): five names, each with the case for
+// them from "Five rappers, five number ones". The ids are what the vote
+// counter keeps (src/lib/rap-poll.ts).
+
+export const RAP_POLL_CHOICES = ["kendrick", "drake", "cole", "future", "cardi"] as const;
+export type RapPollChoice = (typeof RAP_POLL_CHOICES)[number];
+export type Contender = { id: RapPollChoice; name: string; photo: Photo; case: string };
+export const RAP_POLL: { question: string; story: string; contenders: Contender[] } = {
+  question: "Who’s the No. 1 rapper right now?",
+  story: "rap-number-ones-2026",
+  contenders: [
+    { id: "kendrick", name: "Kendrick Lamar", photo: { src: kendrickPhoto, alt: "Kendrick Lamar smiling", credit: "Fuzheado, CC BY-SA 4.0", crop: { pos: "42% 30%" } }, case: "27 Grammys, the most of any rapper" },
+    { id: "drake", name: "Drake", photo: { src: drakePhoto, alt: "Drake on stage", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 22%" } }, case: "Held Nos. 1, 2 and 3 on the Billboard 200 at once" },
+    { id: "cole", name: "J. Cole", photo: { src: colePhoto, alt: "J. Cole smiling on stage", credit: "H D, CC BY 2.0", crop: { pos: "55% 22%" } }, case: "The Fall-Off went straight to No. 1" },
+    { id: "future", name: "Future", photo: { src: futurePhoto, alt: "Future in sunglasses and a leather jacket", credit: "thecomeupshow, CC BY 2.0", crop: { pos: "50% 20%" } }, case: "12th No. 1 album, one more than Eminem" },
+    { id: "cardi", name: "Cardi B", photo: { src: cardiPhoto, alt: "Cardi B at the 2018 VMAs", credit: "Nicole Alexander, CC BY 3.0", crop: { pos: "40% 35%" } }, case: "Best Hip-Hop at the 2026 VMAs for “Safe”" },
+  ],
+};
 
 // ---------------------------------------------------------------- Upcoming events
 // What is coming up across music, games, film, fashion and streaming, in date
