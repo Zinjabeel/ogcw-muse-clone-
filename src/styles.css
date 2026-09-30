@@ -180,17 +180,17 @@
   --ogcw-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
   color-scheme: dark;
 }
-/* Gold: warm sand and gold. The page is a quiet sand tone, never bright
-   white, so it reads as a background and lets photos, cards, headlines and
-   the gold stand out on it. Near-black text; the gold is deep enough to read
-   as text on the sand (4.8:1) and on the cards (5.2:1). */
+/* Gold: soft white and gold. The white is dimmed (a neutral soft white, no
+   tint) so it reads as a background rather than a light, and lets photos,
+   cards, headlines and the gold stand out on it. Near-black text; the gold
+   is deep enough to read as text on the page (4.6:1) and on cards (5:1). */
 :root[data-theme="gold"] {
-  --ogcw-bg: #e4dccc;
-  --ogcw-accent: #7c570b;
-  --ogcw-surface: #ece5d8;
-  --ogcw-text: #14110c;
-  --ogcw-text-2: #574f41;
-  --ogcw-border: #cbbfa8;
+  --ogcw-bg: #e8e8e6;
+  --ogcw-accent: #86600e;
+  --ogcw-surface: #f0f0ee;
+  --ogcw-text: #141414;
+  --ogcw-text-2: #545450;
+  --ogcw-border: #d0d0cc;
   --ogcw-glow: #b8892f;
   color-scheme: light;
 }
@@ -239,15 +239,15 @@
   --ogcw-shadow: none;
   --ogcw-shadow-lift: 0 22px 44px -26px rgb(0 0 0 / .85);
 }
-/* Gold: a calm sand background with soft warm shade instead of bright light,
-   and deeper shadows so cards and photos sit up off the page */
+/* Gold: a calm soft-white background with gentle shade instead of bright
+   light, and deeper shadows so cards and photos sit up off the page */
 :root[data-theme="gold"] {
-  --amb-base: linear-gradient(180deg, #e6dece 0%, #e0d7c5 55%, #e4dccc 100%);
-  --amb-1: rgb(190 140 40 / .14);
-  --amb-2: rgb(170 110 70 / .10);
-  --amb-3: rgb(90 70 40 / .06);
-  --ogcw-shadow: 0 1px 2px rgb(50 35 10 / .08), 0 14px 34px -18px rgb(50 35 10 / .38);
-  --ogcw-shadow-lift: 0 28px 52px -24px rgb(50 35 10 / .45);
+  --amb-base: linear-gradient(180deg, #eaeae8 0%, #e5e5e3 55%, #e8e8e6 100%);
+  --amb-1: rgb(190 150 60 / .10);
+  --amb-2: rgb(120 120 120 / .08);
+  --amb-3: rgb(0 0 0 / .03);
+  --ogcw-shadow: 0 1px 2px rgb(20 20 20 / .07), 0 14px 34px -18px rgb(20 20 20 / .30);
+  --ogcw-shadow-lift: 0 28px 52px -24px rgb(20 20 20 / .38);
 }
 /* No white boxes: product shots sit on the card colour, their white backgrounds blended into it */
 :root[data-theme="gold"] :is(.og-product-photo, .shopcard-thumb, .mix-product-photo) { background: var(--ogcw-surface); }
