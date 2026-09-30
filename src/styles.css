@@ -180,15 +180,18 @@
   --ogcw-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
   color-scheme: dark;
 }
-/* Gold: white and gold. The gold is deep enough to read as text on white (4.6:1). */
+/* Gold: warm sand and gold. The page is a quiet sand tone, never bright
+   white, so it reads as a background and lets photos, cards, headlines and
+   the gold stand out on it. Near-black text; the gold is deep enough to read
+   as text on the sand (4.8:1) and on the cards (5.2:1). */
 :root[data-theme="gold"] {
-  --ogcw-bg: #f8f6f1;
-  --ogcw-accent: #94701b;
-  --ogcw-surface: #f7f4ec;
-  --ogcw-text: #15130f;
-  --ogcw-text-2: #6b6456;
-  --ogcw-border: #e6dfcf;
-  --ogcw-glow: #c9a24a;
+  --ogcw-bg: #e4dccc;
+  --ogcw-accent: #7c570b;
+  --ogcw-surface: #ece5d8;
+  --ogcw-text: #14110c;
+  --ogcw-text-2: #574f41;
+  --ogcw-border: #cbbfa8;
+  --ogcw-glow: #b8892f;
   color-scheme: light;
 }
 /* Navy: navy blue, off-white and creamy yellow */
@@ -236,14 +239,21 @@
   --ogcw-shadow: none;
   --ogcw-shadow-lift: 0 22px 44px -26px rgb(0 0 0 / .85);
 }
+/* Gold: a calm sand background with soft warm shade instead of bright light,
+   and deeper shadows so cards and photos sit up off the page */
 :root[data-theme="gold"] {
-  --amb-base: linear-gradient(180deg, #fffdf9 0%, #fbf6ec 55%, #fdf9f2 100%);
-  --amb-1: rgb(214 168 64 / .22);
-  --amb-2: rgb(255 176 140 / .20);
-  --amb-3: rgb(160 186 232 / .16);
-  --ogcw-shadow: 0 1px 2px rgb(60 45 20 / .05), 0 12px 32px -20px rgb(60 45 20 / .22);
-  --ogcw-shadow-lift: 0 26px 50px -26px rgb(60 45 20 / .32);
+  --amb-base: linear-gradient(180deg, #e6dece 0%, #e0d7c5 55%, #e4dccc 100%);
+  --amb-1: rgb(190 140 40 / .14);
+  --amb-2: rgb(170 110 70 / .10);
+  --amb-3: rgb(90 70 40 / .06);
+  --ogcw-shadow: 0 1px 2px rgb(50 35 10 / .08), 0 14px 34px -18px rgb(50 35 10 / .38);
+  --ogcw-shadow-lift: 0 28px 52px -24px rgb(50 35 10 / .45);
 }
+/* No white boxes: product shots sit on the card colour, their white backgrounds blended into it */
+:root[data-theme="gold"] :is(.og-product-photo, .shopcard-thumb, .mix-product-photo) { background: var(--ogcw-surface); }
+:root[data-theme="gold"] :is(.og-product-photo, .shopcard-thumb, .mix-product-photo) img { mix-blend-mode: multiply; }
+:root[data-theme="gold"] :is(.bs-shop-cta-thumbs, .bs-shop-cta-pick) img { background: var(--ogcw-surface); }
+:root[data-theme="gold"] .bs-shop-cta::before { background: radial-gradient(circle, rgb(255 225 160 / .16), transparent 65%); }
 :root[data-theme="navy"] {
   --amb-1: rgb(242 220 140 / .09);
   --amb-2: rgb(80 140 255 / .12);

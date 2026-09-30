@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { storePreference } from "@/lib/consent";
 
 // Colour-theme switcher in the header. "Night" is the original black and
-// yellow; "Gold" is white and gold; "Navy" is navy, off-white and creamy
+// yellow; "Gold" is warm sand and gold (never bright white); "Navy" is navy, off-white and creamy
 // yellow; "Aurora" is a pastel glow behind the page with plum text and a
 // violet accent. A theme is just <html data-theme="..."> swapping the
 // --ogcw-* colour tokens in styles.css. The choice is remembered in this
@@ -11,7 +11,7 @@ import { storePreference } from "@/lib/consent";
 
 const THEMES = [
   { id: "night", name: "Night", note: "Black & yellow", swatch: ["#0d0d0d", "#ffe600", "#e4e1da"] },
-  { id: "gold", name: "Gold", note: "White & gold", swatch: ["#f8f6f1", "#94701b", "#15130f"] },
+  { id: "gold", name: "Gold", note: "Warm sand & gold", swatch: ["#e4dccc", "#7c570b", "#14110c"] },
   { id: "navy", name: "Navy", note: "Navy, off-white & cream", swatch: ["#0e1a33", "#f2dc8c", "#e8e2d4"] },
   { id: "aurora", name: "Aurora", note: "Pastel glow & violet", swatch: ["#f7eaff", "#7a3fd6", "#1d1426"] },
 ] as const;
