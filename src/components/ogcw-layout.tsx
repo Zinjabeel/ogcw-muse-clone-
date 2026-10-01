@@ -8,6 +8,7 @@ import { BackgroundGradientGlow } from "@/components/ui/background-gradient-glow
 import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
 import { CookieConsent } from "./cookie-consent";
+import { AccountButton } from "./account-button";
 
 // Header navigation. The sections always show; Originals and Shop join them
 // from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
@@ -133,6 +134,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               {pathname === "/" && <HeroSwitcher />}
               <ThemeSwitcher />
               <button type="button" className="icon-button grid" aria-label="Search" aria-haspopup="dialog" aria-expanded={searchOpen} onClick={openSearch}><Search size={16} /></button>
+              <AccountButton />
             </div>
           </div>
         </header>

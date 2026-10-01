@@ -993,25 +993,27 @@ export const ARTICLES: Article[] = [...RAW_ARTICLES].sort((a, b) => b.date.local
   return { ...story, body, read: `${Math.max(2, Math.round(wordCount(body) / 230))} min read`, ...(full?.ask ? { ask: full.ask } : {}) };
 });
 
+// The stories as written in the code. The site shows the live versions
+// from the Sanity studio (/admin) and falls back to these only when Sanity
+// can't be reached: pages get stories through useStories()
+// (src/lib/stories.tsx), not from here.
 export const getArticle = (slug: string) => ARTICLES.find((a) => a.slug === slug);
-export const articlesIn = (section: SectionId) => ARTICLES.filter((a) => a.section === section);
-export const article = (slug: string) => getArticle(slug)!;
 
-// Curated orders used across the site
-export const LEAD = article("vmas-2026-winners");
-export const LISTS = {
-  latest: ARTICLES.slice(0, 6),
-  trending: ["gta-vi-countdown", "vmas-2026-winners", "onimusha-way-of-the-sword-launch", "miley-cyrus-bass-persuades-number-one", "avengers-endgame-encore-box-office"].map(article),
-  mostRead: ["vmas-2026-winners", "gta-vi-countdown", "taylor-swift-the-life-of-a-showgirl-the-encore", "emmys-2026-winners", "z-event-2026-final-edition"].map(article),
-  editorsPicks: ["paris-fashion-week-ss27", "tokyo-game-show-2026-typhoon", "blizzcon-2026-diablo-v-starcraft", "twitch-state-of-gaming-2026", "bts-arirang-world-tour-latin-america"].map(article),
-  featured: ["vmas-2026-winners", "paris-fashion-week-ss27", "gta-vi-countdown", "z-event-2026-final-edition", "taylor-swift-the-life-of-a-showgirl-the-encore"].map(article),
+// Curated orders used across the site, by web address. A story that has
+// been removed in the studio drops out of its list.
+export const LIST_SLUGS = {
+  trending: ["gta-vi-countdown", "vmas-2026-winners", "onimusha-way-of-the-sword-launch", "miley-cyrus-bass-persuades-number-one", "avengers-endgame-encore-box-office"],
+  mostRead: ["vmas-2026-winners", "gta-vi-countdown", "taylor-swift-the-life-of-a-showgirl-the-encore", "emmys-2026-winners", "z-event-2026-final-edition"],
+  editorsPicks: ["paris-fashion-week-ss27", "tokyo-game-show-2026-typhoon", "blizzcon-2026-diablo-v-starcraft", "twitch-state-of-gaming-2026", "bts-arirang-world-tour-latin-america"],
+  featured: ["vmas-2026-winners", "paris-fashion-week-ss27", "gta-vi-countdown", "z-event-2026-final-edition", "taylor-swift-the-life-of-a-showgirl-the-encore"],
 };
 
-export const READING_LISTS = [
-  { id: "pop-week", title: "Pop’s big week", note: "The VMAs, a Taylor Swift encore and BTS on the road.", cover: undefined as Photo | undefined, items: ["vmas-2026-winners", "taylor-swift-the-life-of-a-showgirl-the-encore", "bts-arirang-world-tour-latin-america"].map(article) },
-  { id: "games-to-watch", title: "Games to watch", note: "Launches, delays and the showcases setting up 2027.", cover: undefined as Photo | undefined, items: ["gta-vi-countdown", "marvels-wolverine-sales", "blizzcon-2026-diablo-v-starcraft"].map(article) },
-  { id: "live-on-stream", title: "Live on stream", note: "Records, marathons and the numbers behind Twitch.", cover: undefined as Photo | undefined, items: ["z-event-2026-final-edition", "wardogs-launch-theburntpeanut", "twitch-state-of-gaming-2026"].map(article) },
+export const READING_LIST_SLUGS = [
+  { id: "pop-week", title: "Pop’s big week", note: "The VMAs, a Taylor Swift encore and BTS on the road.", items: ["vmas-2026-winners", "taylor-swift-the-life-of-a-showgirl-the-encore", "bts-arirang-world-tour-latin-america"] },
+  { id: "games-to-watch", title: "Games to watch", note: "Launches, delays and the showcases setting up 2027.", items: ["gta-vi-countdown", "marvels-wolverine-sales", "blizzcon-2026-diablo-v-starcraft"] },
+  { id: "live-on-stream", title: "Live on stream", note: "Records, marathons and the numbers behind Twitch.", items: ["z-event-2026-final-edition", "wardogs-launch-theburntpeanut", "twitch-state-of-gaming-2026"] },
 ];
+export type ReadingList = { id: string; title: string; note: string; cover?: Photo; items: Article[] };
 
 // ---------------------------------------------------------------- Streamers
 // Streamers to watch (the Streaming front and Explore): each with a recent
@@ -1333,13 +1335,13 @@ export const formatDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { da
 
 export type Hit = { kind: "article"; item: Article } | { kind: "episode"; item: Episode } | { kind: "shop"; item: Shop };
 
-/** Matches stories, episodes and shops against a query. TODO: real search endpoint. */
-export function searchSite(query: string): Hit[] {
+/** Matches stories (the live list from useStories()), episodes and shops against a query */
+export function searchSite(query: string, stories: Article[]): Hit[] {
   const q = query.trim().toLowerCase();
   if (!q) return [];
   const match = (...fields: string[]) => fields.join(" ").toLowerCase().includes(q);
   return [
-    ...ARTICLES.filter((a) => match(a.title, a.deck, a.kicker, a.author, SECTIONS[a.section].label)).map((item): Hit => ({ kind: "article", item })),
+    ...stories.filter((a) => match(a.title, a.deck, a.kicker, a.author, SECTIONS[a.section].label)).map((item): Hit => ({ kind: "article", item })),
     ...EPISODES.filter((e) => match(e.title, e.series, e.summary, e.kind, "originals")).map((item): Hit => ({ kind: "episode", item })),
     ...SHOPS.filter((s) => match(s.name, s.tagline, "shop", ...s.products.map((p) => `${p.name} ${p.category}`))).map((item): Hit => ({ kind: "shop", item })),
   ];

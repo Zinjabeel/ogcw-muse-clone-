@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { Img, SectionHead } from "../components/cards";
-import { ARTICLES, articlesIn, EPISODES, SHOPS } from "../data/content";
+import { EPISODES, SHOPS, type Article, type SectionId } from "../data/content";
+import { useStories } from "../lib/stories";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 
 // What OGCW covers, in four photos: live music, the news, games and style
@@ -28,25 +29,28 @@ export const Route = createFileRoute("/about")({
   component: About,
 });
 
-// What OGCW covers, with live counts from the content library
-const DESKS = [
-  { to: "/music", name: "Music", note: "New releases, tours and the big awards nights", count: `${articlesIn("music").length} stories` },
-  { to: "/games", name: "Games", note: "Launches, sales and the showcases ahead", count: `${articlesIn("games").length} stories` },
-  { to: "/streaming", name: "Streaming", note: "The creators and records on Twitch, YouTube and Kick", count: `${articlesIn("streaming").length} stories` },
-  { to: "/culture", name: "Culture", note: "Fashion, television and sneakers", count: `${articlesIn("culture").length} stories` },
+// What OGCW covers, with live counts of the stories
+const deskList = (inSection: (id: SectionId) => Article[]) => [
+  { to: "/music", name: "Music", note: "New releases, tours and the big awards nights", count: `${inSection("music").length} stories` },
+  { to: "/games", name: "Games", note: "Launches, sales and the showcases ahead", count: `${inSection("games").length} stories` },
+  { to: "/streaming", name: "Streaming", note: "The creators and records on Twitch, YouTube and Kick", count: `${inSection("streaming").length} stories` },
+  { to: "/culture", name: "Culture", note: "Fashion, television and sneakers", count: `${inSection("culture").length} stories` },
   { to: "/originals", name: "Originals", note: "Our own interviews, reportage and short docs", count: `${EPISODES.length} episodes` },
   { to: "/shop", name: "Shop", note: "The pieces behind the stories, picked by our desk", count: `${SHOPS.length} shops` },
 ] as const;
 
 // The writers, with the beats and stories they have filed
-const WRITERS = [...new Set(ARTICLES.map((a) => a.author))].map((name) => {
-  const stories = ARTICLES.filter((a) => a.author === name);
+const writerList = (all: Article[]) => [...new Set(all.map((a) => a.author))].map((name) => {
+  const stories = all.filter((a) => a.author === name);
   return { name, stories, beats: [...new Set(stories.map((s) => s.kicker))].slice(0, 3) };
 });
 
 const ENQUIRIES = ["Submit a story", "Music submissions", "Advertising", "Press"];
 
 function About() {
+  const live = useStories();
+  const DESKS = deskList(live.inSection);
+  const WRITERS = writerList(live.all);
   return (
     <SiteShell>
       <PageIntro kicker="About OGCW" title="We report from inside culture." copy="OGCW is an independent editorial platform following the people, places and ideas shaping what comes next." />

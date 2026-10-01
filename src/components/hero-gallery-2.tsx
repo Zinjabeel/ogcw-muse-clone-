@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { article } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { CARDS, CardLink } from "./hero-gallery";
 
 // Gallery 2 (the second option in the hero switcher): the top news takes the
@@ -13,10 +13,11 @@ import { CARDS, CardLink } from "./hero-gallery";
 // Both pause under the pointer, on focus and off screen, and hold still for
 // reduced motion. The hero takes the colour of the story on show.
 
-const FEATURES = [
-  { story: article("gta-vi-countdown"), tab: "GTA VI", tone: "#4f7f96", cta: "Read the countdown" },
-  { story: article("paris-fashion-week-ss27"), tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
-  { story: article("taylor-swift-the-life-of-a-showgirl-the-encore"), tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
+// The three stories, by web address (shown live from the studio)
+const FEATURE_SLOTS = [
+  { slug: "gta-vi-countdown", tab: "GTA VI", tone: "#4f7f96", cta: "Read the countdown" },
+  { slug: "paris-fashion-week-ss27", tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
+  { slug: "taylor-swift-the-life-of-a-showgirl-the-encore", tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
 ];
 
 const FEATURE_MS = 7000;
@@ -33,6 +34,8 @@ const SCALE = [1, 0.86, 0.74];
 const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]! / 2];
 
 export function HeroGallery2() {
+  const stories = useStories();
+  const FEATURES = FEATURE_SLOTS.map((slot) => ({ ...slot, story: stories.pick(slot.slug) }));
   const section = useRef<HTMLElement>(null);
   const [feature, setFeature] = useState(0);
   const [card, setCard] = useState(0);

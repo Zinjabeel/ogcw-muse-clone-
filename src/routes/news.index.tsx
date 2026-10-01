@@ -3,7 +3,7 @@ import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { BsPhoto, ReadTime, shortDate } from "../components/broadsheet";
 import { SECTION_IDS, SECTIONS, type Article, type SectionId } from "../data/content";
-import { getSanityStories, mergeStories } from "../lib/sanity-stories";
+import { useStories } from "../lib/stories";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
@@ -16,8 +16,6 @@ export const Route = createFileRoute("/news/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  // Stories written in the Sanity studio (/admin) join the ones in the code
-  loader: async () => ({ stories: mergeStories(await getSanityStories().catch(() => [])) }),
   component: News,
 });
 
@@ -34,7 +32,7 @@ const FILTERS: { id: Filter; label: string }[] = [
 const countFor = (all: Article[], filter: Filter) => (filter === "all" ? all.length : all.filter((a) => a.section === filter).length);
 
 function News() {
-  const { stories: all } = Route.useLoaderData();
+  const { all } = useStories();
   const [filter, setFilter] = useState<Filter>("all");
   const stories = filter === "all" ? all : all.filter((a) => a.section === filter);
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());

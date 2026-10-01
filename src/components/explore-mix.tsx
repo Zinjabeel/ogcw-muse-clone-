@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Play } from "lucide-react";
-import { article, formatPrice, LISTS, READING_LISTS, SHOPS, SONGS, spotifyTrack, STREAMERS, youtubeThumb, youtubeUrl } from "@/data/content";
+import { formatPrice, SHOPS, SONGS, spotifyTrack, STREAMERS, youtubeThumb, youtubeUrl } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { SpotifyIcon } from "./spotify";
 import { Img } from "./cards";
@@ -10,13 +11,15 @@ import { Img } from "./cards";
 // two pieces from the shop and a reading list. Used at the end of the news
 // front and on /explore.
 
-const pick = article("tokyo-game-show-2026-typhoon");
+const PICK_SLUG = "tokyo-game-show-2026-typhoon";
 const streamer = STREAMERS.find((s) => s.name === "TheBurntPeanut")!;
 const song = SONGS[1]!;
 const shopPicks = [SHOPS[0]!, SHOPS[2]!].map((shop) => ({ shop, product: shop.products[0]! }));
-const list = READING_LISTS[1]!;
 
 export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?: string; idPrefix?: string }) {
+  const stories = useStories();
+  const pick = stories.pick(PICK_SLUG);
+  const list = stories.readingLists[1]!;
   return (
     <section className="bs-explore mix" aria-labelledby={`${idPrefix}-title`}>
       <div className="bs-section-head">
@@ -37,7 +40,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         <div className="mix-tile mix-trending">
           <p className="mix-label">Trending now</p>
           <ol>
-            {LISTS.trending.map((story, index) => (
+            {stories.trending.map((story, index) => (
               <li key={story.slug}>
                 <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-trend">
                   <span className="mix-trend-num">{index + 1}</span>

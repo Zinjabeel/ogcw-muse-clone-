@@ -1,6 +1,7 @@
 import { Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { LISTS, searchSite, type Hit } from "@/data/content";
+import { searchSite, type Hit } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { Thumb } from "./nav-drawer";
 import { HitLink, hitLabel, hitSub, hitTitle, Poster } from "./cards";
 
@@ -12,6 +13,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+  const stories = useStories();
 
   useEffect(() => {
     const el = dialog.current;
@@ -33,7 +35,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
 
   const close = () => dialog.current?.close();
   const term = query.trim().toLowerCase();
-  const results: Hit[] = term ? searchSite(term) : LISTS.mostRead.slice(0, 4).map((item) => ({ kind: "article", item }));
+  const results: Hit[] = term ? searchSite(term, stories.all) : stories.mostRead.slice(0, 4).map((item) => ({ kind: "article", item }));
 
   return (
     <dialog ref={dialog} className="search" aria-label="Search OGCW">

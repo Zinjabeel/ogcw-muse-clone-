@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getArticle } from "@/data/content";
 
 // Reader answers to the yes/no question at the end of each story ("Was this
 // helpful?", "Are you going?"), and the notes people add under it. Answers
@@ -16,7 +15,8 @@ const notes: { slug: string; answer: Answer | null; text: string; at: string }[]
 
 const countsFor = (slug: string): FeedbackCounts => counts.get(slug) ?? { yes: 0, no: 0 };
 const storySlug = (value: unknown) => {
-  if (typeof value !== "string" || !getArticle(value)) throw new Error("No story with that address");
+  // Any story address (stories can be added in the studio at any time)
+  if (typeof value !== "string" || !/^[a-z0-9-]{1,120}$/.test(value)) throw new Error("Not a story address");
   return value;
 };
 const isAnswer = (value: unknown): value is Answer => value === "yes" || value === "no";

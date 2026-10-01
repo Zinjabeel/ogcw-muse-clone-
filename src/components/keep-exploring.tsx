@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
-import { article, RAP_POLL, RAP_POLL_CHOICES, SECTIONS, type Article, type RapPollChoice } from "@/data/content";
+import { RAP_POLL, RAP_POLL_CHOICES, SECTIONS, type Article, type RapPollChoice } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
@@ -15,20 +16,21 @@ import { Img } from "./cards";
 // season as a feature with four games stories, then a Screens & streams
 // list beside two more games stories.
 
-const FEATURE = article("witcher-3-remastered-launch");
-const TILES = ["minecraft-dungeons-ii-launch", "epic-fortnite-dutch-class-action", "build-a-rocket-boy-administration", "kai-cenat-ishowspeed-minecraft-marathon"].map(article);
-const RAP_STORIES = ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"].map(article);
+// The stories in each spot, by web address (shown live from the studio)
+const FEATURE_SLUG = "witcher-3-remastered-launch";
+const TILE_SLUGS = ["minecraft-dungeons-ii-launch", "epic-fortnite-dutch-class-action", "build-a-rocket-boy-administration", "kai-cenat-ishowspeed-minecraft-marathon"];
+const RAP_SLUGS = ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"];
 
-const MORE_FEATURE = article("monster-hunter-wilds-switch-2");
-const MORE_TILES = ["switch-2-calendar-september-direct", "shadow-of-mordor-shadow-of-war-switch-2", "ea-sports-fc-27-launch", "october-2026-games"].map(article);
-const SCREENS = ["netflix-october-2026", "streamer-awards-2026-applications", "made-on-youtube-2026"].map(article);
-const MORE_END = ["intergalactic-quiet-until-2027", "dawn-of-war-iv-space-marines-trailer"].map(article);
+const MORE_FEATURE_SLUG = "monster-hunter-wilds-switch-2";
+const MORE_TILE_SLUGS = ["switch-2-calendar-september-direct", "shadow-of-mordor-shadow-of-war-switch-2", "ea-sports-fc-27-launch", "october-2026-games"];
+const SCREEN_SLUGS = ["netflix-october-2026", "streamer-awards-2026-applications", "made-on-youtube-2026"];
+const MORE_END_SLUGS = ["intergalactic-quiet-until-2027", "dawn-of-war-iv-space-marines-trailer"];
 
-const FIRST_COUNT = 1 + TILES.length + RAP_STORIES.length;
-const MORE_COUNT = 1 + MORE_TILES.length + SCREENS.length + MORE_END.length;
+const FIRST_COUNT = 1 + TILE_SLUGS.length + RAP_SLUGS.length;
+const MORE_COUNT = 1 + MORE_TILE_SLUGS.length + SCREEN_SLUGS.length + MORE_END_SLUGS.length;
 
 /** The stories this section shows, so the More news row can leave them out */
-export const KEEP_EXPLORING_SLUGS = new Set([FEATURE, ...TILES, ...RAP_STORIES, MORE_FEATURE, ...MORE_TILES, ...SCREENS, ...MORE_END].map((story) => story.slug));
+export const KEEP_EXPLORING_SLUGS = new Set([FEATURE_SLUG, ...TILE_SLUGS, ...RAP_SLUGS, MORE_FEATURE_SLUG, ...MORE_TILE_SLUGS, ...SCREEN_SLUGS, ...MORE_END_SLUGS]);
 
 const STORAGE_KEY = "ogcw-vote-no1-rapper";
 
@@ -187,6 +189,15 @@ function RapStory({ story }: { story: Article }) {
 }
 
 export function KeepExploring() {
+  const stories = useStories();
+  const FEATURE = stories.pick(FEATURE_SLUG);
+  const TILES = TILE_SLUGS.map(stories.pick);
+  const RAP_STORIES = RAP_SLUGS.map(stories.pick);
+  const MORE_FEATURE = stories.pick(MORE_FEATURE_SLUG);
+  const MORE_TILES = MORE_TILE_SLUGS.map(stories.pick);
+  const SCREENS = SCREEN_SLUGS.map(stories.pick);
+  const MORE_END = MORE_END_SLUGS.map(stories.pick);
+
   return (
     <section className="kx" aria-labelledby="kx-title">
       <div className="kx-head">

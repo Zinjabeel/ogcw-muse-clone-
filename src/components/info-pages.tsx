@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
-import { ARTICLES, EPISODES, SECTION_IDS, SHOPS } from "@/data/content";
+import { EPISODES, SECTION_IDS, SHOPS } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { NewsletterForm } from "./connect-section";
 import { CookieSettingsButton } from "./cookie-settings-button";
 
@@ -31,6 +32,11 @@ const Faq = ({ items }: { items: [string, ReactNode][] }) => (
     ))}
   </div>
 );
+
+// The live number of stories (from the studio)
+function StoryCount() {
+  return <>{useStories().all.length}</>;
+}
 
 const LICENCES = {
   "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
@@ -116,6 +122,8 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
 const STORAGE_ITEMS: [string, string, string][] = [
   ["ogcw-consent", "Strictly necessary", "Remembers your cookie choices, so we don’t ask on every visit."],
   ["ogcw-lang", "Strictly necessary", "Remembers your language."],
+  ["ogcw-accounts", "Strictly necessary", "Your OGCW account, if you create one: your name, email and a scrambled (hashed) form of your password, never the password itself."],
+  ["ogcw-session", "Strictly necessary", "Keeps you signed in to your OGCW account until you sign out."],
   ["ogcw-theme", "Preferences", "Remembers the colour theme you picked (Night, Gold, Navy or Aurora)."],
   ["ogcw-hero", "Preferences", "Remembers which home page hero you picked."],
   ["ogcw-vote-no1-rapper", "Preferences", "Remembers your vote in the No. 1 rapper poll, so you see the results when you come back."],
@@ -308,7 +316,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <p>OGCW, One Great Culture World, is an independent editorial platform covering music, games, streaming and culture. Every story is reported, written in our own words and published with its sources.</p>
         <h2>OGCW at a glance</h2>
         <ul className="info-list">
-          <li>{ARTICLES.length} stories across {SECTION_IDS.length} sections: music, games, streaming and culture</li>
+          <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming and culture</li>
           <li>{EPISODES.length} episodes of OGCW Originals, our own video series</li>
           <li>The OGCW Shop: an edit from {SHOPS.length} retailers</li>
           <li>Available in four colour themes, free to read, with no account needed</li>

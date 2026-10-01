@@ -21,6 +21,14 @@ const photoFields = [
   defineField({ name: "url", title: "…or paste a photo link", type: "url", description: "Used when no photo is uploaded, e.g. https://i.ytimg.com/vi/VIDEO_ID/maxresdefault.jpg" }),
   defineField({ name: "alt", title: "Describe the photo", type: "string", description: "For screen readers and search engines.", validation: (rule) => rule.required() }),
   defineField({ name: "credit", title: "Credit", type: "string", description: "Photographer and licence, e.g. “Gage Skidmore, CC BY-SA 2.0”." }),
+  defineField({
+    name: "position",
+    title: "Focus point",
+    type: "string",
+    description: "Optional. Which part of the photo stays in view when it's cropped, as “left% top%”, e.g. “50% 30%”. For uploaded photos you can also set this with the hotspot tool.",
+    validation: (rule) => rule.regex(/^\d{1,3}% \d{1,3}%$/, { name: "position" }).warning("Use the form “50% 30%”"),
+  }),
+  defineField({ name: "zoom", title: "Zoom", type: "number", description: "Optional. 1 is normal; 1.3 zooms in by 30%.", validation: (rule) => rule.min(1).max(3) }),
 ];
 
 export const photo = defineType({

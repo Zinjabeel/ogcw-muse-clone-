@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
+import { SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { SpotifyIcon } from "./spotify";
 import { ExploreMix } from "./explore-mix";
 import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
@@ -32,13 +33,11 @@ const sections = [
   { label: "Explore", to: "/explore" },
 ] as const;
 
-const lead = article("vmas-2026-winners");
-const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
-const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"].map(article);
-// Every other story, newest first, runs in the More news carousel (the ones
-// in This week and in Keep exploring are left out)
-const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
-const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug) && !WEEK_SLUGS.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
+// The headline stories, by web address (shown live from the studio)
+const LEAD_SLUG = "vmas-2026-winners";
+const SECONDARY_SLUGS = ["gta-vi-countdown", "paris-fashion-week-ss27"];
+const SIDE_SLUGS = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"];
+const ON_FRONT = new Set([LEAD_SLUG, ...SECONDARY_SLUGS, ...SIDE_SLUGS]);
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
 
 // More news: the cards run on past both edges of the page column, so a
@@ -142,6 +141,13 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
 
 export function NewsFront() {
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  const stories = useStories();
+  const lead = stories.pick(LEAD_SLUG);
+  const secondary = SECONDARY_SLUGS.map(stories.pick);
+  const side = SIDE_SLUGS.map(stories.pick);
+  // Every other story, newest first, runs in the More news carousel (the ones
+  // in This week and in Keep exploring are left out)
+  const moreNews = stories.all.filter((a) => !ON_FRONT.has(a.slug) && !WEEK_SLUGS.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
 
   return (
     <section className="broadsheet" aria-labelledby="news-front-title">
@@ -158,7 +164,7 @@ export function NewsFront() {
           </p>
           <h2 id="news-front-title" className="bs-wordmark">OGCW News</h2>
           <p className="bs-flag bs-flag-right">
-            <span>{ARTICLES.length} stories</span>
+            <span>{stories.all.length} stories</span>
             <span>Every source linked</span>
           </p>
         </header>

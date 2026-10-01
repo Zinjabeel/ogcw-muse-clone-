@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { article, LIVE } from "@/data/content";
+import { LIVE, type Article } from "@/data/content";
+import { useStories } from "@/lib/stories";
 
 // Home hero, option 2 in the hero switcher, set like a magazine cover rather
 // than a carousel: one cover story in a large serif headline, the photo
@@ -8,22 +9,15 @@ import { article, LIVE } from "@/data/content";
 // grain for atmosphere, and an "Also on OGCW" rail along the bottom. The
 // headline is revealed line by line on load, and on scroll the photo drifts
 // slower than the text (CSS scroll-driven animation where supported).
-// TODO: the cover story and rail will come from the admin panel.
+// The cover story and the rail's stories come live from the studio (/admin).
 
-const cover = article("taylor-swift-the-life-of-a-showgirl-the-encore");
+const COVER_SLUG = "taylor-swift-the-life-of-a-showgirl-the-encore";
+const RAIL_SLUGS = ["gta-vi-countdown", "z-event-2026-final-edition"];
 
 type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
 
-const railStory = (slug: string): RailItem => {
-  const story = article(slug);
-  return { kicker: story.kicker, title: story.title, meta: story.read, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug };
-};
-
-const rail: RailItem[] = [
-  { kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true },
-  railStory("gta-vi-countdown"),
-  railStory("z-event-2026-final-edition"),
-];
+const railStory = (story: Article): RailItem => ({ kicker: story.kicker, title: story.title, meta: story.read, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug: story.slug });
+const LIVE_ITEM: RailItem = { kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
   const inner = (
@@ -47,6 +41,9 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
 }
 
 export function HeroCover() {
+  const stories = useStories();
+  const cover = stories.pick(COVER_SLUG);
+  const rail: RailItem[] = [LIVE_ITEM, ...RAIL_SLUGS.map((slug) => railStory(stories.pick(slug)))];
   return (
     <section className="cover" aria-labelledby="cover-title">
       <div className="cover-glow" aria-hidden="true" />

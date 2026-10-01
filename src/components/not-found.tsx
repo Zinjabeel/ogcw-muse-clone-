@@ -2,11 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { SiteShell, useSiteMenu } from "./ogcw-layout";
 import { SectionHead, StoryCard } from "./cards";
-import { LISTS } from "@/data/content";
+import { useStories } from "@/lib/stories";
 
 // 404: inside the normal header and footer, with a way back and the latest
 // stories, so a dead link still lands somewhere worth reading.
 export function NotFoundPage() {
+  const stories = useStories();
   return (
     <SiteShell>
       <main className="page-wrap og-404">
@@ -24,7 +25,7 @@ export function NotFoundPage() {
             <Link to="/news" className="og-more-link">All news</Link>
           </SectionHead>
           <div className="og-grid-4">
-            {LISTS.latest.slice(0, 4).map((story) => <StoryCard key={story.slug} story={story} />)}
+            {stories.latest.slice(0, 4).map((story) => <StoryCard key={story.slug} story={story} />)}
           </div>
         </section>
       </main>

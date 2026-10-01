@@ -2443,3 +2443,53 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 /* /admin: the Sanity studio, full screen over everything (src/routes/admin.$.tsx) */
 .admin-studio { position: fixed; inset: 0; z-index: 100; height: 100dvh; background: #101112; }
 .admin-studio-loading { display: grid; place-items: center; height: 100%; margin: 0; font-family: var(--ogcw-ui); font-size: 14px; color: #c9c9c9; }
+/* ------------------------------------------------------------------
+   Sign in (src/routes/login.tsx): the reader's form beside the team's
+   GitHub door to the studio, both as the site's cards.
+   ------------------------------------------------------------------ */
+.auth { padding-block: clamp(40px, 7vw, 96px); }
+.auth-grid { display: grid; gap: 20px; max-width: 980px; margin-inline: auto; }
+@media (min-width: 860px) { .auth-grid { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; } }
+.auth-card { display: grid; gap: 14px; padding: clamp(24px, 3.5vw, 40px); border: 1px solid var(--ogcw-border); border-radius: 14px; background: var(--ogcw-surface); box-shadow: var(--ogcw-shadow); }
+.auth-title { font-family: var(--ogcw-display); font-size: clamp(30px, 3vw, 40px); font-weight: 400; line-height: 1.1; letter-spacing: -.005em; }
+.auth-title-sm { font-size: clamp(26px, 2.4vw, 32px); }
+.auth-copy { font-family: var(--ogcw-serif); font-size: 16.5px; line-height: 1.5; color: var(--ogcw-text-2); }
+.auth-copy strong { font-weight: 600; color: var(--ogcw-text); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 6px; padding: 4px; border: 1px solid var(--ogcw-border); border-radius: 999px; }
+.auth-tabs button { min-height: 38px; border-radius: 999px; font-family: var(--ogcw-ui); font-size: 13px; font-weight: 600; color: var(--ogcw-text-2); cursor: pointer; transition: background-color .2s ease, color .2s ease; }
+.auth-tabs button[aria-pressed="true"] { background: var(--ogcw-text); color: var(--ogcw-bg); }
+.auth-tabs button:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
+.auth-form { display: grid; gap: 14px; margin-top: 4px; }
+.auth-field { display: grid; gap: 6px; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--ogcw-text-2); }
+.auth-field input { width: 100%; min-height: 46px; padding: 0 14px; border: 1px solid var(--ogcw-border); border-radius: 10px; background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui); font-size: 15px; font-weight: 400; letter-spacing: 0; transition: border-color .2s ease; }
+.auth-field input:focus { border-color: var(--ogcw-accent); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--ogcw-accent) 22%, transparent); }
+.auth-password { position: relative; display: block; }
+.auth-password input { padding-right: 46px; }
+.auth-reveal { position: absolute; top: 50%; right: 6px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 8px; color: var(--ogcw-text-2); transform: translateY(-50%); cursor: pointer; }
+.auth-reveal:hover, .auth-reveal:focus-visible { color: var(--ogcw-text); outline: none; }
+.auth-hint { font-weight: 500; letter-spacing: 0; }
+.auth-error { padding: 10px 12px; border: 1px solid color-mix(in srgb, #e5484d 55%, var(--ogcw-border)); border-radius: 10px; background: color-mix(in srgb, #e5484d 12%, transparent); font-family: var(--ogcw-ui); font-size: 13.5px; line-height: 1.4; color: var(--ogcw-text); }
+.auth-submit, .auth-github, .auth-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px;
+  font-family: var(--ogcw-ui); font-size: 14px; font-weight: 700; cursor: pointer; transition: gap .25s ease, background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.auth-submit { background: var(--ogcw-accent); color: var(--ogcw-bg); }
+.auth-submit:hover, .auth-submit:focus-visible { gap: 12px; background: var(--ogcw-text); outline: none; }
+.auth-submit:disabled { cursor: progress; opacity: .7; }
+.auth-secondary { border: 1px solid var(--ogcw-border); color: var(--ogcw-text); }
+.auth-secondary:hover, .auth-secondary:focus-visible { border-color: var(--ogcw-text); outline: none; }
+.auth-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.auth-switch { font-family: var(--ogcw-ui); font-size: 13.5px; color: var(--ogcw-text-2); }
+.auth-switch button { font-weight: 700; color: var(--ogcw-text); text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; cursor: pointer; }
+.auth-github { justify-self: start; margin-top: 6px; background: #24292f; color: #fff; }
+.auth-github:hover, .auth-github:focus-visible { background: #000; gap: 12px; outline: none; }
+.auth-github:focus-visible { box-shadow: 0 0 0 3px var(--ogcw-surface), 0 0 0 5px var(--ogcw-accent); }
+
+/* The account button and its menu (src/components/account-button.tsx) */
+.account { position: relative; }
+.account-initial { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: var(--ogcw-accent); color: var(--ogcw-bg); font-family: var(--ogcw-ui); font-size: 13px; font-weight: 700; }
+.account-menu { position: absolute; top: calc(100% + 10px); right: 0; z-index: 60; display: grid; gap: 2px; width: 240px; padding: 10px; border: 1px solid var(--ogcw-border); border-radius: 12px; background: var(--ogcw-bg); box-shadow: var(--ogcw-shadow-lift); }
+.account-name { padding: 4px 8px 0; font-family: var(--ogcw-ui); font-size: 14px; font-weight: 700; color: var(--ogcw-text); }
+.account-email { padding: 0 8px 8px; border-bottom: 1px solid var(--ogcw-border); margin-bottom: 4px; font-family: var(--ogcw-ui); font-size: 12.5px; color: var(--ogcw-text-2); overflow-wrap: anywhere; }
+.account-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 38px; padding: 0 8px; border-radius: 8px; font-family: var(--ogcw-ui); font-size: 13.5px; font-weight: 600; color: var(--ogcw-text); text-align: left; cursor: pointer; }
+.account-item:hover, .account-item:focus-visible { background: var(--ogcw-surface); outline: none; }

@@ -14,6 +14,13 @@ export default defineConfig({
   projectId: SANITY_PROJECT_ID,
   dataset: SANITY_DATASET,
   basePath: "/admin",
+  // Admins sign in with GitHub only (the project's members: the owner's
+  // GitHub account), and go straight to GitHub without a choice screen
+  auth: {
+    redirectOnSingle: true,
+    mode: "replace",
+    providers: [{ name: "github", title: "GitHub", url: "https://api.sanity.io/v1/auth/login/github" }],
+  },
   plugins: [structureTool(), visionTool({ defaultApiVersion: SANITY_API_VERSION })],
   schema: { types: schemaTypes },
 });

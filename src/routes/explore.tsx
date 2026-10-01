@@ -4,7 +4,8 @@ import { useState } from "react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { ExploreMix } from "../components/explore-mix";
 import { HitLink, hitLabel, hitSub, hitTitle, Img, StoryRow } from "../components/cards";
-import { READING_LISTS, searchSite } from "../data/content";
+import { searchSite } from "../data/content";
+import { useStories } from "../lib/stories";
 
 // Explore hub: search across everything, the Explore mix, curated reading
 // lists and a directory of every section.
@@ -33,7 +34,8 @@ const DIRECTORY = [
 
 function ExplorePage() {
   const [query, setQuery] = useState("");
-  const hits = searchSite(query);
+  const stories = useStories();
+  const hits = searchSite(query, stories.all);
 
   return (
     <SiteShell>
@@ -70,7 +72,7 @@ function ExplorePage() {
             <h2 id="reading-lists" className="og-section-title">Reading lists</h2>
           </div>
           <div className="og-lists">
-            {READING_LISTS.map((list, index) => (
+            {stories.readingLists.map((list, index) => (
               <article key={list.id} className="og-list">
                 <Img photo={list.cover ?? list.items[0]!.photo} className="og-list-cover" />
                 <p className="og-kicker">Reading list {String(index + 1).padStart(2, "0")} · {list.items.length} stories</p>

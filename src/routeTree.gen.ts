@@ -15,6 +15,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CultureRouteImport } from './routes/culture'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as GamesRouteImport } from './routes/games'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
@@ -56,6 +57,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MusicRoute = MusicRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
   '/games': typeof GamesRoute
+  '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
   '/games': typeof GamesRoute
+  '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
   '/games': typeof GamesRoute
+  '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/culture'
     | '/explore'
     | '/games'
+    | '/login'
     | '/music'
     | '/streaming'
     | '/trends'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/culture'
     | '/explore'
     | '/games'
+    | '/login'
     | '/music'
     | '/streaming'
     | '/trends'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/culture'
     | '/explore'
     | '/games'
+    | '/login'
     | '/music'
     | '/streaming'
     | '/trends'
@@ -250,6 +262,7 @@ export interface RootRouteChildren {
   CultureRoute: typeof CultureRoute
   ExploreRoute: typeof ExploreRoute
   GamesRoute: typeof GamesRoute
+  LoginRoute: typeof LoginRoute
   MusicRoute: typeof MusicRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/games'
       fullPath: '/games'
       preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/music': {
@@ -402,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   CultureRoute: CultureRoute,
   ExploreRoute: ExploreRoute,
   GamesRoute: GamesRoute,
+  LoginRoute: LoginRoute,
   MusicRoute: MusicRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,

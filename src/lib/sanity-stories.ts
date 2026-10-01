@@ -5,21 +5,22 @@ import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/
 
 // Stories from the Sanity studio (/admin), turned into the same shape as
 // the stories in src/data/content.ts so every page shows them the same way.
-// Published stories only, read from Sanity's CDN on the server. If Sanity
-// can't be reached, the site carries on with the stories in the code.
+// Published stories only, read on the server straight from Sanity's API
+// (not its cache), so a publish in the studio is on the site at once. If
+// Sanity can't be reached, the site carries on with the stories in the code.
 
 const client = createClient({
   projectId: SANITY_PROJECT_ID,
   dataset: SANITY_DATASET,
   apiVersion: SANITY_API_VERSION,
-  useCdn: true,
+  useCdn: false,
   perspective: "published",
 });
 
 const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, author, date, ask, photo, body, sources`;
 
 type SanityImage = { asset?: { _ref?: string }; hotspot?: { x?: number; y?: number } };
-type SanityPhoto = { image?: SanityImage; url?: string; alt?: string; credit?: string };
+type SanityPhoto = { image?: SanityImage; url?: string; alt?: string; credit?: string; position?: string; zoom?: number };
 type SanitySpan = { _type: string; text?: string };
 type SanityBlock = { _type: string; style?: string; listItem?: string; children?: SanitySpan[]; [key: string]: unknown };
 type SanityStory = {
@@ -40,12 +41,17 @@ function imageUrl(image: SanityImage | undefined, width: number) {
 function toPhoto(photo: SanityPhoto | undefined, width = 1600): Photo | undefined {
   const src = imageUrl(photo?.image, width) ?? photo?.url;
   if (!src) return undefined;
+  // The focus point: the one typed in, else the hotspot of an uploaded photo
   const hotspot = photo?.image?.hotspot;
+  const pos = photo?.position && /^\d{1,3}% \d{1,3}%$/.test(photo.position)
+    ? photo.position
+    : hotspot?.x !== undefined && hotspot.y !== undefined ? `${Math.round(hotspot.x * 100)}% ${Math.round(hotspot.y * 100)}%` : undefined;
+  const zoom = typeof photo?.zoom === "number" && photo.zoom > 1 ? photo.zoom : undefined;
   return {
     src,
     alt: photo?.alt ?? "",
     ...(photo?.credit ? { credit: photo.credit } : {}),
-    ...(hotspot?.x !== undefined && hotspot.y !== undefined ? { crop: { pos: `${Math.round(hotspot.x * 100)}% ${Math.round(hotspot.y * 100)}%` } } : {}),
+    ...(pos ? { crop: zoom ? { pos, zoom } : { pos } } : {}),
   };
 }
 
@@ -125,37 +131,53 @@ function toArticle(doc: SanityStory): Article | null {
   };
 }
 
-/** Every published story in Sanity, newest first ([] if Sanity can't be reached) */
-export const getSanityStories = createServerFn({ method: "GET" }).handler(async (): Promise<Article[]> => {
+// The site keeps the list for a few seconds so busy pages don't ask Sanity
+// on every request; an edit in the studio shows up within that time.
+const LIST_TTL_MS = 10_000;
+let cached: { at: number; stories: Article[] } | null = null;
+
+// Same date: keep the order the stories have in the code, new ones first
+const CODE_ORDER = new Map(ARTICLES.map((story, index) => [story.slug, index]));
+const byDate = (a: Article, b: Article) => b.date.localeCompare(a.date) || (CODE_ORDER.get(a.slug) ?? -1) - (CODE_ORDER.get(b.slug) ?? -1);
+
+/**
+ * Every published story in Sanity, newest first, without the full text (pages
+ * only need the headline, photo and so on; a story page loads its own text).
+ * [] if Sanity can't be reached, so the site falls back to the stories in the code.
+ */
+export const getStorySummaries = createServerFn({ method: "GET" }).handler(async (): Promise<Article[]> => {
+  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.stories;
   try {
-    const docs = await client.fetch<SanityStory[]>(`*[_type == "story" && defined(slug.current)] | order(date desc) { ${STORY_FIELDS} }`);
-    return docs.map(toArticle).filter((story): story is Article => story !== null);
+    const docs = await client.fetch<SanityStory[]>(`*[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} }`);
+    const stories = docs
+      .map(toArticle)
+      .filter((story): story is Article => story !== null)
+      .sort(byDate)
+      .map((story) => ({ ...story, body: [] }));
+    cached = { at: Date.now(), stories };
+    return stories;
   } catch (error) {
     console.error("Sanity stories didn't load", error);
-    return [];
+    return cached?.stories ?? [];
   }
 });
 
-/** One published story from Sanity by its web address, or null */
+/**
+ * One published story from Sanity by its web address. `reachable: false`
+ * means Sanity couldn't be asked (fall back to the code); reachable with no
+ * story means it doesn't exist (or was removed in the studio).
+ */
 export const getSanityStory = createServerFn({ method: "GET" })
   .validator((slug: unknown) => {
     if (typeof slug !== "string" || !/^[a-z0-9-]{1,120}$/.test(slug)) throw new Error("Not a story address");
     return slug;
   })
-  .handler(async ({ data }): Promise<Article | null> => {
+  .handler(async ({ data }): Promise<{ reachable: boolean; story: Article | null }> => {
     try {
       const doc = await client.fetch<SanityStory | null>(`*[_type == "story" && slug.current == $slug][0] { ${STORY_FIELDS} }`, { slug: data });
-      return doc ? toArticle(doc) : null;
+      return { reachable: true, story: doc ? toArticle(doc) : null };
     } catch (error) {
       console.error("Sanity story didn't load", error);
-      return null;
+      return { reachable: false, story: null };
     }
   });
-
-/** The site's stories with Sanity's merged in (Sanity wins on a shared web address), newest first */
-export function mergeStories(fromSanity: Article[]): Article[] {
-  if (!fromSanity.length) return ARTICLES;
-  const bySlug = new Map(ARTICLES.map((story) => [story.slug, story]));
-  for (const story of fromSanity) bySlug.set(story.slug, story);
-  return [...bySlug.values()].sort((a, b) => b.date.localeCompare(a.date));
-}

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { Img, SECTION_PATH, StoryCard, StoryRow } from "../components/cards";
 import { ArticleFeedback } from "../components/article-feedback";
-import { ARTICLES, formatDate, getArticle, LISTS, SECTIONS, type Article, type Block } from "../data/content";
+import { formatDate, getArticle, SECTIONS, type Article, type Block } from "../data/content";
 import { getSanityStory } from "../lib/sanity-stories";
+import { useStories } from "../lib/stories";
 
 // A single story, text first: headline, summary and byline beside a
 // modest lead photo, then the story in a reading column with subheads, pull
@@ -13,11 +14,12 @@ import { getSanityStory } from "../lib/sanity-stories";
 // and questions and answers. At the end, a yes/no question for readers, the
 // sources, and more news. "In this story" and "Most read" sit in the rail.
 // A thin yellow line tracks reading progress.
-// The story comes from the Sanity studio (/admin) when it's there, otherwise
-// from the stories in the code.
+// The story comes live from the Sanity studio (/admin); only when Sanity
+// can't be reached does the copy in the code stand in.
 export const Route = createFileRoute("/news/$slug")({
   loader: async ({ params }) => {
-    const story = (await getSanityStory({ data: params.slug }).catch(() => null)) ?? getArticle(params.slug);
+    const live = await getSanityStory({ data: params.slug }).catch(() => ({ reachable: false, story: null }));
+    const story = live.reachable ? live.story : getArticle(params.slug) ?? null;
     if (!story) throw notFound();
     return { story };
   },
@@ -141,11 +143,12 @@ function SectionLink({ story }: { story: Article }) {
 
 function ArticlePage() {
   const { story } = Route.useLoaderData();
+  const stories = useStories();
   const firstParagraph = story.body.findIndex((b) => b.type === "p");
   const contents = story.body.flatMap((b) => (b.type === "h2" ? [b.text] : []));
-  const others = ARTICLES.filter((a) => a.slug !== story.slug);
+  const others = stories.all.filter((a) => a.slug !== story.slug);
   const more = [...others.filter((a) => a.section === story.section), ...others.filter((a) => a.section !== story.section)].slice(0, 4);
-  const mostRead = LISTS.mostRead.filter((a) => a.slug !== story.slug).slice(0, 4);
+  const mostRead = stories.mostRead.filter((a) => a.slug !== story.slug).slice(0, 4);
 
   return (
     <SiteShell>

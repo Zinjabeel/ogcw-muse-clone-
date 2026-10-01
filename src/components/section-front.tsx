@@ -3,7 +3,8 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageIntro } from "./ogcw-layout";
 import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, WatchNext } from "./cards";
 import { ContentOfTheMonth } from "./content-of-the-month";
-import { articlesIn, EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
+import { EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
+import { useStories } from "@/lib/stories";
 
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
@@ -11,7 +12,8 @@ import { articlesIn, EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, t
 // songs to check out; Streaming carries Content of the month.
 
 export function SectionFront({ section }: { section: SectionId }) {
-  const stories = articlesIn(section);
+  const live = useStories();
+  const stories = live.inSection(section);
   const [lead, ...rest] = stories;
   const next = SECTION_IDS[(SECTION_IDS.indexOf(section) + 1) % SECTION_IDS.length]!;
   // Originals tied to this section’s stories first, then the newest others
@@ -105,7 +107,7 @@ export function SectionFront({ section }: { section: SectionId }) {
             </Link>
           </div>
           <ol className="og-aside-list og-next-list">
-            {articlesIn(next).slice(0, 3).map((story) => <li key={story.slug}><StoryRow story={story} /></li>)}
+            {live.inSection(next).slice(0, 3).map((story) => <li key={story.slug}><StoryRow story={story} /></li>)}
           </ol>
         </section>
       </main>

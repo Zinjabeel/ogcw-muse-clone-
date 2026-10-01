@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { Img, SectionHead, StoryCard } from "../components/cards";
-import { ARTICLES, formatDate } from "../data/content";
+import { formatDate } from "../data/content";
+import { useStories } from "../lib/stories";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -20,7 +21,6 @@ export const Route = createFileRoute("/blog")({
 
 // The journal: OGCW’s longest reads, longest first, then the essays in progress
 const minutes = (read: string) => Number.parseInt(read, 10) || 0;
-const [cover, ...longReads] = [...ARTICLES].sort((a, b) => minutes(b.read) - minutes(a.read)).slice(0, 4);
 
 const IN_THE_WORKS = [
   { kind: "Essay · Sound", title: "The value of a room that hasn’t been discovered yet", note: "On small stages, accidental communities and why cultural spaces need time before they need scale." },
@@ -29,6 +29,8 @@ const IN_THE_WORKS = [
 ];
 
 function Blog() {
+  const { all } = useStories();
+  const [cover, ...longReads] = [...all].sort((a, b) => minutes(b.read) - minutes(a.read)).slice(0, 4);
   if (!cover) return null;
   return (
     <SiteShell>

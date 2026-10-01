@@ -1,7 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, Search, X } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { ARTICLES, articlesIn, EPISODES, EVENTS, LISTS, SHOPS, type Article, type Episode, type Photo, type Shop, type UpcomingEvent } from "@/data/content";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { EPISODES, EVENTS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop, type UpcomingEvent } from "@/data/content";
+import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
 
@@ -17,21 +18,25 @@ type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | 
 type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
 type Section = { label: string; to: SectionPath; note: string; heading: string; tone: string; items: Item[] };
 
-const stories = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
-const longReads = [...ARTICLES].sort((a, b) => parseInt(b.read, 10) - parseInt(a.read, 10));
+const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
 
-const SECTIONS: Section[] = [
-  { label: "News", to: "/news", note: `${ARTICLES.length} stories`, heading: "Latest", tone: "#6f8499", items: stories(ARTICLES.slice(0, 4)) },
-  { label: "Music", to: "/music", note: `${articlesIn("music").length} stories`, heading: "Latest in Music", tone: "#6e3320", items: stories(articlesIn("music").slice(0, 4)) },
-  { label: "Games", to: "/games", note: `${articlesIn("games").length} stories`, heading: "Latest in Games", tone: "#4f7f96", items: stories(articlesIn("games").slice(0, 4)) },
-  { label: "Streaming", to: "/streaming", note: `${articlesIn("streaming").length} stories`, heading: "Latest in Streaming", tone: "#5a4a8a", items: stories(articlesIn("streaming").slice(0, 4)) },
-  { label: "Culture", to: "/culture", note: `${articlesIn("culture").length} stories`, heading: "Latest in Culture", tone: "#6b3a3a", items: stories(articlesIn("culture").slice(0, 4)) },
-  { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", tone: "#7b6f5a", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
-  { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", tone: "#a91728", items: SHOPS.slice(0, 4).map((s) => ({ kind: "shop", s })) },
-  { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", tone: "#3f6b5a", items: stories(LISTS.trending.slice(0, 4)) },
-  { label: "Blog", to: "/blog", note: "Long reads", heading: "The longest reads", tone: "#7a5a3c", items: stories(longReads.slice(0, 4)) },
-  { label: "About", to: "/about", note: "Who we are", heading: "Editors’ picks", tone: "#8c5e4a", items: stories(LISTS.editorsPicks.slice(0, 4)) },
-];
+// The menu's lines, with the live stories from the studio
+function buildSections(stories: Stories): Section[] {
+  const longReads = [...stories.all].sort((a, b) => parseInt(b.read, 10) - parseInt(a.read, 10));
+  const section = (id: SectionId) => stories.inSection(id);
+  return [
+    { label: "News", to: "/news", note: `${stories.all.length} stories`, heading: "Latest", tone: "#6f8499", items: asItems(stories.all.slice(0, 4)) },
+    { label: "Music", to: "/music", note: `${section("music").length} stories`, heading: "Latest in Music", tone: "#6e3320", items: asItems(section("music").slice(0, 4)) },
+    { label: "Games", to: "/games", note: `${section("games").length} stories`, heading: "Latest in Games", tone: "#4f7f96", items: asItems(section("games").slice(0, 4)) },
+    { label: "Streaming", to: "/streaming", note: `${section("streaming").length} stories`, heading: "Latest in Streaming", tone: "#5a4a8a", items: asItems(section("streaming").slice(0, 4)) },
+    { label: "Culture", to: "/culture", note: `${section("culture").length} stories`, heading: "Latest in Culture", tone: "#6b3a3a", items: asItems(section("culture").slice(0, 4)) },
+    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", tone: "#7b6f5a", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
+    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", tone: "#a91728", items: SHOPS.slice(0, 4).map((s) => ({ kind: "shop", s })) },
+    { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", tone: "#3f6b5a", items: asItems(stories.trending.slice(0, 4)) },
+    { label: "Blog", to: "/blog", note: "Long reads", heading: "The longest reads", tone: "#7a5a3c", items: asItems(longReads.slice(0, 4)) },
+    { label: "About", to: "/about", note: "Who we are", heading: "Editors’ picks", tone: "#8c5e4a", items: asItems(stories.editorsPicks.slice(0, 4)) },
+  ];
+}
 
 const PAGES = [
   { label: "About", to: "/about" },
@@ -95,6 +100,8 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const [closing, setClosing] = useState(false);
   const [preview, setPreview] = useState(0);
   const [today, setToday] = useState<{ iso: string; label: string } | null>(null);
+  const stories = useStories();
+  const SECTIONS = useMemo(() => buildSections(stories), [stories]);
   // The line for the page you’re on is marked, and previewed first
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const currentIndex = SECTIONS.findIndex((s) => pathname === s.to || pathname.startsWith(`${s.to}/`));

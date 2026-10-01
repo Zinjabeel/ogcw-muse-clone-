@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { article, ARTICLES, SECTIONS } from "@/data/content";
+import { SECTIONS } from "@/data/content";
+import { useStories } from "@/lib/stories";
 import { BsPhoto, ReadTime, shortDate } from "./broadsheet";
 
 // This week: fifteen of the latest stories as a second broadsheet block
@@ -10,23 +11,33 @@ import { BsPhoto, ReadTime, shortDate } from "./broadsheet";
 // In brief column of five short items, numbered; then a connected row of
 // three stories on AI and music, read in order.
 
-const LEAD = article("saint-laurent-ss27-vaccarello");
-const THREAD = ["dior-ss27-jonathan-anderson", "courreges-drew-henry-debut", "milan-fashion-week-ss27-review"].map(article);
-const MIDDLE = article("lcd-soundsystem-nyc-residency-100th-show");
-const MIDDLE_LINKED = article("al-doyle-hollywood-saviour");
-const SECOND = article("latin-grammys-2026-nominations");
-const BRIEF = ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"].map(article);
-const AI_MUSIC = ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch"].map(article);
+// The stories in each spot, by web address (shown live from the studio)
+const LEAD_SLUG = "saint-laurent-ss27-vaccarello";
+const THREAD_SLUGS = ["dior-ss27-jonathan-anderson", "courreges-drew-henry-debut", "milan-fashion-week-ss27-review"];
+const MIDDLE_SLUG = "lcd-soundsystem-nyc-residency-100th-show";
+const MIDDLE_LINKED_SLUG = "al-doyle-hollywood-saviour";
+const SECOND_SLUG = "latin-grammys-2026-nominations";
+const BRIEF_SLUGS = ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"];
+const AI_MUSIC_SLUGS = ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch"];
 
 /** The stories this block shows, so the More news row can leave them out */
-export const WEEK_SLUGS = new Set([LEAD, ...THREAD, MIDDLE, MIDDLE_LINKED, SECOND, ...BRIEF, ...AI_MUSIC].map((story) => story.slug));
+export const WEEK_SLUGS = new Set([LEAD_SLUG, ...THREAD_SLUGS, MIDDLE_SLUG, MIDDLE_LINKED_SLUG, SECOND_SLUG, ...BRIEF_SLUGS, ...AI_MUSIC_SLUGS]);
 
 export function NewsWeek() {
+  const stories = useStories();
+  const LEAD = stories.pick(LEAD_SLUG);
+  const THREAD = THREAD_SLUGS.map(stories.pick);
+  const MIDDLE = stories.pick(MIDDLE_SLUG);
+  const MIDDLE_LINKED = stories.pick(MIDDLE_LINKED_SLUG);
+  const SECOND = stories.pick(SECOND_SLUG);
+  const BRIEF = BRIEF_SLUGS.map(stories.pick);
+  const AI_MUSIC = AI_MUSIC_SLUGS.map(stories.pick);
+
   return (
     <section className="bs-week" aria-labelledby="week-title">
       <div className="bs-section-head">
         <h3 id="week-title" className="bs-eyebrow">This week</h3>
-        <Link to="/news" className="bs-more">All {ARTICLES.length} stories</Link>
+        <Link to="/news" className="bs-more">All {stories.all.length} stories</Link>
       </div>
 
       <div className="bs-week-grid">

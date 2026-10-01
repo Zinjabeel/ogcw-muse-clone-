@@ -13,6 +13,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { themeInitScript } from "../components/theme-switcher";
 import { heroInitScript } from "../components/hero-switcher";
 import { NotFoundPage } from "../components/not-found";
+import { getStorySummaries } from "../lib/sanity-stories";
+import { StoriesProvider } from "../lib/stories";
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -76,6 +78,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
+  // Every story, live from the Sanity studio (/admin), for every page.
+  // Reloaded in the background after 15 seconds when you move around.
+  loader: async () => ({ stories: await getStorySummaries().catch(() => []) }),
+  staleTime: 15_000,
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundPage,
@@ -101,11 +107,14 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { stories } = Route.useLoaderData();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <StoriesProvider stories={stories}>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </StoriesProvider>
     </QueryClientProvider>
   );
 }

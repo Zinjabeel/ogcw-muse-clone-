@@ -3,7 +3,8 @@ import { ArrowLeft, Bell, Play } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { EpisodeCard, Poster, StoryRow } from "../components/cards";
-import { EPISODES, getArticle, getEpisode, type Episode } from "../data/content";
+import { EPISODES, getEpisode, type Episode } from "../data/content";
+import { useStories } from "../lib/stories";
 
 // One OGCW Originals episode: the player, then the episode text, chapters and
 // credits, related stories, and "Latest episodes" to keep watching.
@@ -53,10 +54,11 @@ function Player({ episode }: { episode: Episode }) {
 
 function EpisodePage() {
   const { slug } = Route.useParams();
+  const stories = useStories();
   const episode = getEpisode(slug);
   if (!episode) return null;
   const more = EPISODES.filter((e) => e.slug !== episode.slug);
-  const related = episode.related.map(getArticle).filter((a) => a !== undefined);
+  const related = episode.related.map(stories.get).filter((a) => a !== undefined);
 
   return (
     <SiteShell>
