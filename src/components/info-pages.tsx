@@ -104,6 +104,12 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
   ["Kylian Mbappé at Real Madrid", "SdHb", "CC BY-SA 4.0", "Kylian_Mbappe_at_Real_Madrid's_game_versus_Juventus_Turin_on_22_October_2025.jpeg"],
   ["An André Courrèges ensemble, 1965", "Jacqueline Barrière Courrèges", "CC BY-SA 4.0", "Ensemble15,_André_Courrèges,_1965.jpg"],
   ["The Palais de Tokyo, Paris", "Strobilomyces", "CC BY-SA 3.0", "Palais_de_Tokyo_20030101w.JPG"],
+  ["Niketown, Oxford Circus, London", "hyku", "CC BY-SA 2.0", "Niketown_-_Oxford_Circus_-_London_2009-04-19,_UK_09.jpg"],
+  ["A Nike store in downtown Portland", "Steve Morgan", "CC BY-SA 4.0", "Nike_store_in_downtown_Portland_(2018).jpg"],
+  ["Nike House of Innovation, New York", "Ajay Suresh", "CC BY 2.0", "Nike_House_of_Innovation_(48155638687).jpg"],
+  ["An Adidas store in Jakarta", "RasyaAbhirama13", "CC BY-SA 4.0", "Adidas_Store_in_Grand_Indonesia,_Jakarta.jpg"],
+  ["A Uniqlo store in Shenzhen", "Dinkun Chen", "CC BY-SA 4.0", "A_UNIQLO_STORE_IN_IN_COCO_PARK,_SHENZHEN.jpg"],
+  ["A Uniqlo store at Tokyo Station", "Nick-D", "CC BY-SA 4.0", "Small_Uniqlo_store_in_Tokyo_Station_November_2023.jpg"],
 ];
 
 // Every item OGCW keeps in the browser, for the Cookie Policy
@@ -540,7 +546,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             </li>
           ))}
         </ul>
-        <p>Video thumbnails (streamers, music videos, and trailers and showcases from Capcom, PlayStation, Xbox, Nintendo, Netflix, Ketchup Entertainment, CD Projekt Red, Mojang and the ONE PIECE channel) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify.</p>
+        <p>Video thumbnails (streamers, music videos, and trailers and showcases from Capcom, PlayStation, Xbox, Nintendo, Netflix, Ketchup Entertainment, CD Projekt Red, Mojang and the ONE PIECE channel) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify. The Nike, Adidas, StockX and Uniqlo logos are their owners’ trademarks, shown to link to their shops (logo files via Wikimedia Commons).</p>
         <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>

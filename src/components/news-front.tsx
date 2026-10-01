@@ -9,7 +9,7 @@ import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, ReadTime, StoryCard } from "./broadsheet";
 import { NewsWeek, WEEK_SLUGS } from "./news-week";
-import { ShopTicket } from "./shop-ticket";
+import { ShopPromo } from "./shop-promo";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -17,7 +17,7 @@ import { ShopTicket } from "./shop-ticket";
 // Six headline stories (three down the left side, the lead, two on the
 // right) beside the Upcoming events rail, then This week (fifteen more of
 // the latest stories: a lead, connected stories and In brief), the More
-// news carousel, Content of the month, the shop as one ticket into /shop,
+// news carousel, Content of the month, the shop as one card into /shop,
 // and the Explore mix running on into Keep exploring (more stories and the
 // rap desk vote).
 
@@ -270,9 +270,9 @@ export function NewsFront() {
 
         <hr className="bs-rule bs-band bs-band-90" />
 
-        {/* The shop as one ticket: the full shop is on /shop */}
+        {/* The shop as one card: the full shop is on /shop */}
         <div className="bs-band bs-band-90">
-          <ShopTicket />
+          <ShopPromo />
         </div>
 
         <hr className="bs-rule" />
