@@ -332,11 +332,11 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>Colours</h2>
         <ul className="info-swatches">
           {[
-            ["#0D0D0D", "Background"],
-            ["#1A1A1A", "Surface and cards"],
-            ["#292929", "Borders"],
+            ["#303030", "Background"],
+            ["#3A3A3A", "Surface and cards"],
+            ["#4A4A4A", "Borders"],
             ["#E4E1DA", "Primary text"],
-            ["#A3A3A3", "Secondary text"],
+            ["#B5B2AB", "Secondary text"],
             ["#FFE600", "OGCW yellow (accents only)"],
           ].map(([hex, name]) => (
             <li key={hex}><span style={{ background: hex }} aria-hidden="true" /><strong>{hex}</strong> {name}</li>

@@ -167,13 +167,16 @@
    "Night" is the default below; "Gold" and "Navy" swap the six tokens via
    <html data-theme="...">. --ogcw-glow is the hover glow colour.
    ------------------------------------------------------------------ */
+/* Night: a soft charcoal (#303030, the owner's pick, 1 Oct 2026: "less
+   black") with yellow. Cards, rules and the grey text step up from it so
+   everything still separates and reads (grey text 6:1 on the page). */
 :root {
-  --ogcw-bg: #0d0d0d;
+  --ogcw-bg: #303030;
   --ogcw-accent: #ffe600;
-  --ogcw-surface: #1a1a1a;
+  --ogcw-surface: #3a3a3a;
   --ogcw-text: #e4e1da;
-  --ogcw-text-2: #a3a3a3;
-  --ogcw-border: #292929;
+  --ogcw-text-2: #b5b2ab;
+  --ogcw-border: #4a4a4a;
   --ogcw-glow: #e4e1da;
   --ogcw-serif: "Source Serif 4", Georgia, serif;
   --ogcw-display: var(--ogcw-serif);
@@ -231,11 +234,13 @@
    holds still for reduced motion. --ogcw-shadow gives cards a soft lift
    in the light themes (none in the dark ones, where rules do that job).
    ------------------------------------------------------------------ */
+/* Night: the charcoal stays still (no moving dark pool), and the yellow
+   light is the Gold theme's own, the same colour and strength */
 :root {
   --amb-base: var(--ogcw-bg);
-  --amb-1: rgb(255 230 0 / .06);
-  --amb-2: rgb(110 130 255 / .06);
-  --amb-3: rgb(255 255 255 / .035);
+  --amb-1: rgb(190 150 60 / .08);
+  --amb-2: transparent;
+  --amb-3: rgb(0 0 0 / .02);
   --ogcw-shadow: none;
   --ogcw-shadow-lift: 0 22px 44px -26px rgb(0 0 0 / .85);
 }
