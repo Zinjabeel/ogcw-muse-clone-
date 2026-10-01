@@ -18,6 +18,7 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as AdminSplatRouteImport } from './routes/admin.$'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
@@ -72,6 +73,11 @@ const TrendsRoute = TrendsRouteImport.update({
   path: '/trends',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSplatRoute = AdminSplatRouteImport.update({
+  id: '/admin/$',
+  path: '/admin/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InfoSlugRoute = InfoSlugRouteImport.update({
   id: '/info/$slug',
   path: '/info/$slug',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/music': typeof MusicRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/streaming'
     | '/trends'
+    | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/streaming'
     | '/trends'
+    | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/streaming'
     | '/trends'
+    | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   MusicRoute: typeof MusicRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
+  AdminSplatRoute: typeof AdminSplatRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
   OriginalsSlugRoute: typeof OriginalsSlugRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrendsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/$': {
+      id: '/admin/$'
+      path: '/admin/$'
+      fullPath: '/admin/$'
+      preLoaderRoute: typeof AdminSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/info/$slug': {
       id: '/info/$slug'
       path: '/info/$slug'
@@ -385,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   MusicRoute: MusicRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,
+  AdminSplatRoute: AdminSplatRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,
   OriginalsSlugRoute: OriginalsSlugRoute,

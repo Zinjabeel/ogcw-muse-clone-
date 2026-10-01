@@ -5,6 +5,7 @@ import { SiteShell } from "../components/ogcw-layout";
 import { Img, SECTION_PATH, StoryCard, StoryRow } from "../components/cards";
 import { ArticleFeedback } from "../components/article-feedback";
 import { ARTICLES, formatDate, getArticle, LISTS, SECTIONS, type Article, type Block } from "../data/content";
+import { getSanityStory } from "../lib/sanity-stories";
 
 // A single story, text first: headline, summary and byline beside a
 // modest lead photo, then the story in a reading column with subheads, pull
@@ -12,12 +13,16 @@ import { ARTICLES, formatDate, getArticle, LISTS, SECTIONS, type Article, type B
 // and questions and answers. At the end, a yes/no question for readers, the
 // sources, and more news. "In this story" and "Most read" sit in the rail.
 // A thin yellow line tracks reading progress.
+// The story comes from the Sanity studio (/admin) when it's there, otherwise
+// from the stories in the code.
 export const Route = createFileRoute("/news/$slug")({
-  beforeLoad: ({ params }) => {
-    if (!getArticle(params.slug)) throw notFound();
+  loader: async ({ params }) => {
+    const story = (await getSanityStory({ data: params.slug }).catch(() => null)) ?? getArticle(params.slug);
+    if (!story) throw notFound();
+    return { story };
   },
-  head: ({ params }) => {
-    const story = getArticle(params.slug);
+  head: ({ loaderData }) => {
+    const story = loaderData?.story;
     const title = story ? `${story.title} — OGCW` : "OGCW";
     return {
       meta: [
@@ -135,9 +140,7 @@ function SectionLink({ story }: { story: Article }) {
 }
 
 function ArticlePage() {
-  const { slug } = Route.useParams();
-  const story = getArticle(slug);
-  if (!story) return null;
+  const { story } = Route.useLoaderData();
   const firstParagraph = story.body.findIndex((b) => b.type === "p");
   const contents = story.body.flatMap((b) => (b.type === "h2" ? [b.text] : []));
   const others = ARTICLES.filter((a) => a.slug !== story.slug);

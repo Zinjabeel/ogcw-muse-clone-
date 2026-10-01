@@ -1,0 +1,19 @@
+import { defineConfig } from "sanity";
+import { structureTool } from "sanity/structure";
+import { visionTool } from "@sanity/vision";
+import { schemaTypes } from "./schemas/story";
+import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "./env";
+
+// The Sanity Studio, embedded in the website at /admin (src/routes/admin.$.tsx).
+// Stories written here appear on the site next to the ones in
+// src/data/content.ts; a story here with the same web address as one in
+// the code replaces it.
+export default defineConfig({
+  name: "ogcw",
+  title: "OGCW",
+  projectId: SANITY_PROJECT_ID,
+  dataset: SANITY_DATASET,
+  basePath: "/admin",
+  plugins: [structureTool(), visionTool({ defaultApiVersion: SANITY_API_VERSION })],
+  schema: { types: schemaTypes },
+});

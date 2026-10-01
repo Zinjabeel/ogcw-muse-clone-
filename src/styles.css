@@ -2439,3 +2439,7 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .bs-reveal { animation: none; }
   .bs-photo img { transition: none; }
 }
+
+/* /admin: the Sanity studio, full screen over everything (src/routes/admin.$.tsx) */
+.admin-studio { position: fixed; inset: 0; z-index: 100; height: 100dvh; background: #101112; }
+.admin-studio-loading { display: grid; place-items: center; height: 100%; margin: 0; font-family: var(--ogcw-ui); font-size: 14px; color: #c9c9c9; }

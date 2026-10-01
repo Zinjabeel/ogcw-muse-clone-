@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { BsPhoto, ReadTime, shortDate } from "../components/broadsheet";
-import { ARTICLES, SECTION_IDS, SECTIONS, type SectionId } from "../data/content";
+import { SECTION_IDS, SECTIONS, type Article, type SectionId } from "../data/content";
+import { getSanityStories, mergeStories } from "../lib/sanity-stories";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
@@ -15,6 +16,8 @@ export const Route = createFileRoute("/news/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  // Stories written in the Sanity studio (/admin) join the ones in the code
+  loader: async () => ({ stories: mergeStories(await getSanityStories().catch(() => [])) }),
   component: News,
 });
 
@@ -28,11 +31,12 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All stories" },
   ...SECTION_IDS.map((id) => ({ id, label: SECTIONS[id].label })),
 ];
-const countFor = (filter: Filter) => (filter === "all" ? ARTICLES.length : ARTICLES.filter((a) => a.section === filter).length);
+const countFor = (all: Article[], filter: Filter) => (filter === "all" ? all.length : all.filter((a) => a.section === filter).length);
 
 function News() {
+  const { stories: all } = Route.useLoaderData();
   const [filter, setFilter] = useState<Filter>("all");
-  const stories = filter === "all" ? ARTICLES : ARTICLES.filter((a) => a.section === filter);
+  const stories = filter === "all" ? all : all.filter((a) => a.section === filter);
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
 
   return (
@@ -46,7 +50,7 @@ function News() {
             </p>
             <h1 className="bs-wordmark">OGCW News</h1>
             <p className="bs-flag bs-flag-right">
-              <span>{ARTICLES.length} stories</span>
+              <span>{all.length} stories</span>
               <span>Every source linked</span>
             </p>
           </header>
@@ -57,7 +61,7 @@ function News() {
                 <li key={f.id}>
                   <button type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
                     {f.label}
-                    <span className="bs-filter-count">{countFor(f.id)}</span>
+                    <span className="bs-filter-count">{countFor(all, f.id)}</span>
                   </button>
                 </li>
               ))}
