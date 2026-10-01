@@ -1,16 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { Img, StoryCard, StoryRow, WatchNext } from "../components/cards";
-import { ARTICLES, EPISODES, formatDate, LISTS, SECTION_IDS, SECTIONS, type SectionId } from "../data/content";
+import { SiteShell } from "../components/ogcw-layout";
+import { BsPhoto, ReadTime, shortDate } from "../components/broadsheet";
+import { ARTICLES, SECTION_IDS, SECTIONS, type SectionId } from "../data/content";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
     meta: [
       { title: "News — OGCW" },
-      { name: "description", content: "The latest stories from One Great Culture World: music, games, streaming and culture." },
+      { name: "description", content: "Every story from One Great Culture World: music, games, streaming and culture, newest first." },
       { property: "og:title", content: "News — OGCW" },
-      { property: "og:description", content: "The latest stories from One Great Culture World." },
+      { property: "og:description", content: "Every story from One Great Culture World, newest first." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,53 +18,77 @@ export const Route = createFileRoute("/news/")({
   component: News,
 });
 
+// The News page in the broadsheet look of the OGCW News front on the home
+// page: the same masthead and section bar, then every story, newest first,
+// as the same cards in one ruled grid (four across on wide screens, split
+// by hairlines). The section bar filters the grid.
+
 type Filter = "all" | SectionId;
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All stories" },
   ...SECTION_IDS.map((id) => ({ id, label: SECTIONS[id].label })),
 ];
+const countFor = (filter: Filter) => (filter === "all" ? ARTICLES.length : ARTICLES.filter((a) => a.section === filter).length);
 
 function News() {
   const [filter, setFilter] = useState<Filter>("all");
   const stories = filter === "all" ? ARTICLES : ARTICLES.filter((a) => a.section === filter);
-  const [lead, ...rest] = stories;
+  const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
 
   return (
     <SiteShell>
-      <PageIntro kicker="Latest dispatches" title="News" copy="Music, games, streaming and culture: the day’s biggest stories, reported and explained, with every source linked." />
-      <main className="page-wrap pb-24">
-        <div className="og-filters" role="group" aria-label="Filter stories">
-          {FILTERS.map((f) => (
-            <button key={f.id} type="button" className="og-chip" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
-              {f.label}
-              <span className="og-chip-count">{f.id === "all" ? ARTICLES.length : ARTICLES.filter((a) => a.section === f.id).length}</span>
-            </button>
-          ))}
-        </div>
+      <main className="broadsheet bs-newspage">
+        <div className="bs-wrap">
+          <header className="bs-masthead">
+            <p className="bs-flag">
+              <span suppressHydrationWarning>{today}</span>
+              <span>Updated daily</span>
+            </p>
+            <h1 className="bs-wordmark">OGCW News</h1>
+            <p className="bs-flag bs-flag-right">
+              <span>{ARTICLES.length} stories</span>
+              <span>Every source linked</span>
+            </p>
+          </header>
 
-        {lead && (
-          <div key={filter} className="og-news-top">
-            <Link to="/news/$slug" params={{ slug: lead.slug }} className="og-lead">
-              <Img photo={lead.photo} className="og-lead-photo" eager />
-              <span className="og-lead-text">
-                <span className="og-kicker">{lead.kicker}</span>
-                <span className="og-lead-title">{lead.title}</span>
-                <span className="og-lead-deck">{lead.deck}</span>
-                <span className="og-meta">By {lead.author} · {formatDate(lead.date)} · {lead.read}</span>
-              </span>
-            </Link>
-            <aside className="og-news-aside" aria-labelledby="news-most-read">
-              <p id="news-most-read" className="og-aside-title">Most read</p>
-              <ol className="og-aside-list">
-                {LISTS.mostRead.slice(0, 4).map((item, index) => <li key={item.slug}><StoryRow story={item} index={index} /></li>)}
-              </ol>
-              <WatchNext episode={EPISODES[0]!} />
-            </aside>
+          <nav className="bs-nav bs-filter" aria-label="Filter stories by section">
+            <ul>
+              {FILTERS.map((f) => (
+                <li key={f.id}>
+                  <button type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+                    {f.label}
+                    <span className="bs-filter-count">{countFor(f.id)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="bs-all-head">
+            <p className="bs-all-intro">{filter === "all" ? "Music, games, streaming and culture, reported in full, with every source linked." : SECTIONS[filter].intro}</p>
+            <p className="bs-all-count" aria-live="polite">{stories.length} {stories.length === 1 ? "story" : "stories"}, newest first</p>
           </div>
-        )}
 
-        <div key={`${filter}-grid`} className="og-grid-3 og-news-grid">
-          {rest.map((story) => <StoryCard key={story.slug} story={story} showDeck />)}
+          {/* The clip trims the hairlines that run past the outer columns */}
+          <div className="bs-all-clip">
+            <ol key={filter} className="bs-all">
+              {stories.map((story, index) => (
+                <li key={story.slug} className="bs-all-item">
+                  <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
+                    <BsPhoto photo={story.photo} className="bs-photo-more" eager={index < 4} />
+                    <p className="bs-eyebrow">{story.kicker}</p>
+                    <h2 className="bs-title">{story.title}</h2>
+                    <p className="bs-deck bs-deck-sm">{story.deck}</p>
+                    <p className="bs-all-meta">
+                      <span>{SECTIONS[story.section].label}</span>
+                      <time dateTime={story.date}>{shortDate(story.date)}</time>
+                      <ReadTime>{story.read}</ReadTime>
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </main>
     </SiteShell>

@@ -33,6 +33,28 @@ import jhenePhoto from "../assets/news/jhene-aiko.jpg";
 import kaiPhoto from "../assets/news/kai-cenat.jpg";
 import benziesPhoto from "../assets/news/leslie-benzies.jpg";
 import fortnitePhoto from "../assets/news/fortnite-gdc.jpg";
+import rosaliaPhoto from "../assets/news/rosalia-chile-2022.jpg";
+import headphonesPhoto from "../assets/news/studio-headphones.jpg";
+import studioPhoto from "../assets/news/recording-studio.jpg";
+import foleyPhoto from "../assets/news/foley-room.jpg";
+import lcdPhoto from "../assets/news/lcd-soundsystem-roskilde.jpg";
+import doylePhoto from "../assets/news/al-doyle.jpg";
+import stipePhoto from "../assets/news/michael-stipe-padova.jpg";
+import flamingLipsPhoto from "../assets/news/flaming-lips-2017.jpg";
+import leonPhoto from "../assets/news/leon-bridges.jpg";
+import switchPhoto from "../assets/news/switch-2-dock.jpg";
+import xboxPhoto from "../assets/news/xbox-series-x-s.jpg";
+import sudaPhoto from "../assets/news/goichi-suda.jpg";
+import warhammerPhoto from "../assets/news/warhammer-miniature.jpg";
+import kickPhoto from "../assets/news/kick-logo.jpg";
+import wwePhoto from "../assets/news/wwe-nxt-arena.jpg";
+import qtPhoto from "../assets/news/qtcinderella-twitchcon.jpg";
+import youtubeHqPhoto from "../assets/news/youtube-hq.jpg";
+import vaccarelloPhoto from "../assets/news/anthony-vaccarello.jpg";
+import tuileriesPhoto from "../assets/news/tuileries-bassin-octogonal.jpg";
+import galleriaPhoto from "../assets/news/galleria-milano.jpg";
+import courregesPhoto from "../assets/news/courreges-1965.jpg";
+import haskinsPhoto from "../assets/news/dennis-haskins.jpg";
 import { unsplash, youtubeThumb, youtubeUrl } from "./media";
 import { STORY_BODIES } from "./stories";
 
@@ -100,6 +122,439 @@ export const wordCount = (body: Block[]) => body.flatMap(blockWords).join(" ").s
 // one file per section, and its reading time is worked out from that text.
 
 const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
+  // ---- The last week of September 2026
+  {
+    slug: "october-2026-games",
+    section: "games",
+    kicker: "Release calendar",
+    title: "October’s biggest games: Gears, Call of Duty on Switch 2 and Phantom Blade Zero",
+    deck: "Ace Combat 8 opens the month, Gears of War goes back to E-Day and Modern Warfare 4 brings Call of Duty back to Nintendo.",
+    author: "Jonah Reyes",
+    date: "2026-10-01",
+    photo: { src: youtubeThumb("3ot6jdgtp4o"), alt: "A scene from the Call of Duty: Modern Warfare 4 trailer", credit: "Xbox, YouTube", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "Wikipedia: Gears of War: E-Day", url: "https://en.wikipedia.org/wiki/Gears_of_War:_E-Day" },
+      { name: "Wikipedia: Call of Duty: Modern Warfare 4", url: "https://en.wikipedia.org/wiki/Call_of_Duty:_Modern_Warfare_4" },
+      { name: "Wikipedia: Ace Combat 8: Wings of Theve", url: "https://en.wikipedia.org/wiki/Ace_Combat_8:_Wings_of_Theve" },
+      { name: "Wikipedia: Phantom Blade Zero", url: "https://en.wikipedia.org/wiki/Phantom_Blade_Zero" },
+      { name: "Gaming Amigos: October 2026 game launch calendar", url: "https://www.gamingamigos.com/post/october-2026-game-launch-calendar" },
+    ],
+  },
+  {
+    slug: "courreges-drew-henry-debut",
+    section: "culture",
+    kicker: "Paris Fashion Week",
+    title: "Drew Henry breaks Courrèges out of its white box",
+    deck: "The new designer’s first collection, at the Palais de Tokyo, loosened up the vinyl jackets and A-line dresses with colour, raw edges and punk spirit.",
+    author: "Sana Lind",
+    date: "2026-10-01",
+    photo: { src: courregesPhoto, alt: "A model in a white André Courrèges dress and striped top from 1965", credit: "Jacqueline Barrière Courrèges, CC BY-SA 4.0", crop: { pos: "50% 25%" } },
+    sources: [
+      { name: "Vogue via Yahoo: Courrèges spring 2027", url: "https://www.yahoo.com/entertainment/articles/courr-ges-spring-2027-space-194052871.html" },
+      { name: "AnOther: Drew Henry is breaking out at Courrèges", url: "https://www.anothermag.com/fashion-beauty/17530/courreges-drew-henry-spring-summer-2027-review-paris-fashion-week" },
+    ],
+  },
+  {
+    slug: "netflix-october-2026",
+    section: "culture",
+    kicker: "Streaming guide",
+    title: "New on Netflix in October: East of Eden, Lupin and The Diplomat",
+    deck: "Florence Pugh leads Steinbeck’s epic on 1 October, then come Ben Affleck, Chris Evans and the return of three favourites.",
+    author: "Nia Vale",
+    date: "2026-10-01",
+    photo: { src: youtubeThumb("nI17NM1UcJQ"), alt: "The opening scene of Netflix’s East of Eden", credit: "Netflix, YouTube", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "What’s on Netflix: everything coming in October 2026", url: "https://www.whats-on-netflix.com/coming-soon/whats-coming-to-netflix-in-october-2026/" },
+    ],
+  },
+  {
+    slug: "saint-laurent-ss27-vaccarello",
+    section: "culture",
+    kicker: "Paris Fashion Week",
+    title: "Saint Laurent goes gold for what may be Anthony Vaccarello’s last show",
+    deck: "Ten years after his first show, an all-gold collection at the Trocadéro, a song from Charlotte Gainsbourg and a standing ovation.",
+    author: "Sana Lind",
+    date: "2026-09-30",
+    photo: { src: vaccarelloPhoto, alt: "Anthony Vaccarello in a black suit, looking down and smiling", credit: "YanRB, CC BY-SA 4.0", crop: { pos: "50% 22%" } },
+    sources: [
+      { name: "Numéro: The golden age according to Anthony Vaccarello", url: "https://numero.com/en/fashion/fashion-week-en/saint-laurent-spring-summer-2027-show/" },
+      { name: "Stylerave: Saint Laurent spring/summer 2027", url: "https://www.stylerave.com/saint-laurent-spring-summer-2027/" },
+      { name: "W Magazine: At Saint Laurent spring 2027, Vaccarello claims his golden finish", url: "https://www.wmagazine.com/fashion/saint-laurent-spring-2027-anthony-vaccarello-runway-photos" },
+    ],
+  },
+  {
+    slug: "dior-ss27-jonathan-anderson",
+    section: "culture",
+    kicker: "Paris Fashion Week",
+    title: "At Dior, Jonathan Anderson puts a tree in a pond and lets the clothes unravel",
+    deck: "His second spring collection, shown in the Tuileries, was all sheer layers, raw hems and lightness.",
+    author: "Nia Vale",
+    date: "2026-09-30",
+    photo: { src: tuileriesPhoto, alt: "The octagonal pond in the Jardin des Tuileries with a fountain and green chairs", credit: "Chabe01, CC BY-SA 4.0", crop: { pos: "50% 55%" } },
+    sources: [
+      { name: "Coveteur: The lightness of being at Dior spring/summer 2027", url: "https://coveteur.com/dior-ss27-review" },
+      { name: "Whitewall: Dior spring/summer 2027", url: "https://whitewall.art/fashion/dior-jonathan-anderson-spring-summer-2027/" },
+    ],
+  },
+  {
+    slug: "lcd-soundsystem-nyc-residency-100th-show",
+    section: "music",
+    kicker: "Live",
+    title: "LCD Soundsystem book 12 New York nights, with their 100th residency show for charity",
+    deck: "Three weekends at the Knockdown Center and Brooklyn Steel. All the ticket money from 30 November goes to charity.",
+    author: "Nia Vale",
+    date: "2026-09-30",
+    photo: { src: lcdPhoto, alt: "LCD Soundsystem on stage at Roskilde Festival, synths and lights around them", credit: "Bill Ebbesen, CC BY 3.0", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "Stereogum: LCD Soundsystem announce 100th NYC residency show", url: "https://stereogum.com/2513151/lcd-soundsystem-announce-100th-nyc-residency-show-al-doyle-announces-debut-solo-album-hollywood-saviour/news" },
+      { name: "JamBase: LCD Soundsystem NYC residency 2026", url: "https://www.jambase.com/article/lcd-soundsystem-nyc-residency-2026-100th-show" },
+    ],
+  },
+  {
+    slug: "al-doyle-hollywood-saviour",
+    section: "music",
+    kicker: "New music",
+    title: "Al Doyle announces his first solo album, Hollywood Saviour",
+    deck: "The LCD Soundsystem and Hot Chip guitarist releases it on DFA on 20 November. “Hard Times in America” is out now.",
+    author: "Jonah Reyes",
+    date: "2026-09-30",
+    photo: { src: doylePhoto, alt: "Al Doyle playing guitar on stage in warm light", credit: "Kim Metso, CC BY-SA 3.0", crop: { pos: "35% 40%" } },
+    sources: [
+      { name: "Stereogum: Al Doyle announces debut solo album Hollywood Saviour", url: "https://stereogum.com/2513151/lcd-soundsystem-announce-100th-nyc-residency-show-al-doyle-announces-debut-solo-album-hollywood-saviour/news" },
+    ],
+  },
+  {
+    slug: "rem-reveal-25th-anniversary",
+    section: "music",
+    kicker: "Reissues",
+    title: "R.E.M. reissue Reveal for its 25th birthday, with an unreleased Paris session",
+    deck: "A 17-song set recorded for Radio France in May 2001 headlines the anniversary edition, out on 20 November.",
+    author: "Sana Lind",
+    date: "2026-09-30",
+    photo: { src: stipePhoto, alt: "Michael Stipe singing on stage in Padova in 2003, one arm raised", credit: "Stefano Andreoli, CC BY-SA 2.0", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "REMHQ: Reveal 25th anniversary edition coming 20 November", url: "https://remhq.com/news/reveal-25th-anniversary-edition-coming-november-20th/" },
+      { name: "NME: R.E.M. announce Reveal 25th anniversary reissue", url: "https://www.nme.com/news/music/r-e-m-reveal-25th-anniversary-reissue-previously-unreleased-live-session-3971667" },
+      { name: "Wikipedia: Reveal (R.E.M. album)", url: "https://en.wikipedia.org/wiki/Reveal_(R.E.M._album)" },
+    ],
+  },
+  {
+    slug: "shadow-of-mordor-shadow-of-war-switch-2",
+    section: "games",
+    kicker: "Switch 2",
+    title: "Shadow of Mordor and Shadow of War are out on Switch 2",
+    deck: "Aspyr’s Middle-earth: Shadow Bundle brings both complete editions, and the Nemesis System, to a Nintendo console for the first time.",
+    author: "Jonah Reyes",
+    date: "2026-09-30",
+    photo: { src: youtubeThumb("HmIdzplCp-o"), alt: "Artwork from the Middle-earth: Shadow Bundle trailer for Nintendo Switch 2", credit: "Nintendo of America, YouTube", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "Techloy: Shadow of Mordor and Shadow of War come to Switch 2 on 30 September", url: "https://www.techloy.com/shadow-of-mordor-shadow-of-war-switch-2/" },
+      { name: "GamerHub: Aspyr brings the Shadow Bundle to Switch 2", url: "https://gamerhub.co.uk/aspyr-brings-shadow-of-mordor-and-shadow-of-war-to-switch-2-in-sept-30-bundle" },
+      { name: "YouTube: Middle-earth: Shadow Bundle pre-order trailer", url: youtubeUrl("HmIdzplCp-o") },
+    ],
+  },
+  {
+    slug: "xbox-disc-to-digital-all-players",
+    section: "games",
+    kicker: "Xbox",
+    title: "Xbox now turns your game discs into digital copies, for free",
+    deck: "Disc-to-Digital is open to every player. More than 1,500 games work, but you may lose the licence if you sell the disc.",
+    author: "Nia Vale",
+    date: "2026-09-30",
+    photo: { src: xboxPhoto, alt: "An Xbox Series X and Series S on a shop display", credit: "Kyu3a, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "Game Informer: Xbox Disc-to-Digital program now available for all players", url: "https://gameinformer.com/2026/09/30/xbox-disc-to-digital-program-now-available-for-all-players" },
+      { name: "Pure Xbox: Disc to Digital is now live for everyone", url: "https://www.purexbox.com/news/2026/09/xbox-disc-to-digital-is-now-live-for-everyone-but-you-may-need-to-force-it-through" },
+    ],
+  },
+  {
+    slug: "grasshopper-manufacture-leaves-netease",
+    section: "games",
+    kicker: "Industry",
+    title: "Suda51’s Grasshopper Manufacture is independent again",
+    deck: "The No More Heroes studio has split from NetEase, five years and one game after the takeover.",
+    author: "Sana Lind",
+    date: "2026-09-30",
+    photo: { src: sudaPhoto, alt: "Goichi Suda, known as Suda51, speaking into a microphone", credit: "Georges Seguin (Okki), CC BY-SA 3.0", crop: { pos: "50% 35%" } },
+    sources: [
+      { name: "Game Informer: Grasshopper Manufacture leaves NetEase", url: "https://gameinformer.com/2026/09/30/suda51s-grasshopper-manufacture-leaves-netease-is-independent-studio-again-months-after" },
+      { name: "Wikipedia: Grasshopper Manufacture", url: "https://en.wikipedia.org/wiki/Grasshopper_Manufacture" },
+    ],
+  },
+  {
+    slug: "dawn-of-war-iv-space-marines-trailer",
+    section: "games",
+    kicker: "Trailer",
+    title: "Dawn of War IV’s Space Marines trailer brings the Blood Ravens back to Kronus",
+    deck: "A CGI trailer teams them up with the Dark Angels, two months before the strategy game launches on 3 December.",
+    author: "Nia Vale",
+    date: "2026-09-30",
+    photo: { src: warhammerPhoto, alt: "A man in glasses painting a small Warhammer 40,000 miniature", credit: "David Poe, US Air Force, public domain", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "Worthplaying: Dawn of War IV shows off the Blood Ravens and Dark Angels", url: "https://worthplaying.com/article/2026/9/30/news/151114-warhammer-40000-dawn-of-war-iv-shows-off-blood-ravens-and-dark-angels-fighting-side-by-side-in-latest-cinematic-trailer/" },
+      { name: "Bleeding Cool: Dawn of War IV pushed to 3 December", url: "https://bleedingcool.com/games/warhammer-40000-dawn-of-war-iv-launch-pushed-to-december-3rd/" },
+      { name: "Wikipedia: Warhammer 40,000: Dawn of War IV", url: "https://en.wikipedia.org/wiki/Warhammer_40,000:_Dawn_of_War_IV" },
+    ],
+  },
+  {
+    slug: "flaming-lips-at-war-with-the-mystics-20th",
+    section: "music",
+    kicker: "Reissues",
+    title: "The Flaming Lips open the vaults for At War with the Mystics",
+    deck: "The 20th anniversary edition, out on 13 November, adds 33 unreleased demos and studio recordings to the Grammy-winning album.",
+    author: "Nia Vale",
+    date: "2026-09-29",
+    photo: { src: flamingLipsPhoto, alt: "Wayne Coyne singing under purple and blue stage lights with confetti", credit: "dom fellowes, CC BY 2.0", crop: { pos: "50% 35%" } },
+    sources: [
+      { name: "NME: The Flaming Lips announce At War with the Mystics reissue", url: "https://www.nme.com/news/music/the-flaming-lips-at-war-with-the-mystics-20th-anniversary-reissue-unreleased-songs-3971523" },
+      { name: "Dork: At War with the Mystics 20th anniversary edition", url: "https://readdork.com/news/flaming-lips-at-war-with-the-mystics-20th-anniversary-edition-a77838cc0b" },
+      { name: "Wikipedia: At War with the Mystics", url: "https://en.wikipedia.org/wiki/At_War_with_the_Mystics" },
+    ],
+  },
+  {
+    slug: "dennis-haskins-dies",
+    section: "culture",
+    kicker: "Obituary",
+    title: "Dennis Haskins, Saved by the Bell’s Mr. Belding, dies at 75",
+    deck: "He played Bayside’s principal for 13 years, from Good Morning, Miss Bliss to the end of The New Class.",
+    author: "Nia Vale",
+    date: "2026-09-29",
+    photo: { src: haskinsPhoto, alt: "Dennis Haskins smiling at an event in a dark shirt", credit: "Lucha VaVOOM, CC BY 2.0", crop: { pos: "50% 18%" } },
+    sources: [
+      { name: "Deadline: Dennis Haskins dies", url: "https://deadline.com/2026/09/dennis-haskins-dead-saved-by-the-bell-mr-belding-1237115941/" },
+      { name: "Wikipedia: Dennis Haskins", url: "https://en.wikipedia.org/wiki/Dennis_Haskins" },
+    ],
+  },
+  {
+    slug: "coyote-vs-acme-digital-release",
+    section: "culture",
+    kicker: "Film",
+    title: "Coyote vs. Acme, the film that was almost a tax write-off, is now out at home",
+    deck: "After $110 million worldwide and 96% on Rotten Tomatoes, the Looney Tunes comedy is available to buy digitally.",
+    author: "Jonah Reyes",
+    date: "2026-09-29",
+    photo: { src: youtubeThumb("Bpg3tJ4f3v0"), alt: "Wile E. Coyote in a frame from the Coyote vs. Acme final trailer", credit: "Ketchup Entertainment, YouTube", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "Wikipedia: Coyote vs. Acme", url: "https://en.wikipedia.org/wiki/Coyote_vs._Acme" },
+      { name: "IndieWire: Coyote vs. Acme grosses $100 million worldwide", url: "https://www.indiewire.com/news/box-office/coyote-vs-acme-tax-write-off-100-million-box-office-1235218061/" },
+      { name: "Collider: Coyote vs. Acme digital release date", url: "https://collider.com/coyote-vs-acme-digital-release-date-september-2026/" },
+    ],
+  },
+  {
+    slug: "lego-one-piece-netflix",
+    section: "culture",
+    kicker: "TV",
+    title: "LEGO ONE PIECE is on Netflix, with the live-action cast as minifigures",
+    deck: "Usopp retells the first two seasons to Chopper, his way, in a two-part animated special.",
+    author: "Sana Lind",
+    date: "2026-09-29",
+    photo: { src: youtubeThumb("6OP_KhnmUus"), alt: "LEGO minifigures of the Straw Hat crew in the LEGO ONE PIECE trailer", credit: "ONE PIECE Official, YouTube", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "What’s on Netflix: LEGO ONE PIECE trailer and cast", url: "https://www.whats-on-netflix.com/news/lego-one-piece-netflix-release-date-trailer-cast/" },
+      { name: "What’s on Netflix: One Piece is getting a LEGO adaptation", url: "https://www.whats-on-netflix.com/news/one-piece-getting-a-lego-tv-adaptation-in-september-2026/" },
+      { name: "YouTube: LEGO ONE PIECE official trailer", url: youtubeUrl("6OP_KhnmUus") },
+    ],
+  },
+  {
+    slug: "streamer-awards-2026-applications",
+    section: "streaming",
+    kicker: "Awards",
+    title: "The Streamer Awards 2026: apply by 2 October, vote from 16 October",
+    deck: "For the first time creators can put themselves forward. The show, with KATSEYE performing, is on 12 November.",
+    author: "Jonah Reyes",
+    date: "2026-09-29",
+    photo: { src: qtPhoto, alt: "QTCinderella and Maya Higa speaking on a TwitchCon stage", credit: "LeahBeahReah, CC BY-SA 4.0", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "Twitch: How to apply for the 2026 Streamer Awards", url: "https://blog.twitch.tv/en/2026/08/31/how-to-apply-for-the-2026-streamer-awards/" },
+      { name: "Sportskeeda: Streamer Awards 2026 categories and how to apply", url: "https://www.sportskeeda.com/us/streamers/news-streamer-awards-2026-nomination-categories-apply" },
+    ],
+  },
+  {
+    slug: "switch-2-calendar-september-direct",
+    section: "games",
+    kicker: "Switch 2",
+    title: "Your Switch 2 calendar: every date from the September Direct",
+    deck: "Resident Evil in October, Monster Hunter in December, Metroid Ravenous in January. Here it all is, in order.",
+    author: "Sana Lind",
+    date: "2026-09-28",
+    photo: { src: switchPhoto, alt: "A Nintendo Switch 2 standing in its black dock", credit: "Crisco 1492, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "Game Informer: Every new announcement at the September 2026 Nintendo Direct", url: "https://gameinformer.com/nintendo-direct/2026/09/09/every-new-announcement-at-the-september-2026-nintendo-direct" },
+      { name: "GamesRadar+: Everything announced at the Nintendo Direct September 2026", url: "https://www.gamesradar.com/news/live/nintendo-direct-september-2026-everything-announced/" },
+    ],
+  },
+  {
+    slug: "milan-fashion-week-ss27-review",
+    section: "culture",
+    kicker: "Fashion",
+    title: "Milan Fashion Week: Prada’s skirts, Demna’s Gucci shop and Moschino on a car-park roof",
+    deck: "The best of spring/summer 2027 in Milan, and the trends to take away.",
+    author: "Jonah Reyes",
+    date: "2026-09-28",
+    photo: { src: galleriaPhoto, alt: "The glass-roofed arcade of the Galleria Vittorio Emanuele II in Milan", credit: "Maurizio Moro5153, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "Wallpaper*: The standout shows of Milan Fashion Week S/S 2027", url: "https://www.wallpaper.com/fashion-beauty/best-shows-milan-fashion-week-ss-2027-review-round-up" },
+      { name: "W Magazine: 8 things we saw and loved at Milan Fashion Week spring 2027", url: "https://www.wmagazine.com/fashion/milan-fashion-week-spring-2027-recap" },
+      { name: "Luxus Plus: Milan Fashion Week highlights", url: "https://luxus-plus.com/en/milan-fashion-week-farewells-debuts-and-major-events/" },
+    ],
+  },
+  {
+    slug: "monster-hunter-wilds-switch-2",
+    section: "games",
+    kicker: "Switch 2",
+    title: "Monster Hunter Wilds comes to Switch 2 on 4 December",
+    deck: "Every update is included and local play is in. The Ascendance expansion follows in 2027.",
+    author: "Nia Vale",
+    date: "2026-09-27",
+    photo: { src: youtubeThumb("iNru7mV044Y"), alt: "A frame from the Monster Hunter Wilds: Ascendance trailer", credit: "Capcom, YouTube", crop: { pos: "18% 45%" } },
+    sources: [
+      { name: "Game Informer: Monster Hunter Wilds hits Nintendo Switch 2 this December", url: "https://gameinformer.com/nintendo-direct/2026/09/09/monster-hunter-wilds-hits-nintendo-switch-2-this-december" },
+      { name: "GamingBolt: Monster Hunter Wilds is coming to Switch 2 on 4 December", url: "https://gamingbolt.com/monster-hunter-wilds-is-coming-to-nintendo-switch-2-on-december-4th" },
+      { name: "YouTube: Monster Hunter Wilds: Ascendance, TGS 2026 trailer", url: youtubeUrl("iNru7mV044Y") },
+    ],
+  },
+  {
+    slug: "intergalactic-quiet-until-2027",
+    section: "games",
+    kicker: "PlayStation",
+    title: "Naughty Dog goes quiet on Intergalactic until 2027",
+    deck: "Neil Druckmann promised a proper look next year, shared new art and confirmed more The Last of Us projects.",
+    author: "Jonah Reyes",
+    date: "2026-09-27",
+    photo: { src: youtubeThumb("VLGy63pt9vA"), alt: "A frame from the Intergalactic: The Heretic Prophet announcement trailer", credit: "PlayStation, YouTube", crop: { pos: "50% 40%" } },
+    sources: [
+      { name: "Push Square: No Intergalactic updates until 2027", url: "https://www.pushsquare.com/news/2026/09/no-intergalactic-ps5-updates-until-2027-new-artwork-for-now" },
+      { name: "Naughty Dog: Announcing Intergalactic: The Heretic Prophet", url: "https://www.naughtydog.com/blog/intergalactic_the_heretic_prophet_announcement" },
+    ],
+  },
+  {
+    slug: "sony-music-joins-ariam",
+    section: "music",
+    kicker: "AI & music",
+    title: "Sony Music becomes the first music company in the AI coalition ARIAM",
+    deck: "The alliance already counts Disney, the BBC and The New York Times. Sony joins while suing two AI music start-ups.",
+    author: "Jonah Reyes",
+    date: "2026-09-26",
+    photo: { src: studioPhoto, alt: "A large recording studio with a grand piano, drum kit and wooden walls", credit: "Will Fisher, CC BY-SA 2.0", crop: { pos: "50% 55%" } },
+    sources: [
+      { name: "CelebrityAccess: Sony Music Group joins AI coalition ARIAM", url: "https://celebrityaccess.com/2026/09/25/sony-music-group-becomes-first-music-company-to-join-ai-coalition-ariam/" },
+      { name: "Variety: Sony Music Group joins AI content coalition ARIAM", url: "https://variety.com/2026/music/news/sony-music-group-joins-ai-content-coalition-ariam-1236873137/" },
+    ],
+  },
+  {
+    slug: "new-albums-25-september-2026",
+    section: "music",
+    kicker: "New music",
+    title: "New music Friday: Leon Bridges, Julia Jacklin, Tinashe and a very busy 25 September",
+    deck: "More than 50 albums in one day, from soul and indie to country, metal and the Joy Division archive.",
+    author: "Jonah Reyes",
+    date: "2026-09-26",
+    photo: { src: leonPhoto, alt: "Leon Bridges and his band on stage at Webster Hall under red curtains", credit: "Brianga, CC BY-SA 4.0", crop: { pos: "50% 55%" } },
+    sources: [
+      { name: "2 Loud 2 Old Music: Friday new releases, 25 September 2026", url: "https://2loud2oldmusic.com/2026/09/25/friday-new-releases-september-25-2026/" },
+      { name: "Saving Country Music: 25 September 2026 release guide", url: "https://savingcountrymusic.com/september-25th-2026-is-a-super-busy-release-day-heres-your-guide/" },
+    ],
+  },
+  {
+    slug: "ea-sports-fc-27-launch",
+    section: "games",
+    kicker: "Launch",
+    title: "EA Sports FC 27 is out, with Mbappé on every cover",
+    deck: "The football game launched on 25 September on nine platforms, alongside a free FC 27 Lite.",
+    author: "Jonah Reyes",
+    date: "2026-09-25",
+    photo: { src: youtubeThumb("nsIVAUwke3o"), alt: "A frame from the EA Sports FC 27 launch trailer for Nintendo Switch 2", credit: "Nintendo of America, YouTube", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "EA: Kylian Mbappé and Jude Bellingham welcome you to EA Sports FC 27", url: "https://news.ea.com/press-releases/press-releases-details/2026/Kylian-Mbapp-and-Jude-Bellingham-Welcome-You-to-EA-SPORTS-FC-27-Launching-Worldwide-on-September-25/default.aspx" },
+      { name: "EA: FC 27 editions and release dates", url: "https://www.ea.com/games/ea-sports-fc/fc-27/news/fc-27-editions-and-release-dates" },
+      { name: "YouTube: EA Sports FC 27 launch trailer, Nintendo Switch 2", url: youtubeUrl("nsIVAUwke3o") },
+    ],
+  },
+  {
+    slug: "qobuz-ai-music-tags",
+    section: "music",
+    kicker: "AI & music",
+    title: "Qobuz now tells you when a song was made by AI",
+    deck: "The streaming service labels AI-generated releases, and says most streams of those tracks are fraudulent.",
+    author: "Nia Vale",
+    date: "2026-09-25",
+    photo: { src: headphonesPhoto, alt: "A pair of silver and black studio headphones resting on a notebook", credit: "Melissa Ursula Dawn Goldsmith, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "Digital Music News: Qobuz rolls out a tag to flag AI-generated music", url: "https://www.digitalmusicnews.com/2026/09/24/qobuz-tags-ai-generated-music/" },
+      { name: "Trusted Reviews: Qobuz is making it clear which music is AI-produced", url: "https://www.trustedreviews.com/news/qobuz-is-making-it-clear-which-music-is-ai-produced-on-its-service" },
+    ],
+  },
+  {
+    slug: "professional-sound-alliance-launch",
+    section: "music",
+    kicker: "AI & music",
+    title: "Sound designers form the Professional Sound Alliance to fight AI scraping",
+    deck: "Effects libraries and Oscar-winning sound editors want the same protection music and voice already have.",
+    author: "Sana Lind",
+    date: "2026-09-25",
+    photo: { src: foleyPhoto, alt: "A sound artist recording footsteps with a bowling ball in a Foley room", credit: "Vancouver Film School, CC BY 2.0", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "Music Business Worldwide: Sound designers launch the Professional Sound Alliance", url: "https://www.musicbusinessworldwide.com/sound-designers-and-sfx-libraries-launch-professional-sound-alliance-to-fight-ai-scraping-now-sound-will-have-protection-of-our-own/" },
+      { name: "Professional Sound Alliance", url: "https://professionalsoundalliance.org/" },
+    ],
+  },
+  {
+    slug: "wwe-main-event-moves-to-rumble",
+    section: "streaming",
+    kicker: "Platforms",
+    title: "WWE moves Main Event from YouTube to Rumble",
+    deck: "From 14 October the weekly show airs on Wednesdays at 8pm ET, head to head with AEW Dynamite.",
+    author: "Nia Vale",
+    date: "2026-09-25",
+    photo: { src: wwePhoto, alt: "A WWE NXT ring and entrance stage lit up in a dark arena", credit: "InFlamester20, CC BY-SA 4.0", crop: { pos: "50% 45%" } },
+    sources: [
+      { name: "POST Wrestling: WWE Main Event to move from YouTube to Rumble", url: "https://www.postwrestling.com/2026/09/24/wwe-main-event-to-move-from-youtube-to-rumble-beginning-oct-14/" },
+      { name: "Yahoo Sports: WWE moves Main Event to Rumble", url: "https://sports.yahoo.com/articles/wwe-moves-main-event-wing-210043474.html" },
+    ],
+  },
+  {
+    slug: "made-on-youtube-2026",
+    section: "streaming",
+    kicker: "YouTube",
+    title: "Made on YouTube 2026: Live Showdowns, AI help in Studio and a new way to earn",
+    deck: "More than 30 announcements for creators, from split-screen live battles to live dubbing and Shorts series.",
+    author: "Nia Vale",
+    date: "2026-09-24",
+    photo: { src: youtubeHqPhoto, alt: "The glass entrance of YouTube’s headquarters in San Bruno, California", credit: "BrokenSphere, CC BY 3.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "TechCrunch: YouTube releases new AI features for creators in Studio", url: "https://techcrunch.com/2026/09/23/youtube-releases-new-ai-features-for-creators-within-its-studio-app/" },
+      { name: "Upstream: Made on YouTube 2026, what’s new for live streamers", url: "https://upstream.so/blog/made-on-youtube-2026/" },
+    ],
+  },
+  {
+    slug: "kick-partner-program-payout-fix",
+    section: "streaming",
+    kicker: "Platforms",
+    title: "Kick admits a payout error, sends backpay and changes how streamers are paid",
+    deck: "A calculation mistake left partners short in September. Rates are now set across several streams, not one.",
+    author: "Sana Lind",
+    date: "2026-09-23",
+    photo: { src: kickPhoto, alt: "The Kick logo in white on black", credit: "Kick, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
+    sources: [
+      { name: "Streams Charts: Kick revises partner payouts after September errors", url: "https://streamscharts.com/news/kick-revises-kpp-september-2026-update" },
+    ],
+  },
+  {
+    slug: "latin-grammys-2026-nominations",
+    section: "music",
+    kicker: "Awards",
+    title: "Latin Grammys 2026: Edgar Barrera leads, with Rosalía and Karol G close behind",
+    deck: "The producer has 10 nominations; four acts have seven. The winners are named in Las Vegas on 12 November.",
+    author: "Sana Lind",
+    date: "2026-09-17",
+    photo: { src: rosaliaPhoto, alt: "Rosalía singing into a microphone on stage in a black and gold jacket", credit: "Andrés Ibarra, CC BY-SA 4.0", crop: { pos: "50% 30%" } },
+    sources: [
+      { name: "Wikipedia: 27th Annual Latin Grammy Awards", url: "https://en.wikipedia.org/wiki/27th_Annual_Latin_Grammy_Awards" },
+      { name: "Rolling Stone: Latin Grammy nominations 2026", url: "https://www.rollingstone.com/music/music-latin/latin-grammy-nominations-2026-1235623634/" },
+      { name: "Complex: 2026 Latin Grammys nominations", url: "https://www.complex.com/music/a/alex-ocho/latin-grammys-2026-nominations-karol-g-rosalia-ca7riel-paco-amoroso" },
+    ],
+  },
+  // ---- Earlier in September 2026
   {
     slug: "rap-number-ones-2026",
     section: "music",
@@ -531,7 +986,8 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
   },
 ];
 
-export const ARTICLES: Article[] = RAW_ARTICLES.map((story) => {
+// Newest first; stories from the same day keep the order they are listed in
+export const ARTICLES: Article[] = [...RAW_ARTICLES].sort((a, b) => b.date.localeCompare(a.date)).map((story) => {
   const full = STORY_BODIES[story.slug];
   const body = full?.body ?? [];
   return { ...story, body, read: `${Math.max(2, Math.round(wordCount(body) / 230))} min read`, ...(full?.ask ? { ask: full.ask } : {}) };

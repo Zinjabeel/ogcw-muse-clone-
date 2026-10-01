@@ -6,18 +6,29 @@ import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
 
-// Keep exploring: the Explore grid carries straight on into nine more
-// stories, in the same tiles. A big feature and four stories, then the rap
-// desk across the full width: a vote on who is the No. 1 rapper right now,
-// with four stories from the rap beat beside it. After voting you see how
+// Keep exploring: the Explore grid carries straight on into more stories,
+// in the same tiles. A big feature and four stories, then the rap desk
+// across the full width: a vote on who is the No. 1 rapper right now, with
+// four stories from the rap beat beside it. After voting you see how
 // everyone has voted so far, as bars behind the five names.
+// Then More to explore, ten newer stories in the same pattern: the Switch 2
+// season as a feature with four games stories, then a Screens & streams
+// list beside two more games stories.
 
 const FEATURE = article("witcher-3-remastered-launch");
 const TILES = ["minecraft-dungeons-ii-launch", "epic-fortnite-dutch-class-action", "build-a-rocket-boy-administration", "kai-cenat-ishowspeed-minecraft-marathon"].map(article);
 const RAP_STORIES = ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"].map(article);
 
+const MORE_FEATURE = article("monster-hunter-wilds-switch-2");
+const MORE_TILES = ["switch-2-calendar-september-direct", "shadow-of-mordor-shadow-of-war-switch-2", "ea-sports-fc-27-launch", "october-2026-games"].map(article);
+const SCREENS = ["netflix-october-2026", "streamer-awards-2026-applications", "made-on-youtube-2026"].map(article);
+const MORE_END = ["intergalactic-quiet-until-2027", "dawn-of-war-iv-space-marines-trailer"].map(article);
+
+const FIRST_COUNT = 1 + TILES.length + RAP_STORIES.length;
+const MORE_COUNT = 1 + MORE_TILES.length + SCREENS.length + MORE_END.length;
+
 /** The stories this section shows, so the More news row can leave them out */
-export const KEEP_EXPLORING_SLUGS = new Set([FEATURE, ...TILES, ...RAP_STORIES].map((story) => story.slug));
+export const KEEP_EXPLORING_SLUGS = new Set([FEATURE, ...TILES, ...RAP_STORIES, MORE_FEATURE, ...MORE_TILES, ...SCREENS, ...MORE_END].map((story) => story.slug));
 
 const STORAGE_KEY = "ogcw-vote-no1-rapper";
 
@@ -134,13 +145,30 @@ function RapPoll() {
   );
 }
 
-function Tile({ story }: { story: Article }) {
+// A story tile. `tall` tiles sit beside the Screens & streams list, and their
+// photo grows to fill the extra height on wide screens.
+function Tile({ story, tall = false }: { story: Article; tall?: boolean }) {
   return (
-    <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-tile kx-tile">
+    <Link to="/news/$slug" params={{ slug: story.slug }} className={`mix-tile kx-tile ${tall ? "kx-tile-tall" : ""}`}>
       <Img photo={story.photo} className="kx-tile-photo" />
       <span className="mix-label">{story.kicker} · {SECTIONS[story.section].label}</span>
       <span className="kx-tile-title">{story.title}</span>
       <span className="kx-meta">{story.read}</span>
+    </Link>
+  );
+}
+
+// A big story: its photo full-bleed under the words, with a button
+function Feature({ story, label }: { story: Article; label?: string }) {
+  return (
+    <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-tile mix-pick kx-feature">
+      <Img photo={story.photo} className="mix-pick-photo" />
+      <span className="mix-pick-text">
+        <span className="mix-label">{label ?? story.kicker} · {SECTIONS[story.section].label}</span>
+        <span className="mix-pick-title">{story.title}</span>
+        <span className="mix-pick-deck">{story.deck}</span>
+        <span className="kx-feature-cta">Read the story <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+      </span>
     </Link>
   );
 }
@@ -164,19 +192,11 @@ export function KeepExploring() {
       <div className="kx-head">
         <h3 id="kx-title" className="kx-label">Keep exploring</h3>
         <span className="kx-rule" aria-hidden="true" />
-        <span className="kx-count">{KEEP_EXPLORING_SLUGS.size} more stories</span>
+        <span className="kx-count">{FIRST_COUNT} more stories</span>
       </div>
 
       <div className="kx-grid">
-        <Link to="/news/$slug" params={{ slug: FEATURE.slug }} className="mix-tile mix-pick kx-feature">
-          <Img photo={FEATURE.photo} className="mix-pick-photo" />
-          <span className="mix-pick-text">
-            <span className="mix-label">{FEATURE.kicker} · {SECTIONS[FEATURE.section].label}</span>
-            <span className="mix-pick-title">{FEATURE.title}</span>
-            <span className="mix-pick-deck">{FEATURE.deck}</span>
-            <span className="kx-feature-cta">Read the story <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
-          </span>
-        </Link>
+        <Feature story={FEATURE} />
 
         {TILES.map((story) => <Tile key={story.slug} story={story} />)}
 
@@ -199,6 +219,29 @@ export function KeepExploring() {
             <Link to="/music" className="kx-rap-more">More in Music <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
           </div>
         </section>
+      </div>
+
+      <div className="kx-head">
+        <h3 id="kx-more-title" className="kx-label">More to explore</h3>
+        <span className="kx-rule" aria-hidden="true" />
+        <span className="kx-count">{MORE_COUNT} more stories</span>
+      </div>
+
+      <div className="kx-grid">
+        <Feature story={MORE_FEATURE} label="Switch 2 season" />
+
+        {MORE_TILES.map((story) => <Tile key={story.slug} story={story} />)}
+
+        {/* Screens & streams: three quick reads in a list, like the rap beat */}
+        <section className="mix-tile kx-screens" aria-labelledby="kx-screens-title">
+          <p id="kx-screens-title" className="kx-rap-side-head">Screens &amp; streams</p>
+          <ol className="kx-rap-list">
+            {SCREENS.map((story) => <li key={story.slug}><RapStory story={story} /></li>)}
+          </ol>
+          <Link to="/streaming" className="kx-rap-more">More in Streaming <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
+        </section>
+
+        {MORE_END.map((story) => <Tile key={story.slug} story={story} tall />)}
       </div>
     </section>
   );

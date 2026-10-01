@@ -73,6 +73,37 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
   ["Kai Cenat", "ImDavisss Live", "CC BY 3.0", "Kai_Cenat_July_2025.jpg"],
   ["Leslie Benzies", "Austin Hargrave", "CC BY-SA 3.0", "Leslie_Benzies_@_Everywhere_Game.jpg"],
   ["Fortnite Battle Royale at GDC 2018", "Official GDC", "CC BY 2.0", "Fortnite_Battle_Royale_at_GDC_2018.jpg"],
+  ["Rosalía in concert in Chile", "Andrés Ibarra", "CC BY-SA 4.0", "Rosalía_Chile2022_06.png"],
+  ["Karol G in 2018", "Programas Telemedellín", "CC BY 3.0", "Karol_G_en_2018.jpg"],
+  ["Studio headphones", "Melissa Ursula Dawn Goldsmith", "CC BY-SA 4.0", "Studio_Headphones.jpg"],
+  ["Studio A, In Your Ear Studios", "Will Fisher", "CC BY-SA 2.0", "Studio_A,_In_Your_Ear_Studios.jpg"],
+  ["The Foley room at Vancouver Film School", "Vancouver Film School", "CC BY 2.0", "Foley_Room_at_the_Sound_Design_Campus_(cropped).jpg"],
+  ["LCD Soundsystem at Roskilde Festival", "Bill Ebbesen", "CC BY 3.0", "LCD_Soundsystem_-_Roskilde_Festival_2010.jpg"],
+  ["Knockdown Center, Queens", "Jimmyfever1978", "CC BY-SA 4.0", "Knockdown_Center_-_Oct_2023.jpg"],
+  ["Al Doyle with Hot Chip", "Kim Metso", "CC BY-SA 3.0", "Al_Doyle_Hot_Chip_Popaganda_2013.jpg"],
+  ["Michael Stipe in Padova, 2003", "Stefano Andreoli", "CC BY-SA 2.0", "Michael_Stipe_sings_Padova_2003.jpg"],
+  ["The Flaming Lips in 2017", "dom fellowes", "CC BY 2.0", "The_Flaming_Lips_2017.jpg"],
+  ["Wayne Coyne in 2006", "Kris Krug", "CC BY-SA 2.0", "Wayne_Coyne_from_the_Flaming_Lips_photographed_by_Kris_Krug.jpg"],
+  ["Leon Bridges at Webster Hall", "Brianga", "CC BY-SA 4.0", "Leon_Bridges_at_Webster_Hall,_21_October_2015.JPG"],
+  ["Julia Jacklin at Haldern Pop", "Martin Schumann", "CC BY-SA 4.0", "Julia_Jacklin_-_Haldern_Pop_Festival_2017-8.jpg"],
+  ["Nintendo Switch 2 in its dock", "Crisco 1492", "CC BY-SA 4.0", "Nintendo_Switch_2_in_Docking_Console.jpg"],
+  ["Xbox Series X and Series S", "Kyu3a", "CC BY-SA 4.0", "Xbox_Series_XとSeries_S.jpg"],
+  ["Goichi Suda at Toulouse Game Show", "Georges Seguin (Okki)", "CC BY-SA 3.0", "Goichi_Suda_20121201_Toulouse_Game_Show_2_(cropped).jpg"],
+  ["Painting a Warhammer 40,000 miniature", "David Poe, US Air Force", "Public domain", "Wh40k_painting_miniature.jpg"],
+  ["A WWE NXT arena", "InFlamester20", "CC BY-SA 4.0", "WWE_NXT_-_arena_-_2016-09-17_-_02.jpg"],
+  ["QTCinderella and Maya Higa at TwitchCon", "LeahBeahReah", "CC BY-SA 4.0", "QTCinderella_and_Maya_Higa_TwitchCon_2023.jpg"],
+  ["The Kick logo", "Kick", "CC BY-SA 4.0", "Kick_Logo.jpg"],
+  ["YouTube headquarters, San Bruno", "BrokenSphere", "CC BY 3.0", "YouTube_HQ_11.JPG"],
+  ["The Grand Bassin Octogonal, Tuileries", "Chabe01", "CC BY-SA 4.0", "Grand_Bassin_Octogonal_Jardin_Tuileries_Paris_1.jpg"],
+  ["Anthony Vaccarello", "YanRB", "CC BY-SA 4.0", "Anthony_Vaccarello_en_2017.jpg"],
+  ["Charlotte Gainsbourg at Webster Hall", "Amy Hope Dermont", "CC BY 2.0", "Charlotte_Gainsbourg_at_Webster_Hall_April_2010_d.jpg"],
+  ["Galleria Vittorio Emanuele II, Milan", "Maurizio Moro5153", "CC BY-SA 4.0", "Galleria_Vittorio_Emanuele_Interno.jpg"],
+  ["Dennis Haskins", "Lucha VaVOOM", "CC BY 2.0", "Dennis_Haskins_(39643581163).jpg"],
+  ["Florence Pugh", "greg2600", "CC BY-SA 2.0", "Florence_Pugh_in_2019.jpg"],
+  ["Omar Sy", "Harald Krichel", "CC BY-SA 3.0", "Omar_Sy_(2020).jpg"],
+  ["Kylian Mbappé at Real Madrid", "SdHb", "CC BY-SA 4.0", "Kylian_Mbappe_at_Real_Madrid's_game_versus_Juventus_Turin_on_22_October_2025.jpeg"],
+  ["An André Courrèges ensemble, 1965", "Jacqueline Barrière Courrèges", "CC BY-SA 4.0", "Ensemble15,_André_Courrèges,_1965.jpg"],
+  ["The Palais de Tokyo, Paris", "Strobilomyces", "CC BY-SA 3.0", "Palais_de_Tokyo_20030101w.JPG"],
 ];
 
 // Every item OGCW keeps in the browser, for the Cookie Policy
@@ -509,7 +540,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             </li>
           ))}
         </ul>
-        <p>Video thumbnails (streamers, music videos, and game trailers and showcases from Capcom, PlayStation, CD Projekt Red and Mojang) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify.</p>
+        <p>Video thumbnails (streamers, music videos, and trailers and showcases from Capcom, PlayStation, Xbox, Nintendo, Netflix, Ketchup Entertainment, CD Projekt Red, Mojang and the ONE PIECE channel) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify.</p>
         <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>

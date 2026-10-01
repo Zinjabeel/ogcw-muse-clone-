@@ -1,21 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, formatPrice, SHOPS, SONGS, spotifyTrack, type Article, type Photo as PhotoData, type Song } from "@/data/content";
+import { article, ARTICLES, formatPrice, SHOPS, SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
 import { SpotifyIcon } from "./spotify";
 import { ExploreMix } from "./explore-mix";
 import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
 import { ShopCard } from "./cards";
 import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
+import { BsPhoto as Photo, ReadTime, StoryCard } from "./broadsheet";
+import { NewsWeek, WEEK_SLUGS } from "./news-week";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
 // system (Source Serif 4 headlines and text, Inter labels, accent colour).
 // Six headline stories (three down the left side, the lead, two on the
-// right) beside the Upcoming events rail, then the More news carousel,
-// Content of the month, the shop, and the Explore mix running on into Keep
-// exploring (nine more stories and the rap desk vote).
+// right) beside the Upcoming events rail, then This week (fifteen more of
+// the latest stories: a lead, connected stories and In brief), the More
+// news carousel, Content of the month, the shop, and the Explore mix
+// running on into Keep exploring (more stories and the rap desk vote).
 
 const sections = [
   { label: "All news", to: "/news" },
@@ -32,9 +35,9 @@ const lead = article("vmas-2026-winners");
 const secondary = [article("gta-vi-countdown"), article("paris-fashion-week-ss27")];
 const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"].map(article);
 // Every other story, newest first, runs in the More news carousel (the ones
-// in Keep exploring, further down, are left out)
+// in This week and in Keep exploring are left out)
 const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
-const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
+const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug) && !WEEK_SLUGS.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
 // For the shop call-to-action card: one product from three of the shops
 const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
@@ -43,40 +46,6 @@ const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0)
 // the fifth from two, so none repeat the three shown on the shop cards
 const alsoInEdit = [...SHOPS.map((shop) => shop.products[3]!), SHOPS[1]!.products[4]!, SHOPS[3]!.products[4]!];
 const lowestPrice = Math.min(...SHOPS.flatMap((shop) => shop.products.map((product) => product.price)));
-
-function ReadTime({ children }: { children: string }) {
-  return (
-    <span className="bs-read">
-      <BookOpen size={13} strokeWidth={1.5} aria-hidden="true" />
-      {children}
-    </span>
-  );
-}
-
-function Photo({ photo, className }: { photo: PhotoData; className?: string }) {
-  const crop = photo.crop ?? { pos: "50% 50%" };
-  return (
-    <div className={`bs-photo ${className ?? ""}`}>
-      <img
-        src={photo.src}
-        alt={photo.alt}
-        loading="lazy"
-        style={{ objectPosition: crop.pos, ["--zoom" as string]: String(crop.zoom ?? 1), ["--origin" as string]: crop.pos }}
-      />
-    </div>
-  );
-}
-
-function StoryCard({ story, photoClass, hidden = false }: { story: Article; photoClass: string; hidden?: boolean }) {
-  return (
-    <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card" tabIndex={hidden ? -1 : undefined}>
-      <Photo photo={story.photo} className={photoClass} />
-      <p className="bs-eyebrow">{story.kicker}</p>
-      <h4 className="bs-title">{story.title}</h4>
-      <ReadTime>{story.read}</ReadTime>
-    </Link>
-  );
-}
 
 // More news: the cards run on past both edges of the page column, so a
 // slice of the next and the previous card shows on each side, with arrows
@@ -195,7 +164,7 @@ export function NewsFront() {
           </p>
           <h2 id="news-front-title" className="bs-wordmark">OGCW News</h2>
           <p className="bs-flag bs-flag-right">
-            <span>{ARTICLES.length} stories this month</span>
+            <span>{ARTICLES.length} stories</span>
             <span>Every source linked</span>
           </p>
         </header>
@@ -290,6 +259,10 @@ export function NewsFront() {
           </aside>
         </div>
         </div>
+
+        <hr className="bs-rule" />
+
+        <NewsWeek />
 
         <hr className="bs-rule" />
 

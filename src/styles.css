@@ -1303,6 +1303,141 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
 @media (prefers-reduced-motion: reduce) { .cotm-thumb img, .cotm-play { transition: none; } }
 
 /* ------------------------------------------------------------------
+   This week (src/components/news-week.tsx): fifteen more stories under
+   the news front, in the same hairline grid. Phones: one column. Tablets:
+   the lead across the top, then the two middle stories beside In brief.
+   1024px: three columns, lead | two stories | In brief. Then a connected
+   row of three stories, numbered, read in order.
+   ------------------------------------------------------------------ */
+.bs-week-grid { display: grid; gap: var(--spacing-40); }
+.bs-week-mid { display: grid; align-content: start; gap: var(--spacing-32); }
+.bs-week-mid > * + * { padding-top: var(--spacing-32); border-top: 1px solid var(--ogcw-border); }
+@media (min-width: 768px) {
+  .bs-week-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 0; }
+  .bs-week-lead { grid-column: 1 / -1; margin-bottom: var(--spacing-32); padding-bottom: var(--spacing-40); border-bottom: 1px solid var(--ogcw-border); }
+  .bs-week-mid { grid-column: 1; padding-right: var(--spacing-24); }
+  .bs-week-brief { grid-column: 2; padding-left: var(--spacing-24); border-left: 1px solid var(--ogcw-border); }
+}
+@media (min-width: 1024px) {
+  .bs-week-grid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, .92fr); }
+  .bs-week-lead { grid-column: 1; margin: 0; padding: 0 var(--spacing-24) 0 0; border-bottom: 0; }
+  .bs-week-mid { grid-column: 2; padding: 0 var(--spacing-24); border-left: 1px solid var(--ogcw-border); }
+  .bs-week-brief { grid-column: 3; }
+}
+.bs-photo-week { aspect-ratio: 3 / 2; margin-bottom: var(--spacing-16); }
+.bs-week .bs-title { font-size: 22px; }
+.bs-week .bs-title-week { font-size: clamp(30px, 2.5vw, 42px); line-height: 1.08; }
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  /* The lead across the tablet: photo beside the words, the thread underneath */
+  .bs-week-lead > .bs-card { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: var(--spacing-24); }
+  .bs-week-lead > .bs-card > .bs-photo { grid-row: 1 / span 5; margin: 0; }
+}
+
+/* Under the lead: the rest of the thread, as small rows with thumbnails */
+.bs-thread { margin-top: var(--spacing-32); padding-top: 14px; border-top: 2px solid var(--ogcw-text); }
+.bs-thread-head, .bs-brief-head { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; line-height: 1.3; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.bs-thread-head::before, .bs-brief-head::before { content: ""; width: 8px; height: 8px; background: var(--ogcw-accent); }
+.bs-thread-list li + li { border-top: 1px solid var(--ogcw-border); }
+.bs-thread-item { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: start; gap: 16px; padding-block: 14px; }
+.bs-thread-thumb { aspect-ratio: 4 / 3; border-radius: 4px; }
+.bs-thread-text { display: grid; gap: 5px; min-width: 0; }
+.bs-thread-title { font-family: var(--ogcw-display); font-size: 17px; line-height: 1.25; text-wrap: pretty; }
+.bs-thread-item:hover .bs-photo img { transform: scale(calc(var(--zoom, 1) * 1.05)); }
+:is(.bs-thread-item, .bs-brief-item):is(:hover, :focus-visible) :is(.bs-thread-title, .bs-brief-title) { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+:is(.bs-thread-item, .bs-brief-item, .bs-linked):focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 3px; }
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  /* Three across on tablets, each with its photo on top */
+  .bs-thread-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 48px; }
+  .bs-thread-list li + li { position: relative; border-top: 0; }
+  .bs-thread-list li + li::before { content: ""; position: absolute; top: 14px; bottom: 14px; left: -24px; width: 1px; background: var(--ogcw-border); }
+  .bs-thread-item { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The connected story under the live story */
+.bs-linked { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-top: var(--spacing-16); padding: 12px 14px; border: 1px solid var(--ogcw-border); border-radius: 10px; background: color-mix(in srgb, var(--ogcw-surface) 70%, transparent); transition: border-color .2s ease; }
+.bs-linked-tag { padding: 4px 8px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .08em; text-transform: uppercase; }
+.bs-linked-title { font-family: var(--ogcw-display); font-size: 16px; line-height: 1.25; }
+.bs-linked svg { color: var(--ogcw-text-2); transition: transform .2s ease, color .2s ease; }
+.bs-linked:hover { border-color: var(--ogcw-accent); }
+.bs-linked:hover svg { color: var(--ogcw-accent); transform: translateX(3px); }
+
+/* In brief: numbered, words only */
+.bs-brief-head { padding-bottom: 12px; border-bottom: 2px solid var(--ogcw-text); color: var(--ogcw-text); }
+.bs-brief-list li + li { border-top: 1px solid var(--ogcw-border); }
+.bs-brief-item { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; padding-block: 16px; }
+.bs-brief-num { font-family: var(--ogcw-display); font-size: 30px; line-height: .95; color: var(--ogcw-accent); font-variant-numeric: tabular-nums; }
+.bs-brief-text { display: grid; gap: 6px; min-width: 0; }
+.bs-brief-meta { font-size: 11px; font-weight: 600; line-height: 1.3; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.bs-brief-title { font-family: var(--ogcw-display); font-size: 18.5px; line-height: 1.22; text-wrap: pretty; }
+.bs-brief-deck { font-family: var(--ogcw-serif); font-size: 14px; line-height: 1.45; color: var(--ogcw-text-2); }
+
+/* Connected: three stories in a numbered row */
+.bs-cluster { margin-top: var(--spacing-40); padding-top: var(--spacing-32); border-top: 1px solid var(--ogcw-border); }
+.bs-cluster-head { display: grid; gap: 10px; max-width: 46rem; margin-bottom: var(--spacing-24); }
+.bs-cluster-tag { width: fit-content; padding: 5px 11px; border: 1px solid var(--ogcw-accent); border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-accent); }
+.bs-cluster-title { font-family: var(--ogcw-display); font-size: 28px; font-weight: 400; line-height: 1.1; letter-spacing: -.005em; text-wrap: balance; }
+@media (min-width: 768px) { .bs-cluster-title { font-size: 34px; } }
+.bs-cluster-intro { font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.5; color: var(--ogcw-text-2); }
+.bs-cluster-row { display: grid; gap: var(--spacing-32); }
+.bs-cluster-row > li + li { padding-top: var(--spacing-32); border-top: 1px solid var(--ogcw-border); }
+@media (min-width: 768px) {
+  .bs-cluster-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 48px; }
+  .bs-cluster-row > li + li { position: relative; padding-top: 0; border-top: 0; }
+  .bs-cluster-row > li + li::before { content: ""; position: absolute; top: 0; bottom: 0; left: -24px; width: 1px; background: var(--ogcw-border); }
+}
+.bs-cluster-step { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 6px; border-radius: 50%; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 11px; letter-spacing: 0; vertical-align: 1px; }
+
+/* ------------------------------------------------------------------
+   The News page (src/routes/news.index.tsx): the masthead and section bar
+   of the news front, then every story as a card in one ruled grid. Cells
+   meet with no gap, so the hairlines run unbroken: a rule above every row
+   after the first, and one before every card after the first in a row.
+   ------------------------------------------------------------------ */
+.bs-newspage { padding-top: 32px; }
+.bs-filter button { cursor: pointer; display: inline-flex; align-items: baseline; gap: 6px; padding-block: 12px; font-size: 12px; font-weight: 500; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 6px; transition: color .2s ease, text-decoration-color .2s ease; }
+.bs-filter button:hover { color: var(--ogcw-text); }
+.bs-filter button:focus-visible { color: var(--ogcw-accent); outline: none; }
+.bs-filter button[aria-pressed="true"] { color: var(--ogcw-accent); font-weight: 700; text-decoration-color: var(--ogcw-accent); }
+.bs-filter-count { font-size: 10px; font-variant-numeric: tabular-nums; opacity: .7; }
+.bs-all-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; padding-block: 24px 8px; }
+.bs-all-intro { max-width: 44rem; font-family: var(--ogcw-serif); font-size: 17px; line-height: 1.5; color: var(--ogcw-text-2); }
+.bs-all-count { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.bs-all { display: grid; grid-template-columns: minmax(0, 1fr); }
+.bs-all-item { padding-block: 28px; animation: bs-all-in .45s ease both; }
+.bs-all-item + .bs-all-item { border-top: 1px solid var(--ogcw-border); }
+@keyframes bs-all-in { from { opacity: 0; transform: translateY(8px); } }
+.bs-all .bs-title { font-size: 21px; }
+.bs-all .bs-deck-sm { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.bs-all-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: var(--spacing-12); font-size: 12px; line-height: 1.3; color: var(--ogcw-text-2); }
+.bs-all-meta > span:first-child { font-weight: 600; color: var(--ogcw-text); }
+.bs-all-meta .bs-read { margin-top: 0; }
+/* Two or more columns: every card gets the same 24px each side, the grid
+   reaches 24px past the column on both sides, and the clip around it hides
+   that overhang, so all the cards are the same width */
+.bs-all-clip { overflow: hidden; }
+@media (min-width: 640px) {
+  .bs-all { margin-inline: -24px; }
+  .bs-all-item { padding-inline: 24px; }
+  .bs-all-item + .bs-all-item { border-top: 0; }
+}
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .bs-all { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bs-all-item:nth-child(n + 3) { border-top: 1px solid var(--ogcw-border); }
+  .bs-all-item:nth-child(even) { border-left: 1px solid var(--ogcw-border); }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .bs-all { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bs-all-item:nth-child(n + 4) { border-top: 1px solid var(--ogcw-border); }
+  .bs-all-item:not(:nth-child(3n + 1)) { border-left: 1px solid var(--ogcw-border); }
+}
+@media (min-width: 1280px) {
+  .bs-all { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .bs-all-item:nth-child(n + 5) { border-top: 1px solid var(--ogcw-border); }
+  .bs-all-item:not(:nth-child(4n + 1)) { border-left: 1px solid var(--ogcw-border); }
+}
+@media (prefers-reduced-motion: reduce) { .bs-all-item { animation: none; } }
+
+/* ------------------------------------------------------------------
    Explore mix (src/components/explore-mix.tsx): a bit of everything in
    one grid of tiles. Desktop: the editor's pick takes two columns and two
    rows; trending, follow, a streamer and a song fill the right; two shop
@@ -1403,6 +1538,17 @@ a.mix-tile:hover, a.mix-tile:focus-visible { border-color: color-mix(in srgb, va
 .kx-tile:hover .kx-tile-photo img { transform: scale(calc(var(--zoom, 1) * 1.04)); }
 .kx-tile-title { font-family: var(--ogcw-display); font-size: 19px; line-height: 1.22; text-wrap: pretty; }
 .kx-meta { margin-top: auto; padding-top: 2px; font-size: 12px; color: var(--ogcw-text-2); }
+
+/* More to explore: Screens & streams, three quick reads in a list tile */
+.kx-screens { padding: 20px 22px; }
+@media (min-width: 700px) { .kx-screens { grid-column: 1 / -1; } }
+@media (min-width: 1100px) { .kx-screens { grid-column: span 2; } }
+.kx-screens .kx-rap-list { margin-top: 2px; }
+.kx-screens .kx-rap-more { margin-top: 2px; }
+@media (min-width: 1100px) {
+  .kx-tile-tall .kx-tile-photo { flex: 1 1 0; aspect-ratio: auto; min-height: 180px; }
+  .kx-tile-tall .kx-meta { margin-top: 0; }
+}
 :is(.kx-tile, .kx-rap-story):is(:hover, :focus-visible) :is(.kx-tile-title, .kx-rap-title) { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 
 /* The rap desk */
