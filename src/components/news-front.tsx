@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { article, ARTICLES, formatPrice, SHOPS, SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
+import { article, ARTICLES, SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
 import { SpotifyIcon } from "./spotify";
 import { ExploreMix } from "./explore-mix";
 import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
-import { ShopCard } from "./cards";
 import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, ReadTime, StoryCard } from "./broadsheet";
 import { NewsWeek, WEEK_SLUGS } from "./news-week";
+import { ShopTicket } from "./shop-ticket";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -17,8 +17,9 @@ import { NewsWeek, WEEK_SLUGS } from "./news-week";
 // Six headline stories (three down the left side, the lead, two on the
 // right) beside the Upcoming events rail, then This week (fifteen more of
 // the latest stories: a lead, connected stories and In brief), the More
-// news carousel, Content of the month, the shop, and the Explore mix
-// running on into Keep exploring (more stories and the rap desk vote).
+// news carousel, Content of the month, the shop as one ticket into /shop,
+// and the Explore mix running on into Keep exploring (more stories and the
+// rap desk vote).
 
 const sections = [
   { label: "All news", to: "/news" },
@@ -39,13 +40,6 @@ const side = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-b
 const onFront = new Set([lead, ...secondary, ...side].map((a) => a.slug));
 const moreNews = ARTICLES.filter((a) => !onFront.has(a.slug) && !WEEK_SLUGS.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
-// For the shop call-to-action card: one product from three of the shops
-const shopThumbs = SHOPS.slice(0, 3).map((shop) => shop.products[0]!);
-const pickCount = SHOPS.reduce((total, shop) => total + shop.products.length, 0);
-// Six more picks for the call-to-action card: the fourth from each shop and
-// the fifth from two, so none repeat the three shown on the shop cards
-const alsoInEdit = [...SHOPS.map((shop) => shop.products[3]!), SHOPS[1]!.products[4]!, SHOPS[3]!.products[4]!];
-const lowestPrice = Math.min(...SHOPS.flatMap((shop) => shop.products.map((product) => product.price)));
 
 // More news: the cards run on past both edges of the page column, so a
 // slice of the next and the previous card shows on each side, with arrows
@@ -276,46 +270,10 @@ export function NewsFront() {
 
         <hr className="bs-rule bs-band bs-band-90" />
 
-        <section className="bs-band bs-band-90" aria-labelledby="shop-title">
-          <div className="bs-section-head">
-            <h3 id="shop-title" className="bs-eyebrow">Shop</h3>
-            <Link to="/shop" className="bs-more">All four shops</Link>
-          </div>
-          {/* The four shops as shop windows (photo, three picks with prices,
-              a Shop button), and beside them a call-to-action card for the
-              whole shop */}
-          <div className="bs-shop-grid">
-            {SHOPS.map((shop) => <article key={shop.slug}><ShopCard shop={shop} /></article>)}
-
-            <article className="bs-shop-cta-wrap">
-              <Link to="/shop" className="bs-shop-cta">
-                <span className="bs-shop-cta-thumbs" aria-hidden="true">
-                  {shopThumbs.map((product) => <img key={product.image} src={product.image} alt="" loading="lazy" />)}
-                </span>
-                <span className="bs-shop-cta-label">The OGCW Shop</span>
-                <span className="bs-shop-cta-title">Shop the OGCW edit</span>
-                <span className="bs-shop-cta-copy">Picked by our style desk from the brands in our stories, and bought straight from the retailer.</span>
-                <span className="bs-shop-cta-more">
-                  <span className="bs-shop-cta-more-label">Also in the edit</span>
-                  <span className="bs-shop-cta-picks">
-                    {alsoInEdit.map((product) => (
-                      <span key={product.image} className="bs-shop-cta-pick">
-                        <img src={product.image} alt="" loading="lazy" />
-                        <span>{product.name}</span>
-                        <span className="bs-shop-cta-pick-price">{formatPrice(product.price)}</span>
-                      </span>
-                    ))}
-                  </span>
-                </span>
-                <span className="bs-shop-cta-stat">
-                  <span className="bs-shop-cta-num">{pickCount}</span>
-                  <span>picks from {SHOPS.length} shops, from {formatPrice(lowestPrice)}</span>
-                </span>
-                <span className="bs-shop-cta-button">Visit the shop <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></span>
-              </Link>
-            </article>
-          </div>
-        </section>
+        {/* The shop as one ticket: the full shop is on /shop */}
+        <div className="bs-band bs-band-90">
+          <ShopTicket />
+        </div>
 
         <hr className="bs-rule" />
 
