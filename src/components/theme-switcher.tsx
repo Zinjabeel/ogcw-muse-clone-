@@ -11,7 +11,7 @@ import { storePreference } from "@/lib/consent";
 
 const THEMES = [
   { id: "night", name: "Night", note: "Black & yellow", swatch: ["#0d0d0d", "#ffe600", "#e4e1da"] },
-  { id: "gold", name: "Gold", note: "Soft white & gold", swatch: ["#e8e8e6", "#86600e", "#141414"] },
+  { id: "gold", name: "Gold", note: "Soft white & gold", swatch: ["#efefed", "#86600e", "#121212"] },
   { id: "navy", name: "Navy", note: "Navy, off-white & cream", swatch: ["#0e1a33", "#f2dc8c", "#e8e2d4"] },
   { id: "aurora", name: "Aurora", note: "Pastel glow & violet", swatch: ["#f7eaff", "#7a3fd6", "#1d1426"] },
 ] as const;

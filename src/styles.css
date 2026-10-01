@@ -185,12 +185,12 @@
    cards, headlines and the gold stand out on it. Near-black text; the gold
    is deep enough to read as text on the page (4.6:1) and on cards (5:1). */
 :root[data-theme="gold"] {
-  --ogcw-bg: #e8e8e6;
+  --ogcw-bg: #efefed;
   --ogcw-accent: #86600e;
-  --ogcw-surface: #f0f0ee;
-  --ogcw-text: #141414;
-  --ogcw-text-2: #545450;
-  --ogcw-border: #d0d0cc;
+  --ogcw-surface: #f4f4f2;
+  --ogcw-text: #121212;
+  --ogcw-text-2: #50504c;
+  --ogcw-border: #d8d8d4;
   --ogcw-glow: #b8892f;
   color-scheme: light;
 }
@@ -242,10 +242,10 @@
 /* Gold: a calm soft-white background with gentle shade instead of bright
    light, and deeper shadows so cards and photos sit up off the page */
 :root[data-theme="gold"] {
-  --amb-base: linear-gradient(180deg, #eaeae8 0%, #e5e5e3 55%, #e8e8e6 100%);
-  --amb-1: rgb(190 150 60 / .10);
-  --amb-2: rgb(120 120 120 / .08);
-  --amb-3: rgb(0 0 0 / .03);
+  --amb-base: linear-gradient(180deg, #f0f0ee 0%, #ececea 55%, #efefed 100%);
+  --amb-1: rgb(190 150 60 / .08);
+  --amb-2: rgb(120 120 120 / .06);
+  --amb-3: rgb(0 0 0 / .02);
   --ogcw-shadow: 0 1px 2px rgb(20 20 20 / .07), 0 14px 34px -18px rgb(20 20 20 / .30);
   --ogcw-shadow-lift: 0 28px 52px -24px rgb(20 20 20 / .38);
 }
