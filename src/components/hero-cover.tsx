@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { LIVE, SECTIONS, type Article } from "@/data/content";
 import { useStories } from "@/lib/stories";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 import { useSiteText } from "@/lib/site-text";
 
 // Home hero, "Cover story" in the hero switcher: set like a magazine cover.
@@ -36,9 +36,9 @@ function coverLines(title: string): string[] {
   return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
 }
 
-type RailItem = { id: string; kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
+type RailItem = { id: string; kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string; story?: Article };
 
-const railStory = (story: Article): RailItem => ({ id: story.slug, kicker: story.kicker, title: story.title, meta: SECTIONS[story.section].label, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug: story.slug });
+const railStory = (story: Article): RailItem => ({ id: story.slug, kicker: story.kicker, title: story.title, meta: SECTIONS[story.section].label, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug: story.slug, story });
 const LIVE_ITEM: RailItem = { id: "live", kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
@@ -46,10 +46,10 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
     <>
       <span className="cover-rail-thumb"><img src={item.image} alt="" loading="lazy" style={{ objectPosition: item.pos }} /></span>
       <span className="cover-rail-text">
-        <span className="cover-rail-kicker" data-live={item.live ? "" : undefined}>{String(index + 1).padStart(2, "0")} · {item.kicker}</span>
-        <span className="cover-rail-title">{item.title}</span>
+        <span className="cover-rail-kicker" data-live={item.live ? "" : undefined}>{String(index + 1).padStart(2, "0")} · {item.story ? <S story={item.story} f="kicker" /> : <T>{item.kicker}</T>}</span>
+        <span className="cover-rail-title">{item.story ? <S story={item.story} f="title" /> : <T>{item.title}</T>}</span>
         <span className="cover-rail-meta">
-          {item.meta}
+          <T>{item.meta}</T>
           {item.live && <ArrowUpRight size={13} strokeWidth={2} aria-hidden="true" />}
         </span>
       </span>
@@ -64,16 +64,19 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
 
 /** The cover's words: kicker, headline, summary and the link, rising in each time it takes its turn */
 function CoverCopy({ cover, first, leaving }: { cover: Article; first: boolean; leaving?: boolean }) {
-  const usual = cover.slug === USUAL_COVER;
-  const long = !usual && cover.title.length > 48;
-  const lines = usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : long ? [cover.title] : coverLines(cover.title);
+  const site = useSiteText();
+  const title = site.story(cover.slug, "title") ?? cover.title;
+  // The usual cover's hand-set lines, until an admin changes its headline
+  const usual = cover.slug === USUAL_COVER && title === cover.title;
+  const long = !usual && title.length > 48;
+  const linesOf = (words: string) => (usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : long ? [words] : coverLines(words));
   return (
     <div className={`cover-slide ${first ? "" : "is-turn"} ${leaving ? "is-leaving" : ""}`} aria-hidden={leaving || undefined}>
-      <p className="cover-kicker"><T k="hero.cover.kicker">Cover story</T> · {SECTIONS[cover.section].label}</p>
+      <p className="cover-kicker"><T k="hero.cover.kicker">Cover story</T> · <T>{SECTIONS[cover.section].label}</T></p>
       <h1 id={leaving ? undefined : "cover-title"} className={`cover-title ${long ? "cover-title-long" : ""}`}>
-        {lines.map((line) => <span key={line} className="cover-line"><span>{line}</span></span>)}
+        <S story={cover} f="title">{(words) => linesOf(words).map((line) => <span key={line} className="cover-line"><span>{line}</span></span>)}</S>
       </h1>
-      <p className="cover-deck">{cover.deck}</p>
+      <p className="cover-deck"><S story={cover} f="deck" /></p>
       <div className="cover-cta">
         <Link to="/news/$slug" params={{ slug: cover.slug }} className="cover-link" tabIndex={leaving ? -1 : undefined}>
           <T k="hero.cover.cta">Read the cover story</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
@@ -113,8 +116,8 @@ export function HeroCover() {
     return () => observer.disconnect();
   }, []);
 
-  const { editing } = useSiteText();
-  const running = !paused && !hold && inView && !reduce && !editing;
+  const { busy } = useSiteText();
+  const running = !paused && !hold && inView && !reduce && !busy;
   const current = Math.min(active, covers.length - 1);
   const cover = covers[current]!;
 

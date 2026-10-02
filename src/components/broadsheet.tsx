@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { Article, Photo as PhotoData } from "@/data/content";
 import { StoryMeta } from "./story-meta";
+import { S } from "./site-text";
 
 // Shared pieces of the broadsheet (bs-*) look: the OGCW News front on the
 // home page, its This week block, and the News page all use these, so a
@@ -29,8 +30,8 @@ export function StoryCard({ story, photoClass, hidden = false }: { story: Articl
   return (
     <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card" tabIndex={hidden ? -1 : undefined}>
       <BsPhoto photo={story.photo} className={photoClass} />
-      <p className="bs-eyebrow">{story.kicker}</p>
-      <h4 className="bs-title">{story.title}</h4>
+      <p className="bs-eyebrow"><S story={story} f="kicker" /></p>
+      <h4 className="bs-title"><S story={story} f="title" /></h4>
       <Meta story={story} />
     </Link>
   );

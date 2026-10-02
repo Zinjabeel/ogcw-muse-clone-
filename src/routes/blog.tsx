@@ -5,7 +5,7 @@ import { Img, SectionHead, StoryCard } from "../components/cards";
 import { formatDate } from "../data/content";
 import { useStories } from "../lib/stories";
 import { StoryMeta } from "../components/story-meta";
-import { T } from "@/components/site-text";
+import { S, T } from "@/components/site-text";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -41,9 +41,9 @@ function Blog() {
         <Link to="/news/$slug" params={{ slug: cover.slug }} className="journal-cover">
           <Img photo={cover.photo} className="journal-cover-photo" eager />
           <span className="journal-cover-text">
-            <span className="og-kicker">Cover read · {cover.kicker}</span>
-            <span className="og-lead-title">{cover.title}</span>
-            <span className="og-lead-deck">{cover.deck}</span>
+            <span className="og-kicker"><T>Cover read ·</T> <S story={cover} f="kicker" /></span>
+            <span className="og-lead-title"><S story={cover} f="title" /></span>
+            <span className="og-lead-deck"><S story={cover} f="deck" /></span>
             <StoryMeta story={cover} className="og-meta" />
             <span className="og-cta"><T k="blog.read">Read it</T> <ArrowRight size={16} aria-hidden="true" /></span>
           </span>
@@ -64,8 +64,8 @@ function Blog() {
             {IN_THE_WORKS.map((piece) => (
               <li key={piece.title}>
                 <span className="og-kicker">{piece.kind}</span>
-                <span className="journal-works-title">{piece.title}</span>
-                <span className="journal-works-note">{piece.note}</span>
+                <span className="journal-works-title"><T>{piece.title}</T></span>
+                <span className="journal-works-note"><T>{piece.note}</T></span>
                 <span className="og-meta"><T k="blog.soon">Coming to the journal soon</T></span>
               </li>
             ))}

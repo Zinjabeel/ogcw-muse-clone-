@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { Img, ProductCard } from "../components/cards";
 import { getShop, SHOPS, type Product } from "../data/content";
+import { T } from "@/components/site-text";
 
 // A dedicated page per shop: a banner, the OGCW note on the brand, the edit
 // of products with guide prices (filter by category, sort by price), each
@@ -48,29 +49,29 @@ function ShopPage() {
           <Img photo={shop.hero} className="og-shop-hero-photo" eager />
           <div className="page-wrap og-shop-hero-text">
             <nav className="og-crumbs" aria-label="Breadcrumb">
-              <Link to="/shop">Shop</Link>
+              <Link to="/shop"><T>Shop</T></Link>
               <span aria-hidden="true">/</span>
-              <span>{shop.name}</span>
+              <span><T>{shop.name}</T></span>
             </nav>
-            <h1 id="shop-title" className="og-shop-name">{shop.name}</h1>
-            <p className="og-shop-tagline">{shop.tagline}</p>
+            <h1 id="shop-title" className="og-shop-name"><T>{shop.name}</T></h1>
+            <p className="og-shop-tagline"><T>{shop.tagline}</T></p>
           </div>
         </section>
 
         <div className="page-wrap og-shop-intro">
           <p className="og-lede">{shop.intro}</p>
           <div>
-            <p className="og-aside-title">Why we like it</p>
+            <p className="og-aside-title"><T>Why we like it</T></p>
             <p className="og-shop-why">{shop.why}</p>
-            <a className="og-cta" href={shop.site} target="_blank" rel="noopener noreferrer">Visit {shop.name} <ArrowUpRight size={16} aria-hidden="true" /></a>
+            <a className="og-cta" href={shop.site} target="_blank" rel="noopener noreferrer"><T>Visit</T> {shop.name} <ArrowUpRight size={16} aria-hidden="true" /></a>
           </div>
         </div>
 
         <section className="page-wrap og-block" aria-labelledby="the-edit">
           <div className="og-section-head">
-            <h2 id="the-edit" className="og-section-title">The OGCW edit</h2>
+            <h2 id="the-edit" className="og-section-title"><T>The OGCW edit</T></h2>
             <label className="og-sort">
-              <span>Sort</span>
+              <span><T>Sort</T></span>
               <select value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
                 <option value="featured">Featured</option>
                 <option value="low">Price: low to high</option>
@@ -95,19 +96,19 @@ function ShopPage() {
 
         <section className="page-wrap og-more" aria-labelledby="more-shops">
           <div className="og-section-head">
-            <h2 id="more-shops" className="og-section-title">More shops</h2>
-            <Link to="/shop" className="og-more-link">All shops</Link>
+            <h2 id="more-shops" className="og-section-title"><T>More shops</T></h2>
+            <Link to="/shop" className="og-more-link"><T>All shops</T></Link>
           </div>
           <div className="og-grid-3">
             {others.map((s) => (
               <Link key={s.slug} to="/shop/$slug" params={{ slug: s.slug }} className="og-card">
                 <Img photo={s.hero} className="og-card-photo" />
-                <span className="og-kicker">{s.name}</span>
-                <span className="og-card-title">{s.tagline}</span>
+                <span className="og-kicker"><T>{s.name}</T></span>
+                <span className="og-card-title"><T>{s.tagline}</T></span>
               </Link>
             ))}
           </div>
-          <Link to="/shop" className="og-back"><ArrowLeft size={16} aria-hidden="true" /> Back to the shop</Link>
+          <Link to="/shop" className="og-back"><ArrowLeft size={16} aria-hidden="true" /> <T>Back to the shop</T></Link>
         </section>
       </main>
     </SiteShell>

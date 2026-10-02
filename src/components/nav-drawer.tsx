@@ -5,7 +5,7 @@ import { EPISODES, EVENTS, SECTIONS, SHOPS, type Article, type Episode, type Pho
 import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // Site menu: "The OGCW Index", a full-screen contents page that drops down
 // over the site. Each section is a numbered line in large serif type with
@@ -57,6 +57,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const itemKey = (item: Item) => (item.kind === "article" ? item.a.slug : item.kind === "episode" ? item.e.slug : item.s.slug);
 const itemPhoto = (item: Item) => (item.kind === "article" ? item.a.photo : item.kind === "episode" ? item.e.still : item.s.hero);
 const itemTitle = (item: Item) => (item.kind === "article" ? item.a.title : item.kind === "episode" ? item.e.title : `Shop ${item.s.name}`);
+/** An item's title on the page: a story's headline can be changed there by an admin */
+const ItemTitle = ({ item }: { item: Item }) => (item.kind === "article" ? <S story={item.a} f="title" /> : <T>{itemTitle(item)}</T>);
 const itemSub = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${SECTIONS[item.a.section].label}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
 const eventDay = (iso: string) => new Date(iso).getUTCDate();
 const eventMonth = (iso: string) => new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" }).format(new Date(iso));
@@ -86,8 +88,8 @@ function EventLink({ event, onGo }: { event: UpcomingEvent; onGo: () => void }) 
     <>
       <span className="ix-ev-date"><b>{eventDay(event.date)}</b>{eventMonth(event.date)}</span>
       <span className="ix-ev-text">
-        <span className="ix-ev-cat">{event.category}</span>
-        <span className="ix-ev-title">{event.title}</span>
+        <span className="ix-ev-cat"><T>{event.category}</T></span>
+        <span className="ix-ev-title"><T>{event.title}</T></span>
       </span>
     </>
   );
@@ -177,7 +179,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             <button type="button" className="ix-close" aria-label="Close menu" onClick={go}>
               <X size={18} strokeWidth={1.75} aria-hidden="true" />
             </button>
-            <Link to="/" className="ix-logo" aria-label="OGCW home" onClick={go}>OGCW</Link>
+            <Link to="/" className="ix-logo" aria-label="OGCW home" onClick={go}><T>OGCW</T></Link>
           </div>
           <p className="ix-dateline">
             <span><T k="ix.index">The Index</T></span>
@@ -207,7 +209,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                       <span className="ix-num">{pad(index + 1)}</span>
                       <span className="ix-name"><span><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span></span>
                       <span className="ix-note">{section.note}</span>
-                      {lead && <span className="ix-latest">{section.to === "/shop" ? SHOPS.map((s) => s.name).join(", ") : itemTitle(lead)}</span>}
+                      {lead && <span className="ix-latest">{section.to === "/shop" ? SHOPS.map((s) => s.name).join(", ") : <ItemTitle item={lead} />}</span>}
                     </Link>
                   </li>
                 );
@@ -233,14 +235,14 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                         <img src={itemPhoto(lead).src} alt="" loading="lazy" style={{ objectPosition: crop?.pos ?? "50% 50%" }} />
                       </span>
                       <span className="ix-lead-sub">{itemSub(lead)}</span>
-                      <span className="ix-lead-title">{itemTitle(lead)}</span>
+                      <span className="ix-lead-title"><ItemTitle item={lead} /></span>
                     </ItemLink>
                   )}
                   <ol className="ix-more">
                     {rest.slice(0, 3).map((item) => (
                       <li key={itemKey(item)}>
                         <ItemLink item={item} className="ix-more-link" onGo={go}>
-                          <span className="ix-more-title">{itemTitle(item)}</span>
+                          <span className="ix-more-title"><ItemTitle item={item} /></span>
                           <span className="ix-more-sub">{itemSub(item)}</span>
                         </ItemLink>
                       </li>

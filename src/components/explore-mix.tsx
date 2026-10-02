@@ -5,7 +5,7 @@ import { useStories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { SpotifyIcon } from "./spotify";
 import { Img } from "./cards";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // Explore: a bit of everything on OGCW in one grid. An editor's pick, what's
 // trending, where to follow OGCW, a streamer and a song to press play on,
@@ -32,9 +32,9 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         <Link to="/news/$slug" params={{ slug: pick.slug }} className="mix-tile mix-pick">
           <Img photo={pick.photo} className="mix-pick-photo" />
           <span className="mix-pick-text">
-            <span className="mix-label">Editor’s pick · {pick.kicker}</span>
-            <span className="mix-pick-title">{pick.title}</span>
-            <span className="mix-pick-deck">{pick.deck}</span>
+            <span className="mix-label"><T>Editor’s pick ·</T> <S story={pick} f="kicker" /></span>
+            <span className="mix-pick-title"><S story={pick} f="title" /></span>
+            <span className="mix-pick-deck"><S story={pick} f="deck" /></span>
           </span>
         </Link>
 
@@ -45,7 +45,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
               <li key={story.slug}>
                 <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-trend">
                   <span className="mix-trend-num">{index + 1}</span>
-                  <span className="mix-trend-title">{story.title}</span>
+                  <span className="mix-trend-title"><S story={story} f="title" /></span>
                 </Link>
               </li>
             ))}
@@ -74,8 +74,8 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
             <img src={youtubeThumb(streamer.video)} alt="" loading="lazy" />
             <span className="bs-song-play" aria-hidden="true"><Play size={15} fill="currentColor" strokeWidth={0} /></span>
           </span>
-          <span className="mix-media-title">{streamer.name}</span>
-          <span className="mix-media-note">{streamer.note}</span>
+          <span className="mix-media-title"><T>{streamer.name}</T></span>
+          <span className="mix-media-note"><T>{streamer.note}</T></span>
         </a>
 
         <a className="mix-tile mix-media mix-song" href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
@@ -83,31 +83,31 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
           <span className="mix-song-row">
             <span className="mix-song-cover"><img src={song.cover} alt="" loading="lazy" /></span>
             <span className="mix-song-text">
-              <span className="mix-media-title">{song.title}</span>
+              <span className="mix-media-title"><T>{song.title}</T></span>
               <span className="mix-song-artist">{song.artist} · {song.album}</span>
             </span>
           </span>
-          <span className="mix-media-note">{song.note}</span>
-          <span className="bs-spotify"><SpotifyIcon size={15} /> Play on Spotify <ArrowUpRight size={13} aria-hidden="true" /></span>
+          <span className="mix-media-note"><T>{song.note}</T></span>
+          <span className="bs-spotify"><SpotifyIcon size={15} /> <T>Play on Spotify</T> <ArrowUpRight size={13} aria-hidden="true" /></span>
         </a>
 
         {shopPicks.map(({ shop, product }) => (
           <a key={shop.slug} className="mix-tile mix-product" href={product.url} target="_blank" rel="noopener noreferrer">
             <span className="mix-product-photo"><img src={product.image} alt={`${product.name}, ${product.detail}`} loading="lazy" /></span>
-            <span className="mix-label">From the shop · {shop.name}</span>
-            <span className="mix-media-title">{product.name}</span>
-            <span className="mix-product-foot"><span>{formatPrice(product.price)}</span><span>Shop at {shop.name} <ArrowUpRight size={13} aria-hidden="true" /></span></span>
+            <span className="mix-label"><T>From the shop ·</T> {shop.name}</span>
+            <span className="mix-media-title"><T>{product.name}</T></span>
+            <span className="mix-product-foot"><span>{formatPrice(product.price)}</span><span><T>Shop at</T> {shop.name} <ArrowUpRight size={13} aria-hidden="true" /></span></span>
           </a>
         ))}
 
         <div className="mix-tile mix-list">
           <p className="mix-label"><T k="explore.reading-list">Reading list</T></p>
-          <p className="mix-list-title">{list.title}</p>
-          <p className="mix-follow-copy">{list.note}</p>
+          <p className="mix-list-title"><T>{list.title}</T></p>
+          <p className="mix-follow-copy"><T>{list.note}</T></p>
           <ol>
             {list.items.map((story) => (
               <li key={story.slug}>
-                <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-list-link">{story.title}</Link>
+                <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-list-link"><S story={story} f="title" /></Link>
               </li>
             ))}
           </ol>

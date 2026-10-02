@@ -23,14 +23,14 @@ export const Route = createFileRoute("/explore")({
 });
 
 const DIRECTORY = [
-  { label: "News", note: "Every story, newest first", el: (c: string) => <Link to="/news" className={c}>News</Link> },
-  { label: "Music", note: "Releases, tours and awards", el: (c: string) => <Link to="/music" className={c}>Music</Link> },
-  { label: "Games", note: "Launches and showcases", el: (c: string) => <Link to="/games" className={c}>Games</Link> },
-  { label: "Streaming", note: "Creators and records", el: (c: string) => <Link to="/streaming" className={c}>Streaming</Link> },
-  { label: "Culture", note: "Fashion, TV and sneakers", el: (c: string) => <Link to="/culture" className={c}>Culture</Link> },
-  { label: "Originals", note: "OGCW-made video", el: (c: string) => <Link to="/originals" className={c}>Originals</Link> },
-  { label: "Shop", note: "The OGCW edit", el: (c: string) => <Link to="/shop" className={c}>Shop</Link> },
-  { label: "Trends", note: "The culture index", el: (c: string) => <Link to="/trends" className={c}>Trends</Link> },
+  { label: "News", note: "Every story, newest first", el: (c: string) => <Link to="/news" className={c}><T>News</T></Link> },
+  { label: "Music", note: "Releases, tours and awards", el: (c: string) => <Link to="/music" className={c}><T>Music</T></Link> },
+  { label: "Games", note: "Launches and showcases", el: (c: string) => <Link to="/games" className={c}><T>Games</T></Link> },
+  { label: "Streaming", note: "Creators and records", el: (c: string) => <Link to="/streaming" className={c}><T>Streaming</T></Link> },
+  { label: "Culture", note: "Fashion, TV and sneakers", el: (c: string) => <Link to="/culture" className={c}><T>Culture</T></Link> },
+  { label: "Originals", note: "OGCW-made video", el: (c: string) => <Link to="/originals" className={c}><T>Originals</T></Link> },
+  { label: "Shop", note: "The OGCW edit", el: (c: string) => <Link to="/shop" className={c}><T>Shop</T></Link> },
+  { label: "Trends", note: "The culture index", el: (c: string) => <Link to="/trends" className={c}><T>Trends</T></Link> },
 ];
 
 function ExplorePage() {
@@ -44,7 +44,7 @@ function ExplorePage() {
       <main className="page-wrap pb-24">
         <div className="og-explore-search">
           <Search size={22} strokeWidth={1.5} aria-hidden="true" />
-          <label htmlFor="explore-q" className="sr-only">Search OGCW</label>
+          <label htmlFor="explore-q" className="sr-only"><T>Search OGCW</T></label>
           <input id="explore-q" type="search" placeholder="Search stories, Originals and shops" value={query} onChange={(e) => setQuery(e.target.value)} autoComplete="off" />
         </div>
         {query.trim() && (
@@ -76,9 +76,9 @@ function ExplorePage() {
             {stories.readingLists.map((list, index) => (
               <article key={list.id} className="og-list">
                 <Img photo={list.cover ?? list.items[0]!.photo} className="og-list-cover" />
-                <p className="og-kicker">Reading list {String(index + 1).padStart(2, "0")} · {list.items.length} stories</p>
-                <h3 className="og-list-title">{list.title}</h3>
-                <p className="og-list-note">{list.note}</p>
+                <p className="og-kicker"><T>Reading list</T> {String(index + 1).padStart(2, "0")} · {list.items.length} stories</p>
+                <h3 className="og-list-title"><T>{list.title}</T></h3>
+                <p className="og-list-note"><T>{list.note}</T></p>
                 <ol className="og-aside-list">
                   {list.items.map((story, i) => <li key={story.slug}><StoryRow story={story} index={i} /></li>)}
                 </ol>
@@ -95,7 +95,7 @@ function ExplorePage() {
             {DIRECTORY.map((d) => (
               <li key={d.label}>
                 {d.el("og-directory-link")}
-                <span className="og-directory-note">{d.note} <ArrowRight size={14} aria-hidden="true" /></span>
+                <span className="og-directory-note"><T>{d.note}</T> <ArrowRight size={14} aria-hidden="true" /></span>
               </li>
             ))}
           </ul>

@@ -78,8 +78,8 @@ function About() {
             {DESKS.map((desk) => (
               <li key={desk.to}>
                 <Link to={desk.to} className="about-desk">
-                  <span className="about-desk-name">{desk.name} <ArrowRight size={20} strokeWidth={1.5} aria-hidden="true" /></span>
-                  <span className="about-desk-note">{desk.note}</span>
+                  <span className="about-desk-name"><T>{desk.name}</T> <ArrowRight size={20} strokeWidth={1.5} aria-hidden="true" /></span>
+                  <span className="about-desk-note"><T>{desk.note}</T></span>
                   <span className="og-meta">{desk.count}</span>
                 </Link>
               </li>
@@ -92,7 +92,7 @@ function About() {
           <ul className="og-grid-3">
             {SOURCES.map((source) => (
               <li key={source.name} className="about-writer">
-                <p className="about-writer-name">{source.name}</p>
+                <p className="about-writer-name"><T>{source.name}</T></p>
                 <p className="og-kicker">{source.beats.join(" · ")}</p>
                 <p className="og-meta">{source.stories.length} {source.stories.length === 1 ? "story" : "stories"} · Latest:</p>
                 <Link to="/news/$slug" params={{ slug: source.stories[0]!.slug }} className="about-writer-latest">{source.stories[0]!.title}</Link>
@@ -105,14 +105,14 @@ function About() {
           <h2 id="how-we-work" className="og-section-title"><T k="about.how">How we work</T></h2>
           <ol className="og-how-list">
             <li><span className="og-how-num">01</span><strong><T k="about.how.1">Reported, not aggregated</T></strong><span><T k="about.how.1.copy">We go to the shows, the studios and the rooms, and write about what we saw and who we met there.</T></span></li>
-            <li><span className="og-how-num">02</span><strong><T k="about.how.2">Every photo credited</T></strong><span>Photographers are named with their work and on our <Link to="/info/$slug" params={{ slug: "credits" }}>photo credits</Link> page.</span></li>
-            <li><span className="og-how-num">03</span><strong><T k="about.how.3">Corrections, openly</T></strong><span>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> and we’ll fix it and say so.</span></li>
+            <li><span className="og-how-num">02</span><strong><T k="about.how.2">Every photo credited</T></strong><span><T>Photographers are named with their work and on our</T> <Link to="/info/$slug" params={{ slug: "credits" }}><T>photo credits</T></Link> page.</span></li>
+            <li><span className="og-how-num">03</span><strong><T k="about.how.3">Corrections, openly</T></strong><span>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> <T>and we’ll fix it and say so.</T></span></li>
           </ol>
         </section>
 
         <section className="og-block about-contact" aria-labelledby="get-in-touch">
           <SectionHead id="get-in-touch" title="Get in touch" />
-          <p className="about-copy">One address for everything: <a href={mail("General")}>{BUSINESS_EMAIL}</a>. Put one of these in the subject and it reaches the right person.</p>
+          <p className="about-copy"><T>One address for everything:</T> <a href={mail("General")}>{BUSINESS_EMAIL}</a><T>. Put one of these in the subject and it reaches the right person.</T></p>
           <ul className="about-enquiries">
             {ENQUIRIES.map((subject) => <li key={subject}><a href={mail(subject)} className="og-chip">{subject}</a></li>)}
           </ul>

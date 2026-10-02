@@ -4,7 +4,7 @@ import { SiteShell } from "../components/ogcw-layout";
 import { BsPhoto, Meta } from "../components/broadsheet";
 import { SECTION_IDS, SECTIONS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
-import { T } from "@/components/site-text";
+import { S, T } from "@/components/site-text";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
@@ -59,7 +59,7 @@ function News() {
               {FILTERS.map((f) => (
                 <li key={f.id}>
                   <button type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
-                    {f.label}
+                    <T>{f.label}</T>
                     <span className="bs-filter-count">{countFor(all, f.id)}</span>
                   </button>
                 </li>
@@ -79,9 +79,9 @@ function News() {
                 <li key={story.slug} className="bs-all-item">
                   <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
                     <BsPhoto photo={story.photo} className="bs-photo-more" eager={index < 4} />
-                    <p className="bs-eyebrow">{story.kicker}</p>
-                    <h2 className="bs-title">{story.title}</h2>
-                    <p className="bs-deck bs-deck-sm">{story.deck}</p>
+                    <p className="bs-eyebrow"><S story={story} f="kicker" /></p>
+                    <h2 className="bs-title"><S story={story} f="title" /></h2>
+                    <p className="bs-deck bs-deck-sm"><S story={story} f="deck" /></p>
                     <p className="bs-all-meta">
                       <span>{SECTIONS[story.section].label}</span>
                       <Meta story={story} />

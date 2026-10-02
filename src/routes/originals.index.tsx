@@ -33,9 +33,9 @@ function Originals() {
           <Link to="/originals/$slug" params={{ slug: featured.slug }} className="og-feature">
             <Poster episode={featured} size="lg" />
             <span className="og-feature-text">
-              <span className="og-kicker">Up next · {featured.series}</span>
-              <span className="og-lead-title">{featured.title}</span>
-              <span className="og-lead-deck">{featured.summary}</span>
+              <span className="og-kicker"><T>Up next ·</T> {featured.series}</span>
+              <span className="og-lead-title"><T>{featured.title}</T></span>
+              <span className="og-lead-deck"><T>{featured.summary}</T></span>
               <span className="og-meta">{featured.kind} · {featured.length} · Coming soon</span>
               <span className="og-cta"><T k="originals.open">Open the episode</T> <ArrowRight size={16} aria-hidden="true" /></span>
             </span>

@@ -39,8 +39,8 @@ function Trends() {
           {TRENDS.map((trend, index) => (
             <li key={trend.title} className="trend">
               <span className="trend-num">{String(index + 1).padStart(2, "0")}</span>
-              <h2 className="trend-title">{trend.title}</h2>
-              <p className="trend-note">{trend.note}</p>
+              <h2 className="trend-title"><T>{trend.title}</T></h2>
+              <p className="trend-note"><T>{trend.note}</T></p>
               <p className="trend-read"><T k="trends.read">Read the story</T></p>
               <StoryRow story={stories.pick(trend.slug)} />
             </li>

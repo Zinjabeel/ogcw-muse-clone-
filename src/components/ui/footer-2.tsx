@@ -100,7 +100,7 @@ function AppBadge({ store }: { store: "apple" | "google" }) {
     <span className="app-badge" aria-label={`${store === "apple" ? "App Store" : "Google Play"}: coming soon`}>
       <svg viewBox="0 0 24 24" width={18} height={18} fill="currentColor" aria-hidden="true"><path d={storeLogos[store]} /></svg>
       <span className="grid gap-0.5 leading-none">
-        <span className="text-[9px] font-medium uppercase tracking-[.08em] opacity-70">Coming soon on</span>
+        <span className="text-[9px] font-medium uppercase tracking-[.08em] opacity-70"><T>Coming soon on</T></span>
         <span className="text-[13px] font-semibold">{store === "apple" ? "App Store" : "Google Play"}</span>
       </span>
     </span>
@@ -143,7 +143,7 @@ export function Footer2() {
         {/* Masthead: the wordmark and line, with the social channels */}
         <div className="footer-reveal footer-brand" style={{ ["--i" as string]: 0 }}>
           <div>
-            <Link to="/" className="footer-wordmark" aria-label="OGCW home">OGCW</Link>
+            <Link to="/" className="footer-wordmark" aria-label="OGCW home"><T>OGCW</T></Link>
             <p className="footer-tagline"><T k="footer.tagline">One Great Culture World. Culture, reported from the inside.</T></p>
           </div>
           <div className="footer-socials">

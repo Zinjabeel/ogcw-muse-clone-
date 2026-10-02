@@ -29,12 +29,12 @@ export function NewsletterForm() {
     setDone(true);
   };
 
-  if (done) return <p className="ogcw-connect-thanks" role="status">Thanks! The newsletter launches soon.</p>;
+  if (done) return <p className="ogcw-connect-thanks" role="status"><T>Thanks! The newsletter launches soon.</T></p>;
   return (
     <form className="ogcw-connect-form" onSubmit={onSubmit}>
-      <label htmlFor="newsletter-email" className="sr-only">Your email</label>
+      <label htmlFor="newsletter-email" className="sr-only"><T>Your email</T></label>
       <input id="newsletter-email" name="email" type="email" placeholder="Your email" autoComplete="email" required />
-      <button type="submit">Subscribe</button>
+      <button type="submit"><T>Subscribe</T></button>
     </form>
   );
 }
@@ -48,10 +48,10 @@ export function ConnectSection() {
           <p className="ogcw-connect-label"><T k="connect.about.label">About OGCW</T></p>
           <h2 id="about-ogcw-title" className="ogcw-connect-title"><T k="connect.about.title">One Great Culture World</T></h2>
           <p className="ogcw-connect-copy">
-            OGCW is an independent platform for culture and the stories around it. We cover music, fashion, film &amp; TV, sport and pop culture, reported by the people shaping them.
+            <T>OGCW is an independent platform for culture and the stories around it. We cover music, fashion, film &amp; TV, sport and pop culture, reported by the people shaping them.</T>
           </p>
           <p className="ogcw-connect-copy">
-            Our idea is simple: bring culture and what’s happening right now, from all over the world, together in one place.
+            <T>Our idea is simple: bring culture and what’s happening right now, from all over the world, together in one place.</T>
           </p>
           <Link to="/about" className="ogcw-connect-link"><T k="connect.about.link">More about OGCW</T> <ArrowRight size={14} aria-hidden="true" /></Link>
         </section>
@@ -77,8 +77,8 @@ export function ConnectSection() {
               <li key={item.label}>
                 <a href={mail(item.label)}>
                   <span>
-                    <span className="ogcw-connect-work-label">{item.label}</span>
-                    <span className="ogcw-connect-work-note">{item.note}</span>
+                    <span className="ogcw-connect-work-label"><T>{item.label}</T></span>
+                    <span className="ogcw-connect-work-note"><T>{item.note}</T></span>
                   </span>
                   <ArrowUpRight size={16} aria-hidden="true" />
                 </a>

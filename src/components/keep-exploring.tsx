@@ -7,7 +7,7 @@ import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
 import { StoryMeta } from "./story-meta";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // Keep exploring: the Explore grid carries straight on into more stories,
 // in the same tiles. A big feature and four stories, then the rap desk
@@ -94,14 +94,14 @@ function RapPoll() {
               <span className="poll-text">
                 <span className="poll-name">
                   {contender.name}
-                  {mine === contender.id && <span className="poll-mine"><Check size={12} strokeWidth={2.5} aria-hidden="true" /> Your vote</span>}
+                  {mine === contender.id && <span className="poll-mine"><Check size={12} strokeWidth={2.5} aria-hidden="true" /> <T>Your vote</T></span>}
                 </span>
-                <span className="poll-case">{contender.case}</span>
+                <span className="poll-case"><T>{contender.case}</T></span>
               </span>
               {share ? (
                 <span className="poll-share">{share[contender.id]}<small>%</small></span>
               ) : (
-                <span className="poll-cta" aria-hidden="true">Vote</span>
+                <span className="poll-cta" aria-hidden="true"><T>Vote</T></span>
               )}
             </>
           );
@@ -128,7 +128,7 @@ function RapPoll() {
         {status === "idle" && !share && "Pick a name to vote. You’ll see how everyone else voted straight after."}
         {status === "idle" && share && picked && (
           <>
-            <strong>{total.toLocaleString("en-GB")} {total === 1 ? "vote" : "votes"}</strong> so far. You picked {picked.name}.
+            <strong>{total.toLocaleString("en-GB")} {total === 1 ? "vote" : "votes"}</strong> <T>so far. You picked</T> {picked.name}.
           </>
         )}
       </p>
@@ -142,8 +142,8 @@ function Tile({ story, tall = false }: { story: Article; tall?: boolean }) {
   return (
     <Link to="/news/$slug" params={{ slug: story.slug }} className={`mix-tile kx-tile ${tall ? "kx-tile-tall" : ""}`}>
       <Img photo={story.photo} className="kx-tile-photo" />
-      <span className="mix-label">{story.kicker} · {SECTIONS[story.section].label}</span>
-      <span className="kx-tile-title">{story.title}</span>
+      <span className="mix-label"><S story={story} f="kicker" /> · <T>{SECTIONS[story.section].label}</T></span>
+      <span className="kx-tile-title"><S story={story} f="title" /></span>
       <StoryMeta story={story} className="kx-meta" />
     </Link>
   );
@@ -155,9 +155,9 @@ function Feature({ story, label }: { story: Article; label?: string }) {
     <Link to="/news/$slug" params={{ slug: story.slug }} className="mix-tile mix-pick kx-feature">
       <Img photo={story.photo} className="mix-pick-photo" />
       <span className="mix-pick-text">
-        <span className="mix-label">{label ?? story.kicker} · {SECTIONS[story.section].label}</span>
-        <span className="mix-pick-title">{story.title}</span>
-        <span className="mix-pick-deck">{story.deck}</span>
+        <span className="mix-label">{label ? <T>{label}</T> : <S story={story} f="kicker" />} · <T>{SECTIONS[story.section].label}</T></span>
+        <span className="mix-pick-title"><S story={story} f="title" /></span>
+        <span className="mix-pick-deck"><S story={story} f="deck" /></span>
         <span className="kx-feature-cta"><T k="kx.read">Read the story</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
       </span>
     </Link>
@@ -169,8 +169,8 @@ function RapStory({ story }: { story: Article }) {
     <Link to="/news/$slug" params={{ slug: story.slug }} className="kx-rap-story">
       <Img photo={story.photo} className="kx-rap-thumb" />
       <span className="kx-rap-text">
-        <span className="mix-label">{story.kicker}</span>
-        <span className="kx-rap-title">{story.title}</span>
+        <span className="mix-label"><S story={story} f="kicker" /></span>
+        <span className="kx-rap-title"><S story={story} f="title" /></span>
         <StoryMeta story={story} className="kx-meta" />
       </span>
     </Link>
@@ -206,9 +206,9 @@ export function KeepExploring() {
         <section className="mix-tile kx-rap" aria-labelledby="rap-desk-title">
           <div className="kx-rap-poll">
             <p className="mix-label"><T k="kx.rap.label">The rap desk · Vote</T></p>
-            <h4 id="rap-desk-title" className="kx-rap-question">Who’s the <em>No. 1</em> rapper right now?</h4>
+            <h4 id="rap-desk-title" className="kx-rap-question"><T>Who’s the</T> <em><T>No. 1</T></em> <T>rapper right now?</T></h4>
             <p className="kx-rap-intro">
-              Five names, five cases from 2026 so far.{" "}
+              <T>Five names, five cases from 2026 so far.</T>{" "}
               <Link to="/news/$slug" params={{ slug: RAP_POLL.story }} className="kx-rap-intro-link"><T k="kx.rap.case">Read the case for each</T></Link>
             </p>
             <RapPoll />

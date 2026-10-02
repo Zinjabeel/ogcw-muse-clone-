@@ -2801,14 +2801,17 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
    Edit site, for admins (src/components/site-text.tsx): everything
    editable outlined, a button bottom left, the save bar bottom centre
    ------------------------------------------------------------------ */
-.site-editing .site-t { outline: 1px dashed color-mix(in srgb, var(--ogcw-accent) 70%, transparent); outline-offset: 3px; border-radius: 3px; cursor: text; transition: background-color .15s ease, outline-color .15s ease; }
-.site-editing .site-t:hover { background: color-mix(in srgb, var(--ogcw-accent) 14%, transparent); outline-style: solid; }
-.site-editing .site-t.is-changed { outline: 1px solid var(--ogcw-accent); }
-.site-editing .site-t.is-active { outline: 2px solid var(--ogcw-accent); background: color-mix(in srgb, var(--ogcw-bg) 85%, transparent); caret-color: var(--ogcw-accent); }
-.site-editing .site-img { outline: 2px dashed color-mix(in srgb, var(--ogcw-accent) 80%, transparent); outline-offset: -4px; cursor: pointer; }
-.site-editing .site-img:hover { outline-style: solid; filter: brightness(.85); }
-.site-editing .site-img.is-changed { outline-style: solid; }
-.site-edit { position: fixed; left: 16px; bottom: 16px; z-index: 90; display: flex; align-items: center; gap: 10px; font-family: var(--ogcw-ui); }
+.site-editing .site-t { border-radius: 3px; }
+.site-editing .site-t.is-active { outline: 2px solid var(--ogcw-accent); outline-offset: 3px; background: color-mix(in srgb, var(--ogcw-bg) 85%, transparent); caret-color: var(--ogcw-accent); cursor: text; }
+.site-editing .site-t.is-active.is-over { outline-color: var(--destructive); }
+.site-editing .site-t.is-active[data-left]::after { content: "max " attr(data-left) " characters"; position: absolute; margin: 2.2em 0 0 -8em; padding: 2px 8px; border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text-2); font: 600 11px/1.6 var(--ogcw-ui); letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none; }
+.site-editing .site-t.is-active.is-over[data-left]::after { color: var(--destructive); }
+/* The text or photo under the pointer: a frame round it and the Edit button by it */
+.site-edit-frame { position: fixed; z-index: 88; border: 1.5px solid var(--ogcw-accent); border-radius: 5px; background: color-mix(in srgb, var(--ogcw-accent) 8%, transparent); pointer-events: none; animation: site-pop .15s ease both; }
+.site-edit-btn { position: fixed; z-index: 89; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 11px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font: 700 12px/1 var(--ogcw-ui); letter-spacing: .02em; box-shadow: 0 8px 22px -8px rgb(0 0 0 / .55); cursor: pointer; animation: site-pop .15s ease both; }
+.site-edit-btn:hover, .site-edit-btn:focus-visible { background: var(--ogcw-text); outline: none; }
+.site-edit-btn.is-photo { height: 32px; padding: 0 14px; font-size: 12.5px; }
+@keyframes site-pop { from { opacity: 0; transform: translateY(3px); } }.site-edit { position: fixed; left: 16px; bottom: 16px; z-index: 90; display: flex; align-items: center; gap: 10px; font-family: var(--ogcw-ui); }
 .site-edit-toggle { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: color-mix(in srgb, var(--ogcw-surface) 92%, transparent); color: var(--ogcw-text); font-size: 13px; font-weight: 700; box-shadow: var(--ogcw-shadow-lift); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
 .site-edit-toggle:hover, .site-edit-toggle:focus-visible { border-color: var(--ogcw-accent); outline: none; }
 .site-edit.is-on .site-edit-toggle { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }

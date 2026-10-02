@@ -6,7 +6,7 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 import { EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { StoryMeta } from "./story-meta";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
@@ -32,14 +32,14 @@ export function SectionFront({ section }: { section: SectionId }) {
           <Link to="/news/$slug" params={{ slug: lead.slug }} className="og-lead">
             <Img photo={lead.photo} className="og-lead-photo" eager />
             <span className="og-lead-text">
-              <span className="og-kicker">{lead.kicker}</span>
-              <span className="og-lead-title">{lead.title}</span>
-              <span className="og-lead-deck">{lead.deck}</span>
+              <span className="og-kicker"><S story={lead} f="kicker" /></span>
+              <span className="og-lead-title"><S story={lead} f="title" /></span>
+              <span className="og-lead-deck"><S story={lead} f="deck" /></span>
               <StoryMeta story={lead} className="og-meta" />
             </span>
           </Link>
           <aside className="og-news-aside" aria-labelledby={`${section}-list`}>
-            <p id={`${section}-list`} className="og-aside-title">In {SECTIONS[section].label}</p>
+            <p id={`${section}-list`} className="og-aside-title"><T>In</T> {SECTIONS[section].label}</p>
             <ol className="og-aside-list">
               {rest.slice(0, 4).map((item, index) => <li key={item.slug}><StoryRow story={item} index={index} /></li>)}
             </ol>
@@ -51,9 +51,9 @@ export function SectionFront({ section }: { section: SectionId }) {
           <a className="og-live" href={LIVE.url} target="_blank" rel="noopener noreferrer">
             <Img photo={LIVE.photo} className="og-live-photo" />
             <span className="og-live-text">
-              <span className="og-kicker">{LIVE.kicker}</span>
-              <span className="og-live-title">{LIVE.title}</span>
-              <span className="og-meta">{LIVE.meta}</span>
+              <span className="og-kicker"><T>{LIVE.kicker}</T></span>
+              <span className="og-live-title"><T>{LIVE.title}</T></span>
+              <span className="og-meta"><T>{LIVE.meta}</T></span>
             </span>
             <span className="og-live-cta"><T k="section.tour">Tour dates</T> <ArrowUpRight size={16} aria-hidden="true" /></span>
           </a>
@@ -80,7 +80,7 @@ export function SectionFront({ section }: { section: SectionId }) {
         {rest.length > 0 && (
           <section className="og-block" aria-labelledby={`${section}-all`}>
             <div className="og-section-head">
-              <h2 id={`${section}-all`} className="og-section-title">All {SECTIONS[section].label.toLowerCase()} stories</h2>
+              <h2 id={`${section}-all`} className="og-section-title"><T>All</T> {SECTIONS[section].label.toLowerCase()} stories</h2>
             </div>
             <div className="og-grid-3">
               {rest.map((story) => <StoryCard key={story.slug} story={story} showDeck />)}

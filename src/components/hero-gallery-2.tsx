@@ -5,7 +5,7 @@ import type { SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { StoryMeta } from "./story-meta";
 import { CARDS, CardLink } from "./hero-gallery";
-import { EditableImage, T } from "./site-text";
+import { EditableImage, S, T } from "./site-text";
 import { useSiteText } from "@/lib/site-text";
 
 // Gallery 2 (the second option in the hero switcher): the top news takes the
@@ -71,8 +71,8 @@ export function HeroGallery2() {
   }, []);
 
   // The strip moves on every 2 seconds
-  const { editing } = useSiteText();
-  const stripRunning = !paused && !holdStrip && inView && !reduce && !editing;
+  const { busy } = useSiteText();
+  const stripRunning = !paused && !holdStrip && inView && !reduce && !busy;
   useEffect(() => {
     if (!stripRunning) return;
     const timer = window.setInterval(() => setCard((value) => (value + 1) % CARDS.length), STRIP_MS);
@@ -82,7 +82,7 @@ export function HeroGallery2() {
   const offsets = CARDS.map((_, index) => offsetOf(index, card));
   useEffect(() => { lastOffsets.current = offsets; });
 
-  const featureRunning = !paused && !holdFeature && inView && !reduce && !editing;
+  const featureRunning = !paused && !holdFeature && inView && !reduce && !busy;
   // The studio can change how many top stories there are while the page is open
   useEffect(() => { if (feature >= FEATURES.length) setFeature(0); }, [feature, FEATURES.length]);
   const current = FEATURES[feature] ?? FEATURES[0];
@@ -90,7 +90,7 @@ export function HeroGallery2() {
 
   return (
     <section ref={section} className="gallery2" style={{ "--tone": current.tone } as CSSProperties} aria-labelledby="g2-title">
-      <h1 id="g2-title" className="sr-only">OGCW, One Great Culture World</h1>
+      <h1 id="g2-title" className="sr-only"><T>OGCW, One Great Culture World</T></h1>
 
       <div className="gallery-bg" aria-hidden="true">
         {FEATURES.map((item, index) => (
@@ -120,14 +120,14 @@ export function HeroGallery2() {
                 data-on={index === feature}
               >
                 <div className="g2-text">
-                  <p className="g2-kicker"><T k="hero.top.kicker">Top story</T> · {item.story.kicker}</p>
+                  <p className="g2-kicker"><T k="hero.top.kicker">Top story</T> · <S story={item.story} f="kicker" /></p>
                   <h2 className="g2-title">
-                    <Link to="/news/$slug" params={{ slug: item.story.slug }} tabIndex={index === feature ? undefined : -1}>{item.story.title}</Link>
+                    <Link to="/news/$slug" params={{ slug: item.story.slug }} tabIndex={index === feature ? undefined : -1}><S story={item.story} f="title" /></Link>
                   </h2>
-                  <p className="g2-deck">{item.story.deck}</p>
+                  <p className="g2-deck"><S story={item.story} f="deck" /></p>
                   <div className="g2-actions">
                     <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-cta" tabIndex={index === feature ? undefined : -1}>
-                      {item.cta} <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+                      <T>{item.cta}</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
                     </Link>
                     <StoryMeta story={item.story} className="g2-meta" />
                   </div>
@@ -148,7 +148,7 @@ export function HeroGallery2() {
                     <i key={feature} style={{ "--dur": `${FEATURE_MS}ms` } as CSSProperties} data-run={featureRunning} onAnimationEnd={() => setFeature((value) => (value + 1) % FEATURES.length)} />
                   )}
                 </span>
-                <span className="g2-tab-kicker">{item.story.kicker}</span>
+                <span className="g2-tab-kicker"><S story={item.story} f="kicker" /></span>
                 <span className="g2-tab-name">{item.tab}</span>
               </button>
             ))}

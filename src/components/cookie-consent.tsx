@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Cookie, Globe } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { readConsent, saveConsent } from "@/lib/consent";
+import { T } from "./site-text";
 
 // The welcome panel every new visitor sees: pick a language (English, for
 // now) and choose which browser storage OGCW may use. "Accept all" and
@@ -55,10 +56,10 @@ export function CookieConsent() {
   return (
     <div ref={panel} className="consent" role="dialog" aria-modal="false" aria-labelledby="consent-title" aria-describedby="consent-copy">
       <div className="consent-top">
-        <p className="consent-kicker"><Cookie size={14} strokeWidth={2} aria-hidden="true" /> Welcome to OGCW</p>
+        <p className="consent-kicker"><Cookie size={14} strokeWidth={2} aria-hidden="true" /> <T>Welcome to OGCW</T></p>
         <label className="consent-language">
           <Globe size={14} strokeWidth={1.75} aria-hidden="true" />
-          <span className="sr-only">Language</span>
+          <span className="sr-only"><T>Language</T></span>
           <select defaultValue="en" aria-label="Language">
             {LANGUAGES.map((language) => <option key={language.code} value={language.code}>{language.native}</option>)}
           </select>
@@ -70,7 +71,7 @@ export function CookieConsent() {
       {!settings ? (
         <>
           <p id="consent-copy" className="consent-copy">
-            OGCW keeps a few small files in your browser to make the site work and, if you allow it, to remember your preferences, like your colour theme and your votes. We don’t use advertising or tracking cookies. Read the <Link to="/info/$slug" params={{ slug: "cookies" }} onClick={() => setOpen(false)}>Cookie Policy</Link>.
+            <T>OGCW keeps a few small files in your browser to make the site work and, if you allow it, to remember your preferences, like your colour theme and your votes. We don’t use advertising or tracking cookies. Read the</T> <Link to="/info/$slug" params={{ slug: "cookies" }} onClick={() => setOpen(false)}>Cookie Policy</Link>.
           </p>
           <div className="consent-actions">
             <button type="button" className="consent-primary" onClick={() => choose(true)}>Accept all</button>
@@ -80,23 +81,23 @@ export function CookieConsent() {
         </>
       ) : (
         <>
-          <p id="consent-copy" className="consent-copy">Choose what OGCW may store in this browser. You can change this at any time from “Cookie settings” in the footer.</p>
+          <p id="consent-copy" className="consent-copy"><T>Choose what OGCW may store in this browser. You can change this at any time from “Cookie settings” in the footer.</T></p>
           <ul className="consent-list">
             <li>
-              <div><strong>Strictly necessary</strong><span>Remembers this choice and your language. The site needs these to work.</span></div>
-              <span className="consent-always">Always on</span>
+              <div><strong><T>Strictly necessary</T></strong><span><T>Remembers this choice and your language. The site needs these to work.</T></span></div>
+              <span className="consent-always"><T>Always on</T></span>
             </li>
             <li>
-              <div><strong>Preferences</strong><span>Your colour theme, your choice of home page hero, and the votes and answers you have given, so you see the results when you come back.</span></div>
+              <div><strong><T>Preferences</T></strong><span><T>Your colour theme, your choice of home page hero, and the votes and answers you have given, so you see the results when you come back.</T></span></div>
               <button type="button" role="switch" aria-checked={preferences} aria-label="Preferences" className="consent-switch" onClick={() => setPreferences((value) => !value)}><i aria-hidden="true" /></button>
             </li>
             <li className="consent-off">
-              <div><strong>Analytics</strong><span>Not used. OGCW does not measure visits with analytics cookies.</span></div>
-              <span className="consent-always">Not used</span>
+              <div><strong><T>Analytics</T></strong><span><T>Not used. OGCW does not measure visits with analytics cookies.</T></span></div>
+              <span className="consent-always"><T>Not used</T></span>
             </li>
             <li className="consent-off">
-              <div><strong>Advertising</strong><span>Not used. OGCW does not use advertising or tracking cookies.</span></div>
-              <span className="consent-always">Not used</span>
+              <div><strong><T>Advertising</T></strong><span><T>Not used. OGCW does not use advertising or tracking cookies.</T></span></div>
+              <span className="consent-always"><T>Not used</T></span>
             </li>
           </ul>
           <div className="consent-actions">
@@ -114,7 +115,7 @@ export function LanguagePicker() {
   return (
     <label className="lang-picker">
       <Globe size={15} strokeWidth={1.75} aria-hidden="true" />
-      <span className="sr-only">Language</span>
+      <span className="sr-only"><T>Language</T></span>
       <select defaultValue="en" aria-label="Language">
         {LANGUAGES.map((language) => <option key={language.code} value={language.code}>{language.native}</option>)}
       </select>

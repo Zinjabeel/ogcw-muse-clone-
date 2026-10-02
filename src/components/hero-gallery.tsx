@@ -91,8 +91,8 @@ export function HeroGallery() {
 
   const go = (step: number) => setActive((value) => (((value + step) % CARDS.length) + CARDS.length) % CARDS.length);
   const site = useSiteText();
-  // Hold still while an admin edits the site, so the card under the cursor stays put
-  const running = !paused && !hold && inView && !reduce && !site.editing;
+  // Hold still while an admin points at or edits a text, so the card stays put
+  const running = !paused && !hold && inView && !reduce && !site.busy;
   const current = CARDS[active]!;
 
   // Swipe on touch screens (and drag with a mouse): a clear sideways move of 40px or more

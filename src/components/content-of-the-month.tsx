@@ -23,14 +23,14 @@ export function ContentOfTheMonth({ headingLevel = "h3" }: { headingLevel?: "h2"
             <a className="cotm-card" href={youtubeUrl(creator.video)} target="_blank" rel="noopener noreferrer">
               <span className="cotm-thumb">
                 <img src={youtubeThumb(creator.video)} alt="" loading="lazy" />
-                <span className="cotm-rank"><span className="sr-only">Ranked </span>{ordinal(creator.rank)}</span>
+                <span className="cotm-rank"><span className="sr-only"><T>Ranked</T> </span>{ordinal(creator.rank)}</span>
                 <span className="cotm-play" aria-hidden="true"><Play size={15} fill="currentColor" strokeWidth={0} /></span>
               </span>
               <span className="cotm-text">
                 <span className="cotm-honour">{creator.honour}</span>
-                <span className="cotm-name">{creator.name}</span>
+                <span className="cotm-name"><T>{creator.name}</T></span>
                 <span className="cotm-awards">{creator.awards.join(" · ")}</span>
-                <span className="cotm-video"><span className="sr-only">Watch: </span>{creator.videoTitle}<ArrowUpRight size={13} aria-hidden="true" /></span>
+                <span className="cotm-video"><span className="sr-only"><T>Watch:</T> </span>{creator.videoTitle}<ArrowUpRight size={13} aria-hidden="true" /></span>
               </span>
             </a>
           </li>

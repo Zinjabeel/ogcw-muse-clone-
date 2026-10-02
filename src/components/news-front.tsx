@@ -11,7 +11,7 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, Meta, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
 import { ShopPromo } from "./shop-promo";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -247,9 +247,9 @@ export function NewsFront() {
         <div className="bs-front">
           <article className="bs-col bs-col-lead bs-reveal">
             <Link to="/news/$slug" params={{ slug: lead.slug }} className="bs-card">
-              <p className="bs-eyebrow">{lead.kicker}</p>
-              <h3 className="bs-title bs-title-lead">{lead.title}</h3>
-              <p className="bs-deck">{lead.deck}</p>
+              <p className="bs-eyebrow"><S story={lead} f="kicker" /></p>
+              <h3 className="bs-title bs-title-lead"><S story={lead} f="title" /></h3>
+              <p className="bs-deck"><S story={lead} f="deck" /></p>
               <Meta story={lead} />
               <Photo photo={lead.photo} className="bs-photo-lead" />
             </Link>
@@ -264,10 +264,10 @@ export function NewsFront() {
                   <span className="bs-song-play" aria-hidden="true"><Play size={16} fill="currentColor" strokeWidth={0} /></span>
                 </span>
                 <span className="bs-song-info">
-                  <span className="bs-song-title">{song.title}</span>
-                  <span className="bs-song-artist">{song.artist}</span>
+                  <span className="bs-song-title"><T>{song.title}</T></span>
+                  <span className="bs-song-artist"><T>{song.artist}</T></span>
                   <span className="bs-song-album">{song.album} · {song.year}</span>
-                  <span className="bs-song-note">{song.note}</span>
+                  <span className="bs-song-note"><T>{song.note}</T></span>
                   <span className="bs-spotify"><SpotifyIcon size={15} /> <T k="home.song.cta">Play on Spotify</T> <ArrowUpRight size={13} aria-hidden="true" /></span>
                 </span>
               </a>
@@ -279,8 +279,8 @@ export function NewsFront() {
                       <span className="bs-song-num" aria-hidden="true">{index + 2}</span>
                       <span className="bs-song-thumb"><img src={item.cover} alt="" loading="lazy" /></span>
                       <span className="bs-song-next-text">
-                        <span className="bs-song-next-title">{item.title}</span>
-                        <span className="bs-song-next-artist">{item.artist}</span>
+                        <span className="bs-song-next-title"><T>{item.title}</T></span>
+                        <span className="bs-song-next-artist"><T>{item.artist}</T></span>
                       </span>
                       <span className="bs-song-next-play"><SpotifyIcon size={16} /></span>
                     </a>
@@ -295,9 +295,9 @@ export function NewsFront() {
               <article key={story.slug} className="bs-reveal">
                 <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
                   <Photo photo={story.photo} className="bs-photo-secondary" />
-                  <p className="bs-eyebrow">{story.kicker}</p>
-                  <h3 className="bs-title">{story.title}</h3>
-                  <p className="bs-deck bs-deck-sm">{story.deck}</p>
+                  <p className="bs-eyebrow"><S story={story} f="kicker" /></p>
+                  <h3 className="bs-title"><S story={story} f="title" /></h3>
+                  <p className="bs-deck bs-deck-sm"><S story={story} f="deck" /></p>
                   <Meta story={story} />
                 </Link>
               </article>
@@ -311,8 +311,8 @@ export function NewsFront() {
               <article key={story.slug} className="bs-reveal">
                 <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
                   <Photo photo={story.photo} className="bs-photo-secondary" />
-                  <p className="bs-eyebrow">{story.kicker}</p>
-                  <h3 className="bs-title">{story.title}</h3>
+                  <p className="bs-eyebrow"><S story={story} f="kicker" /></p>
+                  <h3 className="bs-title"><S story={story} f="title" /></h3>
                   <Meta story={story} />
                 </Link>
               </article>

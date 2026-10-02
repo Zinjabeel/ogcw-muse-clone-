@@ -66,7 +66,7 @@ export function ShopPromo() {
         <h3 id="sp-title" className="sp-title"><T k="shop-promo.title">Shop the OGCW edit</T></h3>
         <p className="sp-text"><T k="shop-promo.text">Our picks from the brands in our stories, bought straight from the retailer.</T></p>
         <Link to="/shop" className="sp-button">
-          Visit the shop
+          <T>Visit the shop</T>
           <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
         </Link>
 
@@ -77,14 +77,14 @@ export function ShopPromo() {
               <li key={shop.slug}>
                 <Link to="/shop/$slug" params={{ slug: shop.slug }} className="sp-brand">
                   <span className="sp-brand-logo" data-brand={shop.slug}><img src={LOGOS[shop.slug]} alt="" /></span>
-                  <span className="sp-brand-name">{shop.name}</span>
+                  <span className="sp-brand-name"><T>{shop.name}</T></span>
                 </Link>
               </li>
             ))}
             <li>
               <Link to="/shop" className="sp-brand sp-brand-more">
                 <span className="sp-brand-logo"><Plus size={22} strokeWidth={1.75} aria-hidden="true" /></span>
-                <span className="sp-brand-name">More</span>
+                <span className="sp-brand-name"><T>More</T></span>
               </Link>
             </li>
           </ul>

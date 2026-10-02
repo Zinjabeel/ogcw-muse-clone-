@@ -1,6 +1,7 @@
 import { Check, GalleryHorizontal, LayoutPanelTop, PanelsTopLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { storePreference } from "@/lib/consent";
+import { T } from "./site-text";
 
 // Hero switcher in the header, beside the colour switcher and built the same
 // way: "Gallery" (the default, hero-gallery.tsx) is five cards into OGCW,
@@ -88,7 +89,7 @@ export function HeroSwitcher() {
       </button>
       {open && (
         <div id="hero-menu" className="theme-menu" role="group" aria-label="Hero section">
-          <p className="theme-menu-label">Hero section</p>
+          <p className="theme-menu-label"><T>Hero section</T></p>
           {HEROES.map((h, index) => (
             <button
               key={h.id}
@@ -101,8 +102,8 @@ export function HeroSwitcher() {
               <span className="theme-option-num">{index + 1}</span>
               <span className="hero-glyph" aria-hidden="true"><h.Icon size={15} strokeWidth={1.75} /></span>
               <span className="theme-option-text">
-                <span className="theme-option-name">{h.name}</span>
-                <span className="theme-option-note">{h.note}</span>
+                <span className="theme-option-name"><T>{h.name}</T></span>
+                <span className="theme-option-note"><T>{h.note}</T></span>
               </span>
               {h.id === hero && <Check size={16} strokeWidth={2} className="theme-option-check" aria-hidden="true" />}
             </button>

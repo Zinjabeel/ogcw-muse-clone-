@@ -21,9 +21,9 @@ function EventRow({ event }: { event: UpcomingEvent }) {
         <span className="ev-weekday">{weekday(event.date)}</span>
       </span>
       <span className="ev-text">
-        <span className="ev-cat" data-cat={event.category}>{event.category}</span>
-        <span className="ev-title">{event.title}</span>
-        <span className="ev-detail">{event.detail}</span>
+        <span className="ev-cat" data-cat={event.category}><T>{event.category}</T></span>
+        <span className="ev-title"><T>{event.title}</T></span>
+        <span className="ev-detail"><T>{event.detail}</T></span>
       </span>
     </>
   );

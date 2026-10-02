@@ -5,7 +5,7 @@ import { isDefault } from "@/data/placements";
 import { useStories } from "@/lib/stories";
 import { BsPhoto, Meta } from "./broadsheet";
 import { StoryDate } from "./story-meta";
-import { T } from "./site-text";
+import { S, T } from "./site-text";
 
 // This week: fifteen of the latest stories as a second broadsheet block
 // under the OGCW News front, in the same hairline grid. A big lead (Saint
@@ -32,7 +32,7 @@ export function NewsWeek() {
     <section className="bs-week" aria-labelledby="week-title">
       <div className="bs-section-head">
         <h3 id="week-title" className="bs-eyebrow"><T k="home.week.title">This week</T></h3>
-        <Link to="/news" className="bs-more">All {stories.all.length} stories</Link>
+        <Link to="/news" className="bs-more"><T>All</T> {stories.all.length} stories</Link>
       </div>
 
       <div className="bs-week-grid">
@@ -40,9 +40,9 @@ export function NewsWeek() {
         <article className="bs-week-lead bs-reveal">
           <Link to="/news/$slug" params={{ slug: LEAD.slug }} className="bs-card">
             <BsPhoto photo={LEAD.photo} className="bs-photo-week" />
-            <p className="bs-eyebrow">{LEAD.kicker}</p>
-            <h4 className="bs-title bs-title-week">{LEAD.title}</h4>
-            <p className="bs-deck">{LEAD.deck}</p>
+            <p className="bs-eyebrow"><S story={LEAD} f="kicker" /></p>
+            <h4 className="bs-title bs-title-week"><S story={LEAD} f="title" /></h4>
+            <p className="bs-deck"><S story={LEAD} f="deck" /></p>
             <Meta story={LEAD} />
           </Link>
           <div className="bs-thread">
@@ -53,8 +53,8 @@ export function NewsWeek() {
                   <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-thread-item">
                     <BsPhoto photo={story.photo} className="bs-thread-thumb" />
                     <span className="bs-thread-text">
-                      <span className="bs-eyebrow">{story.kicker}</span>
-                      <span className="bs-thread-title">{story.title}</span>
+                      <span className="bs-eyebrow"><S story={story} f="kicker" /></span>
+                      <span className="bs-thread-title"><S story={story} f="title" /></span>
                     </span>
                   </Link>
                 </li>
@@ -69,15 +69,15 @@ export function NewsWeek() {
             <article className="bs-reveal">
               <Link to="/news/$slug" params={{ slug: MIDDLE.slug }} className="bs-card">
                 <BsPhoto photo={MIDDLE.photo} className="bs-photo-secondary" />
-                <p className="bs-eyebrow">{MIDDLE.kicker}</p>
-                <h4 className="bs-title">{MIDDLE.title}</h4>
-                <p className="bs-deck bs-deck-sm">{MIDDLE.deck}</p>
+                <p className="bs-eyebrow"><S story={MIDDLE} f="kicker" /></p>
+                <h4 className="bs-title"><S story={MIDDLE} f="title" /></h4>
+                <p className="bs-deck bs-deck-sm"><S story={MIDDLE} f="deck" /></p>
                 <Meta story={MIDDLE} />
               </Link>
               {MIDDLE_LINKED && MIDDLE_LINKED.slug !== MIDDLE.slug && (
                 <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
                   <span className="bs-linked-tag"><T k="home.week.connected">Connected</T></span>
-                  <span className="bs-linked-title">{MIDDLE_LINKED.title}</span>
+                  <span className="bs-linked-title"><S story={MIDDLE_LINKED} f="title" /></span>
                   <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </Link>
               )}
@@ -87,8 +87,8 @@ export function NewsWeek() {
             <article className="bs-reveal">
               <Link to="/news/$slug" params={{ slug: SECOND.slug }} className="bs-card">
                 <BsPhoto photo={SECOND.photo} className="bs-photo-secondary" />
-                <p className="bs-eyebrow">{SECOND.kicker}</p>
-                <h4 className="bs-title">{SECOND.title}</h4>
+                <p className="bs-eyebrow"><S story={SECOND} f="kicker" /></p>
+                <h4 className="bs-title"><S story={SECOND} f="title" /></h4>
                 <Meta story={SECOND} />
               </Link>
             </article>
@@ -105,8 +105,8 @@ export function NewsWeek() {
                   <span className="bs-brief-num" aria-hidden="true">{index + 1}</span>
                   <span className="bs-brief-text">
                     <span className="bs-brief-meta">{SECTIONS[story.section].label} · <StoryDate story={story} /></span>
-                    <span className="bs-brief-title">{story.title}</span>
-                    <span className="bs-brief-deck">{story.deck}</span>
+                    <span className="bs-brief-title"><S story={story} f="title" /></span>
+                    <span className="bs-brief-deck"><S story={story} f="deck" /></span>
                   </span>
                 </Link>
               </li>
@@ -118,7 +118,7 @@ export function NewsWeek() {
       {/* Connected: three stories on AI and music from the same week, in order */}
       <section className="bs-cluster" aria-labelledby="cluster-ai-title">
         <div className="bs-cluster-head">
-          <p className="bs-cluster-tag">Connected · {AI_MUSIC.length} stories</p>
+          <p className="bs-cluster-tag"><T>Connected ·</T> {AI_MUSIC.length} stories</p>
           {usualCluster ? (
             <>
               <h4 id="cluster-ai-title" className="bs-cluster-title"><T k="home.week.cluster.title">AI and music: one week, three moves</T></h4>
@@ -134,8 +134,8 @@ export function NewsWeek() {
               <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
                 <BsPhoto photo={story.photo} className="bs-photo-more" />
                 <p className="bs-eyebrow"><span className="bs-cluster-step">{index + 1}</span> <StoryDate story={story} /></p>
-                <h5 className="bs-title">{story.title}</h5>
-                <p className="bs-deck bs-deck-sm">{story.deck}</p>
+                <h5 className="bs-title"><S story={story} f="title" /></h5>
+                <p className="bs-deck bs-deck-sm"><S story={story} f="deck" /></p>
                 <Meta story={story} date={false} />
               </Link>
             </li>
