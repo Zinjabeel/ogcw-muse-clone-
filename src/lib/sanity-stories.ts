@@ -31,11 +31,28 @@ const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
 export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
 
-type SiteDoc = { texts?: { key?: string; value?: string }[] | null; images?: { key?: string; alt?: string; src?: string | null; assetId?: string | null }[] | null } | null;
-const toSite = (doc: SiteDoc): SiteContent => ({
-  texts: Object.fromEntries((doc?.texts ?? []).flatMap((item) => (item.key && typeof item.value === "string" ? [[item.key, item.value]] : []))),
-  images: Object.fromEntries((doc?.images ?? []).flatMap((item) => (item.key && item.src ? [[item.key, { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}) }]] : []))),
-});
+type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null };
+// Each edit is its own "Site edit" document; edits saved before that are
+// still in the old single "Site texts" document until the next save moves them
+type SiteDoc = { edits?: SiteItem[] | null; legacy?: { texts?: SiteItem[] | null; images?: SiteItem[] | null } | null } | null;
+const toSite = (doc: SiteDoc): SiteContent => {
+  const site: SiteContent = { texts: {}, images: {}, meta: {} };
+  const add = (item: SiteItem, kind: string | undefined, legacy: boolean) => {
+    if (!item.key) return;
+    if (kind === "image") {
+      if (!item.src) return;
+      site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}) };
+    } else {
+      if (typeof item.value !== "string" || !item.value.trim()) return;
+      site.texts[item.key] = item.value;
+    }
+    site.meta[item.key] = { ...(item.section ? { section: item.section } : {}), ...(item.usual ? { usual: item.usual } : {}), ...(legacy ? { legacy: true } : {}) };
+  };
+  for (const item of doc?.legacy?.texts ?? []) add(item, "text", true);
+  for (const item of doc?.legacy?.images ?? []) add(item, "image", true);
+  for (const item of doc?.edits ?? []) add(item, item.kind, false);
+  return site;
+};
 
 /** Forget the cached copy, so a change saved a moment ago shows on the next load */
 export const refreshSiteCache = createServerFn({ method: "POST" }).handler(async () => {
@@ -78,7 +95,10 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
   try {
     const ratings = ratingTotals();
     const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
-      "site": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } },
+      "site": {
+        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
+        "legacy": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } }
+      },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
       "front": *[_id == "frontPage"][0] { "slots": slots[] { "id": slot, "slugs": stories[]->slug.current }, "hidden": hidden[]->slug.current }
     }`);

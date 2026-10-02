@@ -9,7 +9,8 @@ import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
 import { CookieConsent } from "./cookie-consent";
 import { AccountButton } from "./account-button";
-import { T } from "./site-text";
+import { EditSection, T } from "./site-text";
+import { pageSection } from "@/lib/site-sections";
 
 // Header navigation. The sections always show; Originals and Shop join them
 // from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
@@ -109,6 +110,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <SiteMenuContext.Provider value={{ menuOpen, openMenu, openSearch }}>
       <div className="site-root min-h-screen bg-background text-foreground">
         <BackgroundGradientGlow />
+        <EditSection name="Navigation bar">
         <header className="site-header sticky top-0 z-50">
           <div className="mx-auto grid h-14 max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
             {/* Menu button sits with the logo on the left */}
@@ -139,11 +141,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        {children}
-        <Footer2 />
-        <NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} />
-        <SearchOverlay open={searchOpen} onClose={closeSearch} />
-        <CookieConsent />
+        </EditSection>
+        {/* Texts on the page itself are filed under the page, unless a part says otherwise */}
+        <EditSection name={pageSection(pathname)}>{children}</EditSection>
+        <EditSection name="Footer"><Footer2 /></EditSection>
+        <EditSection name="Menu"><NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} /></EditSection>
+        <EditSection name="Search"><SearchOverlay open={searchOpen} onClose={closeSearch} /></EditSection>
+        <EditSection name="Cookie panel"><CookieConsent /></EditSection>
       </div>
     </SiteMenuContext.Provider>
   );

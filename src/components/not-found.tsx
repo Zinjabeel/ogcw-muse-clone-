@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { SiteShell, useSiteMenu } from "./ogcw-layout";
 import { SectionHead, StoryCard } from "./cards";
 import { useStories } from "@/lib/stories";
-import { T } from "./site-text";
+import { EditSection, T } from "./site-text";
 
 // 404: inside the normal header and footer, with a way back and the latest
 // stories, so a dead link still lands somewhere worth reading.
@@ -11,6 +11,7 @@ export function NotFoundPage() {
   const stories = useStories();
   return (
     <SiteShell>
+      <EditSection name="Error page">
       <main className="page-wrap og-404">
         <p className="og-kicker"><T k="404.kicker">Error 404</T></p>
         <h1 className="og-404-title"><T k="404.title">This page isn’t here.</T></h1>
@@ -30,6 +31,7 @@ export function NotFoundPage() {
           </div>
         </section>
       </main>
+      </EditSection>
     </SiteShell>
   );
 }

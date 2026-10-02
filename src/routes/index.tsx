@@ -5,6 +5,7 @@ import { HeroCover } from "../components/hero-cover";
 import { HeroGallery } from "../components/hero-gallery";
 import { HeroGallery2 } from "../components/hero-gallery-2";
 import { NewsFront } from "../components/news-front";
+import { EditSection } from "../components/site-text";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -20,13 +21,15 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   return <SiteShell>
     {/* All three heroes render; the hero switcher’s choice (html data-hero) decides which shows */}
-    <HeroCover />
-    <HeroGallery />
-    <HeroGallery2 />
+    <EditSection name="Hero">
+      <HeroCover />
+      <HeroGallery />
+      <HeroGallery2 />
+    </EditSection>
 
     <main>
-      <NewsFront />
-      <ConnectSection />
+      <EditSection name="OGCW News"><NewsFront /></EditSection>
+      <EditSection name="About & newsletter"><ConnectSection /></EditSection>
     </main>
   </SiteShell>;
 }

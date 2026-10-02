@@ -7,7 +7,7 @@ import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
 import { StoryMeta } from "./story-meta";
-import { S, T } from "./site-text";
+import { EditSection, S, T } from "./site-text";
 
 // Keep exploring: the Explore grid carries straight on into more stories,
 // in the same tiles. A big feature and four stories, then the rap desk
@@ -203,6 +203,7 @@ export function KeepExploring() {
         {TILES.map((story) => <Tile key={story.slug} story={story} />)}
 
         {/* The rap desk: the vote, and the rap beat beside it */}
+        <EditSection name="Rap desk">
         <section className="mix-tile kx-rap" aria-labelledby="rap-desk-title">
           <div className="kx-rap-poll">
             <p className="mix-label"><T k="kx.rap.label">The rap desk · Vote</T></p>
@@ -221,8 +222,10 @@ export function KeepExploring() {
             <Link to="/music" className="kx-rap-more"><T k="kx.rap.more">More in Music</T> <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
           </div>
         </section>
+        </EditSection>
       </div>
 
+      <EditSection name="More to explore">
       <div className="kx-head">
         <h3 id="kx-more-title" className="kx-label"><T k="kx.more.title">More to explore</T></h3>
         <span className="kx-rule" aria-hidden="true" />
@@ -245,6 +248,7 @@ export function KeepExploring() {
 
         {MORE_END.map((story) => <Tile key={story.slug} story={story} tall />)}
       </div>
+      </EditSection>
     </section>
   );
 }

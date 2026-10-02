@@ -1,9 +1,10 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { createClient, type SanityClient } from "@sanity/client";
 import { Eye, ImagePlus, Loader2, PenLine, RotateCcw, Undo2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ImgHTMLAttributes, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ImgHTMLAttributes, type ReactNode } from "react";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
-import { itemKey, storyKey, useSiteText, type Pending, type SiteContent, type SiteImage, type StoryField } from "@/lib/site-text";
+import { itemKey, storyKey, useSiteText, type EditMeta, type Pending, type SiteContent, type SiteImage, type StoryField } from "@/lib/site-text";
+import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
 import { useWorkAccess } from "@/lib/work";
 
@@ -14,9 +15,11 @@ import { useWorkAccess } from "@/lib/work";
 // Logged in as an admin, point at any text and an "Edit" button appears
 // beside it: press it and type (Enter to finish, Esc to cancel). Photos get
 // a "Change photo" button. A bar collects the changes: Undo, Discard, Save.
-// Saving puts them live for everyone and keeps the site's words as a version
-// in the studio ("Site history"), restorable for 30 days; story changes go
-// to the story itself (with its own history in the studio).
+// Saving puts them live for everyone. In the studio each change is a "Site
+// edit" filed under the part of the site it's in (<EditSection name="Hero">,
+// src/lib/site-sections.ts), and every save is kept as a version ("Site
+// history"), restorable for 30 days; story changes go to the story itself
+// (with its own history in the studio).
 
 const HISTORY_DAYS = 30;
 const START_EVENT = "ogcw-edit-start";
@@ -31,24 +34,35 @@ function rich(value: string): ReactNode {
   return value.split(/\*([^*]+)\*/).map((part, index) => (index % 2 ? <em key={index}>{part}</em> : part));
 }
 
-/** A short, steady name made from a text's usual wording */
-function autoKey(text: string) {
+// Which part of the site the texts inside belong to, for filing their edits
+const SectionContext = createContext<SiteSection | null>(null);
+export function EditSection({ name, children }: { name: SiteSection; children: ReactNode }) {
+  return <SectionContext.Provider value={name}>{children}</SectionContext.Provider>;
+}
+const useSection = () => useContext(SectionContext);
+const sectionNow = (section: SiteSection | null) => section ?? pageSection(window.location.pathname);
+const slugOf = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/** A short, steady name made from a text's usual wording and its part of the site */
+function autoKey(text: string, section: SiteSection | null) {
   let hash = 5381;
   for (let i = 0; i < text.length; i += 1) hash = ((hash << 5) + hash + text.charCodeAt(i)) | 0;
-  return `auto.${(hash >>> 0).toString(36)}`;
+  return `auto.${section ? `${slugOf(section)}.` : ""}${(hash >>> 0).toString(36)}`;
 }
 
 /**
  * A text from the site: its usual wording, or what an admin changed it to.
  * Without a name (`k`), the name comes from the usual wording, so the same
- * wording changes everywhere it's used (e.g. "Play on Spotify").
+ * wording changes everywhere it's used in that part of the site (e.g. every
+ * "Play on Spotify" in Explore).
  */
 export function T({ k, children }: { k?: string; children: string | number | undefined }) {
   const site = useSiteText();
+  const section = useSection();
   const usualRaw = String(children ?? "");
   // Spaces around the words stay where the page put them
   const [, before = "", usual = "", after = ""] = usualRaw.match(/^(\s*)([\s\S]*?)(\s*)$/) ?? [];
-  const key = k ?? autoKey(usual);
+  const key = k ?? autoKey(usual, section);
   const value = site.text(key) ?? usual;
   if (!usual) return <>{usualRaw}</>;
   if (!site.editing) return <>{before}{rich(value)}{after}</>;
@@ -60,7 +74,7 @@ export function T({ k, children }: { k?: string; children: string | number | und
         display={rich(value)}
         changed={value !== usual}
         hint={value !== usual ? `Edited · usual: “${usual}”` : undefined}
-        onCommit={(next) => site.change(key, "text", next === usual ? null : next)}
+        onCommit={(next) => site.change(key, "text", next === usual ? null : next, { section: sectionNow(section), page: window.location.pathname, usual })}
       />
       {after}
     </>
@@ -163,10 +177,11 @@ function Editable({ value, display, changed, max, hint, onCommit }: { value: str
 /** A photo from the site: its usual one, or the one an admin put in its place */
 export function EditableImage({ k, src, alt, className, ...rest }: ImgHTMLAttributes<HTMLImageElement> & { k: string; src: string; alt: string }) {
   const site = useSiteText();
+  const section = useSection();
   const swap = site.image(k);
   const shown = { ...rest, src: swap?.src ?? src, alt: swap?.alt ?? alt };
   if (!site.editing) return <img {...shown} className={className} />;
-  return <img {...shown} className={`${className ?? ""} site-img${swap ? " is-changed" : ""}`} data-edit-img={k} data-swapped={swap ? "" : undefined} />;
+  return <img {...shown} className={`${className ?? ""} site-img${swap ? " is-changed" : ""}`} data-edit-img={k} data-edit-section={section ?? undefined} data-usual={src} data-swapped={swap ? "" : undefined} />;
 }
 
 // ---------------------------------------------------------------- Saving
@@ -182,12 +197,39 @@ function adminClient(): SanityClient | null {
   }
 }
 
-const textItems = (content: SiteContent) => Object.entries(content.texts).map(([key, value]) => ({ _key: itemKey(key), _type: "siteText", key, value }));
+/** One edit's document in Sanity ("Site edits" in the studio, filed by part of the site) */
+export const editDocId = (key: string) => `siteEdit-${itemKey(key)}`;
+type EditDoc = { _id: string; _type: string; [field: string]: unknown };
+function editDoc(key: string, kind: "text" | "image", value: string | SiteImage, meta: EditMeta | undefined, by: string, at: string): EditDoc {
+  const image = kind === "image" ? (value as SiteImage) : null;
+  return {
+    _id: editDocId(key),
+    _type: "siteEdit",
+    key,
+    kind,
+    section: meta?.section ?? sectionOfKey(key),
+    ...(meta?.page ? { page: meta.page } : {}),
+    ...(meta?.usual ? { usual: meta.usual } : {}),
+    ...(image
+      ? { ...(image.alt ? { alt: image.alt } : {}), ...(image.assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: image.assetId } } } : { url: image.src }) }
+      : { value }),
+    updatedAt: at,
+    updatedBy: by,
+  };
+}
+
+// The whole set of edits, as kept in each Site history version
+const textItems = (content: SiteContent) =>
+  Object.entries(content.texts).map(([key, value]) => {
+    const meta = content.meta[key];
+    return { _key: itemKey(key), _type: "siteText", key, value, section: meta?.section ?? sectionOfKey(key), ...(meta?.usual ? { usual: meta.usual } : {}) };
+  });
 const imageItems = (content: SiteContent) =>
   Object.entries(content.images).map(([key, image]) => ({
     _key: itemKey(key),
     _type: "siteImage",
     key,
+    section: content.meta[key]?.section ?? sectionOfKey(key),
     ...(image.alt ? { alt: image.alt } : {}),
     ...(image.assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: image.assetId } } } : { url: image.src }),
   }));
@@ -199,18 +241,20 @@ const lastChanges = (pending: Pending[]) => [...new Map(pending.map((item) => [`
 function applyChanges(live: SiteContent, pending: Pending[]): SiteContent {
   const texts = { ...live.texts };
   const images = { ...live.images };
+  const meta = { ...live.meta };
   for (const item of pending) {
-    if (item.kind === "text") {
-      if (item.value === null) delete texts[item.key];
-      else texts[item.key] = item.value as string;
-    } else if (item.kind === "image") {
-      if (item.value === null) delete images[item.key];
-      else images[item.key] = item.value as SiteImage;
+    if (item.kind === "story") continue;
+    const list: Record<string, unknown> = item.kind === "text" ? texts : images;
+    if (item.value === null) {
+      delete list[item.key];
+      delete meta[item.key];
+    } else {
+      list[item.key] = item.value;
+      meta[item.key] = { ...meta[item.key], ...item.meta, legacy: false };
     }
   }
-  return { texts, images };
+  return { texts, images, meta };
 }
-
 function describe(changes: Pending[]) {
   const parts = changes.map((item) => {
     if (item.kind === "image") return item.value === null ? `photo ${item.key} back to usual` : `photo ${item.key}`;
@@ -233,7 +277,7 @@ export function SiteEditor() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [photo, setPhoto] = useState<{ k: string; rect: DOMRect; swapped: boolean; alt: string } | null>(null);
+  const [photo, setPhoto] = useState<{ k: string; rect: DOMRect; swapped: boolean; alt: string; section: SiteSection | null; usual: string } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [target, setTarget] = useState<Target | null>(null);
   const picker = useRef<HTMLInputElement>(null);
@@ -315,7 +359,7 @@ export function SiteEditor() {
     if (!current) return;
     if (current.kind === "image") {
       const img = current.el as HTMLImageElement;
-      setPhoto({ k: img.dataset["editImg"] ?? "", rect: img.getBoundingClientRect(), swapped: img.dataset["swapped"] !== undefined, alt: img.alt });
+      setPhoto({ k: img.dataset["editImg"] ?? "", rect: img.getBoundingClientRect(), swapped: img.dataset["swapped"] !== undefined, alt: img.alt, section: (img.dataset["editSection"] as SiteSection | undefined) ?? null, usual: img.dataset["usual"] ?? "" });
       setTarget(null);
       return;
     }
@@ -354,10 +398,20 @@ export function SiteEditor() {
       const tx = client.transaction();
       if (siteChanges.length) {
         const hasHistory = await client.fetch<number>(`count(*[_type == "siteSnapshot"])`);
-        tx.createIfNotExists({ _id: "siteContent", _type: "siteContent" });
         // The very first save also keeps the site as it was, so it can be gone back to
         if (!hasHistory) tx.create({ _type: "siteSnapshot", at: new Date(Date.now() - 1000).toISOString(), by: "OGCW", summary: "The site before the first edit", texts: textItems(site.live), images: imageItems(site.live) });
-        tx.patch("siteContent", (patch) => patch.set({ texts: textItems(next), images: imageItems(next), updatedBy: by }));
+        // Each changed text or photo is its own "Site edit", filed under its part of the site
+        for (const item of siteChanges) {
+          if (item.value === null) tx.delete(editDocId(item.key));
+          else tx.createOrReplace(editDoc(item.key, item.kind as "text" | "image", item.value, next.meta[item.key], by, now));
+        }
+        // Edits still in the old single "Site texts" document move to their own too
+        const legacy = Object.entries(next.meta).filter(([, meta]) => meta.legacy);
+        for (const [key] of legacy) {
+          const value = next.texts[key] ?? next.images[key];
+          if (value !== undefined) tx.createOrReplace(editDoc(key, key in next.texts ? "text" : "image", value, next.meta[key], by, now));
+        }
+        if (legacy.length || Object.values(site.live.meta).some((meta) => meta.legacy)) tx.delete("siteContent");
         tx.create({ _type: "siteSnapshot", at: now, by, summary: describe(siteChanges), texts: textItems(next), images: imageItems(next) });
       }
       // A story's words: the published story and any draft of it both change
@@ -403,7 +457,7 @@ export function SiteEditor() {
     setUploading(true);
     try {
       const asset = await client.assets.upload("image", file, { filename: file.name });
-      site.change(photo.k, "image", { src: `${asset.url}?auto=format&w=2000`, assetId: asset._id, alt: photo.alt });
+      site.change(photo.k, "image", { src: `${asset.url}?auto=format&w=2000`, assetId: asset._id, alt: photo.alt }, { section: sectionNow(photo.section), page: window.location.pathname, usual: photo.usual });
       setPhoto(null);
     } catch {
       setStatus("error");

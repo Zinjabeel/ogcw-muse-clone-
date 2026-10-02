@@ -11,7 +11,7 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, Meta, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
 import { ShopPromo } from "./shop-promo";
-import { S, T } from "./site-text";
+import { EditSection, S, T } from "./site-text";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -320,14 +320,14 @@ export function NewsFront() {
           </div>
 
           <aside className="bs-col bs-col-rail bs-reveal" aria-labelledby="events-title">
-            <UpcomingEvents />
+            <EditSection name="Upcoming events"><UpcomingEvents /></EditSection>
           </aside>
         </div>
         </div>
 
         <hr className="bs-rule" />
 
-        <NewsWeek />
+        <EditSection name="This week"><NewsWeek /></EditSection>
 
         <hr className="bs-rule" />
 
@@ -336,21 +336,21 @@ export function NewsFront() {
         <hr className="bs-rule bs-band bs-band-90" />
 
         <div className="bs-band bs-band-90">
-          <ContentOfTheMonth />
+          <EditSection name="Content of the month"><ContentOfTheMonth /></EditSection>
         </div>
 
         <hr className="bs-rule bs-band bs-band-90" />
 
         {/* The shop as one card: the full shop is on /shop */}
         <div className="bs-band bs-band-90">
-          <ShopPromo />
+          <EditSection name="Shop on the home page"><ShopPromo /></EditSection>
         </div>
 
         <hr className="bs-rule" />
 
         {/* Explore runs straight on into Keep exploring: same tiles, no rule between */}
-        <ExploreMix />
-        <KeepExploring />
+        <EditSection name="Explore"><ExploreMix /></EditSection>
+        <EditSection name="Keep exploring"><KeepExploring /></EditSection>
       </div>
     </section>
   );

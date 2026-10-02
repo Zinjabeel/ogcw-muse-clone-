@@ -3,20 +3,23 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 // The site's own words and photos: menus, footer, headings, page intros,
 // hero cards, songs, shops, events. Each is named in the code with its usual
 // wording (<T k="nav.news">News</T>, src/components/site-text.tsx); an admin
-// can change any of them on the page itself, and the changes are kept in
-// Sanity's "Site texts" document (siteContent), loaded with the stories for
+// can change any of them on the page itself. Each change is kept in Sanity
+// as a "Site edit" filed under the part of the site it's in (Hero, OGCW
+// News, Explore…, src/lib/site-sections.ts), loaded with the stories for
 // every page. Each save is also kept as a version ("Site history" in the
 // studio) for 30 days, to go back to.
 // A story's label, headline and summary on the fronts (<S story f="title"/>)
 // can be changed the same way; those changes go to the story itself.
 
 export type SiteImage = { src: string; alt?: string; assetId?: string };
-export type SiteContent = { texts: Record<string, string>; images: Record<string, SiteImage> };
-export const EMPTY_SITE: SiteContent = { texts: {}, images: {} };
+/** Where an edit is from: the part of the site, the page and the usual wording */
+export type EditMeta = { section?: string; page?: string; usual?: string; /** still in the old single "Site texts" document */ legacy?: boolean };
+export type SiteContent = { texts: Record<string, string>; images: Record<string, SiteImage>; meta: Record<string, EditMeta> };
+export const EMPTY_SITE: SiteContent = { texts: {}, images: {}, meta: {} };
 
 export type StoryField = "title" | "deck" | "kicker";
 export type EditKind = "text" | "image" | "story";
-export type Pending = { key: string; kind: EditKind; value: string | SiteImage | null };
+export type Pending = { key: string; kind: EditKind; value: string | SiteImage | null; meta?: EditMeta };
 
 /** A story change's key: "<slug>|<field>" */
 export const storyKey = (slug: string, field: StoryField) => `${slug}|${field}`;
@@ -36,7 +39,7 @@ type Editor = {
   setBusy: (on: boolean) => void;
   /** Unsaved changes, in the order they were made (null = back to the usual wording) */
   pending: Pending[];
-  change: (key: string, kind: EditKind, value: string | SiteImage | null) => void;
+  change: (key: string, kind: EditKind, value: string | SiteImage | null, meta?: EditMeta) => void;
   undo: () => void;
   discard: () => void;
   /** After a save: the saved changes stay on screen until the site's copy catches up */
@@ -94,8 +97,8 @@ export function SiteTextProvider({ content, children }: { content: SiteContent; 
     return saved?.stories.get(key);
   }, [latest, saved]);
 
-  const change = useCallback((key: string, kind: EditKind, value: string | SiteImage | null) => {
-    setPending((list) => [...list, { key, kind, value }]);
+  const change = useCallback((key: string, kind: EditKind, value: string | SiteImage | null, meta?: EditMeta) => {
+    setPending((list) => [...list, meta ? { key, kind, value, meta } : { key, kind, value }]);
   }, []);
   const undo = useCallback(() => setPending((list) => list.slice(0, -1)), []);
   const discard = useCallback(() => setPending([]), []);
