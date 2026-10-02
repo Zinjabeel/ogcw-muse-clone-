@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // Every story, and which goes where on the front page, live from the
   // Sanity studio (/admin), for every page. Reloaded in the background after
   // 15 seconds when you move around.
-  loader: async () => getStorySummaries().catch(() => ({ stories: [], layout: EMPTY_LAYOUT })),
+  loader: async () => getStorySummaries().catch(() => ({ stories: [], layout: EMPTY_LAYOUT, ratings: {} })),
   staleTime: 15_000,
   shellComponent: RootShell,
   component: RootComponent,
@@ -110,11 +110,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const { stories, layout } = Route.useLoaderData();
+  const { stories, layout, ratings } = Route.useLoaderData();
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StoriesProvider stories={stories} layout={layout}>
+      <StoriesProvider stories={stories} layout={layout} ratings={ratings}>
         {/* The studio (/admin) floats over every page, so it can stay open while minimised */}
         <StudioHost>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

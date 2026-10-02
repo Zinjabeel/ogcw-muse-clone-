@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
-import { BsPhoto, ReadTime, shortDate } from "../components/broadsheet";
+import { BsPhoto, Meta } from "../components/broadsheet";
 import { SECTION_IDS, SECTIONS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
 
@@ -83,8 +83,7 @@ function News() {
                     <p className="bs-deck bs-deck-sm">{story.deck}</p>
                     <p className="bs-all-meta">
                       <span>{SECTIONS[story.section].label}</span>
-                      <time dateTime={story.date}>{shortDate(story.date)}</time>
-                      <ReadTime>{story.read}</ReadTime>
+                      <Meta story={story} />
                     </p>
                   </Link>
                 </li>

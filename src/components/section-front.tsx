@@ -5,6 +5,7 @@ import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, WatchNex
 import { ContentOfTheMonth } from "./content-of-the-month";
 import { EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
+import { StoryMeta } from "./story-meta";
 
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
@@ -33,7 +34,7 @@ export function SectionFront({ section }: { section: SectionId }) {
               <span className="og-kicker">{lead.kicker}</span>
               <span className="og-lead-title">{lead.title}</span>
               <span className="og-lead-deck">{lead.deck}</span>
-              <span className="og-meta">By {lead.author} · {formatDate(lead.date)} · {lead.read}</span>
+              <StoryMeta story={lead} className="og-meta" />
             </span>
           </Link>
           <aside className="og-news-aside" aria-labelledby={`${section}-list`}>

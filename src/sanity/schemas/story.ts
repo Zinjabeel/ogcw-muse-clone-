@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { SLUG, StoryPageInput } from "../page-editor";
-import { ChecklistPreview, FactsPreview, FaqPreview, LinkButtonPreview, StoryImagePairPreview, StoryImagePreview } from "../page-previews";
+import { ChecklistPreview, FactsPreview, FaqPreview, LinkButtonPreview, QuestionsPreview, RelatedPreview, StoryImagePairPreview, StoryImagePreview, SummaryPreview, TimelinePreview } from "../page-previews";
 import { frontPage } from "./front-page";
 
 // A story, the same shape as the stories in src/data/content.ts: the
@@ -16,7 +16,6 @@ const SECTIONS = [
   { title: "Streaming", value: "streaming" },
   { title: "Culture", value: "culture" },
 ];
-const AUTHORS = ["Jonah Reyes", "Nia Vale", "Sana Lind"];
 
 // A photo: upload one, or paste a link (for example a YouTube thumbnail)
 const photoFields = [
@@ -69,8 +68,18 @@ export const story = defineType({
     defineField({ name: "section", title: "Section", type: "string", group: "details", options: { list: SECTIONS, layout: "radio", direction: "horizontal" }, validation: (rule) => rule.required() }),
     defineField({ name: "kicker", title: "Label", type: "string", group: "details", description: "The small yellow word above the headline, e.g. “Launch” or “Paris Fashion Week”.", validation: (rule) => rule.required().max(40) }),
     defineField({ name: "deck", title: "Summary", type: "text", rows: 3, group: "details", description: "One or two sentences under the headline.", validation: (rule) => rule.required().max(240) }),
-    defineField({ name: "author", title: "Author", type: "string", group: "details", options: { list: AUTHORS }, validation: (rule) => rule.required() }),
-    defineField({ name: "date", title: "Date", type: "date", group: "details", initialValue: () => new Date().toISOString().slice(0, 10), validation: (rule) => rule.required() }),
+    defineField({
+      name: "credit",
+      title: "Source",
+      type: "string",
+      group: "details",
+      description: "Who the news comes from: the company, organisation or publication behind it (e.g. “Rockstar Games”, “Deadline”), or “OGCW” for our own reporting and round-ups. Never a made-up name.",
+      initialValue: "OGCW",
+      validation: (rule) => rule.required().max(60),
+    }),
+    defineField({ name: "date", title: "Date", type: "date", group: "details", description: "The day it happened, not the day it was written up.", initialValue: () => new Date().toISOString().slice(0, 10), validation: (rule) => rule.required() }),
+    defineField({ name: "updated", title: "Latest update", type: "date", group: "details", description: "For an ongoing story (a release date, a trial, a tour): the date of the latest update it reports. Shows as “Latest update: …”." }),
+    defineField({ name: "certified", title: "Certified", type: "boolean", group: "details", description: "The OGCW editors’ stamp: shows a CERTIFIED label on the story.", initialValue: false }),
     defineField({ name: "photo", title: "Lead photo", type: "photo", group: "details", validation: (rule) => rule.required() }),
     defineField({ name: "ask", title: "Question at the end", type: "string", group: "details", description: "A yes/no question for readers, e.g. “Are you going?”. Leave empty for “Was this helpful?”." }),
     defineField({
@@ -96,9 +105,17 @@ export const story = defineType({
           fields: [
             defineField({ name: "photo", title: "Photo", type: "photo", validation: (rule) => rule.required() }),
             defineField({ name: "caption", title: "Caption", type: "string", validation: (rule) => rule.required() }),
+            defineField({
+              name: "size",
+              title: "Size",
+              type: "string",
+              description: "Vary the sizes down a story: a big moment gets Full width, a portrait sits Beside the text.",
+              options: { list: [{ title: "In the text column", value: "inline" }, { title: "Wider", value: "wide" }, { title: "Full width", value: "full" }, { title: "Beside the text", value: "side" }], layout: "radio", direction: "horizontal" },
+              initialValue: "inline",
+            }),
           ],
           components: { preview: StoryImagePreview },
-          preview: { select: { caption: "caption", media: "photo.image", photo: "photo" }, prepare: ({ caption, media, photo }) => ({ title: caption ?? "Photo", subtitle: "Photo", media, caption, photo }) },
+          preview: { select: { caption: "caption", media: "photo.image", photo: "photo", size: "size" }, prepare: ({ caption, media, photo, size }) => ({ title: caption ?? "Photo", subtitle: "Photo", media, caption, photo, size }) },
         }),
         defineArrayMember({
           name: "storyImagePair",
@@ -180,6 +197,63 @@ export const story = defineType({
           ],
           components: { preview: LinkButtonPreview },
           preview: { select: { title: "label", subtitle: "href", label: "label", href: "href" } },
+        }),
+        defineArrayMember({
+          name: "questions",
+          title: "Questions this story answers",
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Box title", type: "string", initialValue: "What this story answers" }),
+            defineField({ name: "items", title: "Questions", type: "array", of: [defineArrayMember({ type: "string" })], validation: (rule) => rule.min(2).max(6) }),
+          ],
+          components: { preview: QuestionsPreview },
+          preview: { select: { title: "title", items: "items" }, prepare: ({ title, items }) => ({ title: title ?? "What this story answers", subtitle: "Questions this story answers", items }) },
+        }),
+        defineArrayMember({
+          name: "summary",
+          title: "Summary",
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Box title", type: "string", initialValue: "The short version" }),
+            defineField({ name: "items", title: "Points", type: "array", of: [defineArrayMember({ type: "string" })], validation: (rule) => rule.min(1).max(6) }),
+          ],
+          components: { preview: SummaryPreview },
+          preview: { select: { title: "title", items: "items" }, prepare: ({ title, items }) => ({ title: title ?? "The short version", subtitle: "Summary", items }) },
+        }),
+        defineArrayMember({
+          name: "timeline",
+          title: "Timeline",
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Timeline title", type: "string", initialValue: "How it happened" }),
+            defineField({
+              name: "items",
+              title: "Moments",
+              type: "array",
+              of: [defineArrayMember({
+                type: "object",
+                name: "moment",
+                fields: [
+                  defineField({ name: "when", title: "When", type: "string", description: "e.g. “12 September” or “2019”.", validation: (rule) => rule.required() }),
+                  defineField({ name: "what", title: "What happened", type: "text", rows: 2, validation: (rule) => rule.required() }),
+                ],
+                preview: { select: { title: "when", subtitle: "what" } },
+              })],
+            }),
+          ],
+          components: { preview: TimelinePreview },
+          preview: { select: { title: "title", items: "items" }, prepare: ({ title, items }) => ({ title: title ?? "How it happened", subtitle: "Timeline", items }) },
+        }),
+        defineArrayMember({
+          name: "related",
+          title: "Don’t forget to check out these",
+          type: "object",
+          fields: [
+            defineField({ name: "title", title: "Title", type: "string", initialValue: "Don’t forget to check out these" }),
+            defineField({ name: "stories", title: "Stories", type: "array", of: [defineArrayMember({ type: "reference", to: [{ type: "story" }], weak: true })], validation: (rule) => rule.max(6) }),
+          ],
+          components: { preview: RelatedPreview },
+          preview: { select: { title: "title", first: "stories.0.title", second: "stories.1.title", third: "stories.2.title", fourth: "stories.3.title", fifth: "stories.4.title" }, prepare: ({ title, first, second, third, fourth, fifth }) => ({ title: title ?? "Don’t forget to check out these", subtitle: "Related stories", items: [first, second, third, fourth, fifth].filter(Boolean) }) },
         }),
       ],
     }),

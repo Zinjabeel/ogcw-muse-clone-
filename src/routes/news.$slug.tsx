@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check, Link2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, ArrowRight, Check, Link2, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LabelBadge, RatingBadge, StoryDate } from "../components/story-meta";
+import { myRating, rateStory } from "../lib/ratings";
 import { SiteShell } from "../components/ogcw-layout";
 import { Img, SECTION_PATH, StoryCard, StoryRow } from "../components/cards";
 import { ArticleFeedback } from "../components/article-feedback";
@@ -79,11 +81,38 @@ function BodyBlock({ block, first }: { block: Block; first: boolean }) {
       );
     case "image":
       return (
-        <figure className="og-inline">
+        <figure className={`og-inline ${block.size && block.size !== "inline" ? `og-inline-${block.size}` : ""}`}>
           <Img photo={block.photo} className="og-inline-photo" />
           <figcaption>{block.caption}{block.photo.credit && ` Photo: ${block.photo.credit}.`}</figcaption>
         </figure>
       );
+    case "questions":
+      return (
+        <aside className="og-questions" aria-label={block.title}>
+          <p className="og-questions-title">{block.title}</p>
+          <ol>{block.items.map((item) => <li key={item}>{item}</li>)}</ol>
+        </aside>
+      );
+    case "summary":
+      return (
+        <aside className="og-summary" aria-label={block.title}>
+          <p className="og-summary-title">{block.title}</p>
+          <ul>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>
+        </aside>
+      );
+    case "timeline":
+      return (
+        <section className="og-timeline" aria-label={block.title}>
+          <p className="og-timeline-title">{block.title}</p>
+          <ol>
+            {block.items.map(([when, what]) => (
+              <li key={`${when}-${what}`}><span className="og-timeline-when">{when}</span><p>{what}</p></li>
+            ))}
+          </ol>
+        </section>
+      );
+    case "related":
+      return <RelatedStories title={block.title} slugs={block.slugs} />;
     case "images":
       return (
         <figure className="og-inline og-pair">
@@ -137,6 +166,81 @@ function BodyBlock({ block, first }: { block: Block; first: boolean }) {
   }
 }
 
+/** "Don't forget to check out these": linked stories, numbered, with their photos */
+function RelatedStories({ title, slugs }: { title: string; slugs: string[] }) {
+  const stories = useStories();
+  const items = slugs.flatMap((slug) => stories.get(slug) ?? []);
+  if (!items.length) return null;
+  return (
+    <section className="og-related" aria-label={title}>
+      <p className="og-related-title">{title}</p>
+      <ol className="og-related-list">
+        {items.map((item, index) => (
+          <li key={item.slug}>
+            <Link to="/news/$slug" params={{ slug: item.slug }} className="og-related-item">
+              <span className="og-related-num">{index + 1}</span>
+              <Img photo={item.photo} className="og-related-thumb" />
+              <span className="og-related-text">
+                <span className="og-kicker">{item.kicker}</span>
+                <span className="og-related-name">{item.title}</span>
+              </span>
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+/** Rate this story, 1 to 5 stars: real readers' ratings (src/lib/ratings.ts) */
+function RateStory({ slug }: { slug: string }) {
+  const rating = useStories().rating(slug);
+  const [mine, setMine] = useState<number | null>(null);
+  const [hover, setHover] = useState(0);
+  const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
+  useEffect(() => setMine(myRating(slug)), [slug]);
+  const rate = async (stars: number) => {
+    setStatus("saving");
+    try {
+      await rateStory(slug, stars);
+      setMine(stars);
+      setStatus("idle");
+    } catch {
+      setStatus("error");
+    }
+  };
+  const lit = hover || mine || 0;
+  return (
+    <section className="og-rate" aria-labelledby={`rate-${slug}`}>
+      <p id={`rate-${slug}`} className="fb-kicker">Rate this story</p>
+      <div className="og-stars" role="radiogroup" aria-labelledby={`rate-${slug}`} onMouseLeave={() => setHover(0)}>
+        {[1, 2, 3, 4, 5].map((stars) => (
+          <button
+            key={stars}
+            type="button"
+            role="radio"
+            aria-checked={mine === stars}
+            aria-label={`${stars} ${stars === 1 ? "star" : "stars"}`}
+            data-lit={stars <= lit || undefined}
+            disabled={status === "saving"}
+            onMouseEnter={() => setHover(stars)}
+            onFocus={() => setHover(stars)}
+            onBlur={() => setHover(0)}
+            onClick={() => void rate(stars)}
+          >
+            <Star size={26} strokeWidth={1.5} aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+      <p className="og-rate-note" aria-live="polite">
+        {status === "saving" ? "Saving your rating…" : status === "error" ? "Your rating didn’t go through. Try again." : mine ? `You gave it ${mine}/5. Thanks. ` : ""}
+        {status !== "saving" && (rating ? `Readers: ${rating.average.toFixed(1)}/5 from ${rating.count} ratings.` : "The readers’ score shows here once a few people have rated it.")}
+      </p>
+    </section>
+  );
+}
+
 function SectionLink({ story }: { story: Article }) {
   return <Link to={SECTION_PATH[story.section]}>{SECTIONS[story.section].label}</Link>;
 }
@@ -163,7 +267,7 @@ function ArticlePage() {
                   <span aria-hidden="true">/</span>
                   <SectionLink story={story} />
                 </nav>
-                <p className="og-kicker">{story.kicker}</p>
+                <p className="og-kicker og-kicker-row"><LabelBadge label={stories.label(story)} />{story.kicker}</p>
                 <h1 className="og-article-title">{story.title}</h1>
                 <p className="og-article-deck">{story.deck}</p>
               </div>
@@ -173,9 +277,11 @@ function ArticlePage() {
               </figure>
             </div>
             <div className="og-byline">
-              <span>By <strong>{story.author}</strong></span>
-              <time dateTime={story.date}>{formatDate(story.date)}</time>
-              <span>{story.read}</span>
+              {/* The real source of the news, or OGCW for our own reporting: never a made-up name */}
+              <span>{story.credit === "OGCW" ? "By" : "Source:"} <strong>{story.credit}</strong></span>
+              <StoryDate story={story} long />
+              {story.updated && <span>First reported {formatDate(story.date)}</span>}
+              <RatingBadge story={story} count />
               <CopyLink />
             </div>
           </header>
@@ -185,8 +291,9 @@ function ArticlePage() {
               {story.body.map((block, index) => (
                 <BodyBlock key={index} block={block} first={index === firstParagraph} />
               ))}
+              <RateStory slug={story.slug} />
               <ArticleFeedback slug={story.slug} question={story.ask ?? "Was this helpful?"} />
-              <p className="og-signoff">{story.author} for OGCW</p>
+              <p className="og-signoff">{story.credit === "OGCW" ? "Reported by OGCW" : `OGCW, from ${story.credit}`}</p>
               {story.sources.length > 0 && (
                 <div className="og-sources">
                   <h2 className="og-sources-title">Sources</h2>

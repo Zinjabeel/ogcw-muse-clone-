@@ -3,6 +3,7 @@ import { ArrowRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
+import { StoryMeta } from "./story-meta";
 import { CARDS, CardLink } from "./hero-gallery";
 
 // Gallery 2 (the second option in the hero switcher): the top news takes the
@@ -125,7 +126,7 @@ export function HeroGallery2() {
                     <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-cta" tabIndex={index === feature ? undefined : -1}>
                       {item.cta} <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
                     </Link>
-                    <span className="g2-meta">{item.story.read} · By {item.story.author}</span>
+                    <StoryMeta story={item.story} className="g2-meta" />
                   </div>
                 </div>
                 <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-picture" tabIndex={-1} aria-hidden="true">

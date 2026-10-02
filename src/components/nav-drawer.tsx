@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { EPISODES, EVENTS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop, type UpcomingEvent } from "@/data/content";
+import { EPISODES, EVENTS, SECTIONS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop, type UpcomingEvent } from "@/data/content";
 import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
@@ -22,7 +22,7 @@ const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article",
 
 // The menu's lines, with the live stories from the studio
 function buildSections(stories: Stories): Section[] {
-  const longReads = [...stories.all].sort((a, b) => parseInt(b.read, 10) - parseInt(a.read, 10));
+  const longReads = [...stories.all].sort((a, b) => b.words - a.words);
   const section = (id: SectionId) => stories.inSection(id);
   return [
     { label: "News", to: "/news", note: `${stories.all.length} stories`, heading: "Latest", tone: "#6f8499", items: asItems(stories.all.slice(0, 4)) },
@@ -56,7 +56,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const itemKey = (item: Item) => (item.kind === "article" ? item.a.slug : item.kind === "episode" ? item.e.slug : item.s.slug);
 const itemPhoto = (item: Item) => (item.kind === "article" ? item.a.photo : item.kind === "episode" ? item.e.still : item.s.hero);
 const itemTitle = (item: Item) => (item.kind === "article" ? item.a.title : item.kind === "episode" ? item.e.title : `Shop ${item.s.name}`);
-const itemSub = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${item.a.read}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
+const itemSub = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${SECTIONS[item.a.section].label}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
 const eventDay = (iso: string) => new Date(iso).getUTCDate();
 const eventMonth = (iso: string) => new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" }).format(new Date(iso));
 

@@ -8,7 +8,7 @@ import { ExploreMix } from "./explore-mix";
 import { KeepExploring } from "./keep-exploring";
 import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
-import { BsPhoto as Photo, ReadTime, StoryCard } from "./broadsheet";
+import { BsPhoto as Photo, Meta, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
 import { ShopPromo } from "./shop-promo";
 
@@ -249,7 +249,7 @@ export function NewsFront() {
               <p className="bs-eyebrow">{lead.kicker}</p>
               <h3 className="bs-title bs-title-lead">{lead.title}</h3>
               <p className="bs-deck">{lead.deck}</p>
-              <ReadTime>{lead.read}</ReadTime>
+              <Meta story={lead} />
               <Photo photo={lead.photo} className="bs-photo-lead" />
             </Link>
 
@@ -297,7 +297,7 @@ export function NewsFront() {
                   <p className="bs-eyebrow">{story.kicker}</p>
                   <h3 className="bs-title">{story.title}</h3>
                   <p className="bs-deck bs-deck-sm">{story.deck}</p>
-                  <ReadTime>{story.read}</ReadTime>
+                  <Meta story={story} />
                 </Link>
               </article>
             ))}
@@ -312,7 +312,7 @@ export function NewsFront() {
                   <Photo photo={story.photo} className="bs-photo-secondary" />
                   <p className="bs-eyebrow">{story.kicker}</p>
                   <h3 className="bs-title">{story.title}</h3>
-                  <ReadTime>{story.read}</ReadTime>
+                  <Meta story={story} />
                 </Link>
               </article>
             ))}

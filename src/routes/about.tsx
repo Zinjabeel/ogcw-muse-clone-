@@ -39,18 +39,23 @@ const deskList = (inSection: (id: SectionId) => Article[]) => [
   { to: "/shop", name: "Shop", note: "The pieces behind the stories, picked by our desk", count: `${SHOPS.length} shops` },
 ] as const;
 
-// The writers, with the beats and stories they have filed
-const writerList = (all: Article[]) => [...new Set(all.map((a) => a.author))].map((name) => {
-  const stories = all.filter((a) => a.author === name);
-  return { name, stories, beats: [...new Set(stories.map((s) => s.kicker))].slice(0, 3) };
-});
+// Where the news comes from: every story names its source (or OGCW, for our
+// own reporting and round-ups); the six that appear most, with their beats
+const sourceList = (all: Article[]) =>
+  [...new Set(all.map((a) => a.credit))]
+    .map((name) => {
+      const stories = all.filter((a) => a.credit === name);
+      return { name, stories, beats: [...new Set(stories.map((s) => s.kicker))].slice(0, 3) };
+    })
+    .sort((a, b) => b.stories.length - a.stories.length)
+    .slice(0, 6);
 
 const ENQUIRIES = ["Submit a story", "Music submissions", "Advertising", "Press"];
 
 function About() {
   const live = useStories();
   const DESKS = deskList(live.inSection);
-  const WRITERS = writerList(live.all);
+  const SOURCES = sourceList(live.all);
   return (
     <SiteShell>
       <PageIntro kicker="About OGCW" title="We report from inside culture." copy="OGCW is an independent editorial platform following the people, places and ideas shaping what comes next." />
@@ -81,15 +86,15 @@ function About() {
           </ul>
         </section>
 
-        <section className="og-block" aria-labelledby="the-desk">
-          <SectionHead id="the-desk" title="The desk" />
+        <section className="og-block" aria-labelledby="our-sources">
+          <SectionHead id="our-sources" title="Where the news comes from" />
           <ul className="og-grid-3">
-            {WRITERS.map((writer) => (
-              <li key={writer.name} className="about-writer">
-                <p className="about-writer-name">{writer.name}</p>
-                <p className="og-kicker">{writer.beats.join(" · ")}</p>
-                <p className="og-meta">{writer.stories.length} stories · Latest:</p>
-                <Link to="/news/$slug" params={{ slug: writer.stories[0]!.slug }} className="about-writer-latest">{writer.stories[0]!.title}</Link>
+            {SOURCES.map((source) => (
+              <li key={source.name} className="about-writer">
+                <p className="about-writer-name">{source.name}</p>
+                <p className="og-kicker">{source.beats.join(" · ")}</p>
+                <p className="og-meta">{source.stories.length} {source.stories.length === 1 ? "story" : "stories"} · Latest:</p>
+                <Link to="/news/$slug" params={{ slug: source.stories[0]!.slug }} className="about-writer-latest">{source.stories[0]!.title}</Link>
               </li>
             ))}
           </ul>

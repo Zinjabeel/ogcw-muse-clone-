@@ -10,7 +10,7 @@ export type SanityPhoto = { image?: SanityImage; url?: string; alt?: string; cre
 export type SanitySpan = { _type: string; text?: string };
 export type SanityBlock = { _type: string; style?: string; listItem?: string; children?: SanitySpan[]; [key: string]: unknown };
 export type SanityStory = {
-  slug?: string; section?: string; kicker?: string; title?: string; deck?: string; author?: string; date?: string; ask?: string;
+  slug?: string; section?: string; kicker?: string; title?: string; deck?: string; credit?: string; date?: string; updated?: string; certified?: boolean; ask?: string;
   photo?: SanityPhoto; body?: SanityBlock[]; sources?: { name?: string; url?: string }[];
 };
 
@@ -62,8 +62,27 @@ export function toBlocks(body: SanityBlock[] = []): Block[] {
         break;
       }
       case "storyImage": {
-        const photo = toPhoto(block["photo"] as SanityPhoto, 1400);
-        if (photo) blocks.push({ type: "image", photo, caption: String(block["caption"] ?? "") });
+        const size = (["wide", "full", "side"] as const).find((value) => value === block["size"]);
+        const photo = toPhoto(block["photo"] as SanityPhoto, size === "side" ? 900 : size ? 2000 : 1400);
+        if (photo) blocks.push({ type: "image", photo, caption: String(block["caption"] ?? ""), ...(size ? { size } : {}) });
+        break;
+      }
+      case "questions":
+      case "summary": {
+        const items = ((block["items"] as string[] | undefined) ?? []).filter(Boolean);
+        const title = String(block["title"] ?? (block._type === "questions" ? "What this story answers" : "The short version"));
+        if (items.length) blocks.push({ type: block._type, title, items });
+        break;
+      }
+      case "timeline": {
+        const items = ((block["items"] as { when?: string; what?: string }[] | undefined) ?? []).filter((item) => item.when && item.what).map((item): [string, string] => [item.when!, item.what!]);
+        if (items.length) blocks.push({ type: "timeline", title: String(block["title"] ?? "How it happened"), items });
+        break;
+      }
+      case "related": {
+        // The query turns the linked stories into their web addresses (src/lib/sanity-stories.ts)
+        const slugs = ((block["slugs"] as (string | null)[] | undefined) ?? []).filter((slug): slug is string => !!slug);
+        if (slugs.length) blocks.push({ type: "related", title: String(block["title"] ?? "Don’t forget to check out these"), slugs });
         break;
       }
       case "storyImagePair": {
@@ -107,9 +126,11 @@ export function toArticle(doc: SanityStory): Article | null {
     kicker: doc.kicker ?? SECTIONS[section].label,
     title: doc.title,
     deck: doc.deck ?? "",
-    author: doc.author ?? "OGCW",
+    credit: doc.credit?.trim() || "OGCW",
     date: doc.date ?? new Date().toISOString().slice(0, 10),
-    read: `${Math.max(2, Math.round(wordCount(body) / 230))} min read`,
+    ...(doc.updated && doc.updated > (doc.date ?? "") ? { updated: doc.updated } : {}),
+    ...(doc.certified ? { certified: true } : {}),
+    words: wordCount(body),
     photo,
     body,
     sources: (doc.sources ?? []).filter((source) => source.name && source.url).map((source) => ({ name: source.name!, url: source.url! })),

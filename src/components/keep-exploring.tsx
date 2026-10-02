@@ -6,6 +6,7 @@ import { useStories } from "@/lib/stories";
 import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
+import { StoryMeta } from "./story-meta";
 
 // Keep exploring: the Explore grid carries straight on into more stories,
 // in the same tiles. A big feature and four stories, then the rap desk
@@ -142,7 +143,7 @@ function Tile({ story, tall = false }: { story: Article; tall?: boolean }) {
       <Img photo={story.photo} className="kx-tile-photo" />
       <span className="mix-label">{story.kicker} · {SECTIONS[story.section].label}</span>
       <span className="kx-tile-title">{story.title}</span>
-      <span className="kx-meta">{story.read}</span>
+      <StoryMeta story={story} className="kx-meta" />
     </Link>
   );
 }
@@ -169,7 +170,7 @@ function RapStory({ story }: { story: Article }) {
       <span className="kx-rap-text">
         <span className="mix-label">{story.kicker}</span>
         <span className="kx-rap-title">{story.title}</span>
-        <span className="kx-meta">{story.read}</span>
+        <StoryMeta story={story} className="kx-meta" />
       </span>
     </Link>
   );

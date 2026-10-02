@@ -4,6 +4,7 @@ import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { Img, SectionHead, StoryCard } from "../components/cards";
 import { formatDate } from "../data/content";
 import { useStories } from "../lib/stories";
+import { StoryMeta } from "../components/story-meta";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -30,7 +31,7 @@ const IN_THE_WORKS = [
 
 function Blog() {
   const { all } = useStories();
-  const [cover, ...longReads] = [...all].sort((a, b) => minutes(b.read) - minutes(a.read)).slice(0, 4);
+  const [cover, ...longReads] = [...all].sort((a, b) => b.words - a.words).slice(0, 4);
   if (!cover) return null;
   return (
     <SiteShell>
@@ -42,7 +43,7 @@ function Blog() {
             <span className="og-kicker">Cover read · {cover.kicker}</span>
             <span className="og-lead-title">{cover.title}</span>
             <span className="og-lead-deck">{cover.deck}</span>
-            <span className="og-meta">By {cover.author} · {formatDate(cover.date)} · {cover.read}</span>
+            <StoryMeta story={cover} className="og-meta" />
             <span className="og-cta">Read it <ArrowRight size={16} aria-hidden="true" /></span>
           </span>
         </Link>

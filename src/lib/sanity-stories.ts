@@ -4,6 +4,7 @@ import { type Article } from "@/data/content";
 import { EMPTY_LAYOUT, isSlotId, type FrontLayout } from "@/data/placements";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
 import { byDate, toArticle, type SanityStory } from "./sanity-mapping";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
 
 // Stories from the Sanity studio (/admin), turned into the same shape as
 // the stories in src/data/content.ts so every page shows them the same way.
@@ -19,12 +20,31 @@ const client = createClient({
   perspective: "published",
 });
 
-const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, author, date, ask, photo, body, sources`;
+// Links to other stories come back as their web addresses
+const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, credit, date, updated, certified, ask, photo, sources,
+  "body": body[] { ..., _type == "related" => { "slugs": stories[]->slug.current } }`;
 
 // The site keeps the list for a few seconds so busy pages don't ask Sanity
 // on every request; an edit in the studio shows up within that time.
 const LIST_TTL_MS = 10_000;
-export type SiteStories = { stories: Article[]; layout: FrontLayout };
+export type Rating = { average: number; count: number };
+export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating> };
+
+// Readers' star ratings, per story (Supabase, src/lib/ratings.ts); none if they can't be reached
+async function ratingTotals(): Promise<Record<string, Rating>> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/story_rating_totals`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_PUBLISHABLE_KEY, "Content-Type": "application/json" },
+      body: "{}",
+    });
+    if (!response.ok) return {};
+    const rows = (await response.json()) as { slug: string; average: number | string; ratings: number | string }[];
+    return Object.fromEntries(rows.map((row) => [row.slug, { average: Number(row.average), count: Number(row.ratings) }]));
+  } catch {
+    return {};
+  }
+}
 let cached: { at: number; data: SiteStories } | null = null;
 
 type LayoutDoc = { slots?: { id?: string; slugs?: (string | null)[] }[]; hidden?: (string | null)[] } | null;
@@ -43,6 +63,7 @@ const toLayout = (doc: LayoutDoc): FrontLayout => ({
 export const getStorySummaries = createServerFn({ method: "GET" }).handler(async (): Promise<SiteStories> => {
   if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.data;
   try {
+    const ratings = ratingTotals();
     const { docs, front } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc }>(`{
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
       "front": *[_id == "frontPage"][0] { "slots": slots[] { "id": slot, "slugs": stories[]->slug.current }, "hidden": hidden[]->slug.current }
@@ -52,11 +73,11 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
       .filter((story): story is Article => story !== null)
       .sort(byDate)
       .map((story) => ({ ...story, body: [] }));
-    cached = { at: Date.now(), data: { stories, layout: toLayout(front) } };
+    cached = { at: Date.now(), data: { stories, layout: toLayout(front), ratings: await ratings } };
     return cached.data;
   } catch (error) {
     console.error("Sanity stories didn't load", error);
-    return cached?.data ?? { stories: [], layout: EMPTY_LAYOUT };
+    return cached?.data ?? { stories: [], layout: EMPTY_LAYOUT, ratings: await ratingTotals() };
   }
 });
 

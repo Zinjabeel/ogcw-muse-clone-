@@ -9,7 +9,7 @@ import { usePageView } from "./page-editor";
 // to change it. Outside the page view they keep Sanity's usual look.
 
 type Extra = {
-  photo?: SanityPhoto; first?: SanityPhoto; second?: SanityPhoto; caption?: string;
+  photo?: SanityPhoto; first?: SanityPhoto; second?: SanityPhoto; caption?: string; size?: string;
   items?: unknown[]; label?: string; href?: string;
 };
 type Props = PreviewProps & Extra;
@@ -19,8 +19,9 @@ const Missing = ({ children }: { children: string }) => <span className="se-bloc
 export function StoryImagePreview(props: Props) {
   if (!usePageView()) return props.renderDefault(props);
   const photo = toPhoto(props.photo, 1400);
+  const size = props.size && props.size !== "inline" ? `og-inline-${props.size}` : "";
   return (
-    <figure className="og-inline se-block">
+    <figure className={`og-inline ${size} se-block`}>
       {photo ? <Img photo={photo} className="og-inline-photo" /> : <span className="og-inline-photo se-block-photo"><Missing>PHOTO HERE</Missing></span>}
       <figcaption>{props.caption || <Missing>CAPTION HERE</Missing>}{photo?.credit && ` Photo: ${photo.credit}.`}</figcaption>
     </figure>
@@ -84,6 +85,61 @@ export function FaqPreview(props: Props) {
         </details>
       ))}
     </div>
+  );
+}
+
+const titleOf = (props: Props, fallback: string) => (typeof props.title === "string" && props.title ? props.title : fallback);
+const strings = (items: unknown[] | undefined) => (items ?? []).filter((item): item is string => typeof item === "string" && item !== "");
+
+export function QuestionsPreview(props: Props) {
+  if (!usePageView()) return props.renderDefault(props);
+  const items = strings(props.items);
+  return (
+    <aside className="og-questions se-block">
+      <p className="og-questions-title">{titleOf(props, "What this story answers")}</p>
+      <ol>{(items.length ? items : [""]).map((item, index) => <li key={index}>{item || <Missing>QUESTION HERE</Missing>}</li>)}</ol>
+    </aside>
+  );
+}
+
+export function SummaryPreview(props: Props) {
+  if (!usePageView()) return props.renderDefault(props);
+  const items = strings(props.items);
+  return (
+    <aside className="og-summary se-block">
+      <p className="og-summary-title">{titleOf(props, "The short version")}</p>
+      <ul>{(items.length ? items : [""]).map((item, index) => <li key={index}>{item || <Missing>POINT HERE</Missing>}</li>)}</ul>
+    </aside>
+  );
+}
+
+export function TimelinePreview(props: Props) {
+  if (!usePageView()) return props.renderDefault(props);
+  const items = (props.items ?? []) as { _key?: string; when?: string; what?: string }[];
+  return (
+    <section className="og-timeline se-block">
+      <p className="og-timeline-title">{titleOf(props, "How it happened")}</p>
+      <ol>
+        {(items.length ? items : [{}]).map((item, index) => (
+          <li key={item._key ?? index}><span className="og-timeline-when">{item.when || <Missing>WHEN</Missing>}</span><p>{item.what || <Missing>WHAT HAPPENED</Missing>}</p></li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+export function RelatedPreview(props: Props) {
+  if (!usePageView()) return props.renderDefault(props);
+  const items = strings(props.items);
+  return (
+    <section className="og-related se-block">
+      <p className="og-related-title">{titleOf(props, "Don’t forget to check out these")}</p>
+      <ol className="og-related-list">
+        {(items.length ? items : [""]).map((title, index) => (
+          <li key={index}><span className="og-related-item"><span className="og-related-num">{index + 1}</span><span className="og-related-name">{title || <Missing>PICK A STORY</Missing>}</span><ArrowRight size={16} aria-hidden="true" /></span></li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

@@ -72,19 +72,25 @@ export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
 export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 
 // What a story's body is made of: paragraphs, subheads, pull quotes, photos
-// (one, or two side by side), bullet lists, a key-facts box, a checklist
-// ("what to prepare") and questions and answers.
+// (one, in four sizes, or two side by side), bullet lists, a key-facts box,
+// a checklist ("what to prepare"), questions and answers, the questions a
+// story will answer, a summary, a timeline and links to related stories.
+export type ImageSize = "inline" | "wide" | "full" | "side";
 export type Block =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
   | { type: "quote"; text: string }
-  | { type: "image"; photo: Photo; caption: string }
+  | { type: "image"; photo: Photo; caption: string; size?: ImageSize }
   | { type: "images"; photos: [Photo, Photo]; caption: string }
   | { type: "list"; items: string[] }
   | { type: "facts"; title: string; items: [string, string][] }
   | { type: "checklist"; title: string; items: string[] }
   | { type: "faq"; items: [string, string][] }
-  | { type: "link"; label: string; href: string };
+  | { type: "link"; label: string; href: string }
+  | { type: "questions"; title: string; items: string[] }
+  | { type: "summary"; title: string; items: string[] }
+  | { type: "timeline"; title: string; items: [string, string][] }
+  | { type: "related"; title: string; slugs: string[] };
 
 export type Article = {
   slug: string;
@@ -92,9 +98,16 @@ export type Article = {
   kicker: string;
   title: string;
   deck: string;
-  author: string;
-  date: string; // ISO
-  read: string;
+  /** Who the news comes from: the company, organisation or publication behind it, or "OGCW" for our own reporting and round-ups. Never a made-up name. */
+  credit: string;
+  /** The day it happened (ISO) */
+  date: string;
+  /** An ongoing story: the date of the latest update it reports ("Latest update: …") */
+  updated?: string;
+  /** Stamped CERTIFIED by the OGCW editors in the studio */
+  certified?: boolean;
+  /** How long the text is, in words (for sorting; not shown) */
+  words: number;
   photo: Photo;
   body: Block[];
   sources: Source[];
@@ -103,16 +116,16 @@ export type Article = {
 
 export { youtubeThumb, youtubeUrl, spotifyTrack } from "./media";
 
-// Words in a story, for its reading time (about 230 a minute)
+// Words in a story (for sorting by length)
 const blockWords = (block: Block): string[] => {
   switch (block.type) {
     case "p": case "h2": case "quote": return [block.text];
     case "image": case "images": return [block.caption];
     case "list": return block.items;
-    case "facts": return [block.title, ...block.items.flat()];
-    case "checklist": return [block.title, ...block.items];
+    case "facts": case "timeline": return [block.title, ...block.items.flat()];
+    case "checklist": case "questions": case "summary": return [block.title, ...block.items];
     case "faq": return block.items.flat();
-    case "link": return [];
+    case "link": case "related": return [];
   }
 };
 export const wordCount = (body: Block[]) => body.flatMap(blockWords).join(" ").split(/\s+/).filter(Boolean).length;
@@ -121,7 +134,7 @@ export const wordCount = (body: Block[]) => body.flatMap(blockWords).join(" ").s
 // Each story's details are here; its full text lives in src/data/stories,
 // one file per section, and its reading time is worked out from that text.
 
-const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
+const RAW_ARTICLES: Omit<Article, "body" | "words">[] = [
   // ---- The last week of September 2026
   {
     slug: "october-2026-games",
@@ -129,7 +142,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Release calendar",
     title: "October’s biggest games: Gears, Call of Duty on Switch 2 and Phantom Blade Zero",
     deck: "Ace Combat 8 opens the month, Gears of War goes back to E-Day and Modern Warfare 4 brings Call of Duty back to Nintendo.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-10-01",
     photo: { src: youtubeThumb("3ot6jdgtp4o"), alt: "A scene from the Call of Duty: Modern Warfare 4 trailer", credit: "Xbox, YouTube", crop: { pos: "50% 45%" } },
     sources: [
@@ -146,7 +159,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Paris Fashion Week",
     title: "Drew Henry breaks Courrèges out of its white box",
     deck: "The new designer’s first collection, at the Palais de Tokyo, loosened up the vinyl jackets and A-line dresses with colour, raw edges and punk spirit.",
-    author: "Sana Lind",
+    credit: "Vogue",
     date: "2026-10-01",
     photo: { src: courregesPhoto, alt: "A model in a white André Courrèges dress and striped top from 1965", credit: "Jacqueline Barrière Courrèges, CC BY-SA 4.0", crop: { pos: "50% 25%" } },
     sources: [
@@ -160,7 +173,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Streaming guide",
     title: "New on Netflix in October: East of Eden, Lupin and The Diplomat",
     deck: "Florence Pugh leads Steinbeck’s epic on 1 October, then come Ben Affleck, Chris Evans and the return of three favourites.",
-    author: "Nia Vale",
+    credit: "What’s on Netflix",
     date: "2026-10-01",
     photo: { src: youtubeThumb("nI17NM1UcJQ"), alt: "The opening scene of Netflix’s East of Eden", credit: "Netflix, YouTube", crop: { pos: "50% 45%" } },
     sources: [
@@ -173,7 +186,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Paris Fashion Week",
     title: "Saint Laurent goes gold for what may be Anthony Vaccarello’s last show",
     deck: "Ten years after his first show, an all-gold collection at the Trocadéro, a song from Charlotte Gainsbourg and a standing ovation.",
-    author: "Sana Lind",
+    credit: "OGCW",
     date: "2026-09-30",
     photo: { src: vaccarelloPhoto, alt: "Anthony Vaccarello in a black suit, looking down and smiling", credit: "YanRB, CC BY-SA 4.0", crop: { pos: "50% 22%" } },
     sources: [
@@ -188,7 +201,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Paris Fashion Week",
     title: "At Dior, Jonathan Anderson puts a tree in a pond and lets the clothes unravel",
     deck: "His second spring collection, shown in the Tuileries, was all sheer layers, raw hems and lightness.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-30",
     photo: { src: tuileriesPhoto, alt: "The octagonal pond in the Jardin des Tuileries with a fountain and green chairs", credit: "Chabe01, CC BY-SA 4.0", crop: { pos: "50% 55%" } },
     sources: [
@@ -202,7 +215,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Live",
     title: "LCD Soundsystem book 12 New York nights, with their 100th residency show for charity",
     deck: "Three weekends at the Knockdown Center and Brooklyn Steel. All the ticket money from 30 November goes to charity.",
-    author: "Nia Vale",
+    credit: "Stereogum",
     date: "2026-09-30",
     photo: { src: lcdPhoto, alt: "LCD Soundsystem on stage at Roskilde Festival, synths and lights around them", credit: "Bill Ebbesen, CC BY 3.0", crop: { pos: "50% 45%" } },
     sources: [
@@ -216,7 +229,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "New music",
     title: "Al Doyle announces his first solo album, Hollywood Saviour",
     deck: "The LCD Soundsystem and Hot Chip guitarist releases it on DFA on 20 November. “Hard Times in America” is out now.",
-    author: "Jonah Reyes",
+    credit: "Stereogum",
     date: "2026-09-30",
     photo: { src: doylePhoto, alt: "Al Doyle playing guitar on stage in warm light", credit: "Kim Metso, CC BY-SA 3.0", crop: { pos: "35% 40%" } },
     sources: [
@@ -229,7 +242,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Reissues",
     title: "R.E.M. reissue Reveal for its 25th birthday, with an unreleased Paris session",
     deck: "A 17-song set recorded for Radio France in May 2001 headlines the anniversary edition, out on 20 November.",
-    author: "Sana Lind",
+    credit: "R.E.M.",
     date: "2026-09-30",
     photo: { src: stipePhoto, alt: "Michael Stipe singing on stage in Padova in 2003, one arm raised", credit: "Stefano Andreoli, CC BY-SA 2.0", crop: { pos: "50% 40%" } },
     sources: [
@@ -244,7 +257,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Switch 2",
     title: "Shadow of Mordor and Shadow of War are out on Switch 2",
     deck: "Aspyr’s Middle-earth: Shadow Bundle brings both complete editions, and the Nemesis System, to a Nintendo console for the first time.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-30",
     photo: { src: youtubeThumb("HmIdzplCp-o"), alt: "Artwork from the Middle-earth: Shadow Bundle trailer for Nintendo Switch 2", credit: "Nintendo of America, YouTube", crop: { pos: "50% 40%" } },
     sources: [
@@ -259,7 +272,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Xbox",
     title: "Xbox now turns your game discs into digital copies, for free",
     deck: "Disc-to-Digital is open to every player. More than 1,500 games work, but you may lose the licence if you sell the disc.",
-    author: "Nia Vale",
+    credit: "Xbox",
     date: "2026-09-30",
     photo: { src: xboxPhoto, alt: "An Xbox Series X and Series S on a shop display", credit: "Kyu3a, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -273,7 +286,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Industry",
     title: "Suda51’s Grasshopper Manufacture is independent again",
     deck: "The No More Heroes studio has split from NetEase, five years and one game after the takeover.",
-    author: "Sana Lind",
+    credit: "Grasshopper Manufacture",
     date: "2026-09-30",
     photo: { src: sudaPhoto, alt: "Goichi Suda, known as Suda51, speaking into a microphone", credit: "Georges Seguin (Okki), CC BY-SA 3.0", crop: { pos: "50% 35%" } },
     sources: [
@@ -287,7 +300,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Trailer",
     title: "Dawn of War IV’s Space Marines trailer brings the Blood Ravens back to Kronus",
     deck: "A CGI trailer teams them up with the Dark Angels, two months before the strategy game launches on 3 December.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-30",
     photo: { src: warhammerPhoto, alt: "A man in glasses painting a small Warhammer 40,000 miniature", credit: "David Poe, US Air Force, public domain", crop: { pos: "50% 40%" } },
     sources: [
@@ -302,7 +315,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Reissues",
     title: "The Flaming Lips open the vaults for At War with the Mystics",
     deck: "The 20th anniversary edition, out on 13 November, adds 33 unreleased demos and studio recordings to the Grammy-winning album.",
-    author: "Nia Vale",
+    credit: "The Flaming Lips",
     date: "2026-09-29",
     photo: { src: flamingLipsPhoto, alt: "Wayne Coyne singing under purple and blue stage lights with confetti", credit: "dom fellowes, CC BY 2.0", crop: { pos: "50% 35%" } },
     sources: [
@@ -317,7 +330,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Obituary",
     title: "Dennis Haskins, Saved by the Bell’s Mr. Belding, dies at 75",
     deck: "He played Bayside’s principal for 13 years, from Good Morning, Miss Bliss to the end of The New Class.",
-    author: "Nia Vale",
+    credit: "Deadline",
     date: "2026-09-29",
     photo: { src: haskinsPhoto, alt: "Dennis Haskins smiling at an event in a dark shirt", credit: "Lucha VaVOOM, CC BY 2.0", crop: { pos: "50% 18%" } },
     sources: [
@@ -331,7 +344,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Film",
     title: "Coyote vs. Acme, the film that was almost a tax write-off, is now out at home",
     deck: "After $110 million worldwide and 96% on Rotten Tomatoes, the Looney Tunes comedy is available to buy digitally.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-29",
     photo: { src: youtubeThumb("Bpg3tJ4f3v0"), alt: "Wile E. Coyote in a frame from the Coyote vs. Acme final trailer", credit: "Ketchup Entertainment, YouTube", crop: { pos: "50% 40%" } },
     sources: [
@@ -346,7 +359,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "TV",
     title: "LEGO ONE PIECE is on Netflix, with the live-action cast as minifigures",
     deck: "Usopp retells the first two seasons to Chopper, his way, in a two-part animated special.",
-    author: "Sana Lind",
+    credit: "Netflix",
     date: "2026-09-29",
     photo: { src: youtubeThumb("6OP_KhnmUus"), alt: "LEGO minifigures of the Straw Hat crew in the LEGO ONE PIECE trailer", credit: "ONE PIECE Official, YouTube", crop: { pos: "50% 45%" } },
     sources: [
@@ -361,7 +374,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Awards",
     title: "The Streamer Awards 2026: apply by 2 October, vote from 16 October",
     deck: "For the first time creators can put themselves forward. The show, with KATSEYE performing, is on 12 November.",
-    author: "Jonah Reyes",
+    credit: "Twitch",
     date: "2026-09-29",
     photo: { src: qtPhoto, alt: "QTCinderella and Maya Higa speaking on a TwitchCon stage", credit: "LeahBeahReah, CC BY-SA 4.0", crop: { pos: "50% 40%" } },
     sources: [
@@ -375,7 +388,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Switch 2",
     title: "Your Switch 2 calendar: every date from the September Direct",
     deck: "Resident Evil in October, Monster Hunter in December, Metroid Ravenous in January. Here it all is, in order.",
-    author: "Sana Lind",
+    credit: "Nintendo",
     date: "2026-09-28",
     photo: { src: switchPhoto, alt: "A Nintendo Switch 2 standing in its black dock", credit: "Crisco 1492, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -389,7 +402,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Fashion",
     title: "Milan Fashion Week: Prada’s skirts, Demna’s Gucci shop and Moschino on a car-park roof",
     deck: "The best of spring/summer 2027 in Milan, and the trends to take away.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-28",
     photo: { src: galleriaPhoto, alt: "The glass-roofed arcade of the Galleria Vittorio Emanuele II in Milan", credit: "Maurizio Moro5153, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -404,7 +417,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Switch 2",
     title: "Monster Hunter Wilds comes to Switch 2 on 4 December",
     deck: "Every update is included and local play is in. The Ascendance expansion follows in 2027.",
-    author: "Nia Vale",
+    credit: "Capcom",
     date: "2026-09-27",
     photo: { src: youtubeThumb("iNru7mV044Y"), alt: "A frame from the Monster Hunter Wilds: Ascendance trailer", credit: "Capcom, YouTube", crop: { pos: "18% 45%" } },
     sources: [
@@ -419,7 +432,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "PlayStation",
     title: "Naughty Dog goes quiet on Intergalactic until 2027",
     deck: "Neil Druckmann promised a proper look next year, shared new art and confirmed more The Last of Us projects.",
-    author: "Jonah Reyes",
+    credit: "Naughty Dog",
     date: "2026-09-27",
     photo: { src: youtubeThumb("VLGy63pt9vA"), alt: "A frame from the Intergalactic: The Heretic Prophet announcement trailer", credit: "PlayStation, YouTube", crop: { pos: "50% 40%" } },
     sources: [
@@ -433,7 +446,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "AI & music",
     title: "Sony Music becomes the first music company in the AI coalition ARIAM",
     deck: "The alliance already counts Disney, the BBC and The New York Times. Sony joins while suing two AI music start-ups.",
-    author: "Jonah Reyes",
+    credit: "Variety",
     date: "2026-09-26",
     photo: { src: studioPhoto, alt: "A large recording studio with a grand piano, drum kit and wooden walls", credit: "Will Fisher, CC BY-SA 2.0", crop: { pos: "50% 55%" } },
     sources: [
@@ -447,7 +460,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "New music",
     title: "New music Friday: Leon Bridges, Julia Jacklin, Tinashe and a very busy 25 September",
     deck: "More than 50 albums in one day, from soul and indie to country, metal and the Joy Division archive.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-26",
     photo: { src: leonPhoto, alt: "Leon Bridges and his band on stage at Webster Hall under red curtains", credit: "Brianga, CC BY-SA 4.0", crop: { pos: "50% 55%" } },
     sources: [
@@ -461,7 +474,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch",
     title: "EA Sports FC 27 is out, with Mbappé on every cover",
     deck: "The football game launched on 25 September on nine platforms, alongside a free FC 27 Lite.",
-    author: "Jonah Reyes",
+    credit: "EA Sports",
     date: "2026-09-25",
     photo: { src: youtubeThumb("nsIVAUwke3o"), alt: "A frame from the EA Sports FC 27 launch trailer for Nintendo Switch 2", credit: "Nintendo of America, YouTube", crop: { pos: "50% 45%" } },
     sources: [
@@ -476,7 +489,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "AI & music",
     title: "Qobuz now tells you when a song was made by AI",
     deck: "The streaming service labels AI-generated releases, and says most streams of those tracks are fraudulent.",
-    author: "Nia Vale",
+    credit: "Qobuz",
     date: "2026-09-25",
     photo: { src: headphonesPhoto, alt: "A pair of silver and black studio headphones resting on a notebook", credit: "Melissa Ursula Dawn Goldsmith, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -490,7 +503,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "AI & music",
     title: "Sound designers form the Professional Sound Alliance to fight AI scraping",
     deck: "Effects libraries and Oscar-winning sound editors want the same protection music and voice already have.",
-    author: "Sana Lind",
+    credit: "Professional Sound Alliance",
     date: "2026-09-25",
     photo: { src: foleyPhoto, alt: "A sound artist recording footsteps with a bowling ball in a Foley room", credit: "Vancouver Film School, CC BY 2.0", crop: { pos: "50% 45%" } },
     sources: [
@@ -504,7 +517,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Platforms",
     title: "WWE moves Main Event from YouTube to Rumble",
     deck: "From 14 October the weekly show airs on Wednesdays at 8pm ET, head to head with AEW Dynamite.",
-    author: "Nia Vale",
+    credit: "POST Wrestling",
     date: "2026-09-25",
     photo: { src: wwePhoto, alt: "A WWE NXT ring and entrance stage lit up in a dark arena", credit: "InFlamester20, CC BY-SA 4.0", crop: { pos: "50% 45%" } },
     sources: [
@@ -518,7 +531,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "YouTube",
     title: "Made on YouTube 2026: Live Showdowns, AI help in Studio and a new way to earn",
     deck: "More than 30 announcements for creators, from split-screen live battles to live dubbing and Shorts series.",
-    author: "Nia Vale",
+    credit: "YouTube",
     date: "2026-09-24",
     photo: { src: youtubeHqPhoto, alt: "The glass entrance of YouTube’s headquarters in San Bruno, California", credit: "BrokenSphere, CC BY 3.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -532,7 +545,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Platforms",
     title: "Kick admits a payout error, sends backpay and changes how streamers are paid",
     deck: "A calculation mistake left partners short in September. Rates are now set across several streams, not one.",
-    author: "Sana Lind",
+    credit: "Streams Charts",
     date: "2026-09-23",
     photo: { src: kickPhoto, alt: "The Kick logo in white on black", credit: "Kick, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -545,7 +558,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Awards",
     title: "Latin Grammys 2026: Edgar Barrera leads, with Rosalía and Karol G close behind",
     deck: "The producer has 10 nominations; four acts have seven. The winners are named in Las Vegas on 12 November.",
-    author: "Sana Lind",
+    credit: "Latin Recording Academy",
     date: "2026-09-17",
     photo: { src: rosaliaPhoto, alt: "Rosalía singing into a microphone on stage in a black and gold jacket", credit: "Andrés Ibarra, CC BY-SA 4.0", crop: { pos: "50% 30%" } },
     sources: [
@@ -561,7 +574,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "The rap desk",
     title: "Five rappers, five number ones: hip-hop’s 2026 so far",
     deck: "A record Grammy night, three albums in the top three at once and a 12th number one. The case for each name in our No. 1 rapper vote.",
-    author: "Sana Lind",
+    credit: "OGCW",
     date: "2026-09-30",
     photo: { src: coleArenaPhoto, alt: "J. Cole on stage in a packed arena under white spotlights", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -577,7 +590,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Live",
     title: "BTS take the Arirang World Tour to Latin America",
     deck: "After a Song of the Year win at the VMAs, the stadium tour heads to Bogotá, Lima, Santiago, La Plata and São Paulo through October.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-29",
     photo: { src: btsSwimPhoto, alt: "BTS performing “Swim” to a full stadium in Paris", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 45%" } },
     sources: [
@@ -591,7 +604,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Countdown",
     title: "Fifty-one days to GTA VI: what we know before launch",
     deck: "Rockstar’s return to Vice City is on track for 19 November on PS5 and Xbox Series X|S. Pre-orders are open; a PC date is not.",
-    author: "Jonah Reyes",
+    credit: "Rockstar Games",
     date: "2026-09-29",
     photo: { src: youtubeThumb("VQRLujxTm3c"), alt: "Official Grand Theft Auto VI artwork: Jason and Lucia on a dock in Vice City", credit: "Rockstar Games, Trailer 2", crop: { pos: "50% 40%" } },
     sources: [
@@ -606,7 +619,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch",
     title: "The Witcher 3 Remastered is out, and it’s free if you own the game",
     deck: "CD Projekt Red’s overhaul arrived on 29 September with new combat, a revamped skill tree and both expansions free for current owners.",
-    author: "Jonah Reyes",
+    credit: "CD Projekt Red",
     date: "2026-09-29",
     photo: { src: youtubeThumb("OlmuIckOX0c"), alt: "A scene from the official launch trailer for The Witcher 3: Wild Hunt — Remastered", credit: "CD Projekt Red, official launch trailer", crop: { pos: "50% 16%", zoom: 1.35 } },
     sources: [
@@ -620,7 +633,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch",
     title: "Minecraft Dungeons II is out, and it takes you into the Sift",
     deck: "Mojang and Double Eleven’s sequel launched on 29 September with four-player co-op, a new dimension and a lot more loot, from €29.99.",
-    author: "Nia Vale",
+    credit: "Mojang Studios",
     date: "2026-09-29",
     photo: { src: youtubeThumb("nHW7oH_kZd4"), alt: "A scene from the official launch trailer for Minecraft Dungeons II", credit: "Mojang Studios, official launch trailer", crop: { pos: "50% 50%" } },
     sources: [
@@ -634,7 +647,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Awards",
     title: "VMAs 2026: Swift takes Video of the Year as Madonna wins seven",
     deck: "Madonna was named Artist of the Year, BTS won Song of the Year and the show drew its biggest audience since 2015.",
-    author: "Jonah Reyes",
+    credit: "MTV",
     date: "2026-09-28",
     photo: { src: madonnaPhoto, alt: "Madonna on stage during The Celebration Tour, dancers and screens around her", credit: "Ronald Woan, CC BY 4.0", crop: { pos: "50% 40%" } },
     sources: [
@@ -648,7 +661,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Fashion",
     title: "Paris Fashion Week opens its biggest season: the shows to watch",
     deck: "Around 100 houses show spring/summer 2027 between 28 September and 6 October, with debuts at Courrèges and Carven.",
-    author: "Sana Lind",
+    credit: "Fédération de la Haute Couture et de la Mode",
     date: "2026-09-28",
     photo: { src: runwayPhoto, alt: "Models walking the runway at an Alexander McQueen show, seen from behind", credit: "Christopher Macsurak, CC BY 2.0", crop: { pos: "50% 35%" } },
     sources: [
@@ -662,7 +675,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Box office",
     title: "Avengers: Endgame is number one again, seven years on",
     deck: "The Encore re-release took $26.1 million to top the US box office, the first re-release to do it since The Lion King in 2011.",
-    author: "Jonah Reyes",
+    credit: "Deadline",
     date: "2026-09-28",
     photo: { src: unsplash("photo-1489599849927-2ee91cede3ba", 1600), alt: "Rows of red seats in a dark cinema", credit: "Unsplash", crop: { pos: "50% 60%" } },
     sources: [
@@ -676,7 +689,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Charts",
     title: "Miley Cyrus goes to number one with Bass Persuades",
     deck: "Her tenth album opened at the top of the Billboard 200 with 61,000 units. Two Hollywood Bowl nights follow in October.",
-    author: "Sana Lind",
+    credit: "OGCW",
     date: "2026-09-27",
     photo: { src: mileyPhoto, alt: "Miley Cyrus on stage at Primavera Sound in Barcelona, lit green and red", credit: "Jwslubbock, CC BY-SA 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -690,7 +703,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Sneakers",
     title: "This week in sneakers: Bad Bunny’s BadBo, a Harden for Rayasianboy and Nike’s Hyperslides",
     deck: "A busy end to the month, from Jordan retros to a recovery slide made with Hyperice.",
-    author: "Jonah Reyes",
+    credit: "House of Heat",
     date: "2026-09-26",
     photo: { src: unsplash("photo-1556906781-9a412961c28c", 1600), alt: "A pair of Air Jordan 1 sneakers dangling over the edge of a rooftop", credit: "Unsplash", crop: { pos: "50% 55%" } },
     sources: [
@@ -703,7 +716,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Industry",
     title: "MindsEye studio Build A Rocket Boy goes into administration",
     deck: "Leslie Benzies’s Edinburgh studio, founded after he left Rockstar North, has collapsed 15 months after MindsEye’s troubled launch.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-25",
     photo: { src: benziesPhoto, alt: "Leslie Benzies, founder of Build A Rocket Boy, in a black-and-white portrait", credit: "Austin Hargrave, CC BY-SA 3.0", crop: { pos: "50% 22%" } },
     sources: [
@@ -717,7 +730,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "New music",
     title: "Taylor Swift adds four songs with The Life of a Showgirl: The Encore",
     deck: "“Patient Zero”, “Cleveland!”, “Pink Clouding” and “Babylon” extend last year’s record-breaking album.",
-    author: "Sana Lind",
+    credit: "OGCW",
     date: "2026-09-25",
     photo: { src: taylorPhoto, alt: "A packed stadium lit orange during Taylor Swift’s Eras Tour in London", credit: "BrigidLIS, CC BY 4.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -731,7 +744,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Courts",
     title: "Dutch consumer group seeks more than €100 million from Epic over Fortnite",
     deck: "SMC says the Item Shop’s countdown timers and V-Bucks pushed young players into spending they regret. Epic points to its parental controls.",
-    author: "Nia Vale",
+    credit: "DualShockers",
     date: "2026-09-24",
     photo: { src: fortnitePhoto, alt: "The Fortnite Battle Royale booth at the Game Developers Conference 2018", credit: "Official GDC, CC BY 2.0", crop: { pos: "50% 40%" } },
     sources: [
@@ -744,7 +757,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Awards",
     title: "Mercury Prize 2026: four weeks to go, and two favourites",
     deck: "Nia Archives and Suede lead a shortlist that also has Dave, RAYE, Olivia Dean and Paul McCartney. The winner is named in Newcastle on 22 October.",
-    author: "Nia Vale",
+    credit: "Mercury Prize",
     date: "2026-09-24",
     photo: { src: niaPhoto, alt: "Nia Archives singing on stage in Amsterdam under pink light", credit: "Michielderoo, CC0", crop: { pos: "50% 30%" } },
     sources: [
@@ -758,7 +771,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "VTubers",
     title: "Neuro-sama releases “Pattern Recognition” and books her first live concert",
     deck: "The AI streamer’s new single with ODDEEO is out, and she and Evil Neuro play Los Angeles with a live band on 19 December.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-22",
     photo: { src: youtubeThumb("xWDfREk0ZLs"), alt: "Artwork from the “Pattern Recognition” video: an anime-style girl in pink light", credit: "Neuro-sama, YouTube", crop: { pos: "50% 50%" } },
     sources: [
@@ -772,7 +785,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch",
     title: "Marvel’s Wolverine sells 1.9 million in three days despite split reviews",
     deck: "Insomniac’s single-player action game topped the UK chart after its 15 September launch on PS5.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-22",
     photo: { src: unsplash("photo-1753297514865-016ed7975966", 1600), alt: "A PlayStation 5 controller on a black surface", credit: "User_Pascal, Unsplash", crop: { pos: "50% 50%" } },
     sources: [
@@ -785,7 +798,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Charts",
     title: "Jhené Aiko gets her first number one with Westside Whimsy",
     deck: "The album, with Kendrick Lamar, Ab-Soul, Larry June and Tyga among its guests, opened at the top of the Billboard 200 with 74,000 units.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-21",
     photo: { src: jhenePhoto, alt: "Jhené Aiko singing into a microphone in an orange cap", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 30%" } },
     sources: [
@@ -798,7 +811,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Events",
     title: "Typhoon Dujuan cuts Tokyo Game Show’s first five-day run short",
     deck: "The 30th-anniversary show cancelled its final day, the 21 September public holiday, as the storm approached.",
-    author: "Sana Lind",
+    credit: "Kotaku",
     date: "2026-09-21",
     photo: { src: tgsPhoto, alt: "Crowds in the halls of Tokyo Game Show 2026 at Makuhari Messe", credit: "Syced, CC0", crop: { pos: "50% 60%" } },
     sources: [
@@ -812,7 +825,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Tokyo Game Show",
     title: "Bill Skarsgård will star in Kojima’s PHYSINT, now an Xbox game",
     deck: "Hideo Kojima named his lead at the Xbox Tokyo Game Show broadcast, a week after Xbox picked up the spy game.",
-    author: "Nia Vale",
+    credit: "Xbox Wire",
     date: "2026-09-18",
     photo: { src: skarsgardPhoto, alt: "Bill Skarsgård listening on a convention panel", credit: "Gage Skidmore, CC BY-SA 2.0", crop: { pos: "60% 35%" } },
     sources: [
@@ -826,7 +839,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "TV",
     title: "Emmys 2026: The Pitt repeats, and Matthew Rhys wins twice",
     deck: "Widow’s Bay took best comedy, DTF St. Louis best limited series, and Rhea Seehorn won her first Emmy.",
-    author: "Nia Vale",
+    credit: "Television Academy",
     date: "2026-09-15",
     photo: { src: wylePhoto, alt: "Noah Wyle smiling at his Hollywood Walk of Fame ceremony", credit: "Kevin Paul, CC BY 4.0", crop: { pos: "50% 30%" } },
     sources: [
@@ -840,7 +853,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Film",
     title: "Venice gives its Golden Lion to May el-Toukhy’s Woman Unknown",
     deck: "The Danish post-war thriller also won best actress for Mathilde Arcel. John Malkovich took best actor.",
-    author: "Sana Lind",
+    credit: "La Biennale di Venezia",
     date: "2026-09-13",
     photo: { src: venicePhoto, alt: "The red carpet and a row of flags outside the Palazzo del Cinema in Venice", credit: "Pietro Luca Cassarino, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -854,7 +867,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Events",
     title: "BlizzCon 2026: Diablo V for 2029, and StarCraft becomes an open-world shooter",
     deck: "Blizzard looked years ahead in Anaheim, with a Netflix Diablo series and a new Overwatch hero for now.",
-    author: "Jonah Reyes",
+    credit: "Blizzard Entertainment",
     date: "2026-09-13",
     photo: { src: blizzconPhoto, alt: "Fans outside the Anaheim Convention Center during BlizzCon", credit: "tofuprod, CC BY-SA 2.0", crop: { pos: "50% 50%" } },
     sources: [
@@ -868,7 +881,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Courts",
     title: "Lil Durk found not guilty in his murder-for-hire trial",
     deck: "A Los Angeles federal jury cleared the Chicago rapper of every charge on 11 September. He stays in custody ahead of a separate racketeering trial.",
-    author: "Nia Vale",
+    credit: "NBC New York",
     date: "2026-09-12",
     photo: { src: durkPhoto, alt: "Lil Durk in a black jumper and a gold chain with a cross", credit: "Daniel X. O’Neil, CC BY 2.0", crop: { pos: "50% 18%" } },
     sources: [
@@ -881,7 +894,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch week",
     title: "WARDOGS pulls 452,600 viewers at launch, with TheBurntPeanut out front",
     deck: "The shooter’s early access release on 10 September became one of Twitch’s biggest game launches of the year.",
-    author: "Sana Lind",
+    credit: "Streams Charts",
     date: "2026-09-11",
     photo: { src: youtubeThumb("D-gZx4lbGbo"), alt: "Thumbnail from TheBurntPeanut’s WARDOGS video", credit: "TheBurntPeanut, YouTube", crop: { pos: "50% 50%" } },
     sources: [
@@ -895,7 +908,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Data",
     title: "Twitch: 8.6 billion hours of gaming watched so far this year",
     deck: "League of Legends leads again, horror and indie games are growing, and Jynxzi and TheBurntPeanut stand out among creators.",
-    author: "Jonah Reyes",
+    credit: "Twitch",
     date: "2026-09-09",
     photo: { src: twitchconPhoto, alt: "Crowds and stage lights at the TwitchCon block party at night", credit: "Succubussy, CC0", crop: { pos: "50% 55%" } },
     sources: [
@@ -909,7 +922,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Charity",
     title: "Z Event signs off with a record €32.9 million for charity",
     deck: "ZeratoR’s French charity marathon doubled last year’s total in its tenth and final edition.",
-    author: "Nia Vale",
+    credit: "Streams Charts",
     date: "2026-09-07",
     photo: { src: zeratorPhoto, alt: "ZeratoR streaming at his desk during Z Event", credit: "Mickaël Schauli, CC BY-SA 4.0", crop: { pos: "50% 40%" } },
     sources: [
@@ -922,7 +935,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Launch",
     title: "Onimusha: Way of the Sword sells a million on day one",
     deck: "Capcom’s revival of its samurai series is out on Switch 2, PS5, PC and Xbox, and critics are calling it one of the best action games of the year.",
-    author: "Jonah Reyes",
+    credit: "OGCW",
     date: "2026-09-05",
     photo: { src: youtubeThumb("Gbmd6YFm5oU"), alt: "A frame from the Onimusha: Way of the Sword launch trailer", credit: "Capcom, YouTube", crop: { pos: "50% 40%" } },
     sources: [
@@ -936,7 +949,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Live",
     title: "IShowSpeed’s World Talent Show, and the “green apple” moment",
     deck: "Three hours of acts from around the world, one clear winner and a meme that spread before the stream was over.",
-    author: "Nia Vale",
+    credit: "OGCW",
     date: "2026-09-05",
     photo: { src: speedPhoto, alt: "IShowSpeed in an England shirt surrounded by fans and cameras in Singapore", credit: "Aerodynamically, CC0", crop: { pos: "40% 35%" } },
     sources: [
@@ -950,7 +963,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Showcase",
     title: "State of Play: Final Fantasy VII Revelation dated for April 2027",
     deck: "PlayStation’s September show also dated Metro 2039 and Until Dawn 2, and revealed Maneater 2.",
-    author: "Sana Lind",
+    credit: "PlayStation",
     date: "2026-09-04",
     photo: { src: youtubeThumb("KpXesINIQc4"), alt: "The title card of PlayStation’s State of Play broadcast for 3 September 2026", credit: "PlayStation, YouTube", crop: { pos: "50% 50%" } },
     sources: [
@@ -964,7 +977,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Courts",
     title: "Keffe D found guilty of Tupac Shakur’s murder, 30 years on",
     deck: "A Las Vegas jury convicted Duane Davis of first-degree murder on 31 August. He faces life in prison when he is sentenced on 13 October.",
-    author: "Sana Lind",
+    credit: "NBC News",
     date: "2026-09-01",
     photo: { src: tupacStarPhoto, alt: "Tupac Shakur’s star on the Hollywood Walk of Fame", credit: "Alexis Doine, CC0", crop: { pos: "50% 50%" } },
     sources: [
@@ -977,7 +990,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
     kicker: "Records",
     title: "Kai Cenat and IShowSpeed’s Minecraft marathon passed 30 million hours watched",
     deck: "Five days, 121 hours and 42 deaths later, they beat the Ender Dragon, and out-watched most of this year’s esports events.",
-    author: "Jonah Reyes",
+    credit: "Streams Charts",
     date: "2026-08-13",
     photo: { src: kaiPhoto, alt: "Kai Cenat in a black durag, speaking outdoors", credit: "ImDavisss Live, CC BY 3.0", crop: { pos: "50% 28%" } },
     sources: [
@@ -990,7 +1003,7 @@ const RAW_ARTICLES: Omit<Article, "body" | "read">[] = [
 export const ARTICLES: Article[] = [...RAW_ARTICLES].sort((a, b) => b.date.localeCompare(a.date)).map((story) => {
   const full = STORY_BODIES[story.slug];
   const body = full?.body ?? [];
-  return { ...story, body, read: `${Math.max(2, Math.round(wordCount(body) / 230))} min read`, ...(full?.ask ? { ask: full.ask } : {}) };
+  return { ...story, body, words: wordCount(body), ...(full?.ask ? { ask: full.ask } : {}) };
 });
 
 // The stories as written in the code. The site shows the live versions
@@ -1329,7 +1342,8 @@ export const SHOPS: Shop[] = [
 
 export const getShop = (slug: string) => SHOPS.find((s) => s.slug === slug);
 export const formatPrice = (value: number) => new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(value);
-export const formatDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(new Date(iso));
+// A day, shown in UTC so it reads the same in every time zone (and on the server)
+export const formatDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(iso));
 
 // ---------------------------------------------------------------- Search
 
@@ -1341,7 +1355,7 @@ export function searchSite(query: string, stories: Article[]): Hit[] {
   if (!q) return [];
   const match = (...fields: string[]) => fields.join(" ").toLowerCase().includes(q);
   return [
-    ...stories.filter((a) => match(a.title, a.deck, a.kicker, a.author, SECTIONS[a.section].label)).map((item): Hit => ({ kind: "article", item })),
+    ...stories.filter((a) => match(a.title, a.deck, a.kicker, a.credit, SECTIONS[a.section].label)).map((item): Hit => ({ kind: "article", item })),
     ...EPISODES.filter((e) => match(e.title, e.series, e.summary, e.kind, "originals")).map((item): Hit => ({ kind: "episode", item })),
     ...SHOPS.filter((s) => match(s.name, s.tagline, "shop", ...s.products.map((p) => `${p.name} ${p.category}`))).map((item): Hit => ({ kind: "shop", item })),
   ];

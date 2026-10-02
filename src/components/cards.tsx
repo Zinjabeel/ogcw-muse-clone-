@@ -3,8 +3,9 @@ import { ArrowRight, ArrowUpRight, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song } from "@/data/content";
-import { formatDate, formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
+import { formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
 import { SpotifyIcon } from "./spotify";
+import { StoryMeta } from "./story-meta";
 
 /** Where each section's front lives */
 export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture" } as const satisfies Record<SectionId, string>;
@@ -33,7 +34,7 @@ export function StoryCard({ story, size = "md", showDeck = false }: { story: Art
       <span className="og-kicker">{story.kicker}</span>
       <span className="og-card-title">{story.title}</span>
       {showDeck && <span className="og-card-deck">{story.deck}</span>}
-      <span className="og-meta">{story.author} · {story.read}</span>
+      <StoryMeta story={story} className="og-meta" />
     </Link>
   );
 }
@@ -47,7 +48,7 @@ export function StoryRow({ story, index }: { story: Article; index?: number }) {
       <span className="og-row-text">
         <span className="og-kicker">{story.kicker}</span>
         <span className="og-row-title">{story.title}</span>
-        <span className="og-meta">{formatDate(story.date)} · {story.read}</span>
+        <StoryMeta story={story} className="og-meta" />
       </span>
     </Link>
   );
@@ -114,7 +115,7 @@ export function HitLink({ hit, className, onClick, children }: { hit: Hit; class
 export const hitLabel = (hit: Hit) => (hit.kind === "article" ? "Story" : hit.kind === "episode" ? "Original" : "Shop");
 export const hitTitle = (hit: Hit) => (hit.kind === "shop" ? `Shop ${hit.item.name}` : hit.item.title);
 export const hitSub = (hit: Hit) =>
-  hit.kind === "article" ? `${hit.item.kicker} · ${hit.item.read}` : hit.kind === "episode" ? `${hit.item.series} · ${hit.item.length}` : hit.item.tagline;
+  hit.kind === "article" ? `${hit.item.kicker} · ${SECTIONS[hit.item.section].label}` : hit.kind === "episode" ? `${hit.item.series} · ${hit.item.length}` : hit.item.tagline;
 
 /** The "Watch" block under a front page’s list: one Originals episode. */
 export function WatchNext({ episode }: { episode: Episode }) {

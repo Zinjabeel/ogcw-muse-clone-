@@ -3,7 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { SECTIONS } from "@/data/content";
 import { isDefault } from "@/data/placements";
 import { useStories } from "@/lib/stories";
-import { BsPhoto, ReadTime, shortDate } from "./broadsheet";
+import { BsPhoto, Meta } from "./broadsheet";
+import { StoryDate } from "./story-meta";
 
 // This week: fifteen of the latest stories as a second broadsheet block
 // under the OGCW News front, in the same hairline grid. A big lead (Saint
@@ -41,7 +42,7 @@ export function NewsWeek() {
             <p className="bs-eyebrow">{LEAD.kicker}</p>
             <h4 className="bs-title bs-title-week">{LEAD.title}</h4>
             <p className="bs-deck">{LEAD.deck}</p>
-            <ReadTime>{LEAD.read}</ReadTime>
+            <Meta story={LEAD} />
           </Link>
           <div className="bs-thread">
             <p className="bs-thread-head">{usualThread ? "More from fashion month" : "Also this week"}</p>
@@ -70,7 +71,7 @@ export function NewsWeek() {
                 <p className="bs-eyebrow">{MIDDLE.kicker}</p>
                 <h4 className="bs-title">{MIDDLE.title}</h4>
                 <p className="bs-deck bs-deck-sm">{MIDDLE.deck}</p>
-                <ReadTime>{MIDDLE.read}</ReadTime>
+                <Meta story={MIDDLE} />
               </Link>
               {MIDDLE_LINKED && MIDDLE_LINKED.slug !== MIDDLE.slug && (
                 <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
@@ -87,7 +88,7 @@ export function NewsWeek() {
                 <BsPhoto photo={SECOND.photo} className="bs-photo-secondary" />
                 <p className="bs-eyebrow">{SECOND.kicker}</p>
                 <h4 className="bs-title">{SECOND.title}</h4>
-                <ReadTime>{SECOND.read}</ReadTime>
+                <Meta story={SECOND} />
               </Link>
             </article>
           )}
@@ -102,7 +103,7 @@ export function NewsWeek() {
                 <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-brief-item">
                   <span className="bs-brief-num" aria-hidden="true">{index + 1}</span>
                   <span className="bs-brief-text">
-                    <span className="bs-brief-meta">{SECTIONS[story.section].label} · <time dateTime={story.date}>{shortDate(story.date)}</time></span>
+                    <span className="bs-brief-meta">{SECTIONS[story.section].label} · <StoryDate story={story} /></span>
                     <span className="bs-brief-title">{story.title}</span>
                     <span className="bs-brief-deck">{story.deck}</span>
                   </span>
@@ -131,10 +132,10 @@ export function NewsWeek() {
             <li key={story.slug} className="bs-reveal">
               <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
                 <BsPhoto photo={story.photo} className="bs-photo-more" />
-                <p className="bs-eyebrow"><span className="bs-cluster-step">{index + 1}</span> {shortDate(story.date)}</p>
+                <p className="bs-eyebrow"><span className="bs-cluster-step">{index + 1}</span> <StoryDate story={story} /></p>
                 <h5 className="bs-title">{story.title}</h5>
                 <p className="bs-deck bs-deck-sm">{story.deck}</p>
-                <ReadTime>{story.read}</ReadTime>
+                <Meta story={story} date={false} />
               </Link>
             </li>
           ))}

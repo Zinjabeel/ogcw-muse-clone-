@@ -17,12 +17,11 @@ import { SANITY_API_VERSION } from "./env";
 
 type Source = { _key: string; _type?: string; name?: string; url?: string };
 type Story = {
-  title?: string; slug?: { current?: string }; section?: string; kicker?: string; deck?: string; author?: string; date?: string;
+  title?: string; slug?: { current?: string }; section?: string; kicker?: string; deck?: string; credit?: string; date?: string; updated?: string; certified?: boolean;
   photo?: SanityPhoto; ask?: string; body?: SanityBlock[]; sources?: Source[];
 };
 type Change = FormPatch | FormPatch[] | PatchEvent;
 
-const AUTHORS = ["Jonah Reyes", "Nia Vale", "Sana Lind"];
 const MODE_KEY = "ogcw-studio-editor";
 /** A story's web address: what the site accepts (src/lib/sanity-stories.ts) */
 export const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -54,7 +53,9 @@ function checkStory(story: Story): Record<string, string[]> {
   max("kicker", story.kicker, 40);
   required("deck", story.deck?.trim());
   max("deck", story.deck, 240);
-  required("author", story.author);
+  required("credit", story.credit?.trim());
+  max("credit", story.credit, 60);
+  if (story.updated && story.date && story.updated < story.date) add("updated", "The latest update can’t be before the date it happened.");
   required("date", story.date);
   required("photo", story.photo?.image?.asset?._ref || story.photo?.url);
   if (story.photo?.image?.asset?._ref || story.photo?.url) required("photo.alt", story.photo.alt?.trim());
@@ -120,14 +121,16 @@ function Choice({ label, value, options, placeholder, onChange, readOnly, invali
   );
 }
 
-function DateChoice({ value, onChange, readOnly, invalid }: { value: string | undefined; onChange: (value: string) => void; readOnly: boolean; invalid: boolean }) {
+function DateChoice({ value, onChange, readOnly, invalid, empty = "DATE HERE", prefix = "" }: {
+  value: string | undefined; onChange: (value: string) => void; readOnly: boolean; invalid: boolean; empty?: string; prefix?: string;
+}) {
   const ref = useRef<HTMLInputElement>(null);
   return (
     <span className={`se-choice se-date ${value ? "" : "se-empty"} ${invalid ? "se-invalid" : ""}`}>
       <button type="button" disabled={readOnly} onClick={() => { try { ref.current?.showPicker(); } catch { ref.current?.focus(); } }}>
-        {value ? formatDate(value) : "DATE HERE"}
+        {value ? `${prefix}${formatDate(value)}` : empty}
       </button>
-      <input ref={ref} type="date" tabIndex={-1} aria-label="Date" value={value ?? ""} onChange={(event) => onChange(event.target.value)} />
+      <input ref={ref} type="date" tabIndex={-1} aria-label={prefix ? prefix.replace(/[: ]+$/, "") : "Date"} value={value ?? ""} onChange={(event) => onChange(event.target.value)} />
     </span>
   );
 }
@@ -368,8 +371,17 @@ export function StoryPageInput(props: ObjectInputProps) {
               <LeadPhoto photo={story.photo} onChange={onChange} onFocus={onPathFocus} errors={errorsAt("photo")} altErrors={errorsAt("photo", "alt")} readOnly={readOnly} />
             </div>
             <div className="og-byline">
-              <span>By <Choice label="Author" value={story.author} placeholder="AUTHOR HERE" options={AUTHORS.map((name) => ({ value: name, title: name }))} onChange={text("author")} readOnly={readOnly} invalid={errorsAt("author").length > 0} /></span>
+              {/* Who the news comes from: a real company or publication, or OGCW */}
+              <span className="se-credit">{story.credit === "OGCW" ? "By" : "Source:"} <Box label="Source" value={story.credit} placeholder="SOURCE HERE" onChange={text("credit")} onFocus={focus(["credit"])} errors={errorsAt("credit")} readOnly={readOnly} className="se-inline" /></span>
               <DateChoice value={story.date} onChange={text("date")} readOnly={readOnly} invalid={errorsAt("date").length > 0} />
+              <span className="se-updated">
+                <DateChoice value={story.updated} onChange={text("updated")} readOnly={readOnly} invalid={errorsAt("updated").length > 0} empty="+ LATEST UPDATE" prefix="Latest update: " />
+                {story.updated && !readOnly && <button type="button" className="se-icon" aria-label="Remove the latest update" onClick={() => onChange(unset(["updated"]))}><X size={13} aria-hidden="true" /></button>}
+              </span>
+              <label className={`se-certified ${story.certified ? "is-on" : ""}`}>
+                <input type="checkbox" checked={Boolean(story.certified)} disabled={readOnly} onChange={(event) => onChange(set(event.target.checked, ["certified"]))} />
+                CERTIFIED
+              </label>
               <span>{read}</span>
               <span className="og-share" aria-hidden="true"><Link2 size={14} /> Copy link</span>
             </div>
@@ -404,7 +416,7 @@ export function StoryPageInput(props: ObjectInputProps) {
                   <span className="fb-button">No</span>
                 </div>
               </section>
-              <p className="og-signoff">{story.author ?? "The author"} for OGCW</p>
+              <p className="og-signoff">{!story.credit || story.credit === "OGCW" ? "Reported by OGCW" : `OGCW, from ${story.credit}`}</p>
               <Sources sources={story.sources ?? []} onChange={onChange} onFocus={onPathFocus} readOnly={readOnly} />
             </div>
             <aside className="og-article-aside">
