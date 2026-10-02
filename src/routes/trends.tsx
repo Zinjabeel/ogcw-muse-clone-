@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { StoryRow } from "../components/cards";
 import { useStories } from "../lib/stories";
+import { T } from "@/components/site-text";
 
 export const Route = createFileRoute("/trends")({
   head: () => ({
@@ -40,7 +41,7 @@ function Trends() {
               <span className="trend-num">{String(index + 1).padStart(2, "0")}</span>
               <h2 className="trend-title">{trend.title}</h2>
               <p className="trend-note">{trend.note}</p>
-              <p className="trend-read">Read the story</p>
+              <p className="trend-read"><T k="trends.read">Read the story</T></p>
               <StoryRow story={stories.pick(trend.slug)} />
             </li>
           ))}

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { EVENTS, type UpcomingEvent } from "@/data/content";
+import { T } from "./site-text";
 
 // Upcoming events: the calendar rail on the news front (in place of the old
 // Briefing). What is coming up across music, games, film, fashion and
@@ -48,11 +49,11 @@ export function UpcomingEvents({ show = 8 }: { show?: number }) {
   return (
     <div className="bs-briefing ev">
       <p id="events-title" className="bs-briefing-head">
-        <span>Upcoming events</span>
+        <span><T k="events.title">Upcoming events</T></span>
         <span className="bs-dot" aria-hidden="true" />
       </p>
       <div className="bs-briefing-body">
-        <p className="bs-briefing-intro">Releases, shows and big nights across music, games, film, fashion and streaming.</p>
+        <p className="bs-briefing-intro"><T k="events.intro">Releases, shows and big nights across music, games, film, fashion and streaming.</T></p>
         {groups.map((group) => (
           <section key={group.month} className="ev-month" aria-label={group.month}>
             <p className="ev-month-name" aria-hidden="true">{group.month}</p>

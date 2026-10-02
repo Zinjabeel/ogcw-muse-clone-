@@ -9,6 +9,7 @@ import { ArticleFeedback } from "../components/article-feedback";
 import { formatDate, getArticle, SECTIONS, type Article, type Block } from "../data/content";
 import { getSanityStory } from "../lib/sanity-stories";
 import { useStories } from "../lib/stories";
+import { T } from "@/components/site-text";
 
 // A single story, text first: headline, summary and byline beside a
 // modest lead photo, then the story in a reading column with subheads, pull
@@ -213,7 +214,7 @@ function RateStory({ slug }: { slug: string }) {
   const lit = hover || mine || 0;
   return (
     <section className="og-rate" aria-labelledby={`rate-${slug}`}>
-      <p id={`rate-${slug}`} className="fb-kicker">Rate this story</p>
+      <p id={`rate-${slug}`} className="fb-kicker"><T k="story.rate">Rate this story</T></p>
       <div className="og-stars" role="radiogroup" aria-labelledby={`rate-${slug}`} onMouseLeave={() => setHover(0)}>
         {[1, 2, 3, 4, 5].map((stars) => (
           <button
@@ -296,7 +297,7 @@ function ArticlePage() {
               <p className="og-signoff">{story.credit === "OGCW" ? "Reported by OGCW" : `OGCW, from ${story.credit}`}</p>
               {story.sources.length > 0 && (
                 <div className="og-sources">
-                  <h2 className="og-sources-title">Sources</h2>
+                  <h2 className="og-sources-title"><T k="story.sources">Sources</T></h2>
                   <ul>
                     {story.sources.map((source) => (
                       <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a></li>
@@ -308,13 +309,13 @@ function ArticlePage() {
             <aside className="og-article-aside">
               {contents.length > 2 && (
                 <nav className="og-toc" aria-labelledby="toc-title">
-                  <p id="toc-title" className="og-aside-title">In this story</p>
+                  <p id="toc-title" className="og-aside-title"><T k="story.toc">In this story</T></p>
                   <ol>
                     {contents.map((heading) => <li key={heading}><a href={`#${anchor(heading)}`}>{heading}</a></li>)}
                   </ol>
                 </nav>
               )}
-              <p className="og-aside-title">Most read</p>
+              <p className="og-aside-title"><T k="story.most-read">Most read</T></p>
               <ol className="og-aside-list">
                 {mostRead.map((item, index) => (
                   <li key={item.slug}><StoryRow story={item} index={index} /></li>
@@ -326,8 +327,8 @@ function ArticlePage() {
 
         <section className="page-wrap og-more" aria-labelledby="more-news">
           <div className="og-section-head">
-            <h2 id="more-news" className="og-section-title">More news</h2>
-            <Link to="/news" className="og-more-link">All news</Link>
+            <h2 id="more-news" className="og-section-title"><T k="story.more">More news</T></h2>
+            <Link to="/news" className="og-more-link"><T k="story.all">All news</T></Link>
           </div>
           <div className="og-grid-4">
             {more.map((item) => <StoryCard key={item.slug} story={item} />)}

@@ -4,6 +4,7 @@ import { SiteShell } from "../components/ogcw-layout";
 import { BsPhoto, Meta } from "../components/broadsheet";
 import { SECTION_IDS, SECTIONS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
+import { T } from "@/components/site-text";
 
 export const Route = createFileRoute("/news/")({
   head: () => ({
@@ -44,12 +45,12 @@ function News() {
           <header className="bs-masthead">
             <p className="bs-flag">
               <span suppressHydrationWarning>{today}</span>
-              <span>Updated daily</span>
+              <span><T k="news.daily">Updated daily</T></span>
             </p>
-            <h1 className="bs-wordmark">OGCW News</h1>
+            <h1 className="bs-wordmark"><T k="news.wordmark">OGCW News</T></h1>
             <p className="bs-flag bs-flag-right">
               <span>{all.length} stories</span>
-              <span>Every source linked</span>
+              <span><T k="news.sources">Every source linked</T></span>
             </p>
           </header>
 

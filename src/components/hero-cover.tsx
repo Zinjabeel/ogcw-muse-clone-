@@ -3,6 +3,8 @@ import { ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { LIVE, SECTIONS, type Article } from "@/data/content";
 import { useStories } from "@/lib/stories";
+import { T } from "./site-text";
+import { useSiteText } from "@/lib/site-text";
 
 // Home hero, "Cover story" in the hero switcher: set like a magazine cover.
 // The cover stories take turns every 3 seconds: the photo cross-fades into
@@ -67,14 +69,14 @@ function CoverCopy({ cover, first, leaving }: { cover: Article; first: boolean; 
   const lines = usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : long ? [cover.title] : coverLines(cover.title);
   return (
     <div className={`cover-slide ${first ? "" : "is-turn"} ${leaving ? "is-leaving" : ""}`} aria-hidden={leaving || undefined}>
-      <p className="cover-kicker">Cover story · {SECTIONS[cover.section].label}</p>
+      <p className="cover-kicker"><T k="hero.cover.kicker">Cover story</T> · {SECTIONS[cover.section].label}</p>
       <h1 id={leaving ? undefined : "cover-title"} className={`cover-title ${long ? "cover-title-long" : ""}`}>
         {lines.map((line) => <span key={line} className="cover-line"><span>{line}</span></span>)}
       </h1>
       <p className="cover-deck">{cover.deck}</p>
       <div className="cover-cta">
         <Link to="/news/$slug" params={{ slug: cover.slug }} className="cover-link" tabIndex={leaving ? -1 : undefined}>
-          Read the cover story <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+          <T k="hero.cover.cta">Read the cover story</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
         </Link>
       </div>
     </div>
@@ -111,7 +113,8 @@ export function HeroCover() {
     return () => observer.disconnect();
   }, []);
 
-  const running = !paused && !hold && inView && !reduce;
+  const { editing } = useSiteText();
+  const running = !paused && !hold && inView && !reduce && !editing;
   const current = Math.min(active, covers.length - 1);
   const cover = covers[current]!;
 
@@ -207,7 +210,7 @@ export function HeroCover() {
         </div>
 
         <nav className="cover-rail" aria-label="Also on OGCW">
-          <p className="cover-rail-label">Also on OGCW</p>
+          <p className="cover-rail-label"><T k="hero.cover.rail">Also on OGCW</T></p>
           <ol>
             {railItems.map((item, index) => (
               <li key={index}><div key={item.id} className="cover-rail-swap"><RailEntry item={item} index={index} /></div></li>

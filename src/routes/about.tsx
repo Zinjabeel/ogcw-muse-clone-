@@ -5,6 +5,7 @@ import { Img, SectionHead } from "../components/cards";
 import { EPISODES, SHOPS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
+import { T } from "@/components/site-text";
 
 // What OGCW covers, in four photos: live music, the news, games and style
 const shot = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&h=800&q=80`;
@@ -65,9 +66,9 @@ function About() {
             {COLLAGE.map((photo) => <Img key={photo.src} photo={photo} className="about-collage-photo" eager />)}
           </div>
           <div className="about-position">
-            <p id="our-position" className="og-kicker">Our position</p>
-            <p className="about-statement">We pay attention before everyone else does.</p>
-            <p className="about-copy">We cover style, sound, art and design without flattening them into trends. Our work values original reporting, strong images and the people who build scenes long before they become markets.</p>
+            <p id="our-position" className="og-kicker"><T k="about.position">Our position</T></p>
+            <p className="about-statement"><T k="about.statement">We pay attention before everyone else does.</T></p>
+            <p className="about-copy"><T k="about.copy">We cover style, sound, art and design without flattening them into trends. Our work values original reporting, strong images and the people who build scenes long before they become markets.</T></p>
           </div>
         </section>
 
@@ -101,11 +102,11 @@ function About() {
         </section>
 
         <section className="og-block og-how" aria-labelledby="how-we-work">
-          <h2 id="how-we-work" className="og-section-title">How we work</h2>
+          <h2 id="how-we-work" className="og-section-title"><T k="about.how">How we work</T></h2>
           <ol className="og-how-list">
-            <li><span className="og-how-num">01</span><strong>Reported, not aggregated</strong><span>We go to the shows, the studios and the rooms, and write about what we saw and who we met there.</span></li>
-            <li><span className="og-how-num">02</span><strong>Every photo credited</strong><span>Photographers are named with their work and on our <Link to="/info/$slug" params={{ slug: "credits" }}>photo credits</Link> page.</span></li>
-            <li><span className="og-how-num">03</span><strong>Corrections, openly</strong><span>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> and we’ll fix it and say so.</span></li>
+            <li><span className="og-how-num">01</span><strong><T k="about.how.1">Reported, not aggregated</T></strong><span><T k="about.how.1.copy">We go to the shows, the studios and the rooms, and write about what we saw and who we met there.</T></span></li>
+            <li><span className="og-how-num">02</span><strong><T k="about.how.2">Every photo credited</T></strong><span>Photographers are named with their work and on our <Link to="/info/$slug" params={{ slug: "credits" }}>photo credits</Link> page.</span></li>
+            <li><span className="og-how-num">03</span><strong><T k="about.how.3">Corrections, openly</T></strong><span>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> and we’ll fix it and say so.</span></li>
           </ol>
         </section>
 

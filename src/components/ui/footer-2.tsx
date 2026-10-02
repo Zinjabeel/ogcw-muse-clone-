@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SOCIALS, SocialIcon } from "@/components/socials";
 import type { InfoSlug } from "@/components/info-pages";
+import { T } from "@/components/site-text";
 import { CookieSettingsButton } from "@/components/cookie-settings-button";
 import { LanguagePicker } from "@/components/cookie-consent";
 
@@ -74,10 +75,12 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
 
 // White links that glow softly on hover (.footer-link in styles.css)
 const linkClass = "footer-link";
+const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 function FooterItem({ link }: { link: FooterLink }) {
-  if ("page" in link) return <Link to={link.page} className={linkClass}>{link.label}</Link>;
-  if ("home" in link) return <Link to="/" hash={link.home} className={linkClass}>{link.label}</Link>;
-  if ("info" in link) return <Link to="/info/$slug" params={{ slug: link.info }} className={linkClass}>{link.label}</Link>;
+  const label = <T k={`footer.link.${slug(link.label)}`}>{link.label}</T>;
+  if ("page" in link) return <Link to={link.page} className={linkClass}>{label}</Link>;
+  if ("home" in link) return <Link to="/" hash={link.home} className={linkClass}>{label}</Link>;
+  if ("info" in link) return <Link to="/info/$slug" params={{ slug: link.info }} className={linkClass}>{label}</Link>;
   // let an email address break after the @ on narrow screens
   const [user, domain] = link.label.split("@");
   return <a href={link.href} className={linkClass}>{domain ? <>{user}@<wbr />{domain}</> : link.label}</a>;
@@ -141,7 +144,7 @@ export function Footer2() {
         <div className="footer-reveal footer-brand" style={{ ["--i" as string]: 0 }}>
           <div>
             <Link to="/" className="footer-wordmark" aria-label="OGCW home">OGCW</Link>
-            <p className="footer-tagline">One Great Culture World. Culture, reported from the inside.</p>
+            <p className="footer-tagline"><T k="footer.tagline">One Great Culture World. Culture, reported from the inside.</T></p>
           </div>
           <div className="footer-socials">
             {SOCIALS.map((social) => (
@@ -155,7 +158,7 @@ export function Footer2() {
         <div className="grid grid-cols-2 gap-8 py-12 md:grid-cols-4">
           {footerLinks.map((item, index) => (
             <div key={item.title} className="footer-reveal" style={{ ["--i" as string]: index + 1 }}>
-              <h3 className="footer-heading">{item.title}</h3>
+              <h3 className="footer-heading"><T k={`footer.heading.${slug(item.title)}`}>{item.title}</T></h3>
               <ul className="space-y-2 text-sm">
                 {item.links.map((link) => (
                   <li key={link.label}><FooterItem link={link} /></li>
@@ -169,9 +172,9 @@ export function Footer2() {
         <div className="footer-reveal footer-base" style={{ ["--i" as string]: 5 }}>
           <p>
             © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
-            <Link to="/" className="footer-link">One Great Culture World</Link>. All rights reserved.
+            <Link to="/" className="footer-link"><T k="footer.name">One Great Culture World</T></Link>. <T k="footer.rights">All rights reserved.</T>
             {/* The team's login, kept out of the way */}
-            <span className="footer-work"> · <Link to="/work" className="footer-link">For Work</Link></span>
+            <span className="footer-work"> · <Link to="/work" className="footer-link"><T k="footer.work">For Work</T></Link></span>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <LanguagePicker />

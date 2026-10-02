@@ -5,6 +5,7 @@ import { Img, SectionHead, StoryCard } from "../components/cards";
 import { formatDate } from "../data/content";
 import { useStories } from "../lib/stories";
 import { StoryMeta } from "../components/story-meta";
+import { T } from "@/components/site-text";
 
 export const Route = createFileRoute("/blog")({
   head: () => ({
@@ -44,13 +45,13 @@ function Blog() {
             <span className="og-lead-title">{cover.title}</span>
             <span className="og-lead-deck">{cover.deck}</span>
             <StoryMeta story={cover} className="og-meta" />
-            <span className="og-cta">Read it <ArrowRight size={16} aria-hidden="true" /></span>
+            <span className="og-cta"><T k="blog.read">Read it</T> <ArrowRight size={16} aria-hidden="true" /></span>
           </span>
         </Link>
 
         <section className="og-block" aria-labelledby="long-reads">
           <SectionHead id="long-reads" title="More long reads">
-            <Link to="/news" className="og-more-link">All stories</Link>
+            <Link to="/news" className="og-more-link"><T k="blog.all">All stories</T></Link>
           </SectionHead>
           <div className="og-grid-3">
             {longReads.map((story) => <StoryCard key={story.slug} story={story} showDeck />)}
@@ -65,7 +66,7 @@ function Blog() {
                 <span className="og-kicker">{piece.kind}</span>
                 <span className="journal-works-title">{piece.title}</span>
                 <span className="journal-works-note">{piece.note}</span>
-                <span className="og-meta">Coming to the journal soon</span>
+                <span className="og-meta"><T k="blog.soon">Coming to the journal soon</T></span>
               </li>
             ))}
           </ol>

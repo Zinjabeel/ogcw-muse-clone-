@@ -6,6 +6,7 @@ import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song } fro
 import { formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
 import { SpotifyIcon } from "./spotify";
 import { StoryMeta } from "./story-meta";
+import { T } from "./site-text";
 
 /** Where each section's front lives */
 export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture" } as const satisfies Record<SectionId, string>;
@@ -61,7 +62,7 @@ export function Poster({ episode, size = "md", play = true }: { episode: Episode
     <span className={`og-poster og-poster-${size}`}>
       <Img photo={episode.still} className="og-poster-still" />
       <span className="og-poster-top">
-        <span className="og-poster-mark">OGCW Originals</span>
+        <span className="og-poster-mark"><T k="cards.originals">OGCW Originals</T></span>
         <span>{episode.series} · Ep. {episode.number}</span>
       </span>
       <span className="og-poster-title">{episode.title}</span>
@@ -121,7 +122,7 @@ export const hitSub = (hit: Hit) =>
 export function WatchNext({ episode }: { episode: Episode }) {
   return (
     <div className="og-watch">
-      <p className="og-aside-title">Watch</p>
+      <p className="og-aside-title"><T k="cards.watch">Watch</T></p>
       <EpisodeCard episode={episode} />
     </div>
   );

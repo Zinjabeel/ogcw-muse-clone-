@@ -5,6 +5,7 @@ import { isDefault } from "@/data/placements";
 import { useStories } from "@/lib/stories";
 import { BsPhoto, Meta } from "./broadsheet";
 import { StoryDate } from "./story-meta";
+import { T } from "./site-text";
 
 // This week: fifteen of the latest stories as a second broadsheet block
 // under the OGCW News front, in the same hairline grid. A big lead (Saint
@@ -30,7 +31,7 @@ export function NewsWeek() {
   return (
     <section className="bs-week" aria-labelledby="week-title">
       <div className="bs-section-head">
-        <h3 id="week-title" className="bs-eyebrow">This week</h3>
+        <h3 id="week-title" className="bs-eyebrow"><T k="home.week.title">This week</T></h3>
         <Link to="/news" className="bs-more">All {stories.all.length} stories</Link>
       </div>
 
@@ -45,7 +46,7 @@ export function NewsWeek() {
             <Meta story={LEAD} />
           </Link>
           <div className="bs-thread">
-            <p className="bs-thread-head">{usualThread ? "More from fashion month" : "Also this week"}</p>
+            <p className="bs-thread-head">{usualThread ? <T k="home.week.thread">More from fashion month</T> : <T k="home.week.thread-other">Also this week</T>}</p>
             <ol className="bs-thread-list">
               {THREAD.map((story) => (
                 <li key={story.slug}>
@@ -75,7 +76,7 @@ export function NewsWeek() {
               </Link>
               {MIDDLE_LINKED && MIDDLE_LINKED.slug !== MIDDLE.slug && (
                 <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
-                  <span className="bs-linked-tag">Connected</span>
+                  <span className="bs-linked-tag"><T k="home.week.connected">Connected</T></span>
                   <span className="bs-linked-title">{MIDDLE_LINKED.title}</span>
                   <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </Link>
@@ -96,7 +97,7 @@ export function NewsWeek() {
 
         {/* In brief: five shorter stories, numbered, no photos */}
         <aside className="bs-week-brief bs-reveal" aria-labelledby="brief-title">
-          <h4 id="brief-title" className="bs-brief-head">In brief</h4>
+          <h4 id="brief-title" className="bs-brief-head"><T k="home.week.brief">In brief</T></h4>
           <ol className="bs-brief-list">
             {BRIEF.map((story, index) => (
               <li key={story.slug}>
@@ -120,11 +121,11 @@ export function NewsWeek() {
           <p className="bs-cluster-tag">Connected · {AI_MUSIC.length} stories</p>
           {usualCluster ? (
             <>
-              <h4 id="cluster-ai-title" className="bs-cluster-title">AI and music: one week, three moves</h4>
-              <p className="bs-cluster-intro">A streaming service, a record label and the people who make sound for film and games all acted on AI within days of each other. Read them in order.</p>
+              <h4 id="cluster-ai-title" className="bs-cluster-title"><T k="home.week.cluster.title">AI and music: one week, three moves</T></h4>
+              <p className="bs-cluster-intro"><T k="home.week.cluster.intro">A streaming service, a record label and the people who make sound for film and games all acted on AI within days of each other. Read them in order.</T></p>
             </>
           ) : (
-            <h4 id="cluster-ai-title" className="bs-cluster-title">Read them together</h4>
+            <h4 id="cluster-ai-title" className="bs-cluster-title"><T k="home.week.cluster.title-other">Read them together</T></h4>
           )}
         </div>
         <ol className="bs-cluster-row">

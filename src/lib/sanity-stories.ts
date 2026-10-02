@@ -5,6 +5,7 @@ import { EMPTY_LAYOUT, isSlotId, type FrontLayout } from "@/data/placements";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
 import { byDate, toArticle, type SanityStory } from "./sanity-mapping";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
+import { EMPTY_SITE, type SiteContent } from "./site-text";
 
 // Stories from the Sanity studio (/admin), turned into the same shape as
 // the stories in src/data/content.ts so every page shows them the same way.
@@ -28,7 +29,19 @@ const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, credit
 // on every request; an edit in the studio shows up within that time.
 const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
-export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating> };
+export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
+
+type SiteDoc = { texts?: { key?: string; value?: string }[] | null; images?: { key?: string; alt?: string; src?: string | null; assetId?: string | null }[] | null } | null;
+const toSite = (doc: SiteDoc): SiteContent => ({
+  texts: Object.fromEntries((doc?.texts ?? []).flatMap((item) => (item.key && typeof item.value === "string" ? [[item.key, item.value]] : []))),
+  images: Object.fromEntries((doc?.images ?? []).flatMap((item) => (item.key && item.src ? [[item.key, { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}) }]] : []))),
+});
+
+/** Forget the cached copy, so a change saved a moment ago shows on the next load */
+export const refreshSiteCache = createServerFn({ method: "POST" }).handler(async () => {
+  cached = null;
+  return true;
+});
 
 // Readers' star ratings, per story (Supabase, src/lib/ratings.ts); none if they can't be reached
 async function ratingTotals(): Promise<Record<string, Rating>> {
@@ -64,7 +77,8 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
   if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.data;
   try {
     const ratings = ratingTotals();
-    const { docs, front } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc }>(`{
+    const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
+      "site": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
       "front": *[_id == "frontPage"][0] { "slots": slots[] { "id": slot, "slugs": stories[]->slug.current }, "hidden": hidden[]->slug.current }
     }`);
@@ -73,11 +87,11 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
       .filter((story): story is Article => story !== null)
       .sort(byDate)
       .map((story) => ({ ...story, body: [] }));
-    cached = { at: Date.now(), data: { stories, layout: toLayout(front), ratings: await ratings } };
+    cached = { at: Date.now(), data: { stories, layout: toLayout(front), ratings: await ratings, site: toSite(site) } };
     return cached.data;
   } catch (error) {
     console.error("Sanity stories didn't load", error);
-    return cached?.data ?? { stories: [], layout: EMPTY_LAYOUT, ratings: await ratingTotals() };
+    return cached?.data ?? { stories: [], layout: EMPTY_LAYOUT, ratings: await ratingTotals(), site: EMPTY_SITE };
   }
 });
 

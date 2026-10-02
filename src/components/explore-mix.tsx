@@ -5,6 +5,7 @@ import { useStories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { SpotifyIcon } from "./spotify";
 import { Img } from "./cards";
+import { T } from "./site-text";
 
 // Explore: a bit of everything on OGCW in one grid. An editor's pick, what's
 // trending, where to follow OGCW, a streamer and a song to press play on,
@@ -23,8 +24,8 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
   return (
     <section className="bs-explore mix" aria-labelledby={`${idPrefix}-title`}>
       <div className="bs-section-head">
-        <h3 id={`${idPrefix}-title`} className="bs-eyebrow">{title}</h3>
-        <Link to="/explore" className="bs-more">Search everything</Link>
+        <h3 id={`${idPrefix}-title`} className="bs-eyebrow"><T k={`${idPrefix}.title`}>{title}</T></h3>
+        <Link to="/explore" className="bs-more"><T k="explore.search">Search everything</T></Link>
       </div>
 
       <div className="mix-grid">
@@ -38,7 +39,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         </Link>
 
         <div className="mix-tile mix-trending">
-          <p className="mix-label">Trending now</p>
+          <p className="mix-label"><T k="explore.trending">Trending now</T></p>
           <ol>
             {stories.trending.map((story, index) => (
               <li key={story.slug}>
@@ -52,8 +53,8 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         </div>
 
         <div className="mix-tile mix-follow">
-          <p className="mix-label">Follow OGCW</p>
-          <p className="mix-follow-copy">The day’s stories, clips and drops, wherever you scroll.</p>
+          <p className="mix-label"><T k="explore.follow">Follow OGCW</T></p>
+          <p className="mix-follow-copy"><T k="explore.follow.copy">The day’s stories, clips and drops, wherever you scroll.</T></p>
           <ul>
             {SOCIALS.map((social) => (
               <li key={social.name}>
@@ -68,7 +69,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         </div>
 
         <a className="mix-tile mix-media" href={youtubeUrl(streamer.video)} target="_blank" rel="noopener noreferrer">
-          <span className="mix-label">Streamer to watch</span>
+          <span className="mix-label"><T k="explore.streamer">Streamer to watch</T></span>
           <span className="mix-media-thumb">
             <img src={youtubeThumb(streamer.video)} alt="" loading="lazy" />
             <span className="bs-song-play" aria-hidden="true"><Play size={15} fill="currentColor" strokeWidth={0} /></span>
@@ -78,7 +79,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         </a>
 
         <a className="mix-tile mix-media mix-song" href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
-          <span className="mix-label">Song to check out</span>
+          <span className="mix-label"><T k="explore.song">Song to check out</T></span>
           <span className="mix-song-row">
             <span className="mix-song-cover"><img src={song.cover} alt="" loading="lazy" /></span>
             <span className="mix-song-text">
@@ -100,7 +101,7 @@ export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?
         ))}
 
         <div className="mix-tile mix-list">
-          <p className="mix-label">Reading list</p>
+          <p className="mix-label"><T k="explore.reading-list">Reading list</T></p>
           <p className="mix-list-title">{list.title}</p>
           <p className="mix-follow-copy">{list.note}</p>
           <ol>

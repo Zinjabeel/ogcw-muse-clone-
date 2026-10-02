@@ -15,6 +15,8 @@ import { heroInitScript } from "../components/hero-switcher";
 import { NotFoundPage } from "../components/not-found";
 import { getStorySummaries } from "../lib/sanity-stories";
 import { EMPTY_LAYOUT } from "../data/placements";
+import { EMPTY_SITE, SiteTextProvider } from "../lib/site-text";
+import { SiteEditor } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
 
@@ -83,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   // Every story, and which goes where on the front page, live from the
   // Sanity studio (/admin), for every page. Reloaded in the background after
   // 15 seconds when you move around.
-  loader: async () => getStorySummaries().catch(() => ({ stories: [], layout: EMPTY_LAYOUT, ratings: {} })),
+  loader: async () => getStorySummaries().catch(() => ({ stories: [], layout: EMPTY_LAYOUT, ratings: {}, site: EMPTY_SITE })),
   staleTime: 15_000,
   shellComponent: RootShell,
   component: RootComponent,
@@ -110,16 +112,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const { stories, layout, ratings } = Route.useLoaderData();
+  const { stories, layout, ratings, site } = Route.useLoaderData();
 
   return (
     <QueryClientProvider client={queryClient}>
       <StoriesProvider stories={stories} layout={layout} ratings={ratings}>
         {/* The studio (/admin) floats over every page, so it can stay open while minimised */}
-        <StudioHost>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </StudioHost>
+        {/* The site's own texts and photos, editable by admins on the page (src/components/site-text.tsx) */}
+        <SiteTextProvider content={site}>
+          <StudioHost>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </StudioHost>
+          <SiteEditor />
+        </SiteTextProvider>
       </StoriesProvider>
     </QueryClientProvider>
   );

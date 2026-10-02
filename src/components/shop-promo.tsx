@@ -12,6 +12,7 @@ import nikeInnovationPhoto from "@/assets/shop/nike-house-of-innovation.jpg";
 import adidasStorePhoto from "@/assets/shop/adidas-store-jakarta.jpg";
 import uniqloShenzhenPhoto from "@/assets/shop/uniqlo-store-shenzhen.jpg";
 import uniqloTokyoPhoto from "@/assets/shop/uniqlo-store-tokyo.jpg";
+import { T } from "./site-text";
 
 // The shop on the home page: one card into the shop, in the site's own card
 // style. On the left, a line about the shop, the button into it, and the
@@ -61,16 +62,16 @@ export function ShopPromo() {
   return (
     <section className="sp" aria-labelledby="sp-title">
       <div className="sp-copy">
-        <p className="sp-label">The OGCW Shop</p>
-        <h3 id="sp-title" className="sp-title">Shop the OGCW edit</h3>
-        <p className="sp-text">Our picks from the brands in our stories, bought straight from the retailer.</p>
+        <p className="sp-label"><T k="shop-promo.label">The OGCW Shop</T></p>
+        <h3 id="sp-title" className="sp-title"><T k="shop-promo.title">Shop the OGCW edit</T></h3>
+        <p className="sp-text"><T k="shop-promo.text">Our picks from the brands in our stories, bought straight from the retailer.</T></p>
         <Link to="/shop" className="sp-button">
           Visit the shop
           <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
         </Link>
 
         <div className="sp-brands">
-          <p id="sp-brands-title" className="sp-brands-title">Shop by brand</p>
+          <p id="sp-brands-title" className="sp-brands-title"><T k="shop-promo.brands">Shop by brand</T></p>
           <ul className="sp-brand-list" aria-labelledby="sp-brands-title">
             {SHOPS.map((shop) => (
               <li key={shop.slug}>

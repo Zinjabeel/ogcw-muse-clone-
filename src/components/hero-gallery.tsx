@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { EditableImage, T } from "./site-text";
+import { useSiteText } from "@/lib/site-text";
 
 // Gallery hero (the default in the hero switcher): the five doors into OGCW
 // (About, News, Shop, Blog, Subscribe) as cards on a stage. The current card
@@ -88,7 +90,9 @@ export function HeroGallery() {
   useEffect(() => { lastOffsets.current = offsets; });
 
   const go = (step: number) => setActive((value) => (((value + step) % CARDS.length) + CARDS.length) % CARDS.length);
-  const running = !paused && !hold && inView && !reduce;
+  const site = useSiteText();
+  // Hold still while an admin edits the site, so the card under the cursor stays put
+  const running = !paused && !hold && inView && !reduce && !site.editing;
   const current = CARDS[active]!;
 
   // Swipe on touch screens (and drag with a mouse): a clear sideways move of 40px or more
@@ -120,7 +124,7 @@ export function HeroGallery() {
       {/* The ambient light: the middle card's photo, blurred, over a wash of its colour */}
       <div className="gallery-bg" aria-hidden="true">
         {CARDS.map((card, index) => (
-          <img key={card.id} src={card.photo} alt="" className={index === active ? "is-on" : undefined} />
+          <img key={card.id} src={site.image(`hero.card.${card.id}`)?.src ?? card.photo} alt="" className={index === active ? "is-on" : undefined} />
         ))}
       </div>
 
@@ -161,12 +165,12 @@ export function HeroGallery() {
                     if (offset !== 0) { event.preventDefault(); go(offset); }
                   }}
                 >
-                  <img src={card.photo} alt={card.alt} loading={distance < 2 ? "eager" : "lazy"} draggable={false} />
+                  <EditableImage k={`hero.card.${card.id}`} src={card.photo} alt={card.alt} loading={distance < 2 ? "eager" : "lazy"} draggable={false} />
                   <span className="gallery-card-body">
-                    <span className="gallery-card-label">{card.label}</span>
-                    <span className="gallery-card-title">{card.title}</span>
-                    <span className="gallery-card-copy">{card.copy}</span>
-                    <span className="gallery-card-cta">{card.cta} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+                    <span className="gallery-card-label"><T k={`hero.card.${card.id}.label`}>{card.label}</T></span>
+                    <span className="gallery-card-title"><T k={`hero.card.${card.id}.title`}>{card.title}</T></span>
+                    <span className="gallery-card-copy"><T k={`hero.card.${card.id}.copy`}>{card.copy}</T></span>
+                    <span className="gallery-card-cta"><T k={`hero.card.${card.id}.cta`}>{card.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
                   </span>
                 </CardLink>
               </li>
@@ -175,7 +179,7 @@ export function HeroGallery() {
         </ol>
 
         <div className="gallery-foot">
-          <p className="gallery-now" aria-live={running ? "off" : "polite"}>{current.label}</p>
+          <p className="gallery-now" aria-live={running ? "off" : "polite"}><T k={`hero.card.${current.id}.label`}>{current.label}</T></p>
           <p className="gallery-count">
             <span className="sr-only">Card </span>
             <span>{pad(active + 1)}</span>

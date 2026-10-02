@@ -11,6 +11,7 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, Meta, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
 import { ShopPromo } from "./shop-promo";
+import { T } from "./site-text";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
@@ -177,8 +178,8 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
   return (
     <section ref={section} className="bs-carousel" aria-labelledby="more-news-title" aria-roledescription="carousel">
       <div className="bs-section-head">
-        <h3 id="more-news-title" className="bs-eyebrow">More news</h3>
-        <Link to="/news" className="bs-more">All stories</Link>
+        <h3 id="more-news-title" className="bs-eyebrow"><T k="home.more.title">More news</T></h3>
+        <Link to="/news" className="bs-more"><T k="home.more.link">All stories</T></Link>
       </div>
       <div className="bs-carousel-stage">
         <div className="bs-carousel-track" ref={track}>
@@ -224,12 +225,12 @@ export function NewsFront() {
         <header className="bs-masthead">
           <p className="bs-flag">
             <span suppressHydrationWarning>{today}</span>
-            <span>Updated daily</span>
+            <span><T k="home.news.flag-left">Updated daily</T></span>
           </p>
-          <h2 id="news-front-title" className="bs-wordmark">OGCW News</h2>
+          <h2 id="news-front-title" className="bs-wordmark"><T k="home.news.title">OGCW News</T></h2>
           <p className="bs-flag bs-flag-right">
             <span>{stories.all.length} stories</span>
-            <span>Every source linked</span>
+            <span><T k="home.news.flag-right">Every source linked</T></span>
           </p>
         </header>
 
@@ -237,7 +238,7 @@ export function NewsFront() {
           <ul>
             {sections.map((section) => (
               <li key={section.label}>
-                <Link to={section.to}>{section.label}</Link>
+                <Link to={section.to}><T k={`home.news.nav.${section.to.slice(1)}`}>{section.label}</T></Link>
               </li>
             ))}
           </ul>
@@ -256,7 +257,7 @@ export function NewsFront() {
             {/* The song to check out, then the rest of the playlist as a short
                 list. Every song opens on Spotify, shown with its album cover. */}
             <div className="bs-song bs-song-wide">
-              <p className="bs-song-head">Check out this song</p>
+              <p className="bs-song-head"><T k="home.song.title">Check out this song</T></p>
               <a className="bs-song-main" href={spotifyTrack(song.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${song.title} by ${song.artist}, on Spotify`}>
                 <span className="bs-song-media">
                   <img src={song.cover} alt="" loading="lazy" />
@@ -267,10 +268,10 @@ export function NewsFront() {
                   <span className="bs-song-artist">{song.artist}</span>
                   <span className="bs-song-album">{song.album} · {song.year}</span>
                   <span className="bs-song-note">{song.note}</span>
-                  <span className="bs-spotify"><SpotifyIcon size={15} /> Play on Spotify <ArrowUpRight size={13} aria-hidden="true" /></span>
+                  <span className="bs-spotify"><SpotifyIcon size={15} /> <T k="home.song.cta">Play on Spotify</T> <ArrowUpRight size={13} aria-hidden="true" /></span>
                 </span>
               </a>
-              <p className="bs-song-sub">Up next on the playlist</p>
+              <p className="bs-song-sub"><T k="home.song.next">Up next on the playlist</T></p>
               <ol className="bs-song-next">
                 {nextSongs.map((item, index) => (
                   <li key={item.spotify}>

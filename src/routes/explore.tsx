@@ -6,6 +6,7 @@ import { ExploreMix } from "../components/explore-mix";
 import { HitLink, hitLabel, hitSub, hitTitle, Img, StoryRow } from "../components/cards";
 import { searchSite } from "../data/content";
 import { useStories } from "../lib/stories";
+import { T } from "@/components/site-text";
 
 // Explore hub: search across everything, the Explore mix, curated reading
 // lists and a directory of every section.
@@ -69,7 +70,7 @@ function ExplorePage() {
 
         <section className="og-block" aria-labelledby="reading-lists">
           <div className="og-section-head">
-            <h2 id="reading-lists" className="og-section-title">Reading lists</h2>
+            <h2 id="reading-lists" className="og-section-title"><T k="explore.lists">Reading lists</T></h2>
           </div>
           <div className="og-lists">
             {stories.readingLists.map((list, index) => (
@@ -88,7 +89,7 @@ function ExplorePage() {
 
         <section className="og-block" aria-labelledby="directory">
           <div className="og-section-head">
-            <h2 id="directory" className="og-section-title">Everything on OGCW</h2>
+            <h2 id="directory" className="og-section-title"><T k="explore.directory">Everything on OGCW</T></h2>
           </div>
           <ul className="og-directory">
             {DIRECTORY.map((d) => (

@@ -5,6 +5,7 @@ import { EPISODES, EVENTS, SECTIONS, SHOPS, type Article, type Episode, type Pho
 import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
+import { T } from "./site-text";
 
 // Site menu: "The OGCW Index", a full-screen contents page that drops down
 // over the site. Each section is a numbered line in large serif type with
@@ -179,11 +180,11 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             <Link to="/" className="ix-logo" aria-label="OGCW home" onClick={go}>OGCW</Link>
           </div>
           <p className="ix-dateline">
-            <span>The Index</span>
+            <span><T k="ix.index">The Index</T></span>
             {today && <span className="ix-today">{today.label}</span>}
           </p>
           <button type="button" className="ix-search" onClick={() => close(onSearch)}>
-            <Search size={15} strokeWidth={1.75} aria-hidden="true" /> <span>Search</span>
+            <Search size={15} strokeWidth={1.75} aria-hidden="true" /> <span><T k="ix.search">Search</T></span>
           </button>
         </div>
 
@@ -204,7 +205,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                       onClick={go}
                     >
                       <span className="ix-num">{pad(index + 1)}</span>
-                      <span className="ix-name"><span>{section.label}</span></span>
+                      <span className="ix-name"><span><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span></span>
                       <span className="ix-note">{section.note}</span>
                       {lead && <span className="ix-latest">{section.to === "/shop" ? SHOPS.map((s) => s.name).join(", ") : itemTitle(lead)}</span>}
                     </Link>
@@ -223,7 +224,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
               return (
                 <section key={section.label} className="ix-card" data-on={on} inert={!on} aria-hidden={on ? undefined : true} aria-label={`${section.heading}: ${section.label}`}>
                   <p className="ix-card-head">
-                    <span>{section.heading}</span>
+                    <span><T k={`ix.${section.to.slice(1)}.heading`}>{section.heading}</T></span>
                     <span className="ix-card-num">{pad(index + 1)} / {pad(SECTIONS.length)}</span>
                   </p>
                   {lead && (
@@ -246,7 +247,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                     ))}
                   </ol>
                   <Link to={section.to} className="ix-all" onClick={go}>
-                    Go to {section.label} <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+                    <T k="ix.go">Go to</T> <T k={`nav.${section.to.slice(1)}`}>{section.label}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
                   </Link>
                 </section>
               );
@@ -257,8 +258,8 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
         <div className="ix-foot">
           <section className="ix-events" aria-labelledby="ix-events-title">
             <p id="ix-events-title" className="ix-foot-head">
-              Coming up
-              <Link to="/" hash="events-title" className="ix-foot-link" onClick={go}>All events <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Link>
+              <T k="ix.coming">Coming up</T>
+              <Link to="/" hash="events-title" className="ix-foot-link" onClick={go}><T k="ix.events">All events</T> <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Link>
             </p>
             <ol>
               {upcoming.map((event) => <li key={event.date + event.title}><EventLink event={event} onGo={go} /></li>)}
@@ -266,28 +267,28 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
           </section>
           <div className="ix-foot-side">
             <nav className="ix-pages" aria-labelledby="ix-pages-title">
-              <p id="ix-pages-title" className="ix-foot-head">More from OGCW</p>
+              <p id="ix-pages-title" className="ix-foot-head"><T k="ix.pages">More from OGCW</T></p>
               <ul>
                 {PAGES.map((page) => (
                   <li key={page.label}>
                     {"to" in page
-                      ? <Link to={page.to} onClick={go}>{page.label}</Link>
-                      : <Link to="/info/$slug" params={{ slug: page.info }} onClick={go}>{page.label}</Link>}
+                      ? <Link to={page.to} onClick={go}><T k={`nav.${page.to.slice(1)}`}>{page.label}</T></Link>
+                      : <Link to="/info/$slug" params={{ slug: page.info }} onClick={go}><T k={`more.${page.info}`}>{page.label}</T></Link>}
                   </li>
                 ))}
               </ul>
             </nav>
             <nav className="ix-pages" aria-labelledby="ix-legal-title">
-              <p id="ix-legal-title" className="ix-foot-head">Legal</p>
+              <p id="ix-legal-title" className="ix-foot-head"><T k="ix.legal">Legal</T></p>
               <ul>
                 {LEGAL.map((page) => (
-                  <li key={page.label}><Link to="/info/$slug" params={{ slug: page.info }} onClick={go}>{page.label}</Link></li>
+                  <li key={page.label}><Link to="/info/$slug" params={{ slug: page.info }} onClick={go}><T k={`more.${page.info}`}>{page.label}</T></Link></li>
                 ))}
-                <li><button type="button" className="ix-text-button" onClick={() => close(openConsent)}>Cookie settings</button></li>
+                <li><button type="button" className="ix-text-button" onClick={() => close(openConsent)}><T k="ix.cookies">Cookie settings</T></button></li>
               </ul>
             </nav>
             <div className="ix-social">
-              <p className="ix-foot-head">Follow</p>
+              <p className="ix-foot-head"><T k="ix.follow">Follow</T></p>
               <ul>
                 {SOCIALS.map((social) => (
                   <li key={social.name}>

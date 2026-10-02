@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
+import { T } from "./site-text";
 
 // Three columns under the news front (requirements doc):
 // About OGCW (who we are, vision, what we cover; the social links sit in
@@ -44,22 +45,22 @@ export function ConnectSection() {
       <div className="ogcw-connect-grid">
         {/* About OGCW */}
         <section className="ogcw-connect-col" aria-labelledby="about-ogcw-title">
-          <p className="ogcw-connect-label">About OGCW</p>
-          <h2 id="about-ogcw-title" className="ogcw-connect-title">One Great Culture World</h2>
+          <p className="ogcw-connect-label"><T k="connect.about.label">About OGCW</T></p>
+          <h2 id="about-ogcw-title" className="ogcw-connect-title"><T k="connect.about.title">One Great Culture World</T></h2>
           <p className="ogcw-connect-copy">
             OGCW is an independent platform for culture and the stories around it. We cover music, fashion, film &amp; TV, sport and pop culture, reported by the people shaping them.
           </p>
           <p className="ogcw-connect-copy">
             Our idea is simple: bring culture and what’s happening right now, from all over the world, together in one place.
           </p>
-          <Link to="/about" className="ogcw-connect-link">More about OGCW <ArrowRight size={14} aria-hidden="true" /></Link>
+          <Link to="/about" className="ogcw-connect-link"><T k="connect.about.link">More about OGCW</T> <ArrowRight size={14} aria-hidden="true" /></Link>
         </section>
 
         {/* Newsletter */}
         <section className="ogcw-connect-col" aria-labelledby="newsletter-title">
-          <p className="ogcw-connect-label">Newsletter</p>
-          <h2 id="newsletter-title" className="ogcw-connect-title">Stay in the culture.</h2>
-          <p className="ogcw-connect-copy">Get the biggest stories from OGCW directly to your inbox.</p>
+          <p className="ogcw-connect-label"><T k="connect.newsletter.label">Newsletter</T></p>
+          <h2 id="newsletter-title" className="ogcw-connect-title"><T k="connect.newsletter.title">Stay in the culture.</T></h2>
+          <p className="ogcw-connect-copy"><T k="connect.newsletter.copy">Get the biggest stories from OGCW directly to your inbox.</T></p>
           <ul className="ogcw-connect-topics" aria-label="What’s in it">
             {newsletterTopics.map((topic) => <li key={topic}>{topic}</li>)}
           </ul>
@@ -68,9 +69,9 @@ export function ConnectSection() {
 
         {/* Business, Partnerships & Contact */}
         <section className="ogcw-connect-col" aria-labelledby="work-title">
-          <p className="ogcw-connect-label">Business &amp; partnerships</p>
-          <h2 id="work-title" className="ogcw-connect-title">Work with OGCW</h2>
-          <p className="ogcw-connect-copy">For brands, artists, labels, PR agencies and partners.</p>
+          <p className="ogcw-connect-label"><T k="connect.work.label">Business & partnerships</T></p>
+          <h2 id="work-title" className="ogcw-connect-title"><T k="connect.work.title">Work with OGCW</T></h2>
+          <p className="ogcw-connect-copy"><T k="connect.work.copy">For brands, artists, labels, PR agencies and partners.</T></p>
           <ul className="ogcw-connect-work">
             {workWith.map((item) => (
               <li key={item.label}>

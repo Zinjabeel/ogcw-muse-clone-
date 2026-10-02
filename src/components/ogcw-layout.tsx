@@ -9,6 +9,7 @@ import { ThemeSwitcher } from "./theme-switcher";
 import { HeroSwitcher } from "./hero-switcher";
 import { CookieConsent } from "./cookie-consent";
 import { AccountButton } from "./account-button";
+import { T } from "./site-text";
 
 // Header navigation. The sections always show; Originals and Shop join them
 // from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
@@ -64,22 +65,22 @@ function MoreMenu({ pathname }: { pathname: string }) {
   return (
     <div ref={root} className="nav-more">
       <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""} ${currentTier && currentTier !== "all" ? `nav-more-${currentTier}-active` : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
-        More <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+        <T k="nav.more">More</T> <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
       {open && (
         <div id="nav-more-menu" className="nav-more-menu">
           <ul className="nav-more-wide">
             {nav.filter((item) => item.tier !== "all").map((item) => (
-              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} className="nav-more-link">{item.label}</Link></li>
+              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} className="nav-more-link"><T k={`nav.${item.to.slice(1)}`}>{item.label}</T></Link></li>
             ))}
           </ul>
           <ul>
             {more.map((item) => (
               <li key={item.label}>
                 {"to" in item ? (
-                  <Link to={item.to} className="nav-more-link">{item.label}<span>{item.note}</span></Link>
+                  <Link to={item.to} className="nav-more-link"><T k={`more.${item.label.toLowerCase()}`}>{item.label}</T><span><T k={`more.${item.label.toLowerCase()}.note`}>{item.note}</T></span></Link>
                 ) : (
-                  <Link to="/info/$slug" params={{ slug: item.info }} className="nav-more-link">{item.label}<span>{item.note}</span></Link>
+                  <Link to="/info/$slug" params={{ slug: item.info }} className="nav-more-link"><T k={`more.${item.info}`}>{item.label}</T><span><T k={`more.${item.info}.note`}>{item.note}</T></span></Link>
                 )}
               </li>
             ))}
@@ -125,7 +126,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                   className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
                   aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
                 >
-                  {item.label}
+                  <T k={`nav.${item.to.slice(1)}`}>{item.label}</T>
                 </Link>
               ))}
               <MoreMenu pathname={pathname} />
@@ -150,13 +151,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
 /** Page opener: kicker, sentence-case serif title and a short intro. `compact`
  *  for the small info pages, where a poster-size title would dwarf the text. */
-export function PageIntro({ kicker, title, copy, compact = false }: { kicker: string; title: string; copy: string; compact?: boolean }) {
+export function PageIntro({ kicker, title, copy, compact = false, id }: { kicker: string; title: string; copy: string; compact?: boolean; id?: string }) {
+  // Editable by admins, named after the page (or `id`): "intro.about.title"…
+  const key = `intro.${id ?? kicker.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;
   return (
     <section className={`page-wrap page-intro ${compact ? "page-intro-compact" : ""}`}>
-      <p className="section-kicker">{kicker}</p>
+      <p className="section-kicker"><T k={`${key}.kicker`}>{kicker}</T></p>
       <div className="page-intro-grid">
-        <h1 className="page-intro-title">{title}</h1>
-        <p className="page-intro-copy">{copy}</p>
+        <h1 className="page-intro-title"><T k={`${key}.title`}>{title}</T></h1>
+        <p className="page-intro-copy"><T k={`${key}.copy`}>{copy}</T></p>
       </div>
     </section>
   );

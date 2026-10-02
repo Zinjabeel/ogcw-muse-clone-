@@ -7,6 +7,7 @@ import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { Img } from "./cards";
 import { StoryMeta } from "./story-meta";
+import { T } from "./site-text";
 
 // Keep exploring: the Explore grid carries straight on into more stories,
 // in the same tiles. A big feature and four stories, then the rap desk
@@ -157,7 +158,7 @@ function Feature({ story, label }: { story: Article; label?: string }) {
         <span className="mix-label">{label ?? story.kicker} · {SECTIONS[story.section].label}</span>
         <span className="mix-pick-title">{story.title}</span>
         <span className="mix-pick-deck">{story.deck}</span>
-        <span className="kx-feature-cta">Read the story <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+        <span className="kx-feature-cta"><T k="kx.read">Read the story</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
       </span>
     </Link>
   );
@@ -191,7 +192,7 @@ export function KeepExploring() {
   return (
     <section className="kx" aria-labelledby="kx-title">
       <div className="kx-head">
-        <h3 id="kx-title" className="kx-label">Keep exploring</h3>
+        <h3 id="kx-title" className="kx-label"><T k="kx.title">Keep exploring</T></h3>
         <span className="kx-rule" aria-hidden="true" />
         <span className="kx-count">{FIRST_COUNT} more stories</span>
       </div>
@@ -204,26 +205,26 @@ export function KeepExploring() {
         {/* The rap desk: the vote, and the rap beat beside it */}
         <section className="mix-tile kx-rap" aria-labelledby="rap-desk-title">
           <div className="kx-rap-poll">
-            <p className="mix-label">The rap desk · Vote</p>
+            <p className="mix-label"><T k="kx.rap.label">The rap desk · Vote</T></p>
             <h4 id="rap-desk-title" className="kx-rap-question">Who’s the <em>No. 1</em> rapper right now?</h4>
             <p className="kx-rap-intro">
               Five names, five cases from 2026 so far.{" "}
-              <Link to="/news/$slug" params={{ slug: RAP_POLL.story }} className="kx-rap-intro-link">Read the case for each</Link>
+              <Link to="/news/$slug" params={{ slug: RAP_POLL.story }} className="kx-rap-intro-link"><T k="kx.rap.case">Read the case for each</T></Link>
             </p>
             <RapPoll />
           </div>
           <div className="kx-rap-side">
-            <p className="kx-rap-side-head">On the rap beat</p>
+            <p className="kx-rap-side-head"><T k="kx.rap.beat">On the rap beat</T></p>
             <ol className="kx-rap-list">
               {RAP_STORIES.map((story) => <li key={story.slug}><RapStory story={story} /></li>)}
             </ol>
-            <Link to="/music" className="kx-rap-more">More in Music <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
+            <Link to="/music" className="kx-rap-more"><T k="kx.rap.more">More in Music</T> <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
           </div>
         </section>
       </div>
 
       <div className="kx-head">
-        <h3 id="kx-more-title" className="kx-label">More to explore</h3>
+        <h3 id="kx-more-title" className="kx-label"><T k="kx.more.title">More to explore</T></h3>
         <span className="kx-rule" aria-hidden="true" />
         <span className="kx-count">{MORE_COUNT} more stories</span>
       </div>
@@ -235,11 +236,11 @@ export function KeepExploring() {
 
         {/* Screens & streams: three quick reads in a list, like the rap beat */}
         <section className="mix-tile kx-screens" aria-labelledby="kx-screens-title">
-          <p id="kx-screens-title" className="kx-rap-side-head">Screens &amp; streams</p>
+          <p id="kx-screens-title" className="kx-rap-side-head"><T k="kx.screens">Screens & streams</T></p>
           <ol className="kx-rap-list">
             {SCREENS.map((story) => <li key={story.slug}><RapStory story={story} /></li>)}
           </ol>
-          <Link to="/streaming" className="kx-rap-more">More in Streaming <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
+          <Link to="/streaming" className="kx-rap-more"><T k="kx.screens.more">More in Streaming</T> <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></Link>
         </section>
 
         {MORE_END.map((story) => <Tile key={story.slug} story={story} tall />)}

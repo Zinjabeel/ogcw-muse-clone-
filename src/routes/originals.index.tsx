@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
 import { EpisodeCard, Poster } from "../components/cards";
 import { EPISODES } from "../data/content";
+import { T } from "@/components/site-text";
 
 export const Route = createFileRoute("/originals/")({
   head: () => ({
@@ -36,14 +37,14 @@ function Originals() {
               <span className="og-lead-title">{featured.title}</span>
               <span className="og-lead-deck">{featured.summary}</span>
               <span className="og-meta">{featured.kind} · {featured.length} · Coming soon</span>
-              <span className="og-cta">Open the episode <ArrowRight size={16} aria-hidden="true" /></span>
+              <span className="og-cta"><T k="originals.open">Open the episode</T> <ArrowRight size={16} aria-hidden="true" /></span>
             </span>
           </Link>
         )}
 
         <section className="og-block" aria-labelledby="all-episodes">
           <div className="og-section-head">
-            <h2 id="all-episodes" className="og-section-title">All episodes</h2>
+            <h2 id="all-episodes" className="og-section-title"><T k="originals.all">All episodes</T></h2>
           </div>
           <div className="og-filters" role="group" aria-label="Filter by series">
             {SERIES.map((s) => (

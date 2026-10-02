@@ -1,5 +1,6 @@
 import { ArrowUpRight, Play } from "lucide-react";
 import { AWARDS_SOURCE, CONTENT_OF_THE_MONTH, youtubeThumb, youtubeUrl } from "@/data/content";
+import { T } from "./site-text";
 
 // Content of the month: the creators who won the year's top streaming awards,
 // ranked. First place takes the big card on the left; second to fifth sit in
@@ -13,8 +14,8 @@ export function ContentOfTheMonth({ headingLevel = "h3" }: { headingLevel?: "h2"
   return (
     <section className="cotm" aria-labelledby="cotm-title">
       <div className="bs-section-head">
-        <Heading id="cotm-title" className="bs-eyebrow cotm-heading">Content of the month</Heading>
-        <a href={AWARDS_SOURCE.url} className="bs-more" target="_blank" rel="noopener noreferrer">The Streamer Awards winners</a>
+        <Heading id="cotm-title" className="bs-eyebrow cotm-heading"><T k="cotm.title">Content of the month</T></Heading>
+        <a href={AWARDS_SOURCE.url} className="bs-more" target="_blank" rel="noopener noreferrer"><T k="cotm.link">The Streamer Awards winners</T></a>
       </div>
       <ol className="cotm-grid">
         {CONTENT_OF_THE_MONTH.map((creator) => (

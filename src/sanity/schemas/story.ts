@@ -2,6 +2,7 @@ import { defineArrayMember, defineField, defineType } from "sanity";
 import { SLUG, StoryPageInput } from "../page-editor";
 import { ChecklistPreview, FactsPreview, FaqPreview, LinkButtonPreview, QuestionsPreview, RelatedPreview, StoryImagePairPreview, StoryImagePreview, SummaryPreview, TimelinePreview } from "../page-previews";
 import { frontPage } from "./front-page";
+import { siteContent, siteSnapshot } from "./site";
 
 // A story, the same shape as the stories in src/data/content.ts: the
 // details (section, label, headline, summary, author, date, photo, sources)
@@ -281,4 +282,4 @@ export const story = defineType({
   },
 });
 
-export const schemaTypes = [photo, story, frontPage];
+export const schemaTypes = [photo, story, frontPage, siteContent, siteSnapshot];

@@ -5,6 +5,8 @@ import type { SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { StoryMeta } from "./story-meta";
 import { CARDS, CardLink } from "./hero-gallery";
+import { EditableImage, T } from "./site-text";
+import { useSiteText } from "@/lib/site-text";
 
 // Gallery 2 (the second option in the hero switcher): the top news takes the
 // middle of the hero, and the five doors into OGCW run in a smaller strip
@@ -69,7 +71,8 @@ export function HeroGallery2() {
   }, []);
 
   // The strip moves on every 2 seconds
-  const stripRunning = !paused && !holdStrip && inView && !reduce;
+  const { editing } = useSiteText();
+  const stripRunning = !paused && !holdStrip && inView && !reduce && !editing;
   useEffect(() => {
     if (!stripRunning) return;
     const timer = window.setInterval(() => setCard((value) => (value + 1) % CARDS.length), STRIP_MS);
@@ -79,7 +82,7 @@ export function HeroGallery2() {
   const offsets = CARDS.map((_, index) => offsetOf(index, card));
   useEffect(() => { lastOffsets.current = offsets; });
 
-  const featureRunning = !paused && !holdFeature && inView && !reduce;
+  const featureRunning = !paused && !holdFeature && inView && !reduce && !editing;
   // The studio can change how many top stories there are while the page is open
   useEffect(() => { if (feature >= FEATURES.length) setFeature(0); }, [feature, FEATURES.length]);
   const current = FEATURES[feature] ?? FEATURES[0];
@@ -117,7 +120,7 @@ export function HeroGallery2() {
                 data-on={index === feature}
               >
                 <div className="g2-text">
-                  <p className="g2-kicker">Top story · {item.story.kicker}</p>
+                  <p className="g2-kicker"><T k="hero.top.kicker">Top story</T> · {item.story.kicker}</p>
                   <h2 className="g2-title">
                     <Link to="/news/$slug" params={{ slug: item.story.slug }} tabIndex={index === feature ? undefined : -1}>{item.story.title}</Link>
                   </h2>
@@ -178,11 +181,11 @@ export function HeroGallery2() {
                 style={{ "--x": Math.sign(offset) * X[distance]!, "--s": SCALE[distance], zIndex: 10 - distance } as CSSProperties}
               >
                 <CardLink dest={item.dest} className="g2-card-link" tabIndex={undefined} onClick={() => {}}>
-                  <img src={item.photo} alt="" loading="lazy" draggable={false} />
+                  <EditableImage k={`hero.card.${item.id}`} src={item.photo} alt="" loading="lazy" draggable={false} />
                   <span className="g2-card-body">
-                    <span className="g2-card-label">{item.label}</span>
-                    <span className="g2-card-title">{item.title}</span>
-                    <span className="g2-card-cta">{item.cta} <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></span>
+                    <span className="g2-card-label"><T k={`hero.card.${item.id}.label`}>{item.label}</T></span>
+                    <span className="g2-card-title"><T k={`hero.card.${item.id}.title`}>{item.title}</T></span>
+                    <span className="g2-card-cta"><T k={`hero.card.${item.id}.cta`}>{item.cta}</T> <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></span>
                   </span>
                 </CardLink>
               </li>

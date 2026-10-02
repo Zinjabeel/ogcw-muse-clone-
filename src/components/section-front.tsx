@@ -6,6 +6,7 @@ import { ContentOfTheMonth } from "./content-of-the-month";
 import { EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { StoryMeta } from "./story-meta";
+import { T } from "./site-text";
 
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
@@ -54,15 +55,15 @@ export function SectionFront({ section }: { section: SectionId }) {
               <span className="og-live-title">{LIVE.title}</span>
               <span className="og-meta">{LIVE.meta}</span>
             </span>
-            <span className="og-live-cta">Tour dates <ArrowUpRight size={16} aria-hidden="true" /></span>
+            <span className="og-live-cta"><T k="section.tour">Tour dates</T> <ArrowUpRight size={16} aria-hidden="true" /></span>
           </a>
         )}
 
         {section === "music" && (
           <section className="og-block" aria-labelledby="music-songs">
             <div className="og-section-head">
-              <h2 id="music-songs" className="og-section-title">Songs to check out</h2>
-              <span className="og-more-link">Listen on Spotify</span>
+              <h2 id="music-songs" className="og-section-title"><T k="section.songs">Songs to check out</T></h2>
+              <span className="og-more-link"><T k="section.spotify">Listen on Spotify</T></span>
             </div>
             <ul className="og-songs">
               {SONGS.map((song) => <li key={song.spotify}><SongCard song={song} /></li>)}
@@ -90,8 +91,8 @@ export function SectionFront({ section }: { section: SectionId }) {
         {more.length > 0 && (
           <section className="og-block" aria-labelledby={`${section}-originals`}>
             <div className="og-section-head">
-              <h2 id={`${section}-originals`} className="og-section-title">From OGCW Originals</h2>
-              <Link to="/originals" className="og-more-link">All originals</Link>
+              <h2 id={`${section}-originals`} className="og-section-title"><T k="section.originals">From OGCW Originals</T></h2>
+              <Link to="/originals" className="og-more-link"><T k="section.originals.all">All originals</T></Link>
             </div>
             <div className="og-grid-3">
               {more.map((episode) => <EpisodeCard key={episode.slug} episode={episode} />)}
@@ -101,7 +102,7 @@ export function SectionFront({ section }: { section: SectionId }) {
 
         <section className="og-next" aria-labelledby="keep-reading">
           <div>
-            <p id="keep-reading" className="og-kicker">Keep reading</p>
+            <p id="keep-reading" className="og-kicker"><T k="section.keep">Keep reading</T></p>
             <Link to={SECTION_PATH[next]} className="og-next-link">
               <span className="og-next-name">{SECTIONS[next].label} <ArrowRight className="og-next-arrow" aria-hidden="true" /></span>
               <span className="og-next-intro">{SECTIONS[next].intro}</span>
