@@ -34,6 +34,9 @@ const sections = [
 ] as const;
 
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
+// More news drifts on by itself, this fast, and waits this long after the reader takes over
+const GLIDE_PX_PER_S = 24;
+const GLIDE_REST_MS = 6000;
 
 // More news: the cards run on past both edges of the page column, so a
 // slice of the next and the previous card shows on each side, with arrows
@@ -83,13 +86,76 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
     });
 
     let settle = 0;
-    const onScroll = () => { window.clearTimeout(settle); settle = window.setTimeout(recentre, 160); };
+    const onScroll = () => {
+      if (row.classList.contains("is-gliding")) return; // the glide keeps itself in the middle set
+      window.clearTimeout(settle);
+      settle = window.setTimeout(recentre, 160);
+    };
     row.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measure);
+
+    // The slow glide: the row drifts on by itself, a little each frame, while
+    // it's on screen. Pointing at it holds it; scrolling, swiping, the arrows
+    // or the keyboard hand it back to the reader for a few seconds (and turn
+    // card snapping back on). Never for reduced motion.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0;
+    let last = 0;
+    let at = 0;
+    let holding = false;
+    let onScreen = false;
+    let restUntil = 0;
+    const frame = (now: number) => {
+      const dt = last ? Math.min(64, now - last) : 0;
+      last = now;
+      if (onScreen && !holding && now > restUntil) {
+        if (!row.classList.contains("is-gliding")) {
+          row.classList.add("is-gliding");
+          at = row.scrollLeft;
+        }
+        at += (GLIDE_PX_PER_S * dt) / 1000;
+        const width = setWidth();
+        if (width && at > width * 1.5) at -= width;
+        row.scrollLeft = at;
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    const handBack = () => {
+      row.classList.remove("is-gliding");
+      restUntil = performance.now() + GLIDE_REST_MS;
+    };
+    const hold = () => { holding = true; };
+    const release = () => { holding = false; };
+    const seen = new IntersectionObserver(([entry]) => { onScreen = !!entry?.isIntersecting; }, { threshold: 0.2 });
+    if (!reduce) {
+      seen.observe(el);
+      raf = requestAnimationFrame(frame);
+      row.addEventListener("pointerdown", handBack);
+      row.addEventListener("wheel", handBack, { passive: true });
+      row.addEventListener("touchstart", handBack, { passive: true });
+      el.addEventListener("keydown", handBack);
+      el.addEventListener("pointerenter", hold);
+      el.addEventListener("pointerleave", release);
+      el.addEventListener("focusin", hold);
+      el.addEventListener("focusout", release);
+      el.addEventListener("ogcw-carousel-page", handBack);
+    }
+
     return () => {
       cancelAnimationFrame(start);
+      cancelAnimationFrame(raf);
+      seen.disconnect();
       window.clearTimeout(settle);
       row.removeEventListener("scroll", onScroll);
+      row.removeEventListener("pointerdown", handBack);
+      row.removeEventListener("wheel", handBack);
+      row.removeEventListener("touchstart", handBack);
+      el.removeEventListener("keydown", handBack);
+      el.removeEventListener("pointerenter", hold);
+      el.removeEventListener("pointerleave", release);
+      el.removeEventListener("focusin", hold);
+      el.removeEventListener("focusout", release);
+      el.removeEventListener("ogcw-carousel-page", handBack);
       window.removeEventListener("resize", measure);
     };
   }, [stories.length]);
@@ -100,6 +166,7 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
     const row = track.current;
     const card = row?.children[0] as HTMLElement | undefined;
     if (!el || !row || !card) return;
+    el.dispatchEvent(new Event("ogcw-carousel-page")); // the reader takes over from the glide
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
     const step = card.offsetWidth + gap;
     const perPage = Math.max(1, Math.floor((el.clientWidth + gap) / step));

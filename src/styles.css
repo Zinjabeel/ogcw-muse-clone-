@@ -1297,6 +1297,8 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
   mask-image: linear-gradient(to right, var(--fade), #000 var(--bleed-l, 0px), #000 calc(100% - var(--bleed-r, 0px)), var(--fade));
 }
 .bs-carousel-track::-webkit-scrollbar { display: none; }
+/* While the row glides on by itself, no snapping to cards (src/components/news-front.tsx) */
+.bs-carousel-track.is-gliding { scroll-snap-type: none; scroll-behavior: auto; }
 .bs-carousel-item { flex: 0 0 var(--card-w); min-width: 0; scroll-snap-align: start; }
 @media (max-width: 767px) { .bs-carousel-item { scroll-snap-align: center; } }
 .bs-photo-more { aspect-ratio: 3 / 2; margin-bottom: var(--spacing-12); border-radius: 6px; }
