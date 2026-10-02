@@ -591,6 +591,9 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
   -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent 0, transparent 4%, #000 42%), linear-gradient(to top, transparent 0, transparent 8%, #000 48%);
   mask-composite: intersect;
 }
+/* The cover stories' photos, stacked: the one on show fades in over the last and pushes in slowly while it's on */
+.cover-photo img { position: absolute; inset: 0; opacity: 0; scale: 1; transition: opacity 1.2s ease, scale 0s 1.2s; }
+.cover-photo img.is-on { z-index: 1; opacity: 1; scale: 1.05; transition: opacity 1.2s ease, scale 3.6s linear; }
 .cover-credit { position: absolute; z-index: 3; top: 28px; right: 14px; margin: 0; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10px; letter-spacing: .1em; color: color-mix(in srgb, var(--ogcw-text) 45%, transparent); }
 
 /* Content column, aligned with the page column below */
@@ -618,6 +621,43 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 .cover-link { display: inline-flex; align-items: center; gap: 10px; padding-bottom: 7px; border-bottom: 2px solid var(--ogcw-accent); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; transition: gap .25s ease, text-shadow .25s ease; }
 .cover-link:hover, .cover-link:focus-visible { gap: 14px; text-shadow: 0 0 14px color-mix(in srgb, var(--ogcw-accent) 55%, transparent); outline: none; }
 .cover-meta { font-size: 12px; letter-spacing: .06em; color: color-mix(in srgb, var(--ogcw-text) 55%, transparent); }
+
+/* Taking turns: the new cover's words rise in over the old ones, which fade up and away */
+.cover-slides { display: grid; }
+.cover-slide { grid-area: 1 / 1; }
+.cover-slide.is-leaving { pointer-events: none; animation: cover-slide-out .6s ease both; }
+@keyframes cover-slide-out { to { opacity: 0; transform: translateY(-12px); } }
+/* After the first, the reveal is quicker, to fit a 3-second turn */
+.cover-slide.is-turn .cover-kicker { animation-duration: .6s; animation-delay: .05s; }
+.cover-slide.is-turn .cover-line > span { animation-duration: .8s; }
+.cover-slide.is-turn .cover-line:nth-child(1) > span { animation-delay: .08s; }
+.cover-slide.is-turn .cover-line:nth-child(2) > span { animation-delay: .16s; }
+.cover-slide.is-turn .cover-deck { animation-duration: .6s; animation-delay: .24s; }
+.cover-slide.is-turn .cover-cta { animation-duration: .6s; animation-delay: .3s; }
+
+/* Which cover is on: a numbered row of thin lines, the one on show filling in 3 seconds */
+.cover-turns { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 30px; animation: cover-fade-up .9s .75s cubic-bezier(.2,.8,.2,1) both; }
+.cover-count { min-width: 62px; font-size: 11px; font-weight: 700; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--ogcw-text) 60%, transparent); }
+.cover-turn { display: grid; align-items: center; width: 34px; height: 22px; cursor: pointer; }
+.cover-turn span { position: relative; display: block; height: 2px; overflow: hidden; background: color-mix(in srgb, var(--ogcw-text) 22%, transparent); transition: background-color .2s ease; }
+.cover-turn[aria-pressed="true"] span { background: color-mix(in srgb, var(--ogcw-accent) 35%, transparent); }
+.cover-turn:hover span { background: color-mix(in srgb, var(--ogcw-text) 50%, transparent); }
+.cover-turn:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
+.cover-turn i { position: absolute; inset: 0; background: var(--ogcw-accent); transform-origin: left; animation: cover-turn-fill var(--dur) linear both; }
+.cover-turn i[data-run="false"] { animation-play-state: paused; }
+@keyframes cover-turn-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.cover-pause { display: grid; place-items: center; width: 28px; height: 28px; margin-left: 6px; border: 1px solid color-mix(in srgb, var(--ogcw-text) 25%, transparent); border-radius: 50%; color: var(--ogcw-text); cursor: pointer; transition: border-color .2s ease; }
+.cover-pause:hover, .cover-pause:focus-visible { border-color: var(--ogcw-accent); outline: none; }
+
+/* Also on OGCW, quieter than the cover; each new story slides softly into its place */
+.cover-rail ol { opacity: .78; transition: opacity .3s ease; }
+.cover-rail:hover ol, .cover-rail:focus-within ol { opacity: 1; }
+.cover-rail-swap { animation: cover-rail-swap .7s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes cover-rail-swap { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cover-photo img, .cover-photo img.is-on { scale: 1; transition: opacity .3s ease; }
+  .cover-slide, .cover-slide *, .cover-rail-swap, .cover-turns { animation: none !important; }
+}
 
 /* "Also on OGCW" rail */
 .cover-rail { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 32px; padding: 22px 0 30px; border-top: 1px solid color-mix(in srgb, var(--ogcw-text) 14%, transparent); animation: cover-fade-up 1s .8s cubic-bezier(.2,.8,.2,1) both; }
