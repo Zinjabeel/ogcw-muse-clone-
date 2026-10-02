@@ -22,7 +22,11 @@ export default defineConfig({
     mode: "replace",
     providers: [{ name: "github", title: "GitHub", url: "https://api.sanity.io/v1/auth/login/github" }],
   },
-  plugins: [structureTool(), visionTool({ defaultApiVersion: SANITY_API_VERSION })],
+  plugins: [
+    // Stories only: the front page is changed from each story ("Where it appears")
+    structureTool({ structure: (S) => S.list().title("Content").items(S.documentTypeListItems().filter((item) => item.getId() !== "frontPage")) }),
+    visionTool({ defaultApiVersion: SANITY_API_VERSION }),
+  ],
   schema: { types: schemaTypes },
   // The top bar, with "Website" and minimise buttons (src/sanity/navbar.tsx)
   studio: { components: { navbar: OgcwNavbar } },

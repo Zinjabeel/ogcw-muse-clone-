@@ -16,21 +16,8 @@ import { Img } from "./cards";
 // season as a feature with four games stories, then a Screens & streams
 // list beside two more games stories.
 
-// The stories in each spot, by web address (shown live from the studio)
-const FEATURE_SLUG = "witcher-3-remastered-launch";
-const TILE_SLUGS = ["minecraft-dungeons-ii-launch", "epic-fortnite-dutch-class-action", "build-a-rocket-boy-administration", "kai-cenat-ishowspeed-minecraft-marathon"];
-const RAP_SLUGS = ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"];
-
-const MORE_FEATURE_SLUG = "monster-hunter-wilds-switch-2";
-const MORE_TILE_SLUGS = ["switch-2-calendar-september-direct", "shadow-of-mordor-shadow-of-war-switch-2", "ea-sports-fc-27-launch", "october-2026-games"];
-const SCREEN_SLUGS = ["netflix-october-2026", "streamer-awards-2026-applications", "made-on-youtube-2026"];
-const MORE_END_SLUGS = ["intergalactic-quiet-until-2027", "dawn-of-war-iv-space-marines-trailer"];
-
-const FIRST_COUNT = 1 + TILE_SLUGS.length + RAP_SLUGS.length;
-const MORE_COUNT = 1 + MORE_TILE_SLUGS.length + SCREEN_SLUGS.length + MORE_END_SLUGS.length;
-
-/** The stories this section shows, so the More news row can leave them out */
-export const KEEP_EXPLORING_SLUGS = new Set([FEATURE_SLUG, ...TILE_SLUGS, ...RAP_SLUGS, MORE_FEATURE_SLUG, ...MORE_TILE_SLUGS, ...SCREEN_SLUGS, ...MORE_END_SLUGS]);
+// The stories in each spot are chosen in the studio (src/data/placements.ts)
+const USUAL_MORE_FEATURE = "monster-hunter-wilds-switch-2";
 
 const STORAGE_KEY = "ogcw-vote-no1-rapper";
 
@@ -190,13 +177,15 @@ function RapStory({ story }: { story: Article }) {
 
 export function KeepExploring() {
   const stories = useStories();
-  const FEATURE = stories.pick(FEATURE_SLUG);
-  const TILES = TILE_SLUGS.map(stories.pick);
-  const RAP_STORIES = RAP_SLUGS.map(stories.pick);
-  const MORE_FEATURE = stories.pick(MORE_FEATURE_SLUG);
-  const MORE_TILES = MORE_TILE_SLUGS.map(stories.pick);
-  const SCREENS = SCREEN_SLUGS.map(stories.pick);
-  const MORE_END = MORE_END_SLUGS.map(stories.pick);
+  const [FEATURE = stories.pick("witcher-3-remastered-launch")] = stories.slot("kx-feature");
+  const TILES = stories.slot("kx-tiles");
+  const RAP_STORIES = stories.slot("kx-rap");
+  const [MORE_FEATURE = stories.pick(USUAL_MORE_FEATURE)] = stories.slot("kx-more-feature");
+  const MORE_TILES = stories.slot("kx-more-tiles");
+  const SCREENS = stories.slot("kx-screens");
+  const MORE_END = stories.slot("kx-more-end");
+  const FIRST_COUNT = 1 + TILES.length + RAP_STORIES.length;
+  const MORE_COUNT = 1 + MORE_TILES.length + SCREENS.length + MORE_END.length;
 
   return (
     <section className="kx" aria-labelledby="kx-title">
@@ -239,7 +228,7 @@ export function KeepExploring() {
       </div>
 
       <div className="kx-grid">
-        <Feature story={MORE_FEATURE} label="Switch 2 season" />
+        <Feature story={MORE_FEATURE} {...(MORE_FEATURE.slug === USUAL_MORE_FEATURE ? { label: "Switch 2 season" } : {})} />
 
         {MORE_TILES.map((story) => <Tile key={story.slug} story={story} />)}
 

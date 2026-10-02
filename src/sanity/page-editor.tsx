@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
 import { Check, ChevronDown, ImagePlus, Link2, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import { useDocumentPane } from "sanity/structure";
-import { insert, ObjectInputMember, set, setIfMissing, unset, useClient, type FieldMember, type FormPatch, type ObjectInputProps, type Path, type PatchEvent, type RenderFieldCallback } from "sanity";
+import { PlacesButton } from "./placements";
+import { getPublishedId, insert, ObjectInputMember, set, setIfMissing, unset, useClient, type FieldMember, type FormPatch, type ObjectInputProps, type Path, type PatchEvent, type RenderFieldCallback } from "sanity";
 import { Img } from "@/components/cards";
 import { formatDate, SECTIONS, wordCount } from "@/data/content";
 import { SECTION_IDS, toBlocks, toPhoto, type SanityBlock, type SanityPhoto } from "@/lib/sanity-mapping";
@@ -288,11 +289,19 @@ export function StoryPageInput(props: ObjectInputProps) {
       <button type="button" aria-pressed={mode === "fields"} onClick={() => choose("fields")}>All fields</button>
     </div>
   );
+  // Where on the site it shows besides the News page (src/sanity/placements.tsx)
+  const documentId = (props.value as { _id?: string } | undefined)?._id;
+  const places = (
+    <PlacesButton
+      story={{ id: documentId ? getPublishedId(documentId) : "", slug: story.slug?.current ?? "", title: story.title || "This story", date: story.date ?? "", photo: story.photo }}
+      disabled={readOnly || !documentId}
+    />
+  );
 
   if (mode === "fields") {
     return (
       <div className="se-fields">
-        <div className="se-fields-bar">{switcher}</div>
+        <div className="se-fields-bar">{switcher}{places}</div>
         {props.renderDefault(props)}
       </div>
     );
@@ -324,6 +333,7 @@ export function StoryPageInput(props: ObjectInputProps) {
               <button type="button" onClick={() => onChange(set({ _type: "slug", current: slugify(story.title ?? "") }, ["slug"]))}>Make from headline</button>
             )}
           </label>
+          {places}
         </div>
         {slug && errorsAt("slug").map((message) => <p key={message} className="se-error se-bar-error" role="alert">{message}</p>)}
 

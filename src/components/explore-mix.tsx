@@ -11,14 +11,14 @@ import { Img } from "./cards";
 // two pieces from the shop and a reading list. Used at the end of the news
 // front and on /explore.
 
-const PICK_SLUG = "tokyo-game-show-2026-typhoon";
 const streamer = STREAMERS.find((s) => s.name === "TheBurntPeanut")!;
 const song = SONGS[1]!;
 const shopPicks = [SHOPS[0]!, SHOPS[2]!].map((shop) => ({ shop, product: shop.products[0]! }));
 
 export function ExploreMix({ title = "Explore", idPrefix = "explore" }: { title?: string; idPrefix?: string }) {
   const stories = useStories();
-  const pick = stories.pick(PICK_SLUG);
+  // The editor's pick and Trending are chosen in the studio (src/data/placements.ts)
+  const [pick = stories.pick("tokyo-game-show-2026-typhoon")] = stories.slot("explore-pick");
   const list = stories.readingLists[1]!;
   return (
     <section className="bs-explore mix" aria-labelledby={`${idPrefix}-title`}>

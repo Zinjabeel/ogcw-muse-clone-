@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Pause, Play } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { CARDS, CardLink } from "./hero-gallery";
 
@@ -13,12 +14,15 @@ import { CARDS, CardLink } from "./hero-gallery";
 // Both pause under the pointer, on focus and off screen, and hold still for
 // reduced motion. The hero takes the colour of the story on show.
 
-// The three stories, by web address (shown live from the studio)
-const FEATURE_SLOTS = [
-  { slug: "gta-vi-countdown", tab: "GTA VI", tone: "#4f7f96", cta: "Read the countdown" },
-  { slug: "paris-fashion-week-ss27", tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
-  { slug: "taylor-swift-the-life-of-a-showgirl-the-encore", tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
-];
+// The top stories are chosen in the studio (src/data/placements.ts). The
+// usual three have their own tab name, colour and button; any other story
+// uses its label, its section's colour and "Read the story".
+const USUAL: Record<string, { tab: string; tone: string; cta: string }> = {
+  "gta-vi-countdown": { tab: "GTA VI", tone: "#4f7f96", cta: "Read the countdown" },
+  "paris-fashion-week-ss27": { tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
+  "taylor-swift-the-life-of-a-showgirl-the-encore": { tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
+};
+const SECTION_TONE: Record<SectionId, string> = { music: "#6e3320", games: "#4f7f96", streaming: "#5a4a8a", culture: "#6b3a3a" };
 
 const FEATURE_MS = 7000;
 const STRIP_MS = 2000;
@@ -35,7 +39,7 @@ const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]!
 
 export function HeroGallery2() {
   const stories = useStories();
-  const FEATURES = FEATURE_SLOTS.map((slot) => ({ ...slot, story: stories.pick(slot.slug) }));
+  const FEATURES = stories.slot("hero-top").map((story) => ({ story, ...(USUAL[story.slug] ?? { tab: story.kicker, tone: SECTION_TONE[story.section], cta: "Read the story" }) }));
   const section = useRef<HTMLElement>(null);
   const [feature, setFeature] = useState(0);
   const [card, setCard] = useState(0);
@@ -75,7 +79,10 @@ export function HeroGallery2() {
   useEffect(() => { lastOffsets.current = offsets; });
 
   const featureRunning = !paused && !holdFeature && inView && !reduce;
-  const current = FEATURES[feature]!;
+  // The studio can change how many top stories there are while the page is open
+  useEffect(() => { if (feature >= FEATURES.length) setFeature(0); }, [feature, FEATURES.length]);
+  const current = FEATURES[feature] ?? FEATURES[0];
+  if (!current) return null;
 
   return (
     <section ref={section} className="gallery2" style={{ "--tone": current.tone } as CSSProperties} aria-labelledby="g2-title">

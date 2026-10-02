@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@sanity/client";
-import { ARTICLES, type Article } from "@/data/content";
+import { type Article } from "@/data/content";
+import { EMPTY_LAYOUT, isSlotId, type FrontLayout } from "@/data/placements";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
-import { toArticle, type SanityStory } from "./sanity-mapping";
+import { byDate, toArticle, type SanityStory } from "./sanity-mapping";
 
 // Stories from the Sanity studio (/admin), turned into the same shape as
 // the stories in src/data/content.ts so every page shows them the same way.
@@ -23,31 +24,39 @@ const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, author
 // The site keeps the list for a few seconds so busy pages don't ask Sanity
 // on every request; an edit in the studio shows up within that time.
 const LIST_TTL_MS = 10_000;
-let cached: { at: number; stories: Article[] } | null = null;
+export type SiteStories = { stories: Article[]; layout: FrontLayout };
+let cached: { at: number; data: SiteStories } | null = null;
 
-// Same date: keep the order the stories have in the code, new ones first
-const CODE_ORDER = new Map(ARTICLES.map((story, index) => [story.slug, index]));
-const byDate = (a: Article, b: Article) => b.date.localeCompare(a.date) || (CODE_ORDER.get(a.slug) ?? -1) - (CODE_ORDER.get(b.slug) ?? -1);
+type LayoutDoc = { slots?: { id?: string; slugs?: (string | null)[] }[]; hidden?: (string | null)[] } | null;
+const toLayout = (doc: LayoutDoc): FrontLayout => ({
+  slots: Object.fromEntries((doc?.slots ?? []).flatMap((slot) => (slot.id && isSlotId(slot.id) ? [[slot.id, (slot.slugs ?? []).filter((slug): slug is string => !!slug)]] : []))),
+  hidden: (doc?.hidden ?? []).filter((slug): slug is string => !!slug),
+});
 
 /**
  * Every published story in Sanity, newest first, without the full text (pages
- * only need the headline, photo and so on; a story page loads its own text).
- * [] if Sanity can't be reached, so the site falls back to the stories in the code.
+ * only need the headline, photo and so on; a story page loads its own text),
+ * and the front page: which stories the studio put in which spot
+ * (src/data/placements.ts). No stories if Sanity can't be reached, so the
+ * site falls back to the stories in the code.
  */
-export const getStorySummaries = createServerFn({ method: "GET" }).handler(async (): Promise<Article[]> => {
-  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.stories;
+export const getStorySummaries = createServerFn({ method: "GET" }).handler(async (): Promise<SiteStories> => {
+  if (cached && Date.now() - cached.at < LIST_TTL_MS) return cached.data;
   try {
-    const docs = await client.fetch<SanityStory[]>(`*[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} }`);
+    const { docs, front } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc }>(`{
+      "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
+      "front": *[_id == "frontPage"][0] { "slots": slots[] { "id": slot, "slugs": stories[]->slug.current }, "hidden": hidden[]->slug.current }
+    }`);
     const stories = docs
       .map(toArticle)
       .filter((story): story is Article => story !== null)
       .sort(byDate)
       .map((story) => ({ ...story, body: [] }));
-    cached = { at: Date.now(), stories };
-    return stories;
+    cached = { at: Date.now(), data: { stories, layout: toLayout(front) } };
+    return cached.data;
   } catch (error) {
     console.error("Sanity stories didn't load", error);
-    return cached?.stories ?? [];
+    return cached?.data ?? { stories: [], layout: EMPTY_LAYOUT };
   }
 });
 

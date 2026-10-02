@@ -1,4 +1,4 @@
-import { SECTIONS, wordCount, type Article, type Block, type Photo, type SectionId } from "@/data/content";
+import { ARTICLES, SECTIONS, wordCount, type Article, type Block, type Photo, type SectionId } from "@/data/content";
 import { SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
 
 // Sanity's stories → the site's stories (src/data/content.ts), so every page
@@ -116,3 +116,8 @@ export function toArticle(doc: SanityStory): Article | null {
     ...(doc.ask ? { ask: doc.ask } : {}),
   };
 }
+
+// Newest first; on the same date, the order the stories have in the code, new ones first
+const CODE_ORDER = new Map(ARTICLES.map((story, index) => [story.slug, index]));
+export const byDate = (a: { slug: string; date: string }, b: { slug: string; date: string }) =>
+  b.date.localeCompare(a.date) || (CODE_ORDER.get(a.slug) ?? -1) - (CODE_ORDER.get(b.slug) ?? -1);

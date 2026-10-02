@@ -5,11 +5,11 @@ import { SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { SpotifyIcon } from "./spotify";
 import { ExploreMix } from "./explore-mix";
-import { KeepExploring, KEEP_EXPLORING_SLUGS } from "./keep-exploring";
+import { KeepExploring } from "./keep-exploring";
 import { UpcomingEvents } from "./upcoming-events";
 import { ContentOfTheMonth } from "./content-of-the-month";
 import { BsPhoto as Photo, ReadTime, StoryCard } from "./broadsheet";
-import { NewsWeek, WEEK_SLUGS } from "./news-week";
+import { NewsWeek } from "./news-week";
 import { ShopPromo } from "./shop-promo";
 
 // The news front page: the broadsheet grid from the Monocle reference (design
@@ -33,11 +33,6 @@ const sections = [
   { label: "Explore", to: "/explore" },
 ] as const;
 
-// The headline stories, by web address (shown live from the studio)
-const LEAD_SLUG = "vmas-2026-winners";
-const SECONDARY_SLUGS = ["gta-vi-countdown", "paris-fashion-week-ss27"];
-const SIDE_SLUGS = ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"];
-const ON_FRONT = new Set([LEAD_SLUG, ...SECONDARY_SLUGS, ...SIDE_SLUGS]);
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
 
 // More news: the cards run on past both edges of the page column, so a
@@ -142,12 +137,14 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
 export function NewsFront() {
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   const stories = useStories();
-  const lead = stories.pick(LEAD_SLUG);
-  const secondary = SECONDARY_SLUGS.map(stories.pick);
-  const side = SIDE_SLUGS.map(stories.pick);
-  // Every other story, newest first, runs in the More news carousel (the ones
-  // in This week and in Keep exploring are left out)
-  const moreNews = stories.all.filter((a) => !ON_FRONT.has(a.slug) && !WEEK_SLUGS.has(a.slug) && !KEEP_EXPLORING_SLUGS.has(a.slug));
+  // The headline stories: the spots chosen in the studio (src/data/placements.ts)
+  const [lead = stories.pick("vmas-2026-winners")] = stories.slot("front-lead");
+  const secondary = stories.slot("front-secondary");
+  const side = stories.slot("front-side");
+  // Every other story, newest first, runs in the More news carousel: the ones
+  // in another spot on the front page, and the ones kept to the News page,
+  // are left out
+  const moreNews = stories.all.filter((a) => !stories.onFront.has(a.slug) && !stories.hidden.has(a.slug));
 
   return (
     <section className="broadsheet" aria-labelledby="news-front-title">

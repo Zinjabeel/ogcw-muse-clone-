@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { LIVE, type Article } from "@/data/content";
+import { LIVE, SECTIONS, type Article } from "@/data/content";
 import { useStories } from "@/lib/stories";
 
 // Home hero, option 2 in the hero switcher, set like a magazine cover rather
@@ -11,8 +11,22 @@ import { useStories } from "@/lib/stories";
 // slower than the text (CSS scroll-driven animation where supported).
 // The cover story and the rail's stories come live from the studio (/admin).
 
-const COVER_SLUG = "taylor-swift-the-life-of-a-showgirl-the-encore";
-const RAIL_SLUGS = ["gta-vi-countdown", "z-event-2026-final-edition"];
+// The cover story and the rail are chosen in the studio (src/data/placements.ts).
+// The usual cover keeps its hand-set headline; any other story's headline is
+// split over two lines for the reveal.
+const USUAL_COVER = "taylor-swift-the-life-of-a-showgirl-the-encore";
+
+function coverLines(title: string): string[] {
+  const words = title.split(" ");
+  if (words.length < 4) return [title];
+  let best = 1;
+  for (let i = 1; i < words.length; i += 1) {
+    const left = words.slice(0, i).join(" ").length;
+    const bestLeft = words.slice(0, best).join(" ").length;
+    if (Math.abs(left - title.length / 2) < Math.abs(bestLeft - title.length / 2)) best = i;
+  }
+  return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
+}
 
 type RailItem = { kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string };
 
@@ -42,23 +56,26 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
 
 export function HeroCover() {
   const stories = useStories();
-  const cover = stories.pick(COVER_SLUG);
-  const rail: RailItem[] = [LIVE_ITEM, ...RAIL_SLUGS.map((slug) => railStory(stories.pick(slug)))];
+  const [cover = stories.pick(USUAL_COVER)] = stories.slot("hero-cover");
+  const rail: RailItem[] = [LIVE_ITEM, ...stories.slot("hero-cover-rail").map(railStory)];
+  const usual = cover.slug === USUAL_COVER;
+  const long = !usual && cover.title.length > 48;
+  // A long headline wraps on its own, evened out (see .cover-title-long)
+  const lines = usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : long ? [cover.title] : coverLines(cover.title);
   return (
     <section className="cover" aria-labelledby="cover-title">
       <div className="cover-glow" aria-hidden="true" />
 
       <figure className="cover-photo">
-        <img src={cover.photo.src} alt={cover.photo.alt} style={{ objectPosition: "50% 45%" }} />
+        <img src={cover.photo.src} alt={cover.photo.alt} style={{ objectPosition: usual ? "50% 45%" : cover.photo.crop?.pos ?? "50% 50%" }} />
       </figure>
-      <p className="cover-credit">Taylor Swift, The Eras Tour · Photo: {cover.photo.credit}</p>
+      {cover.photo.credit && <p className="cover-credit">{usual && "Taylor Swift, The Eras Tour · "}Photo: {cover.photo.credit}</p>}
 
       <div className="cover-inner">
         <div className="cover-copy">
-          <p className="cover-kicker">Cover story · Music</p>
-          <h1 id="cover-title" className="cover-title">
-            <span className="cover-line"><span>Taylor Swift’s Showgirl</span></span>
-            <span className="cover-line"><span>gets an encore</span></span>
+          <p className="cover-kicker">Cover story · {SECTIONS[cover.section].label}</p>
+          <h1 id="cover-title" className={`cover-title ${long ? "cover-title-long" : ""}`}>
+            {lines.map((line) => <span key={line} className="cover-line"><span>{line}</span></span>)}
           </h1>
           <p className="cover-deck">{cover.deck}</p>
           <div className="cover-cta">

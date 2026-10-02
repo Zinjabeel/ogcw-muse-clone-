@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { SECTIONS } from "@/data/content";
+import { isDefault } from "@/data/placements";
 import { useStories } from "@/lib/stories";
 import { BsPhoto, ReadTime, shortDate } from "./broadsheet";
 
@@ -11,27 +12,19 @@ import { BsPhoto, ReadTime, shortDate } from "./broadsheet";
 // In brief column of five short items, numbered; then a connected row of
 // three stories on AI and music, read in order.
 
-// The stories in each spot, by web address (shown live from the studio)
-const LEAD_SLUG = "saint-laurent-ss27-vaccarello";
-const THREAD_SLUGS = ["dior-ss27-jonathan-anderson", "courreges-drew-henry-debut", "milan-fashion-week-ss27-review"];
-const MIDDLE_SLUG = "lcd-soundsystem-nyc-residency-100th-show";
-const MIDDLE_LINKED_SLUG = "al-doyle-hollywood-saviour";
-const SECOND_SLUG = "latin-grammys-2026-nominations";
-const BRIEF_SLUGS = ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"];
-const AI_MUSIC_SLUGS = ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch"];
-
-/** The stories this block shows, so the More news row can leave them out */
-export const WEEK_SLUGS = new Set([LEAD_SLUG, ...THREAD_SLUGS, MIDDLE_SLUG, MIDDLE_LINKED_SLUG, SECOND_SLUG, ...BRIEF_SLUGS, ...AI_MUSIC_SLUGS]);
-
+// The stories in each spot are chosen in the studio (src/data/placements.ts).
+// The headings written for the usual stories (fashion month, AI and music)
+// give way to plain ones when other stories take those spots.
 export function NewsWeek() {
   const stories = useStories();
-  const LEAD = stories.pick(LEAD_SLUG);
-  const THREAD = THREAD_SLUGS.map(stories.pick);
-  const MIDDLE = stories.pick(MIDDLE_SLUG);
-  const MIDDLE_LINKED = stories.pick(MIDDLE_LINKED_SLUG);
-  const SECOND = stories.pick(SECOND_SLUG);
-  const BRIEF = BRIEF_SLUGS.map(stories.pick);
-  const AI_MUSIC = AI_MUSIC_SLUGS.map(stories.pick);
+  const [LEAD = stories.pick("saint-laurent-ss27-vaccarello")] = stories.slot("week-lead");
+  const THREAD = stories.slot("week-thread");
+  const [MIDDLE, SECOND] = stories.slot("week-middle");
+  const [MIDDLE_LINKED] = stories.slot("week-connected");
+  const BRIEF = stories.slot("week-brief");
+  const AI_MUSIC = stories.slot("week-cluster");
+  const usualThread = isDefault("week-thread", THREAD);
+  const usualCluster = isDefault("week-cluster", AI_MUSIC);
 
   return (
     <section className="bs-week" aria-labelledby="week-title">
@@ -51,7 +44,7 @@ export function NewsWeek() {
             <ReadTime>{LEAD.read}</ReadTime>
           </Link>
           <div className="bs-thread">
-            <p className="bs-thread-head">More from fashion month</p>
+            <p className="bs-thread-head">{usualThread ? "More from fashion month" : "Also this week"}</p>
             <ol className="bs-thread-list">
               {THREAD.map((story) => (
                 <li key={story.slug}>
@@ -70,28 +63,34 @@ export function NewsWeek() {
 
         {/* Two stories, the first with its connected story underneath */}
         <div className="bs-week-mid">
-          <article className="bs-reveal">
-            <Link to="/news/$slug" params={{ slug: MIDDLE.slug }} className="bs-card">
-              <BsPhoto photo={MIDDLE.photo} className="bs-photo-secondary" />
-              <p className="bs-eyebrow">{MIDDLE.kicker}</p>
-              <h4 className="bs-title">{MIDDLE.title}</h4>
-              <p className="bs-deck bs-deck-sm">{MIDDLE.deck}</p>
-              <ReadTime>{MIDDLE.read}</ReadTime>
-            </Link>
-            <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
-              <span className="bs-linked-tag">Connected</span>
-              <span className="bs-linked-title">{MIDDLE_LINKED.title}</span>
-              <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-            </Link>
-          </article>
-          <article className="bs-reveal">
-            <Link to="/news/$slug" params={{ slug: SECOND.slug }} className="bs-card">
-              <BsPhoto photo={SECOND.photo} className="bs-photo-secondary" />
-              <p className="bs-eyebrow">{SECOND.kicker}</p>
-              <h4 className="bs-title">{SECOND.title}</h4>
-              <ReadTime>{SECOND.read}</ReadTime>
-            </Link>
-          </article>
+          {MIDDLE && (
+            <article className="bs-reveal">
+              <Link to="/news/$slug" params={{ slug: MIDDLE.slug }} className="bs-card">
+                <BsPhoto photo={MIDDLE.photo} className="bs-photo-secondary" />
+                <p className="bs-eyebrow">{MIDDLE.kicker}</p>
+                <h4 className="bs-title">{MIDDLE.title}</h4>
+                <p className="bs-deck bs-deck-sm">{MIDDLE.deck}</p>
+                <ReadTime>{MIDDLE.read}</ReadTime>
+              </Link>
+              {MIDDLE_LINKED && MIDDLE_LINKED.slug !== MIDDLE.slug && (
+                <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
+                  <span className="bs-linked-tag">Connected</span>
+                  <span className="bs-linked-title">{MIDDLE_LINKED.title}</span>
+                  <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Link>
+              )}
+            </article>
+          )}
+          {SECOND && (
+            <article className="bs-reveal">
+              <Link to="/news/$slug" params={{ slug: SECOND.slug }} className="bs-card">
+                <BsPhoto photo={SECOND.photo} className="bs-photo-secondary" />
+                <p className="bs-eyebrow">{SECOND.kicker}</p>
+                <h4 className="bs-title">{SECOND.title}</h4>
+                <ReadTime>{SECOND.read}</ReadTime>
+              </Link>
+            </article>
+          )}
         </div>
 
         {/* In brief: five shorter stories, numbered, no photos */}
@@ -117,9 +116,15 @@ export function NewsWeek() {
       {/* Connected: three stories on AI and music from the same week, in order */}
       <section className="bs-cluster" aria-labelledby="cluster-ai-title">
         <div className="bs-cluster-head">
-          <p className="bs-cluster-tag">Connected · 3 stories</p>
-          <h4 id="cluster-ai-title" className="bs-cluster-title">AI and music: one week, three moves</h4>
-          <p className="bs-cluster-intro">A streaming service, a record label and the people who make sound for film and games all acted on AI within days of each other. Read them in order.</p>
+          <p className="bs-cluster-tag">Connected · {AI_MUSIC.length} stories</p>
+          {usualCluster ? (
+            <>
+              <h4 id="cluster-ai-title" className="bs-cluster-title">AI and music: one week, three moves</h4>
+              <p className="bs-cluster-intro">A streaming service, a record label and the people who make sound for film and games all acted on AI within days of each other. Read them in order.</p>
+            </>
+          ) : (
+            <h4 id="cluster-ai-title" className="bs-cluster-title">Read them together</h4>
+          )}
         </div>
         <ol className="bs-cluster-row">
           {AI_MUSIC.map((story, index) => (
