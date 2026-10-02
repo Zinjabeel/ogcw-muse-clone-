@@ -2457,6 +2457,138 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .studio-dock-close { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--ogcw-text-2); transition: background-color .2s ease, color .2s ease; }
 .studio-dock-close:hover, .studio-dock-close:focus-visible { background: var(--ogcw-bg); color: var(--ogcw-text); outline: none; }
 @media (prefers-reduced-motion: reduce) { .studio-dock { animation: none; } }
+
+/* ------------------------------------------------------------------
+   The story editor in the studio (src/sanity/page-editor.tsx): the story on
+   a copy of its own page, a box on everything you can change. The page is
+   laid out by the width of the studio's pane (container queries), not the
+   window, since the pane is narrower than the window.
+   ------------------------------------------------------------------ */
+/* Sanity keeps its forms 640px wide; the page needs the whole pane */
+[data-testid="document-panel-scroller"] > div:has(.se-canvas) { max-width: none !important; }
+.se-canvas { container-type: inline-size; overflow: clip; border: 1px solid var(--ogcw-border); border-radius: 14px; background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui); -webkit-font-smoothing: antialiased; }
+.se-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 10px 14px; border-bottom: 1px solid var(--ogcw-border); background: color-mix(in srgb, var(--ogcw-bg) 94%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.se-modes { display: inline-flex; flex: none; padding: 3px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); font-family: var(--ogcw-ui); }
+.se-modes button { height: 28px; padding: 0 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--ogcw-text-2); cursor: pointer; transition: background-color .2s ease, color .2s ease; }
+.se-modes button:hover { color: var(--ogcw-text); }
+.se-modes button[aria-pressed="true"] { background: var(--ogcw-accent); color: var(--ogcw-bg); }
+.se-fields-bar { display: flex; margin-bottom: 20px; }
+.se-address { display: flex; flex: 1 1 320px; align-items: center; min-width: 0; height: 34px; padding: 0 4px 0 14px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-surface); font-size: 13px; color: var(--ogcw-text-2); cursor: text; }
+.se-address:focus-within { border-color: var(--ogcw-accent); }
+.se-address > span { flex: none; }
+.se-address input { flex: 1; min-width: 60px; height: 100%; border: 0; background: transparent; font: inherit; color: var(--ogcw-text); outline: none; }
+.se-address input::placeholder { color: color-mix(in srgb, var(--ogcw-text) 35%, transparent); }
+.se-address button { flex: none; height: 26px; padding: 0 12px; border-radius: 999px; background: var(--ogcw-bg); font-size: 12px; font-weight: 600; color: var(--ogcw-text); cursor: pointer; }
+.se-address button:hover { background: var(--ogcw-accent); color: var(--ogcw-bg); }
+.se-wrap { padding: 0 clamp(20px, 4.5cqi, 56px) 72px; }
+.se-bar-error { padding: 8px 14px 0; }
+
+/* The page itself, by the pane's width */
+.se-canvas .og-article-top { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.se-canvas .og-article-lead { display: block; }
+.se-canvas .og-article-lead-photo { flex: none; aspect-ratio: 16 / 10; min-height: 0; }
+.se-canvas .og-article-title { max-width: 22ch; font-size: clamp(30px, 5.4cqi, 60px); }
+.se-canvas .og-article-deck { font-size: clamp(17px, 1.9cqi, 22px); }
+.se-canvas .og-article-layout { grid-template-columns: minmax(0, 1fr); gap: 48px; }
+.se-canvas .og-article-aside { position: static; }
+@container (min-width: 860px) {
+  .se-canvas .og-article-top { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); gap: 48px; }
+  .se-canvas .og-article-lead { display: flex; flex-direction: column; }
+  .se-canvas .og-article-lead-photo { flex: 1 1 0; aspect-ratio: auto; min-height: 340px; }
+}
+@container (min-width: 1120px) {
+  .se-canvas .og-article-layout { grid-template-columns: minmax(0, 1fr) 280px; gap: 0 56px; }
+  .se-canvas .og-article-aside { position: sticky; top: 72px; align-self: start; }
+}
+
+/* A box you click and type in: dashed while empty or under the pointer,
+   yellow while you type, with its name on a tab above it */
+.se-box { position: relative; display: block; border-radius: 6px; outline: 1px dashed transparent; outline-offset: 5px; cursor: text; transition: outline-color .15s ease, background-color .15s ease; }
+.se-box:hover { outline-color: color-mix(in srgb, var(--ogcw-accent) 60%, transparent); }
+.se-box.se-empty { outline-color: color-mix(in srgb, var(--ogcw-text) 32%, transparent); background: color-mix(in srgb, var(--ogcw-text) 4%, transparent); }
+.se-box:focus-within { outline: 2px solid var(--ogcw-accent); background: transparent; }
+.se-box.se-invalid { outline: 1px dashed var(--destructive); }
+.se-choice.se-invalid { outline: 1px dashed var(--destructive); }
+.se-box::before { content: attr(data-label); position: absolute; bottom: calc(100% + 7px); right: -6px; z-index: 2; padding: 2px 8px; border-radius: 5px; background: var(--ogcw-accent); color: var(--ogcw-bg); font: 700 10px/1.6 var(--ogcw-ui); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s ease; }
+.se-box:focus-within::before { opacity: 1; }
+.se-input { all: unset; display: block; box-sizing: border-box; width: 100%; overflow: hidden; resize: none; font: inherit; color: inherit; letter-spacing: inherit; line-height: inherit; text-transform: inherit; white-space: pre-wrap; overflow-wrap: anywhere; cursor: text; }
+.se-input::placeholder { color: color-mix(in srgb, currentColor 40%, transparent); opacity: 1; }
+.se-inline { display: inline-block; min-width: 12ch; vertical-align: top; }
+.se-error { display: block; margin-top: 10px; font: 500 12.5px/1.4 var(--ogcw-ui); letter-spacing: 0; text-transform: none; color: var(--destructive); }
+.se-note { display: grid; gap: 6px; margin-top: 14px; font-family: var(--ogcw-ui); font-size: 12.5px; line-height: 1.45; color: var(--ogcw-text-2); }
+.se-note-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.og-article-head .og-kicker .se-box { width: fit-content; min-width: 16ch; }
+
+/* The section and author menus, the date */
+.se-choice { position: relative; display: inline-flex; align-items: center; gap: 2px; border-radius: 6px; outline: 1px dashed transparent; outline-offset: 4px; transition: outline-color .15s ease; }
+.se-choice:hover, .se-choice.se-empty { outline-color: color-mix(in srgb, var(--ogcw-accent) 60%, transparent); }
+.se-choice:focus-within { outline: 2px solid var(--ogcw-accent); }
+.se-choice select { field-sizing: content; }
+.se-choice select, .se-choice button { appearance: none; padding: 0 16px 0 0; border: 0; background: transparent; font: inherit; font-weight: 600; letter-spacing: inherit; text-transform: inherit; color: var(--ogcw-text); cursor: pointer; outline: none; }
+.se-choice select option { background: var(--ogcw-surface); color: var(--ogcw-text); text-transform: none; }
+.se-choice svg { position: absolute; right: 0; pointer-events: none; color: var(--ogcw-accent); }
+.se-date button { padding: 0; font-weight: 400; color: var(--ogcw-text-2); }
+.se-date input { position: absolute; inset: 0; width: 100%; opacity: 0; pointer-events: none; }
+
+/* The lead photo: dropped or chosen straight onto the page */
+.se-lead { position: relative; }
+.se-photo { position: relative; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.se-photo .og-article-lead-photo { flex: 1 1 auto; }
+.se-photo-tools { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; opacity: 0; transition: opacity .2s ease; }
+.se-photo:hover .se-photo-tools, .se-photo:focus-within .se-photo-tools { opacity: 1; }
+.se-photo-tools button { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: color-mix(in srgb, var(--ogcw-bg) 88%, transparent); color: var(--ogcw-text); font: 600 12px var(--ogcw-ui); cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.se-photo-tools button:hover { background: var(--ogcw-accent); color: var(--ogcw-bg); }
+.se-photo-busy, .se-dragging::after { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--ogcw-bg) 70%, transparent); font: 600 13px var(--ogcw-ui); color: var(--ogcw-text); }
+.se-dragging::after { content: "Drop to use this photo"; outline: 2px solid var(--ogcw-accent); }
+.se-drop { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 24px; border: 1.5px dashed color-mix(in srgb, var(--ogcw-text) 32%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--ogcw-text) 4%, transparent); color: var(--ogcw-text-2); font-family: var(--ogcw-ui); text-align: center; cursor: pointer; transition: border-color .2s ease, color .2s ease; }
+.se-drop:hover, .se-drop:focus-visible { border-color: var(--ogcw-accent); color: var(--ogcw-text); outline: none; }
+.se-drop strong { font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--ogcw-text); }
+.se-drop span { font-size: 13px; }
+.se-drop.se-invalid { border-color: var(--destructive); }
+.se-link-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font: 600 12px var(--ogcw-ui); color: var(--ogcw-text-2); cursor: pointer; }
+.se-link-toggle:hover { color: var(--ogcw-accent); }
+.se-link { display: flex; align-items: center; gap: 4px; margin-top: 10px; padding: 3px 3px 3px 12px; border: 1px solid var(--ogcw-accent); border-radius: 999px; background: var(--ogcw-surface); }
+.se-link input { flex: 1; min-width: 0; height: 30px; border: 0; background: transparent; font: 13px var(--ogcw-ui); color: var(--ogcw-text); outline: none; }
+.se-link button, .se-icon { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; color: var(--ogcw-text-2); cursor: pointer; }
+.se-link button:hover, .se-icon:hover { background: var(--ogcw-bg); color: var(--ogcw-text); }
+.se-lead figcaption { display: flex; align-items: baseline; gap: 6px; }
+
+/* The end of the story: the question, the sources */
+.se-fb .fb-buttons { pointer-events: none; }
+.se-sources ul { gap: 10px; }
+.se-source { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; align-items: center; gap: 8px 16px; font-size: 14px; }
+.se-source-url { color: var(--ogcw-text-2); }
+.se-add { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 6px 12px; border: 1px dashed var(--ogcw-border); border-radius: 999px; font: 600 12.5px var(--ogcw-ui); color: var(--ogcw-text-2); cursor: pointer; }
+.se-add:hover { border-color: var(--ogcw-accent); color: var(--ogcw-accent); }
+.se-toc-item { display: block; padding: 7px 0 7px 14px; font-size: 14px; line-height: 1.4; color: var(--ogcw-text-2); }
+
+/* The story text: Sanity's own editor, dressed as the page (its toolbar
+   stays, pinned under the bar, to pick a subhead, a pull quote or a box) */
+.se-body [data-ui="Card"]:not([data-testid="pt-editor__toolbar-card"]) { background: transparent !important; }
+.se-body [data-testid="pt-editor"], .se-body [data-ui="Card"]:has([data-testid="pt-editor"]), .se-body [data-testid="pt-editor"] > [data-ui="Card"], .se-body div:empty { box-shadow: none !important; }
+/* …as long as the story, like the page, instead of a box that scrolls */
+.se-body [data-testid="pt-editor"] { height: auto !important; max-height: none !important; overflow: visible !important; border: 0 !important; }
+.se-body [data-testid="pt-editor"] > [data-ui="Card"]:not([data-testid="pt-editor__toolbar-card"]) { flex: none !important; height: auto !important; overflow: visible !important; }
+.se-body [data-testid="pt-editor__toolbar-card"] { position: sticky; top: 56px; z-index: 4; margin-bottom: 18px; border: 1px solid var(--ogcw-border) !important; border-radius: 10px; background: var(--ogcw-surface) !important; }
+.se-body [data-testid="pt-editor__scroller"] { overflow: visible !important; height: auto !important; max-height: none !important; }
+.se-body [data-testid="text-block"] { padding-block: 0 .55em !important; }
+.se-body [data-testid^="text-style--"], .se-body [data-testid^="text-style--"] [data-ui="Text"] { font-family: var(--ogcw-serif) !important; font-size: 18px !important; font-weight: 400 !important; line-height: 1.7 !important; letter-spacing: 0 !important; color: var(--ogcw-text) !important; }
+.se-body [data-testid^="text-style--"]::before, .se-body [data-testid^="text-style--"]::after, .se-body [data-testid^="text-style--"] [data-ui="Text"]::before, .se-body [data-testid^="text-style--"] [data-ui="Text"]::after { display: none !important; }
+.se-body [data-testid="text-style--h2"], .se-body [data-testid="text-style--h2"] [data-ui="Text"] { margin-top: .9em; font-family: var(--ogcw-display) !important; font-size: 28px !important; line-height: 1.2 !important; letter-spacing: -.005em !important; }
+.se-body [data-testid="text-style--blockquote"] { margin-block: .8em; padding-block: 24px !important; padding-left: 0 !important; border: 0 !important; border-block: 1px solid var(--ogcw-border) !important; }
+.se-body [data-testid="text-style--blockquote"]::before { content: "" !important; display: block !important; width: 10px; height: 10px; margin-bottom: 16px; background: var(--ogcw-accent); }
+.se-body [data-testid="text-style--blockquote"] [data-ui="Text"] { font-family: var(--ogcw-display) !important; font-size: clamp(24px, 2.6cqi, 32px) !important; line-height: 1.2 !important; letter-spacing: -.01em !important; }
+.se-body [data-testid="pte-block-object"] { margin-block: .6em 1.2em; }
+/* An empty story: a box like the others instead of Sanity's "Empty" */
+.se-body [data-testid="pt-input-placeholder"] { font-size: 0 !important; }
+.se-body [data-testid="pt-input-placeholder"]::after { content: "STORY TEXT HERE: click and start writing"; font: 400 18px/1.7 var(--ogcw-serif); color: color-mix(in srgb, var(--ogcw-text) 40%, transparent); }
+.se-body [data-testid="pte-block-object"] [data-ui="Card"] { background: transparent !important; }
+
+/* Photo and box blocks inside the story text */
+.se-block { margin: 0 !important; }
+.se-block-photo { display: grid; place-items: center; border: 1.5px dashed color-mix(in srgb, var(--ogcw-text) 30%, transparent); background: color-mix(in srgb, var(--ogcw-text) 4%, transparent); }
+.se-block-missing { font: 700 11px/1.4 var(--ogcw-ui); letter-spacing: .1em; color: color-mix(in srgb, var(--ogcw-text) 45%, transparent); }
+.se-block-href { display: block; margin-top: 8px; font: 12px var(--ogcw-ui); color: var(--ogcw-text-2); }
 /* ------------------------------------------------------------------
    Sign in (src/routes/login.tsx): the reader's form beside the team's
    GitHub door to the studio, both as the site's cards.

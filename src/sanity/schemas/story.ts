@@ -1,4 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
+import { SLUG, StoryPageInput } from "../page-editor";
+import { ChecklistPreview, FactsPreview, FaqPreview, LinkButtonPreview, StoryImagePairPreview, StoryImagePreview } from "../page-previews";
 
 // A story, the same shape as the stories in src/data/content.ts: the
 // details (section, label, headline, summary, author, date, photo, sources)
@@ -43,6 +45,8 @@ export const story = defineType({
   name: "story",
   title: "Story",
   type: "document",
+  // Edited on a copy of its own page (src/sanity/page-editor.tsx)
+  components: { input: StoryPageInput },
   groups: [
     { name: "details", title: "Details", default: true },
     { name: "text", title: "Story" },
@@ -57,7 +61,9 @@ export const story = defineType({
       group: "details",
       description: "The end of the story’s link: ogcultureworld.com/news/…",
       options: { source: "title", maxLength: 90 },
-      validation: (rule) => rule.required(),
+      // The site only opens lowercase addresses (src/lib/sanity-stories.ts)
+      validation: (rule) => rule.required().custom((value: { current?: string } | undefined) =>
+        !value?.current || SLUG.test(value.current) || "Use lowercase letters, numbers and dashes only, e.g. vmas-2026-winners."),
     }),
     defineField({ name: "section", title: "Section", type: "string", group: "details", options: { list: SECTIONS, layout: "radio", direction: "horizontal" }, validation: (rule) => rule.required() }),
     defineField({ name: "kicker", title: "Label", type: "string", group: "details", description: "The small yellow word above the headline, e.g. “Launch” or “Paris Fashion Week”.", validation: (rule) => rule.required().max(40) }),
@@ -90,7 +96,8 @@ export const story = defineType({
             defineField({ name: "photo", title: "Photo", type: "photo", validation: (rule) => rule.required() }),
             defineField({ name: "caption", title: "Caption", type: "string", validation: (rule) => rule.required() }),
           ],
-          preview: { select: { title: "caption", media: "photo.image" }, prepare: ({ title, media }) => ({ title: title ?? "Photo", subtitle: "Photo", media }) },
+          components: { preview: StoryImagePreview },
+          preview: { select: { caption: "caption", media: "photo.image", photo: "photo" }, prepare: ({ caption, media, photo }) => ({ title: caption ?? "Photo", subtitle: "Photo", media, caption, photo }) },
         }),
         defineArrayMember({
           name: "storyImagePair",
@@ -101,7 +108,8 @@ export const story = defineType({
             defineField({ name: "second", title: "Right photo", type: "photo", validation: (rule) => rule.required() }),
             defineField({ name: "caption", title: "Caption", type: "string", validation: (rule) => rule.required() }),
           ],
-          preview: { select: { title: "caption", media: "first.image" }, prepare: ({ title, media }) => ({ title: title ?? "Two photos", subtitle: "Two photos", media }) },
+          components: { preview: StoryImagePairPreview },
+          preview: { select: { caption: "caption", media: "first.image", first: "first", second: "second" }, prepare: ({ caption, media, first, second }) => ({ title: caption ?? "Two photos", subtitle: "Two photos", media, caption, first, second }) },
         }),
         defineArrayMember({
           name: "facts",
@@ -124,7 +132,8 @@ export const story = defineType({
               })],
             }),
           ],
-          preview: { select: { title: "title" }, prepare: ({ title }) => ({ title: title ?? "Key facts", subtitle: "Key facts box" }) },
+          components: { preview: FactsPreview },
+          preview: { select: { title: "title", items: "items" }, prepare: ({ title, items }) => ({ title: title ?? "Key facts", subtitle: "Key facts box", items }) },
         }),
         defineArrayMember({
           name: "checklist",
@@ -134,7 +143,8 @@ export const story = defineType({
             defineField({ name: "title", title: "Checklist title", type: "string", validation: (rule) => rule.required() }),
             defineField({ name: "items", title: "Points", type: "array", of: [defineArrayMember({ type: "string" })] }),
           ],
-          preview: { select: { title: "title" }, prepare: ({ title }) => ({ title: title ?? "Checklist", subtitle: "Checklist" }) },
+          components: { preview: ChecklistPreview },
+          preview: { select: { title: "title", items: "items" }, prepare: ({ title, items }) => ({ title: title ?? "Checklist", subtitle: "Checklist", items }) },
         }),
         defineArrayMember({
           name: "faq",
@@ -156,7 +166,8 @@ export const story = defineType({
               })],
             }),
           ],
-          preview: { select: { items: "items" }, prepare: ({ items }) => ({ title: `${(items as unknown[] | undefined)?.length ?? 0} questions`, subtitle: "Questions and answers" }) },
+          components: { preview: FaqPreview },
+          preview: { select: { items: "items" }, prepare: ({ items }) => ({ title: `${(items as unknown[] | undefined)?.length ?? 0} questions`, subtitle: "Questions and answers", items }) },
         }),
         defineArrayMember({
           name: "linkButton",
@@ -166,7 +177,8 @@ export const story = defineType({
             defineField({ name: "label", title: "Button text", type: "string", validation: (rule) => rule.required() }),
             defineField({ name: "href", title: "Link", type: "string", description: "A page on the site (/news/…) or a full web address.", validation: (rule) => rule.required() }),
           ],
-          preview: { select: { title: "label", subtitle: "href" } },
+          components: { preview: LinkButtonPreview },
+          preview: { select: { title: "label", subtitle: "href", label: "label", href: "href" } },
         }),
       ],
     }),
