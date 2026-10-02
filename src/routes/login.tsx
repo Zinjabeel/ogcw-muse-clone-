@@ -32,6 +32,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [sentTo, setSentTo] = useState("");
   const [busy, setBusy] = useState(false);
 
   const switchTo = (next: Mode) => {
@@ -44,8 +45,12 @@ function LoginPage() {
     setError("");
     setBusy(true);
     try {
-      if (mode === "signup") await signUp({ name, email, password });
-      else await signIn({ email, password });
+      if (mode === "signup") {
+        const { confirm } = await signUp({ name, email, password });
+        if (confirm) setSentTo(email.trim());
+      } else {
+        await signIn({ email, password });
+      }
       setPassword("");
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : "Something went wrong. Try again.");
@@ -66,7 +71,16 @@ function LoginPage() {
                 <p className="auth-copy">Signed in as <strong>{user.name}</strong> ({user.email}).</p>
                 <div className="auth-actions">
                   <Link to="/" className="auth-submit">Go to the front page <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></Link>
-                  <button type="button" className="auth-secondary" onClick={signOut}><LogOut size={15} strokeWidth={2} aria-hidden="true" /> Sign out</button>
+                  <button type="button" className="auth-secondary" onClick={() => void signOut()}><LogOut size={15} strokeWidth={2} aria-hidden="true" /> Sign out</button>
+                </div>
+              </>
+            ) : sentTo ? (
+              <>
+                <p className="og-kicker">Your OGCW account</p>
+                <h1 id="auth-title" className="auth-title">Check your email</h1>
+                <p className="auth-copy" role="status">We’ve sent a link to <strong>{sentTo}</strong>. Open it to confirm your address, and you’re in. Then you can sign in on any device.</p>
+                <div className="auth-actions">
+                  <button type="button" className="auth-secondary" onClick={() => { setSentTo(""); switchTo("signin"); }}>Back to sign in</button>
                 </div>
               </>
             ) : (

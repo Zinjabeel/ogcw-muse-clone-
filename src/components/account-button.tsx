@@ -49,7 +49,7 @@ export function AccountButton() {
           {admin && (
             <Link to="/admin/$" params={{ _splat: "" }} className="account-item" onClick={() => setOpen(false)}><PenSquare size={15} aria-hidden="true" /> Open the studio</Link>
           )}
-          <button type="button" className="account-item" onClick={() => { signOut(); setOpen(false); }}>
+          <button type="button" className="account-item" onClick={() => { void signOut(); setOpen(false); }}>
             <LogOut size={15} aria-hidden="true" /> Sign out
           </button>
         </div>

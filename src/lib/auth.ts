@@ -1,92 +1,77 @@
 import { useEffect, useState } from "react";
+import { isAuthApiError, type AuthError, type User as SupabaseUser } from "@supabase/supabase-js";
 import { SANITY_PROJECT_ID } from "@/sanity/env";
+import { getSupabase } from "./supabase";
 
 // Reader accounts (sign up, sign in, sign out), used by /login and the
-// account button in the header.
-// TODO: Supabase. For now accounts are kept in this browser (localStorage):
-// the password is never stored, only a salted PBKDF2 hash of it. Swapping in
-// Supabase Auth means rewriting the four functions below (signUp, signIn,
-// signOut, readUser); the pages that use them stay as they are.
+// account button in the header. Accounts live in Supabase (src/lib/supabase.ts),
+// so they work on any device: Supabase keeps the name and email and only a
+// hashed form of the password, and keeps the reader signed in on this device.
 //
 // Admins don't use these accounts: they sign in to the studio at /admin with
 // GitHub (Sanity's own login; only the Sanity project's members get in).
 
 export type User = { id: string; name: string; email: string };
 
-type StoredAccount = User & { salt: string; hash: string; createdAt: string };
-const ACCOUNTS_KEY = "ogcw-accounts";
-const SESSION_KEY = "ogcw-session";
-const CHANGE_EVENT = "ogcw-auth";
-
-const read = <T,>(key: string, fallback: T): T => {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
+const toUser = (user: SupabaseUser): User => {
+  const email = user.email ?? "";
+  const name = typeof user.user_metadata["name"] === "string" ? user.user_metadata["name"].trim() : "";
+  return { id: user.id, email, name: name || email.split("@")[0] || "Reader" };
 };
-const write = (key: string, value: unknown) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    throw new Error("Your browser is blocking storage, so we can’t keep you signed in. Allow site data and try again.");
-  }
-};
-const announce = () => window.dispatchEvent(new Event(CHANGE_EVENT));
-
-const toHex = (buffer: ArrayBuffer) => [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-async function hashPassword(password: string, salt: string) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: new TextEncoder().encode(salt), iterations: 210_000 }, key, 256);
-  return toHex(bits);
-}
 
 const normaliseEmail = (email: string) => email.trim().toLowerCase();
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-/** Create an account and sign in. Throws a readable message if something's wrong. */
-export async function signUp(input: { name: string; email: string; password: string }): Promise<User> {
+// Supabase's errors, in plain words
+function readable(error: AuthError): Error {
+  const code = isAuthApiError(error) ? error.code : undefined;
+  switch (code) {
+    case "invalid_credentials": return new Error("That email and password don’t match.");
+    case "email_not_confirmed": return new Error("Confirm your email first: open the link we sent when you signed up.");
+    case "user_already_exists":
+    case "email_exists": return new Error("There’s already an account with this email. Sign in instead.");
+    case "weak_password": return new Error("Choose a stronger password: longer, and harder to guess.");
+    case "email_address_invalid": return new Error("That email address doesn’t look right.");
+    case "signup_disabled": return new Error("New accounts are paused for now. Try again later.");
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit": return new Error("Too many tries just now. Wait a few minutes and try again.");
+  }
+  if (!isAuthApiError(error)) return new Error("We couldn’t reach the account service. Check your connection and try again.");
+  return new Error("Something went wrong. Try again.");
+}
+
+/**
+ * Create an account. Supabase emails a link to confirm the address; until
+ * it's opened, `confirm` is true and the reader isn't signed in yet.
+ */
+export async function signUp(input: { name: string; email: string; password: string }): Promise<{ user: User | null; confirm: boolean }> {
   const name = input.name.trim();
   const email = normaliseEmail(input.email);
   if (!name) throw new Error("Add your name.");
   if (name.length > 60) throw new Error("Keep your name under 60 characters.");
   if (!EMAIL.test(email)) throw new Error("That email address doesn’t look right.");
   if (input.password.length < 8) throw new Error("Use at least 8 characters for your password.");
-  const accounts = read<StoredAccount[]>(ACCOUNTS_KEY, []);
-  if (accounts.some((account) => account.email === email)) throw new Error("There’s already an account with this email. Sign in instead.");
-  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
-  const account: StoredAccount = { id: crypto.randomUUID(), name, email, salt, hash: await hashPassword(input.password, salt), createdAt: new Date().toISOString() };
-  write(ACCOUNTS_KEY, [...accounts, account]);
-  const user: User = { id: account.id, name, email };
-  write(SESSION_KEY, user);
-  announce();
-  return user;
+  const { data, error } = await getSupabase().auth.signUp({
+    email,
+    password: input.password,
+    options: { data: { name }, emailRedirectTo: `${window.location.origin}/login` },
+  });
+  if (error) throw readable(error);
+  return { user: data.session && data.user ? toUser(data.user) : null, confirm: !data.session };
 }
 
-/** Sign in with email and password. Throws a readable message if it doesn't match. */
+/** Sign in with email and password. Throws a readable message if it doesn't work. */
 export async function signIn(input: { email: string; password: string }): Promise<User> {
   const email = normaliseEmail(input.email);
-  const account = read<StoredAccount[]>(ACCOUNTS_KEY, []).find((item) => item.email === email);
-  if (!account || (await hashPassword(input.password, account.salt)) !== account.hash) throw new Error("That email and password don’t match.");
-  const user: User = { id: account.id, name: account.name, email: account.email };
-  write(SESSION_KEY, user);
-  announce();
-  return user;
+  if (!EMAIL.test(email)) throw new Error("That email address doesn’t look right.");
+  if (!input.password) throw new Error("Add your password.");
+  const { data, error } = await getSupabase().auth.signInWithPassword({ email, password: input.password });
+  if (error) throw readable(error);
+  return toUser(data.user);
 }
 
-export function signOut() {
-  try {
-    localStorage.removeItem(SESSION_KEY);
-  } catch {
-    // nothing stored, nothing to remove
-  }
-  announce();
-}
-
-function readUser(): User | null {
-  const user = read<User | null>(SESSION_KEY, null);
-  return user && typeof user.email === "string" && typeof user.name === "string" ? user : null;
+export async function signOut() {
+  await getSupabase().auth.signOut({ scope: "local" });
 }
 
 /** Whether this browser is signed in to the OGCW studio (/admin) as an admin */
@@ -102,13 +87,22 @@ export function hasStudioSession() {
 export function useUser() {
   const [state, setState] = useState<{ user: User | null; admin: boolean; ready: boolean }>({ user: null, admin: false, ready: false });
   useEffect(() => {
-    const update = () => setState({ user: readUser(), admin: hasStudioSession(), ready: true });
-    update();
-    window.addEventListener(CHANGE_EVENT, update);
-    window.addEventListener("storage", update); // other tabs
+    // Accounts used to live in the browser (until 2 October 2026): clear them out
+    try {
+      localStorage.removeItem("ogcw-accounts");
+      localStorage.removeItem("ogcw-session");
+    } catch {
+      // storage blocked: nothing stored either
+    }
+    const auth = getSupabase().auth;
+    const show = (user: SupabaseUser | null | undefined) => setState({ user: user ? toUser(user) : null, admin: hasStudioSession(), ready: true });
+    // Fires straight away with the saved session, then on every sign in and out (here and in other tabs)
+    const { data } = auth.onAuthStateChange((_event, session) => show(session?.user));
+    const onStorage = () => setState((current) => ({ ...current, admin: hasStudioSession() }));
+    window.addEventListener("storage", onStorage); // the studio, signed in or out in another tab
     return () => {
-      window.removeEventListener(CHANGE_EVENT, update);
-      window.removeEventListener("storage", update);
+      data.subscription.unsubscribe();
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
   return state;

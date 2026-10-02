@@ -22,6 +22,8 @@ export type InfoGroup = "Help" | "Company" | "Legal";
 type InfoPage = { kicker: InfoGroup; title: string; label?: string; intro: string; updated?: string; body: ReactNode };
 
 const UPDATED = "30 September 2026";
+// Privacy and cookies changed when reader accounts moved to Supabase
+const ACCOUNTS_UPDATED = "2 October 2026";
 
 const Mail = ({ subject, children }: { subject: string; children: ReactNode }) => <a href={mail(subject)}>{children}</a>;
 const Page = ({ slug, children }: { slug: InfoSlug; children: ReactNode }) => <Link to="/info/$slug" params={{ slug }}>{children}</Link>;
@@ -122,8 +124,7 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
 const STORAGE_ITEMS: [string, string, string][] = [
   ["ogcw-consent", "Strictly necessary", "Remembers your cookie choices, so we don’t ask on every visit."],
   ["ogcw-lang", "Strictly necessary", "Remembers your language."],
-  ["ogcw-accounts", "Strictly necessary", "Your OGCW account, if you create one: your name, email and a scrambled (hashed) form of your password, never the password itself."],
-  ["ogcw-session", "Strictly necessary", "Keeps you signed in to your OGCW account until you sign out."],
+  ["sb-dkzjgjerfaxtjyeixpqe-auth-token", "Strictly necessary", "Keeps you signed in to your OGCW account on this device until you sign out. Only there if you sign in."],
   ["ogcw-theme", "Preferences", "Remembers the colour theme you picked (Night, Gold, Navy or Aurora)."],
   ["ogcw-hero", "Preferences", "Remembers which home page hero you picked."],
   ["ogcw-vote-no1-rapper", "Preferences", "Remembers your vote in the No. 1 rapper poll, so you see the results when you come back."],
@@ -414,7 +415,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     title: "Privacy Policy",
     label: "Privacy",
     intro: "What personal data OGCW collects, why, and the rights you have.",
-    updated: UPDATED,
+    updated: ACCOUNTS_UPDATED,
     body: (
       <>
         <p>We collect as little as we can. You can read OGCW without an account, and we don’t use analytics, advertising or tracking cookies.</p>
@@ -425,6 +426,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <thead><tr><th>What</th><th>Why</th><th>Legal basis</th></tr></thead>
           <tbody>
             <tr><td>Technical data your browser sends when you visit, such as your IP address, browser type and the pages you request</td><td>To deliver the site, keep it secure and fix problems. Our hosting provider processes this data for us.</td><td>Our legitimate interest in running a secure website</td></tr>
+            <tr><td>Your name, email address and password, if you create an account</td><td>To let you sign in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it.</td><td>Our agreement with you when you create an account</td></tr>
             <tr><td>Your answers to polls and to the questions at the end of stories</td><td>To count them and show the results. They are counted without your name.</td><td>Our legitimate interest in running polls you choose to take part in</td></tr>
             <tr><td>Notes you write under a story</td><td>To read your feedback. Notes are stored with the story and the time, and never published.</td><td>Our legitimate interest in improving our reporting</td></tr>
             <tr><td>Your email address, when the newsletter launches</td><td>To send you the newsletter.</td><td>Your consent, which you can withdraw at any time</td></tr>
@@ -437,12 +439,13 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>4. How long we keep it</h2>
         <ul className="info-list">
           <li>Technical logs: only as long as needed for security and fixing problems.</li>
+          <li>Your account: until you ask us to delete it.</li>
           <li>Poll counts and answers: as long as the poll or story is online.</li>
           <li>Notes and emails: as long as needed to deal with them, then deleted.</li>
           <li>Newsletter address: until you unsubscribe.</li>
         </ul>
         <h2>5. Who we share it with</h2>
-        <p>We never sell your data. We share it only with the service providers who help us run OGCW, such as hosting and email, under agreements that protect it, or where the law requires it. If a provider processes data outside the European Economic Area, we make sure appropriate safeguards are in place.</p>
+        <p>We never sell your data. We share it only with the service providers who help us run OGCW, such as hosting, email and Supabase for accounts, under agreements that protect it, or where the law requires it. If a provider processes data outside the European Economic Area, we make sure appropriate safeguards are in place.</p>
         <h2>6. Your rights</h2>
         <p>You can ask to access, correct or delete your personal data, to restrict or object to how we use it, and to receive it in a portable format. Where we rely on your consent, you can withdraw it at any time. Email <Mail subject="Privacy request">{BUSINESS_EMAIL}</Mail>. You also have the right to complain to your local data protection authority.</p>
         <h2>7. Children</h2>
@@ -457,7 +460,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     title: "Cookie Policy",
     label: "Cookies",
     intro: "What OGCW stores in your browser, and how to change it.",
-    updated: UPDATED,
+    updated: ACCOUNTS_UPDATED,
     body: (
       <>
         <p>Cookies and similar technologies, such as your browser’s local storage, let a website remember small things between pages and visits. OGCW uses very few of them, and none for tracking you or showing you adverts.</p>
