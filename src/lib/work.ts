@@ -47,7 +47,7 @@ const once = <T extends boolean | WorkAccess>(key: string, ask: () => Promise<T>
 async function sanityMember() {
   let token: string | null = null;
   try {
-    token = JSON.parse(localStorage.getItem(`__studio_auth_token_${SANITY_PROJECT_ID}`) ?? "null")?.token ?? null;
+    token = JSON.parse(localStorage.getItem(STUDIO_TOKEN_KEY) ?? "null")?.token ?? null;
   } catch {
     return false;
   }
@@ -57,6 +57,37 @@ async function sanityMember() {
     const response = await fetch(`https://api.sanity.io/v2021-06-07/projects/${SANITY_PROJECT_ID}`, { headers: { Authorization: `Bearer ${token}` } });
     return response.ok;
   }).catch(() => false);
+}
+
+const STUDIO_TOKEN_KEY = `__studio_auth_token_${SANITY_PROJECT_ID}`;
+
+/**
+ * Log in to the studio with GitHub, through Sanity itself (the same login
+ * the studio's own login screen uses). Sanity sends the browser back to
+ * `returnTo` with a one-time "#sid=…" in the address, which
+ * finishStudioLogin swaps for the studio's login token.
+ */
+export function studioLogin(returnTo: string) {
+  const params = new URLSearchParams({ origin: `${window.location.origin}${returnTo}`, projectId: SANITY_PROJECT_ID, type: "dual" });
+  window.location.assign(`https://api.sanity.io/v1/auth/login/github?${params}`);
+}
+
+/** Back from the GitHub login: keep the studio's login token, as the studio itself would */
+let finishing: Promise<void> | null = null;
+export function finishStudioLogin() {
+  finishing ??= (async () => {
+    const match = window.location.hash.match(/sid=([^&]{20,})/);
+    if (!match) return;
+    const url = new URL(window.location.href);
+    url.hash = window.location.hash.replace(/&?sid=[^&]+/, "").replace(/^#&?$/, "");
+    history.replaceState(history.state, "", url);
+    const response = await fetch(`https://${SANITY_PROJECT_ID}.api.sanity.io/v2021-06-07/auth/fetch?sid=${encodeURIComponent(match[1]!)}`);
+    if (!response.ok) throw new Error("The GitHub login didn’t go through. Try again.");
+    const { token } = (await response.json()) as { token?: string };
+    if (!token) throw new Error("The GitHub login didn’t go through. Try again.");
+    localStorage.setItem(STUDIO_TOKEN_KEY, JSON.stringify({ token }));
+  })();
+  return finishing;
 }
 
 /** What the OGCW account logged in here may do, as the server sees it */
@@ -77,6 +108,7 @@ export function useWorkAccess() {
   useEffect(() => {
     let current = true;
     const check = async () => {
+      await finishStudioLogin().catch(() => {});
       const result = await accountAccess();
       if (current) setAccess(result === "admin" || (await sanityMember()) ? "admin" : result);
     };

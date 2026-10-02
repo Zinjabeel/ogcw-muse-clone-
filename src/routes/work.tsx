@@ -1,15 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, LayoutDashboard, LogOut, Lock } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
 import { GitHubMark } from "../components/account-button";
 import { enabledProviders, signIn, signInWith, signOut, useUser, type Provider } from "../lib/auth";
-import { useWorkAccess } from "../lib/work";
+import { finishStudioLogin, studioLogin, useWorkAccess } from "../lib/work";
 
 // For Work: the OGCW team's login, in place of a public admin page. Log in
-// with Google, GitHub or email. The server checks the account: only the OGCW
-// GitHub account gets the button into the admin dashboard (/admin); any
-// other account is a normal OGCW reader account. /admin itself sends
+// with Google, GitHub or email. GitHub logs in through Sanity, the same
+// login as the studio's own: members of the OGCW Sanity project get the
+// admin dashboard (/admin). Google and email are OGCW accounts (Supabase),
+// checked by the server; any of those is a normal reader account unless it
+// is the OGCW GitHub account. /admin itself sends
 // everyone else back here (src/components/studio-host.tsx).
 
 export const Route = createFileRoute("/work")({
@@ -50,11 +52,24 @@ function WorkPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     void enabledProviders().then(setProviders);
     setError(returnedError());
+    finishStudioLogin().catch((problem: unknown) => setError(problem instanceof Error ? problem.message : "The GitHub login didn’t go through. Try again."));
   }, []);
+
+  // Sent here from /admin: once the login gives admin access, carry on there
+  useEffect(() => {
+    if (access === "admin" && search.from === "admin") void navigate({ to: "/admin/$", params: { _splat: "" }, replace: true });
+  }, [access, search.from, navigate]);
+
+  const withGitHub = () => {
+    setError("");
+    setBusy("github");
+    studioLogin(search.from === "admin" ? "/work?from=admin" : "/work");
+  };
 
   const withProvider = async (provider: Provider) => {
     setError("");
@@ -117,9 +132,8 @@ function WorkPage() {
               <GoogleMark /> {busy === "google" ? "Opening Google…" : "Continue with Google"}
               {providers?.google === false && <small>Not set up yet</small>}
             </button>
-            <button type="button" className="authx-provider" disabled={!!busy || providers?.github === false} onClick={() => void withProvider("github")}>
+            <button type="button" className="authx-provider" disabled={!!busy} onClick={withGitHub}>
               <GitHubMark /> {busy === "github" ? "Opening GitHub…" : "Continue with GitHub"}
-              {providers?.github === false && <small>Not set up yet</small>}
             </button>
           </div>
           <p className="authx-divider"><span>or with email</span></p>
