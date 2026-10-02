@@ -47,7 +47,7 @@ export function AccountButton() {
           <p className="account-name">{user.name}</p>
           <p className="account-email">{user.email}</p>
           {admin && (
-            <a href="/admin" className="account-item"><PenSquare size={15} aria-hidden="true" /> Open the studio</a>
+            <Link to="/admin/$" params={{ _splat: "" }} className="account-item" onClick={() => setOpen(false)}><PenSquare size={15} aria-hidden="true" /> Open the studio</Link>
           )}
           <button type="button" className="account-item" onClick={() => { signOut(); setOpen(false); }}>
             <LogOut size={15} aria-hidden="true" /> Sign out

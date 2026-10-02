@@ -15,6 +15,7 @@ import { heroInitScript } from "../components/hero-switcher";
 import { NotFoundPage } from "../components/not-found";
 import { getStorySummaries } from "../lib/sanity-stories";
 import { StoriesProvider } from "../lib/stories";
+import { StudioHost } from "../components/studio-host";
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -112,8 +113,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoriesProvider stories={stories}>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        {/* The studio (/admin) floats over every page, so it can stay open while minimised */}
+        <StudioHost>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </StudioHost>
       </StoriesProvider>
     </QueryClientProvider>
   );

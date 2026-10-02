@@ -127,11 +127,10 @@ function LoginPage() {
             <p className="og-kicker">The OGCW team</p>
             <h2 id="admin-title" className="auth-title auth-title-sm">Admin</h2>
             <p className="auth-copy">Write, edit and publish stories in the OGCW studio. Changes go live on the site as soon as you publish.</p>
-            {/* A full page load: the studio is its own app */}
-            <a href="/admin" className="auth-github">
+            <Link to="/admin/$" params={{ _splat: "" }} className="auth-github">
               <GitHubMark />
               {admin ? "Open the studio" : "Sign in with GitHub"}
-            </a>
+            </Link>
           </aside>
         </div>
       </main>

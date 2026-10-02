@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "./schemas/story";
+import { OgcwNavbar } from "./navbar";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "./env";
 
 // The Sanity Studio, embedded in the website at /admin (src/routes/admin.$.tsx).
@@ -23,4 +24,6 @@ export default defineConfig({
   },
   plugins: [structureTool(), visionTool({ defaultApiVersion: SANITY_API_VERSION })],
   schema: { types: schemaTypes },
+  // The top bar, with "Website" and minimise buttons (src/sanity/navbar.tsx)
+  studio: { components: { navbar: OgcwNavbar } },
 });
