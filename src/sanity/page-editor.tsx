@@ -278,7 +278,8 @@ export function StoryPageInput(props: ObjectInputProps) {
     const fromSanity = checks
       .filter((item) => item.level === "error" && item.path.length === path.length && path.every((part, index) => item.path[index] === part))
       .map((item) => item.message);
-    return [...new Set([...(local[key] ?? []), ...fromSanity])];
+    // One message per problem: the page's own wording when it has one, else Sanity's
+    return local[key]?.length ? local[key] : [...new Set(fromSanity)];
   };
   const text = (name: keyof Story) => (value: string) => onChange(value ? set(value, [name]) : unset([name]));
   const focus = (path: Path) => () => onPathFocus(path);
