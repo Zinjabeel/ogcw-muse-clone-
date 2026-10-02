@@ -17,8 +17,11 @@ import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusicRouteImport } from './routes/music'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
+import { Route as WorkRouteImport } from './routes/work'
 import { Route as AdminSplatRouteImport } from './routes/admin.$'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -69,6 +72,16 @@ const MusicRoute = MusicRouteImport.update({
   path: '/music',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StreamingRoute = StreamingRouteImport.update({
   id: '/streaming',
   path: '/streaming',
@@ -77,6 +90,11 @@ const StreamingRoute = StreamingRouteImport.update({
 const TrendsRoute = TrendsRouteImport.update({
   id: '/trends',
   path: '/trends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkRoute = WorkRouteImport.update({
+  id: '/work',
+  path: '/work',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSplatRoute = AdminSplatRouteImport.update({
@@ -134,8 +152,11 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -155,8 +176,11 @@ export interface FileRoutesByTo {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -177,8 +201,11 @@ export interface FileRoutesById {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
+  '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -200,8 +227,11 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/music'
+    | '/reset-password'
+    | '/signup'
     | '/streaming'
     | '/trends'
+    | '/work'
     | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
@@ -221,8 +251,11 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/music'
+    | '/reset-password'
+    | '/signup'
     | '/streaming'
     | '/trends'
+    | '/work'
     | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
@@ -242,8 +275,11 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/music'
+    | '/reset-password'
+    | '/signup'
     | '/streaming'
     | '/trends'
+    | '/work'
     | '/admin/$'
     | '/info/$slug'
     | '/news/$slug'
@@ -264,8 +300,11 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
   MusicRoute: typeof MusicRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SignupRoute: typeof SignupRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
+  WorkRoute: typeof WorkRoute
   AdminSplatRoute: typeof AdminSplatRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
@@ -335,6 +374,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MusicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/streaming': {
       id: '/streaming'
       path: '/streaming'
@@ -347,6 +400,13 @@ declare module '@tanstack/react-router' {
       path: '/trends'
       fullPath: '/trends'
       preLoaderRoute: typeof TrendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work': {
+      id: '/work'
+      path: '/work'
+      fullPath: '/work'
+      preLoaderRoute: typeof WorkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/$': {
@@ -424,8 +484,11 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
   MusicRoute: MusicRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SignupRoute: SignupRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,
+  WorkRoute: WorkRoute,
   AdminSplatRoute: AdminSplatRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,

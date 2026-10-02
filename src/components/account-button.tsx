@@ -2,10 +2,11 @@ import { Link } from "@tanstack/react-router";
 import { LogOut, PenSquare, User as UserIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useUser } from "@/lib/auth";
+import { useWorkAccess } from "@/lib/work";
 
-// The account button in the header. Signed out: a link to /login. Signed
-// in: the reader's initial, opening a small menu with their name, the
-// studio (when this browser is also signed in to /admin) and Sign out.
+// The account button in the header. Logged out: a link to /login. Logged
+// in: the reader's initial, opening a small menu with their name, the admin
+// dashboard (for the OGCW team account only, src/lib/work.ts) and Log out.
 
 export function GitHubMark({ size = 18 }: { size?: number }) {
   return (
@@ -16,7 +17,8 @@ export function GitHubMark({ size = 18 }: { size?: number }) {
 }
 
 export function AccountButton() {
-  const { user, admin, ready } = useUser();
+  const { user, ready } = useUser();
+  const admin = useWorkAccess() === "admin";
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
@@ -31,7 +33,7 @@ export function AccountButton() {
 
   if (!ready || !user) {
     return (
-      <Link to="/login" className="icon-button grid" aria-label="Sign in" title="Sign in">
+      <Link to="/login" className="icon-button grid" aria-label="Login" title="Login">
         <UserIcon size={16} />
       </Link>
     );
@@ -47,10 +49,10 @@ export function AccountButton() {
           <p className="account-name">{user.name}</p>
           <p className="account-email">{user.email}</p>
           {admin && (
-            <Link to="/admin/$" params={{ _splat: "" }} className="account-item" onClick={() => setOpen(false)}><PenSquare size={15} aria-hidden="true" /> Open the studio</Link>
+            <Link to="/admin/$" params={{ _splat: "" }} className="account-item" onClick={() => setOpen(false)}><PenSquare size={15} aria-hidden="true" /> Admin dashboard</Link>
           )}
           <button type="button" className="account-item" onClick={() => { void signOut(); setOpen(false); }}>
-            <LogOut size={15} aria-hidden="true" /> Sign out
+            <LogOut size={15} aria-hidden="true" /> Log out
           </button>
         </div>
       )}

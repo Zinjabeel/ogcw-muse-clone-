@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import { isAuthApiError, type AuthError, type User as SupabaseUser } from "@supabase/supabase-js";
-import { SANITY_PROJECT_ID } from "@/sanity/env";
-import { getSupabase } from "./supabase";
+import { getSupabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
 
-// Reader accounts (sign up, sign in, sign out), used by /login and the
-// account button in the header. Accounts live in Supabase (src/lib/supabase.ts),
-// so they work on any device: Supabase keeps the name and email and only a
-// hashed form of the password, and keeps the reader signed in on this device.
+// OGCW accounts: create an account, log in and out (/signup, /login, and
+// For Work at /work with Google or GitHub too), reset a password. Accounts
+// live in Supabase (src/lib/supabase.ts), so they work on any device:
+// Supabase keeps the name and email and only a hashed form of the password.
 //
-// Admins don't use these accounts: they sign in to the studio at /admin with
-// GitHub (Sanity's own login; only the Sanity project's members get in).
+// Every account is a normal reader account. Only the OGCW GitHub account
+// gets into the admin dashboard, which the server decides (src/lib/work.ts).
 
 export type User = { id: string; name: string; email: string };
 
 const toUser = (user: SupabaseUser): User => {
   const email = user.email ?? "";
-  const name = typeof user.user_metadata["name"] === "string" ? user.user_metadata["name"].trim() : "";
-  return { id: user.id, email, name: name || email.split("@")[0] || "Reader" };
+  const meta = user.user_metadata;
+  // Our sign-up keeps "name"; Google and GitHub send "full_name" or "user_name"
+  const name = [meta["name"], meta["full_name"], meta["user_name"]].find((value): value is string => typeof value === "string" && value.trim() !== "");
+  return { id: user.id, email, name: name?.trim() || email.split("@")[0] || "Reader" };
 };
 
 const normaliseEmail = (email: string) => email.trim().toLowerCase();
@@ -29,7 +30,7 @@ function readable(error: AuthError): Error {
     case "invalid_credentials": return new Error("That email and password don’t match.");
     case "email_not_confirmed": return new Error("Confirm your email first: open the link we sent when you signed up.");
     case "user_already_exists":
-    case "email_exists": return new Error("There’s already an account with this email. Sign in instead.");
+    case "email_exists": return new Error("There’s already an account with this email. Log in instead.");
     case "weak_password": return new Error("Choose a stronger password: longer, and harder to guess.");
     case "email_address_invalid": return new Error("That email address doesn’t look right.");
     case "signup_disabled": return new Error("New accounts are paused for now. Try again later.");
@@ -74,18 +75,49 @@ export async function signOut() {
   await getSupabase().auth.signOut({ scope: "local" });
 }
 
-/** Whether this browser is signed in to the OGCW studio (/admin) as an admin */
-export function hasStudioSession() {
+export type Provider = "google" | "github";
+
+/** Log in with Google or GitHub: off to their page, then back to `returnTo` on this site */
+export async function signInWith(provider: Provider, returnTo: string) {
+  const { error } = await getSupabase().auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}${returnTo}` } });
+  if (error) throw readable(error);
+}
+
+/** Which of Google and GitHub are switched on in Supabase (Authentication → Providers) */
+export async function enabledProviders(): Promise<Record<Provider, boolean>> {
   try {
-    return Boolean(localStorage.getItem(`__studio_auth_token_${SANITY_PROJECT_ID}`));
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY } });
+    const settings = (await response.json()) as { external?: Partial<Record<Provider, boolean>> };
+    return { google: Boolean(settings.external?.google), github: Boolean(settings.external?.github) };
   } catch {
-    return false;
+    return { google: false, github: false };
   }
 }
 
-/** The signed-in reader (null when signed out, and on the server) and whether the studio is signed in */
+/** Email a link to choose a new password; it opens /reset-password */
+export async function sendPasswordReset(email: string) {
+  const address = normaliseEmail(email);
+  if (!EMAIL.test(address)) throw new Error("That email address doesn’t look right.");
+  const { error } = await getSupabase().auth.resetPasswordForEmail(address, { redirectTo: `${window.location.origin}/reset-password` });
+  if (error) throw readable(error);
+}
+
+/** Set a new password, once the link from the reset email has logged the reader in */
+export async function setNewPassword(password: string) {
+  if (password.length < 8) throw new Error("Use at least 8 characters for your password.");
+  const { error } = await getSupabase().auth.updateUser({ password });
+  if (error) throw readable(error);
+}
+
+/** The current session's access token (for asking the server what this account may do) */
+export async function accessToken() {
+  const { data } = await getSupabase().auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
+/** The logged-in reader (null when logged out, and on the server) */
 export function useUser() {
-  const [state, setState] = useState<{ user: User | null; admin: boolean; ready: boolean }>({ user: null, admin: false, ready: false });
+  const [state, setState] = useState<{ user: User | null; ready: boolean }>({ user: null, ready: false });
   useEffect(() => {
     // Accounts used to live in the browser (until 2 October 2026): clear them out
     try {
@@ -94,16 +126,9 @@ export function useUser() {
     } catch {
       // storage blocked: nothing stored either
     }
-    const auth = getSupabase().auth;
-    const show = (user: SupabaseUser | null | undefined) => setState({ user: user ? toUser(user) : null, admin: hasStudioSession(), ready: true });
-    // Fires straight away with the saved session, then on every sign in and out (here and in other tabs)
-    const { data } = auth.onAuthStateChange((_event, session) => show(session?.user));
-    const onStorage = () => setState((current) => ({ ...current, admin: hasStudioSession() }));
-    window.addEventListener("storage", onStorage); // the studio, signed in or out in another tab
-    return () => {
-      data.subscription.unsubscribe();
-      window.removeEventListener("storage", onStorage);
-    };
+    // Fires straight away with the saved session, then on every login and logout (here and in other tabs)
+    const { data } = getSupabase().auth.onAuthStateChange((_event, session) => setState({ user: session?.user ? toUser(session.user) : null, ready: true }));
+    return () => data.subscription.unsubscribe();
   }, []);
   return state;
 }

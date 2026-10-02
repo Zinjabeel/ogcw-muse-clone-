@@ -170,6 +170,8 @@ export function Footer2() {
           <p>
             © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
             <Link to="/" className="footer-link">One Great Culture World</Link>. All rights reserved.
+            {/* The team's login, kept out of the way */}
+            <span className="footer-work"> · <Link to="/work" className="footer-link">For Work</Link></span>
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <LanguagePicker />

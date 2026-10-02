@@ -2,6 +2,7 @@ import { useRouter, useRouterState } from "@tanstack/react-router";
 import { ChevronUp, PenSquare, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode, type RefObject } from "react";
 import { isStudioPath, STUDIO_BASE, StudioWindowContext, type StudioControls } from "@/sanity/studio-window";
+import { adminAccess } from "@/lib/work";
 
 // The OGCW studio (Sanity, /admin) as a window over the site. On /admin it
 // fills the screen. "Minimise" in its top bar takes you back to the page you
@@ -31,14 +32,29 @@ export function StudioHost({ children }: { children: ReactNode }) {
   const [failed, setFailed] = useState(false);
   const controls = useRef<StudioControls | null>(null);
   const siteHref = useRef(onStudio ? "/" : href);
+  const [access, setAccess] = useState<"checking" | "ok">("checking");
+
+  // Only the OGCW team gets in: the server checks the account (src/lib/work.ts).
+  // Anyone else goes to the work login, and the Studio isn't even downloaded.
+  useEffect(() => {
+    if (phase !== "open" || access === "ok") return;
+    let current = true;
+    void adminAccess().then((allowed) => {
+      if (!current) return;
+      if (allowed) return setAccess("ok");
+      setPhase("closed");
+      void router.navigate({ to: "/work", search: { from: "admin" }, replace: true });
+    });
+    return () => { current = false; };
+  }, [phase, access, router]);
 
   // Load the Studio the first time it opens
   useEffect(() => {
-    if (phase === "closed" || Studio || !loadStudio) return;
+    if (phase === "closed" || access !== "ok" || Studio || !loadStudio) return;
     loadStudio()
       .then((module) => setStudio(() => module.default))
       .catch(() => setFailed(true));
-  }, [phase, Studio]);
+  }, [phase, access, Studio]);
 
   // Follow the address bar
   useEffect(() => {
@@ -80,7 +96,7 @@ export function StudioHost({ children }: { children: ReactNode }) {
           {Studio ? (
             <Studio controls={controls} />
           ) : (
-            <p className="admin-studio-loading">{failed ? "The studio didn’t load. Refresh to try again." : "Loading the OGCW studio…"}</p>
+            <p className="admin-studio-loading">{failed ? "The studio didn’t load. Refresh to try again." : access === "ok" ? "Loading the OGCW studio…" : "Checking your access…"}</p>
           )}
         </div>
       )}
