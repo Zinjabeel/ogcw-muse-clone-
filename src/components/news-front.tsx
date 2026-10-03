@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { SONGS, spotifyTrack, type Article, type Song } from "@/data/content";
 import { useStories } from "@/lib/stories";
@@ -23,21 +23,25 @@ import { EditSection, S, T } from "./site-text";
 // and the Explore mix running on into Keep exploring (more stories and the
 // rap desk vote).
 
+// The bar under the masthead. Each keeps its first name (`key`) so the
+// wording admins gave it stays with it.
 const sections = [
-  { label: "All news", to: "/news" },
-  { label: "Music", to: "/music" },
-  { label: "Games", to: "/games" },
-  { label: "Streaming", to: "/streaming" },
-  { label: "Culture", to: "/culture" },
-  { label: "Originals", to: "/originals" },
-  { label: "Shop", to: "/shop" },
-  { label: "Explore", to: "/explore" },
+  { label: "All news", to: "/news", key: "news" },
+  { label: "Socials", to: "/about", hash: "socials", key: "music" },
+  { label: "Stories", to: "/originals", key: "games" },
+  { label: "Stream", to: "/streaming", key: "streaming" },
+  { label: "Culture", to: "/culture", key: "culture" },
+  { label: "Upcoming", to: "/", hash: "events-title", key: "originals" },
+  { label: "Shop", to: "/shop", key: "shop" },
+  { label: "Explore", to: "/explore", key: "explore" },
 ] as const;
 
 const [song, ...nextSongs] = SONGS as [Song, ...Song[]];
-// More news drifts on by itself, this fast, and waits this long after the reader takes over
+// More news drifts on by itself, this fast, and picks up again this soon
+// after the reader scrolls it by hand or jumps with the arrows
 const GLIDE_PX_PER_S = 24;
-const GLIDE_REST_MS = 6000;
+const GLIDE_REST_MS = 1200;
+const GLIDE_AFTER_ARROW_MS = 900;
 
 // More news: the cards run on past both edges of the page column, so a
 // slice of the next and the previous card shows on each side, with arrows
@@ -96,9 +100,10 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
     window.addEventListener("resize", measure);
 
     // The slow glide: the row drifts on by itself, a little each frame, while
-    // it's on screen. Pointing at it holds it; scrolling, swiping, the arrows
-    // or the keyboard hand it back to the reader for a few seconds (and turn
-    // card snapping back on). Never for reduced motion.
+    // it's on screen, and keeps going under the pointer. Scrolling or swiping
+    // by hand takes over for a moment; the arrows jump a page and the glide
+    // carries on from there. Keyboard focus on a story holds it still, so it
+    // can be read and chosen. Never for reduced motion.
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let last = 0;
@@ -121,25 +126,29 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
       }
       raf = requestAnimationFrame(frame);
     };
-    const handBack = () => {
+    const handBack = (rest = GLIDE_REST_MS) => {
       row.classList.remove("is-gliding");
-      restUntil = performance.now() + GLIDE_REST_MS;
+      restUntil = performance.now() + rest;
     };
-    const hold = () => { holding = true; };
+    const byHand = () => handBack();
+    const byArrow = () => handBack(GLIDE_AFTER_ARROW_MS);
+    // Only keyboard focus on a story holds the row (not a click on an arrow)
+    const hold = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.matches(":focus-visible") && !target.closest(".bs-carousel-arrow")) holding = true;
+    };
     const release = () => { holding = false; };
     const seen = new IntersectionObserver(([entry]) => { onScreen = !!entry?.isIntersecting; }, { threshold: 0.2 });
     if (!reduce) {
       seen.observe(el);
       raf = requestAnimationFrame(frame);
-      row.addEventListener("pointerdown", handBack);
-      row.addEventListener("wheel", handBack, { passive: true });
-      row.addEventListener("touchstart", handBack, { passive: true });
-      el.addEventListener("keydown", handBack);
-      el.addEventListener("pointerenter", hold);
-      el.addEventListener("pointerleave", release);
+      row.addEventListener("pointerdown", byHand);
+      row.addEventListener("wheel", byHand, { passive: true });
+      row.addEventListener("touchstart", byHand, { passive: true });
+      el.addEventListener("keydown", byHand);
       el.addEventListener("focusin", hold);
       el.addEventListener("focusout", release);
-      el.addEventListener("ogcw-carousel-page", handBack);
+      el.addEventListener("ogcw-carousel-page", byArrow);
     }
 
     return () => {
@@ -148,15 +157,13 @@ function MoreNewsCarousel({ stories }: { stories: Article[] }) {
       seen.disconnect();
       window.clearTimeout(settle);
       row.removeEventListener("scroll", onScroll);
-      row.removeEventListener("pointerdown", handBack);
-      row.removeEventListener("wheel", handBack);
-      row.removeEventListener("touchstart", handBack);
-      el.removeEventListener("keydown", handBack);
-      el.removeEventListener("pointerenter", hold);
-      el.removeEventListener("pointerleave", release);
+      row.removeEventListener("pointerdown", byHand);
+      row.removeEventListener("wheel", byHand);
+      row.removeEventListener("touchstart", byHand);
+      el.removeEventListener("keydown", byHand);
       el.removeEventListener("focusin", hold);
       el.removeEventListener("focusout", release);
-      el.removeEventListener("ogcw-carousel-page", handBack);
+      el.removeEventListener("ogcw-carousel-page", byArrow);
       window.removeEventListener("resize", measure);
     };
   }, [stories.length]);
@@ -229,8 +236,7 @@ export function NewsFront() {
           </p>
           <h2 id="news-front-title" className="bs-wordmark"><T k="home.news.title">OGCW News</T></h2>
           <p className="bs-flag bs-flag-right">
-            <span>{stories.all.length} stories</span>
-            <span><T k="home.news.flag-right">Every source linked</T></span>
+            <span className="bs-certified"><BadgeCheck size={14} strokeWidth={2} aria-hidden="true" /><T k="home.news.certified">Certified news</T></span>
           </p>
         </header>
 
@@ -238,7 +244,7 @@ export function NewsFront() {
           <ul>
             {sections.map((section) => (
               <li key={section.label}>
-                <Link to={section.to}><T k={`home.news.nav.${section.to.slice(1)}`}>{section.label}</T></Link>
+                <Link to={section.to} {...("hash" in section ? { hash: section.hash } : {})}><T k={`home.news.nav.${section.key}`}>{section.label}</T></Link>
               </li>
             ))}
           </ul>

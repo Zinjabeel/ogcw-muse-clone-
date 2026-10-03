@@ -6,6 +6,15 @@ import { EPISODES, SHOPS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 import { T } from "@/components/site-text";
+import { SOCIALS, SocialIcon } from "@/components/socials";
+
+// Where to follow OGCW (the "Socials" link on the news front comes here)
+const SOCIAL_NOTES: Record<(typeof SOCIALS)[number]["name"], string> = {
+  Instagram: "Photos from the shows, the streets and the studio",
+  TikTok: "The day’s stories in a minute",
+  YouTube: "OGCW Originals, interviews and short docs",
+  X: "Breaking news as it happens",
+};
 
 // What OGCW covers, in four photos: live music, the news, games and style
 const shot = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&h=800&q=80`;
@@ -108,6 +117,22 @@ function About() {
             <li><span className="og-how-num">02</span><strong><T k="about.how.2">Every photo credited</T></strong><span><T>Photographers are named with their work and on our</T> <Link to="/info/$slug" params={{ slug: "credits" }}><T>photo credits</T></Link> page.</span></li>
             <li><span className="og-how-num">03</span><strong><T k="about.how.3">Corrections, openly</T></strong><span>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> <T>and we’ll fix it and say so.</T></span></li>
           </ol>
+        </section>
+
+        <section id="socials" className="og-block about-socials" aria-labelledby="follow-ogcw">
+          <SectionHead id="follow-ogcw" title="Follow OGCW" />
+          <ul className="about-social-list">
+            {SOCIALS.map((social) => (
+              <li key={social.name}>
+                <a href={social.href} target="_blank" rel="noopener noreferrer" className="about-social">
+                  <span className="about-social-icon"><SocialIcon path={social.path} size={22} /></span>
+                  <span className="about-social-name"><T>{social.name}</T></span>
+                  <span className="about-social-note"><T>{SOCIAL_NOTES[social.name]}</T></span>
+                  <ArrowRight size={18} strokeWidth={1.5} className="about-social-arrow" aria-hidden="true" />
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="og-block about-contact" aria-labelledby="get-in-touch">

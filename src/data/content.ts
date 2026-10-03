@@ -1102,6 +1102,7 @@ export const EVENTS: UpcomingEvent[] = [
   { date: "2026-10-22", category: "Music", title: "Mercury Prize 2026", detail: "The winner is named live in Newcastle", slug: "mercury-prize-2026-shortlist" },
   { date: "2026-10-23", category: "Film", title: "Klara and the Sun", detail: "Taika Waititi adapts Kazuo Ishiguro’s novel" },
   { date: "2026-11-04", category: "Games", title: "World of Warcraft: Forever", detail: "Blizzard’s new way to play launches", slug: "blizzcon-2026-diablo-v-starcraft" },
+  { date: "2026-11-06", category: "Music", title: "Lil Baby’s new album", detail: "The date he posted on 2 October; title still to come", slug: "lil-baby-new-album-november-6" },
   { date: "2026-11-06", category: "Film", title: "The Cat in the Hat", detail: "Warner Bros.’ animated musical" },
   { date: "2026-11-12", category: "Streaming", title: "The Streamer Awards 2026", detail: "Streaming’s big night, in Los Angeles" },
   { date: "2026-11-13", end: "2026-11-15", category: "Streaming", title: "TwitchCon San Diego", detail: "Three days at the San Diego Convention Center", slug: "twitch-state-of-gaming-2026" },

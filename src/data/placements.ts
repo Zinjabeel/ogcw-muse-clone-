@@ -36,12 +36,12 @@ export const SLOTS = [
   { id: "front-side", area: "OGCW News", name: "Down the side", note: "Three stories in the side column", max: 3, defaults: ["bts-arirang-world-tour-latin-america", "avengers-endgame-encore-box-office", "neuro-sama-pattern-recognition-first-concert"] },
 
   // This week
-  { id: "week-lead", area: "This week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["saint-laurent-ss27-vaccarello"] },
-  { id: "week-thread", area: "This week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["dior-ss27-jonathan-anderson", "courreges-drew-henry-debut", "milan-fashion-week-ss27-review"] },
-  { id: "week-middle", area: "This week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["lcd-soundsystem-nyc-residency-100th-show", "latin-grammys-2026-nominations"] },
+  { id: "week-lead", area: "This week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["lil-baby-new-album-november-6"] },
+  { id: "week-thread", area: "This week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["dior-ss27-jonathan-anderson", "drake-solar-eclipse-choosin-texas-publishing", "milan-fashion-week-ss27-review"] },
+  { id: "week-middle", area: "This week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["lcd-soundsystem-nyc-residency-100th-show", "yung-lean-thats-it-gta-vi-future-metro-boomin"] },
   { id: "week-connected", area: "This week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["al-doyle-hollywood-saviour"] },
   { id: "week-brief", area: "This week", name: "In brief", note: "Five short items, numbered", max: 5, defaults: ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"] },
-  { id: "week-cluster", area: "This week", name: "Read together", note: "A row of three connected stories", max: 3, defaults: ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch"] },
+  { id: "week-cluster", area: "This week", name: "Big news", note: "Three places, each fading between two stories every few seconds", max: 6, defaults: ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch", "rap-number-ones-2026", "neuro-sama-pattern-recognition-first-concert", "lil-durk-not-guilty-murder-for-hire"], list: true },
 
   // Explore and Keep exploring, at the end of the front page
   { id: "explore-pick", area: "Explore", name: "Editor’s pick", note: "The big tile in Explore", max: 1, defaults: ["tokyo-game-show-2026-typhoon"] },
