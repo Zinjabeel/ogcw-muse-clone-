@@ -19,6 +19,7 @@ import { EMPTY_SITE, SiteTextProvider } from "../lib/site-text";
 import { SiteEditor } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
+import { CardHover } from "../components/card-hover";
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -125,6 +126,7 @@ function RootComponent() {
             <Outlet />
           </StudioHost>
           <SiteEditor />
+          <CardHover />
         </SiteTextProvider>
       </StoriesProvider>
     </QueryClientProvider>
