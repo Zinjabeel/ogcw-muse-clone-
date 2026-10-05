@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { SECTIONS } from "@/data/content";
-import { CARDS } from "./hero-gallery";
+import { useStories } from "@/lib/stories";
+import { useSiteText } from "@/lib/site-text";
 import { EditableImage, S, T } from "./site-text";
 
 // Impact grid hero (the default in the hero switcher): the Complex-style
@@ -15,9 +16,11 @@ import { EditableImage, S, T } from "./site-text";
 // still for reduced motion.
 
 const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
+import { CARDS } from "./hero-gallery";
 
 export function HeroImpact() {
-  const stories = useLeadStories();
+  const stories = useStories();
+  const site = useSiteText();
   const lead = stories.slot("hero-cover")[0] ?? stories.latest[0] ?? stories.all[0];
   if (!lead) return null;
 
@@ -52,7 +55,7 @@ export function HeroImpact() {
             const inner = (
               <>
                 <span className="impact-door-photo">
-                  <img src={siteImage(`hero.card.${door.id}`)} alt="" loading="lazy" />
+                  <img src={site.image(`hero.card.${door.id}`)?.src ?? door.photo} alt="" loading="lazy" />
                 </span>
                 <span className="impact-door-body">
                   <span className="impact-door-label"><T k={`hero.card.${door.id}.label`}>{door.label}</T></span>
@@ -71,18 +74,4 @@ export function HeroImpact() {
       </div>
     </section>
   );
-}
-
-// The site-image lookup and the story pool, pulled in so the component stays small
-import { useStories } from "@/lib/stories";
-import { useSiteText } from "@/lib/site-text";
-
-function useLeadStories() {
-  return useStories();
-}
-
-const siteImage = (key: string) => useSiteImage(key);
-function useSiteImage(key: string): string | undefined {
-  const site = useSiteText();
-  return site.image(key)?.src;
 }
