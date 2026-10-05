@@ -716,6 +716,131 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 }
 
 /* ------------------------------------------------------------------
+   Impact grid hero (src/components/hero-impact.tsx): the Complex-style
+   front, in one framed grid. A lead story fills most of the frame —
+   its photo, a "Featured story" stamp, a very large serif headline,
+   one line of copy and a block CTA on the accent colour — and three
+   doors (Newsletter, News, Shop) stand in a column beside it like
+   secondary covers. A huge OGCW watermark sits faintly behind. On
+   load the pieces rise in sequence; on hover photos push in and the
+   doors brighten. Held still for reduced motion.
+   ------------------------------------------------------------------ */
+.impact {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: calc(100svh - 3.5rem);
+  display: grid; align-content: center;
+  padding-block: clamp(28px, 5vh, 56px) clamp(48px, 8vh, 96px);
+  background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui);
+}
+/* The watermark, barely there, cropping off the top-left like a print sheet */
+.impact-watermark {
+  position: absolute; z-index: 0; top: -6%; left: -2%;
+  font-family: var(--ogcw-display); font-weight: 600; letter-spacing: -.03em;
+  font-size: clamp(240px, 30vw, 460px); line-height: 1; white-space: nowrap;
+  color: color-mix(in srgb, var(--ogcw-text) 4%, transparent);
+  pointer-events: none; user-select: none;
+}
+.impact-frame {
+  position: relative; z-index: 1;
+  width: min(calc(100% - 32px), var(--page-width)); margin-inline: auto;
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  border: 1px solid color-mix(in srgb, var(--ogcw-text) 18%, transparent);
+  background: color-mix(in srgb, var(--ogcw-surface) 62%, transparent);
+  box-shadow: 0 40px 90px -50px rgb(0 0 0 / .55);
+}
+.impact-frame > * { min-width: 0; }
+
+/* The lead: the photo fills the cell, the words stand on a gradient at its foot */
+.impact-lead { position: relative; overflow: hidden; min-height: clamp(480px, 74svh, 780px); border-right: 1px solid color-mix(in srgb, var(--ogcw-text) 18%, transparent); }
+.impact-lead-photo { position: absolute; inset: 0; display: block; }
+.impact-lead-img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.92) contrast(1.04); transition: transform 1.4s cubic-bezier(.2,.8,.2,1); }
+.impact-lead-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .92) 0%, rgb(0 0 0 / .55) 38%, rgb(0 0 0 / .08) 72%, transparent 100%); }
+.impact-lead:hover .impact-lead-img, .impact-lead:focus-within .impact-lead-img { transform: scale(1.045); }
+.impact-lead-body { position: absolute; inset: auto 0 0; z-index: 1; display: grid; gap: 18px; justify-items: start; padding: clamp(24px, 4vw, 48px); }
+.impact-stamp {
+  display: inline-flex; align-items: center; padding: 7px 14px;
+  background: var(--ogcw-accent); color: var(--ogcw-accent-foreground);
+  font-size: 11px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+}
+.impact-lead-title {
+  margin: 4px 0 0; max-width: 14ch;
+  font-family: var(--ogcw-display); font-weight: 600;
+  font-size: clamp(44px, 6vw, 104px); line-height: .92; letter-spacing: -.02em; text-wrap: balance;
+  color: #f5f3ee; text-shadow: 0 2px 24px rgb(0 0 0 / .45);
+}
+.impact-lead-deck {
+  max-width: 38rem; margin: 0;
+  font-family: var(--ogcw-serif); font-size: clamp(16px, 1.3vw, 19px); line-height: 1.5;
+  color: rgb(245 243 238 / .82); text-shadow: 0 1px 12px rgb(0 0 0 / .5);
+}
+.impact-lead-cta {
+  display: inline-flex; align-items: center; gap: 12px; margin-top: 10px; padding: 17px 38px;
+  background: var(--ogcw-accent); color: var(--ogcw-accent-foreground);
+  font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, filter .3s ease;
+}
+.impact-lead-cta:hover, .impact-lead-cta:focus-visible { transform: translateY(-3px); box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--ogcw-accent) 65%, transparent); filter: brightness(1.05); outline: none; }
+.impact-lead-cta svg { transition: transform .3s ease; }
+.impact-lead-cta:hover svg { transform: translateX(5px); }
+.impact-credit { position: absolute; z-index: 1; top: 16px; right: 14px; margin: 0; font-size: 10px; letter-spacing: .1em; color: rgb(245 243 238 / .55); }
+
+/* The doors: three stacked covers, each its own photo and title */
+.impact-doors { display: grid; grid-template-rows: repeat(3, 1fr); }
+.impact-door { position: relative; display: block; overflow: hidden; min-height: 200px; padding: clamp(18px, 2vw, 28px); }
+.impact-door + .impact-door { border-top: 1px solid color-mix(in srgb, var(--ogcw-text) 18%, transparent); }
+.impact-door-photo { position: absolute; inset: 0; }
+.impact-door-photo img { width: 100%; height: 100%; object-fit: cover; opacity: .42; filter: saturate(.85); transition: opacity .5s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
+.impact-door-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .88) 0%, rgb(0 0 0 / .45) 60%, rgb(0 0 0 / .15) 100%); }
+.impact-door:hover .impact-door-photo img, .impact-door:focus-visible .impact-door-photo img { opacity: .6; transform: scale(1.06); }
+.impact-door-body { position: relative; z-index: 1; display: grid; gap: 6px; align-content: end; min-height: 164px; color: #f5f3ee; }
+.impact-door-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--ogcw-accent); }
+.impact-door-title { font-family: var(--ogcw-display); font-weight: 600; font-size: clamp(22px, 1.8vw, 30px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
+.impact-door-go { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgb(245 243 238 / .75); opacity: 0; transform: translateY(4px); transition: opacity .3s ease, transform .3s ease; }
+.impact-door:hover .impact-door-go, .impact-door:focus-visible .impact-door-go { opacity: 1; transform: none; }
+.impact-door:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ogcw-accent); }
+
+/* The entrance: the frame rises, the lead's words follow, the doors stagger in */
+.impact-frame { animation: impact-in 1s cubic-bezier(.2,.8,.2,1) both; }
+.impact-stamp, .impact-lead-title, .impact-lead-deck, .impact-lead-cta, .impact-credit { animation: impact-rise .9s cubic-bezier(.2,.8,.2,1) both; }
+.impact-stamp { animation-delay: .2s; }
+.impact-lead-title { animation-delay: .3s; }
+.impact-lead-deck { animation-delay: .4s; }
+.impact-lead-cta { animation-delay: .5s; }
+.impact-credit { animation-delay: .6s; }
+.impact-lead-img { animation: impact-photo 1.6s cubic-bezier(.2,.8,.2,1) both; }
+.impact-door { animation: impact-rise .9s cubic-bezier(.2,.8,.2,1) both; }
+.impact-door:nth-child(1) { animation-delay: .35s; }
+.impact-door:nth-child(2) { animation-delay: .45s; }
+.impact-door:nth-child(3) { animation-delay: .55s; }
+@keyframes impact-in { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+@keyframes impact-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes impact-photo { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .impact-frame, .impact-lead-img, .impact-stamp, .impact-lead-title, .impact-lead-deck, .impact-lead-cta, .impact-credit, .impact-door { animation: none; }
+  .impact-door-photo img { transition: none; }
+}
+
+/* Tablets and phones: the lead on top, the doors under it */
+@media (max-width: 1023px) {
+  .impact { min-height: 0; }
+  .impact-watermark { font-size: clamp(160px, 40vw, 280px); }
+  .impact-frame { grid-template-columns: minmax(0, 1fr); }
+  .impact-lead { min-height: 0; border-right: 0; border-bottom: 1px solid color-mix(in srgb, var(--ogcw-text) 18%, transparent); }
+  .impact-lead-photo { position: relative; aspect-ratio: 4 / 3; max-height: 64svh; }
+  .impact-lead-body { position: relative; padding: 20px 20px 30px; }
+  .impact-lead-title { font-size: clamp(40px, 9.5vw, 64px); }
+  .impact-credit { top: 12px; right: 10px; }
+  .impact-door { min-height: 148px; }
+  .impact-door-body { min-height: 112px; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .impact-doors { grid-template-rows: none; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .impact-door + .impact-door { border-top: 0; border-left: 1px solid color-mix(in srgb, var(--ogcw-text) 18%, transparent); }
+  .impact-door-body { min-height: 128px; }
+}
+
+
+/* ------------------------------------------------------------------
    Site menu: "The OGCW Index" (src/components/nav-drawer.tsx). A full-
    screen contents page that drops down over the site behind a thin
    yellow line: numbered sections in large serif type on the left, what
