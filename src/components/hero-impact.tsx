@@ -15,8 +15,9 @@ import { EditableImage, S, T } from "./site-text";
 // carry across. Entry: the frame's pieces rise in sequence once, held
 // still for reduced motion.
 
-const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
 import { CARDS } from "./hero-gallery";
+
+const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
 
 export function HeroImpact() {
   const stories = useStories();

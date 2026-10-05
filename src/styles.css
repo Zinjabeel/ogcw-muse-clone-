@@ -306,11 +306,12 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
    switcher; each option shows a small outline of its layout */
 .hero-glyph { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--ogcw-border); border-radius: 7px; color: var(--ogcw-text); }
 .theme-option[aria-pressed="true"] .hero-glyph { border-color: var(--ogcw-accent); color: var(--ogcw-accent); }
-/* The chosen hero shows; the other stays out of the page. The gallery is
-   the default; <html data-hero="cover"> swaps in the cover story. */
+/* The chosen hero shows; the others stay out of the page. The impact grid
+   is the default; <html data-hero="gallery|gallery2|cover"> swaps one in. */
 :root:not([data-hero="cover"]) .cover { display: none; }
 :root:not([data-hero="gallery2"]) .gallery2 { display: none; }
-:root:is([data-hero="cover"], [data-hero="gallery2"]) .gallery { display: none; }
+:root:not([data-hero="gallery"]) .gallery { display: none; }
+:root:is([data-hero="cover"], [data-hero="gallery2"], [data-hero="gallery"]) .impact { display: none; }
 
 /* ------------------------------------------------------------------
    Gallery hero (src/components/hero-gallery.tsx): five equal cards, the
