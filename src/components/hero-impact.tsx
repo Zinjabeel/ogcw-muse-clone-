@@ -4,6 +4,7 @@ import { SECTIONS } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { useSiteText } from "@/lib/site-text";
 import { EditableImage, S, T } from "./site-text";
+import { CARDS } from "./hero-gallery";
 
 // Impact grid hero (the default in the hero switcher): the Complex-style
 // front. One lead story fills most of the frame — its photo, a "Featured
@@ -14,8 +15,6 @@ import { EditableImage, S, T } from "./site-text";
 // cover hero); the doors keep their texts from the gallery hero, so edits
 // carry across. Entry: the frame's pieces rise in sequence once, held
 // still for reduced motion.
-
-import { CARDS } from "./hero-gallery";
 
 const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
 
