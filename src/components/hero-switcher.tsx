@@ -1,16 +1,19 @@
-import { Check, GalleryHorizontal, LayoutPanelTop, PanelsTopLeft } from "lucide-react";
+import { Check, GalleryHorizontal, LayoutPanelTop, PanelsTopLeft, SquareSplitHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { storePreference } from "@/lib/consent";
 import { T } from "./site-text";
 
 // Hero switcher in the header, beside the colour switcher and built the same
-// way: "Gallery" (the default, hero-gallery.tsx) is five cards into OGCW,
-// "Gallery 2" (hero-gallery-2.tsx) the top news with the cards below it,
-// "Cover story" (hero-cover.tsx) one big photo and headline. The choice is
-// <html data-hero="gallery2|cover"> (no attribute means the gallery), remembered in
-// this browser and applied before first paint by heroInitScript.
+// way: "Impact grid" (the default, hero-impact.tsx) is the Complex-style
+// front — one lead story and three doors — "Gallery" (hero-gallery.tsx) is
+// five cards into OGCW, "Gallery 2" (hero-gallery-2.tsx) the top news with
+// the cards below it, "Cover story" (hero-cover.tsx) one big photo and
+// headline. The choice is <html data-hero="gallery|gallery2|cover"> (no
+// attribute means the impact grid), remembered in this browser and applied
+// before first paint by heroInitScript.
 
 const HEROES = [
+  { id: "impact", name: "Impact grid", note: "One lead story, three doors", Icon: SquareSplitHorizontal },
   { id: "gallery", name: "Gallery", note: "Five cards into OGCW", Icon: GalleryHorizontal },
   { id: "gallery2", name: "Gallery 2", note: "Top news, with the cards below", Icon: PanelsTopLeft },
   { id: "cover", name: "Cover story", note: "One big photo and headline", Icon: LayoutPanelTop },
@@ -21,17 +24,17 @@ const STORAGE_KEY = "ogcw-hero";
 const isHero = (value: unknown): value is HeroId => HEROES.some((h) => h.id === value);
 
 // Runs in <head> before first paint so a saved hero never flashes the default.
-export const heroInitScript = `(function(){try{var h=localStorage.getItem("${STORAGE_KEY}");if(h==="cover"||h==="gallery2"){document.documentElement.dataset.hero=h}}catch(e){}})();`;
+export const heroInitScript = `(function(){try{var h=localStorage.getItem("${STORAGE_KEY}");if(h&&h!=="impact"){document.documentElement.dataset.hero=h}}catch(e){}})();`;
 
 function applyHero(id: HeroId) {
   const root = document.documentElement;
-  if (id === "gallery") delete root.dataset["hero"];
+  if (id === "impact") delete root.dataset["hero"];
   else root.dataset["hero"] = id;
   storePreference(STORAGE_KEY, id); // remembered only if the reader allows preferences
 }
 
 export function HeroSwitcher() {
-  const [hero, setHero] = useState<HeroId>("gallery");
+  const [hero, setHero] = useState<HeroId>("impact");
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
