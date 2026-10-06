@@ -3075,3 +3075,84 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   :is(.bs-card, .og-card, .mix-tile, .kx-rap-story, .bs-thread-item) :is(.bs-photo, .og-img, .mix-pick-photo, .bs-thread-thumb) img { transition: none; }
   [data-ch-tilt] { transform: none; }
 }
+
+/* ------------------------------------------------------------------
+   Header (6 Oct 2026): tall at the top of the page, with OGCW big in the
+   middle and the sections in a row under it; it shrinks as the page
+   scrolls (--hp: 0 tall to 1 slim, set in ogcw-layout.tsx) until it is the
+   usual slim bar by the first section after the hero. The header is fixed;
+   .site-header-space keeps its place at the top of the page.
+   ------------------------------------------------------------------ */
+.site-header-space { height: 56px; }
+.site-header { height: 56px; }
+.site-header-row { height: 56px; }
+.site-header .site-logo { grid-column: 2; justify-self: center; font-size: 1.375rem; letter-spacing: .06em; white-space: nowrap; }
+@media (min-width: 1024px) {
+  .site-header-space { height: 122px; }
+  .site-header { --hp-inv: calc(1 - var(--hp, 0)); height: calc(122px - 66px * var(--hp, 0)); }
+  .site-header-row { position: relative; height: calc(76px - 20px * var(--hp, 0)); }
+  .site-header .site-logo {
+    position: absolute; z-index: 2; grid-column: auto; top: calc(38px - 10px * var(--hp, 0));
+    left: calc(var(--hp-inv) * 50% + var(--hp, 0) * (4vw + 48px));
+    transform: translate(calc(-50% * var(--hp-inv)), -50%);
+    font-size: calc(2.5rem - 1.125rem * var(--hp, 0));
+    letter-spacing: calc(.14em - .08em * var(--hp, 0));
+  }
+  .site-header .site-nav { position: absolute; z-index: 1; left: 50%; top: calc(99px - 71px * var(--hp, 0)); transform: translate(-50%, -50%); }
+}
+.site-header.is-slim { box-shadow: 0 1px 0 var(--ogcw-border); }
+
+/* The sections: a little bolder and brighter, with a pressed-in pill under the pointer */
+.site-header .site-nav { gap: 2px; }
+.site-header .nav-link {
+  display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 999px; white-space: nowrap;
+  font-size: .84rem; font-weight: 600; letter-spacing: .06em; color: var(--ogcw-text);
+  transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+.site-header .nav-link:hover, .site-header .nav-link:focus-visible {
+  background: color-mix(in srgb, var(--ogcw-text) 9%, transparent);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / .22), inset 0 0 0 1px color-mix(in srgb, var(--ogcw-text) 8%, transparent);
+  transform: translateY(1px); color: var(--ogcw-text); outline: none;
+}
+.site-header .nav-link:active { transform: translateY(1px) scale(.95); }
+.site-header .nav-link:focus-visible { box-shadow: inset 0 0 0 2px var(--ogcw-accent); }
+.site-header .nav-link-active, .site-header .nav-link-active:hover { color: var(--ogcw-accent); background: color-mix(in srgb, var(--ogcw-accent) 12%, transparent); }
+.site-header .nav-more-button { height: 32px; }
+@media (prefers-reduced-motion: reduce) { .site-header .nav-link, .site-header .nav-link:hover, .site-header .nav-link:active { transform: none; } }
+
+/* ------------------------------------------------------------------
+   Gold theme: the hero stays black (its own dark colours, gold kept warm),
+   so the photos and headlines sit on black above the soft-white page
+   ------------------------------------------------------------------ */
+:root[data-theme="gold"] :is(.cover, .gallery, .gallery2) {
+  --ogcw-bg: #0b0b0b;
+  --ogcw-accent: #e8c46a;
+  --ogcw-surface: #161616;
+  --ogcw-text: #ece9e2;
+  --ogcw-text-2: #b5b2ab;
+  --ogcw-border: #2c2c2c;
+  --ogcw-glow: #e8c46a;
+  color-scheme: dark;
+}
+:root[data-theme="gold"] .cover { background: #0b0b0b; color: var(--ogcw-text); }
+:root[data-theme="gold"] .gallery { --wash: 20%; }
+:root[data-theme="gold"] .gallery2 { --wash: 18%; }
+:root[data-theme="gold"] .gallery-bg img.is-on { opacity: .5; }
+:root[data-theme="gold"] .gallery-bg::before { mix-blend-mode: screen; opacity: .7; }
+
+/* ------------------------------------------------------------------
+   Cookie consent (cookie-consent.tsx): the card slides up, the dialog's
+   categories rise in one after another
+   ------------------------------------------------------------------ */
+.cookie-banner { animation: cookie-in .4s ease-out both; font-family: var(--ogcw-ui); }
+.cookie-banner.is-leaving { animation: cookie-out .4s ease-in both; }
+@keyframes cookie-in { from { opacity: 0; transform: translateY(100px); } }
+@keyframes cookie-out { to { opacity: 0; transform: translateY(100px); } }
+.cookie-title { font-family: var(--ogcw-display); font-weight: 600; }
+.cookie-cat { animation: cookie-cat-in .2s ease-out both; }
+@keyframes cookie-cat-in { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .cookie-banner, .cookie-banner.is-leaving, .cookie-cat { animation: none; } }
+/* The hero fills the first screen under the tall header */
+@media (min-width: 1024px) { .gallery, .gallery2, .cover, .cover-inner { min-height: calc(100svh - 122px); } }
+/* This week straight under the news masthead: room to breathe */
+.bs-band-front + .bs-week { margin-top: clamp(28px, 4vw, 48px); }

@@ -16,9 +16,9 @@ import { EditSection, S, T } from "./site-text";
 // The news front page: the broadsheet grid from the Monocle reference (design
 // md monocle), with hairline rules building the grid, dressed in the OGCW brand
 // system (Source Serif 4 headlines and text, Inter labels, accent colour).
-// Six headline stories (three down the left side, the lead, two on the
-// right) beside the Upcoming events rail, then This week (fifteen more of
-// the latest stories: a lead, connected stories and In brief), the More
+// This week first (a lead, connected stories, In brief and Big news), then
+// six headline stories (three down the left side, the lead, two on the
+// right) beside the Upcoming events rail, the More
 // news carousel, Content of the month, the shop as one card into /shop,
 // and the Explore mix running on into Keep exploring (more stories and the
 // rap desk vote).
@@ -249,7 +249,14 @@ export function NewsFront() {
             ))}
           </ul>
         </nav>
+        </div>
 
+        {/* This week comes first, straight under the masthead; the headline front follows */}
+        <EditSection name="This week"><NewsWeek /></EditSection>
+
+        <hr className="bs-rule" />
+
+        <div className="bs-band bs-band-front">
         <div className="bs-front">
           <article className="bs-col bs-col-lead bs-reveal">
             <Link to="/news/$slug" params={{ slug: lead.slug }} className="bs-card">
@@ -330,10 +337,6 @@ export function NewsFront() {
           </aside>
         </div>
         </div>
-
-        <hr className="bs-rule" />
-
-        <EditSection name="This week"><NewsWeek /></EditSection>
 
         <hr className="bs-rule" />
 

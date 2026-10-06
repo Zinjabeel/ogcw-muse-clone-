@@ -261,7 +261,6 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
           <section className="ix-events" aria-labelledby="ix-events-title">
             <p id="ix-events-title" className="ix-foot-head">
               <T k="ix.coming">Coming up</T>
-              <Link to="/" hash="events-title" className="ix-foot-link" onClick={go}><T k="ix.events">All events</T> <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Link>
             </p>
             <ol>
               {upcoming.map((event) => <li key={event.date + event.title}><EventLink event={event} onGo={go} /></li>)}

@@ -105,21 +105,46 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
+  const header = useRef<HTMLElement>(null);
+
+  // The header starts tall (the logo big in the middle, the sections in a row
+  // under it) and shrinks as the page scrolls, until it is the usual slim bar
+  // by the first section after the hero (or after 160px on other pages):
+  // --hp runs from 0 (tall) to 1 (slim) and the CSS does the rest.
+  useEffect(() => {
+    const el = header.current;
+    if (!el) return;
+    let frame = 0;
+    const update = () => {
+      const hero = [...document.querySelectorAll<HTMLElement>(".cover, .gallery, .gallery2")].find((item) => item.offsetHeight > 0);
+      const distance = hero ? Math.max(120, hero.getBoundingClientRect().bottom + window.scrollY - 56 - 122) : 160;
+      const p = Math.min(1, Math.max(0, window.scrollY / distance));
+      el.style.setProperty("--hp", p.toFixed(3));
+      el.classList.toggle("is-slim", p >= 1);
+    };
+    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, [pathname]);
 
   return (
     <SiteMenuContext.Provider value={{ menuOpen, openMenu, openSearch }}>
       <div className="site-root min-h-screen bg-background text-foreground">
         <BackgroundGradientGlow />
         <EditSection name="Navigation bar">
-        <header className="site-header sticky top-0 z-50">
-          <div className="mx-auto grid h-14 max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
-            {/* Menu button sits with the logo on the left */}
+        {/* Holds the header's place: the header itself is fixed and shrinks on scroll */}
+        <div className="site-header-space" aria-hidden="true" />
+        <header ref={header} className="site-header fixed inset-x-0 top-0 z-50">
+          <div className="site-header-row mx-auto grid max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
+            {/* The menu button on the left; the logo starts big in the middle and moves beside it as the header shrinks */}
             <div className="flex items-center gap-3 justify-self-start">
               <button type="button" className="icon-button grid" aria-label="Open menu" aria-haspopup="dialog" aria-expanded={menuOpen} onClick={openMenu}>
                 <Menu size={18} />
               </button>
-              <Link to="/" className="site-logo" aria-label="OGCW home">OGCW</Link>
             </div>
+            <Link to="/" className="site-logo" aria-label="OGCW home">OGCW</Link>
             <nav className="site-nav hidden items-center lg:flex" aria-label="Main navigation">
               {nav.map((item) => (
                 <Link
