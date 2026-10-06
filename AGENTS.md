@@ -3,9 +3,11 @@
 > made on 7 October 2026 from Zinjabeel/ogcw-muse for design experiments.
 > It is **not** connected to Lovable and must never be pushed to
 > Zinjabeel/ogcw-muse. The Lovable note below applies to the original only.
-> It shares the live Sanity project (z0ih0mun) and Supabase project with the
-> real site, so changing content or data there changes the real site too:
-> design and code changes are safe, content/data changes are not.
+> It uses its OWN Sanity dataset, `staging` (a copy of production made on
+> 7 Oct 2026; see src/sanity/env.ts), so stories and site edits here don't
+> touch the live site. It still shares the Supabase project (accounts,
+> ratings) with the real site: don't change existing tables or data there.
+> Run it with `node --use-system-ca .claude/dev.mjs` (port 5174).
 <!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
