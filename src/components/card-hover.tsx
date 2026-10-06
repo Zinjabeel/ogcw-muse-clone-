@@ -5,7 +5,7 @@ import { useEffect } from "react";
 // towards it. (The photo zoom is plain CSS, in styles.css under "Card hover".)
 // Mouse only, and nothing for reduced motion.
 
-const SPOTLIGHT = ".mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked";
+const SPOTLIGHT = ".mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door";
 const TILT = ".gallery-card[aria-current] .gallery-card-link, .g2-card[data-pos='0'] .g2-card-link, .kx-feature, .mix-pick, .shopcard";
 const MAX_TILT = 5; // degrees
 

@@ -3060,13 +3060,13 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 :is(.bs-card, .og-card, .mix-tile, .kx-rap-story, .bs-thread-item) :is(.bs-photo, .og-img, .mix-pick-photo, .bs-thread-thumb) { overflow: hidden; }
 :is(.bs-card, .og-card, .mix-tile, .kx-rap-story, .bs-thread-item) :is(.bs-photo, .og-img, .mix-pick-photo, .bs-thread-thumb) img { transition: transform 1.1s cubic-bezier(.16, 1, .3, 1); }
 :is(.bs-card, .og-card, .mix-tile, .kx-rap-story, .bs-thread-item):hover :is(.bs-photo, .og-img, .mix-pick-photo, .bs-thread-thumb) img { transform: scale(1.045); }
-:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked) { position: relative; isolation: isolate; }
-:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked)::after {
+:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door) { position: relative; isolation: isolate; }
+:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door)::after {
   content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
   background: radial-gradient(420px circle at var(--ch-x, 50%) var(--ch-y, 50%), color-mix(in srgb, var(--ogcw-accent) 11%, transparent), transparent 60%);
   opacity: 0; transition: opacity .28s ease;
 }
-:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked):hover::after { opacity: 1; }
+:is(.mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door):hover::after { opacity: 1; }
 .gallery-card[aria-current] .gallery-card-link, .g2-card .g2-card-link, .kx-feature, .mix-pick, .shopcard { transition: transform .65s cubic-bezier(.16, 1, .3, 1), box-shadow .4s ease, border-color .25s ease; }
 [data-ch-tilt] { transform: perspective(1100px) translateY(var(--ch-lift, 0)) rotateX(var(--ch-rx, 0deg)) rotateY(var(--ch-ry, 0deg)); transition: transform .14s linear, box-shadow .4s ease, border-color .25s ease; }
 .gallery-card[aria-current] .gallery-card-link[data-ch-tilt] { --ch-lift: -10px; }
@@ -3179,3 +3179,38 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .impact-door { min-height: 0; display: flex; align-items: flex-end; }
   .impact-door-body { min-height: 0; width: 100%; }
 }
+
+/* Impact hero lead: Tour Ma Vie (hero-impact.tsx), dressed like the poster
+   itself: the poster's dark red-brown frame (#2f1a13) runs round the edge of
+   the whole card, black inside it, the note and the CTA on the left and the
+   poster standing the full height on the right. The poster's own frame is
+   trimmed off so its black melts into the card's. On hover the poster
+   pushes in exactly like the doors (×1.06 over .9s). */
+.impact-tour {
+  --tour-frame: clamp(8px, .8vw, 16px);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr); align-items: stretch;
+  box-sizing: border-box; border: var(--tour-frame) solid #2f1a13; background: #000;
+}
+.impact-tour .impact-lead-body { position: relative; inset: auto; align-content: center; padding-right: clamp(24px, 3vw, 48px); }
+.impact-tour .impact-lead-title { max-width: 9ch; font-size: clamp(56px, 7vw, 128px); }
+.impact-tour .impact-lead-deck { max-width: 34rem; }
+.impact-poster { position: relative; display: block; height: 100%; aspect-ratio: 1414 / 2000; overflow: hidden; background: #000; }
+.impact-poster-img {
+  --tour-trim: 1.07; /* cuts the poster's own frame off */
+  width: 100%; height: 100%; object-fit: cover; transform: scale(var(--tour-trim));
+  transition: transform .9s cubic-bezier(.2,.8,.2,1);
+  /* fades in only: a transform in the entrance would undo the trim */
+  animation: impact-poster-in 1.4s ease both;
+}
+@keyframes impact-poster-in { from { opacity: 0; } }
+.impact-tour:hover .impact-poster-img, .impact-tour:focus-within .impact-poster-img { transform: scale(calc(var(--tour-trim) * 1.06)); }
+@media (max-width: 1023px) {
+  .impact-tour { --tour-frame: 6px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; }
+  .impact-poster { order: -1; width: 100%; height: auto; aspect-ratio: 4 / 5; max-height: 72svh; }
+  .impact-poster-img { object-position: 50% 30%; }
+  .impact-tour .impact-lead-body { padding: 22px 20px 32px; }
+  .impact-tour .impact-lead-title { font-size: clamp(48px, 13vw, 76px); }
+}
+@media (prefers-reduced-motion: reduce) { .impact-poster-img { animation: none; transition: none; } }
+/* A little room between the hero and the OGCW News masthead */
+:is(.impact, .cover, .gallery, .gallery2) ~ main > .broadsheet:first-child { padding-top: clamp(56px, 6vw, 96px); }
