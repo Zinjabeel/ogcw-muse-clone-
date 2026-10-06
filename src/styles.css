@@ -794,7 +794,7 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
 .impact-door:hover .impact-door-photo img, .impact-door:focus-visible .impact-door-photo img { opacity: .6; transform: scale(1.06); }
 .impact-door-body { position: relative; z-index: 1; display: grid; gap: 6px; align-content: end; min-height: 164px; color: #f5f3ee; }
 .impact-door-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--ogcw-accent); }
-.impact-door-title { font-family: var(--ogcw-display); font-weight: 600; font-size: clamp(22px, 1.8vw, 30px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
+.impact-door-title { font-family: var(--ogcw-display); font-weight: 600; font-size: clamp(19px, 1.45vw, 25px); line-height: 1.05; letter-spacing: -.01em; text-wrap: balance; }
 .impact-door-go { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgb(245 243 238 / .75); opacity: 0; transform: translateY(4px); transition: opacity .3s ease, transform .3s ease; }
 .impact-door:hover .impact-door-go, .impact-door:focus-visible .impact-door-go { opacity: 1; transform: none; }
 .impact-door:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ogcw-accent); }
@@ -3230,11 +3230,34 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .impact { height: calc(max(520px, calc((100svh - 122px) * .88)) + var(--hero-gap)); }
 }
 
-/* Shop door: the OGCW x partners artwork centred in the top of the card
-   (its black melts into the door's), the words under it at the doors' usual
-   size; the headline fades out from the middle of "Jordan" (.impact-door-fade) */
-.impact-door-shop { background: #000; }
-.impact-door-shop .impact-door-photo img { object-fit: contain; object-position: 50% 50%; transform: translateY(-26.5%) scale(1.2); transform-origin: 50% 50%; opacity: .95; filter: none; }
-.impact-door-shop:hover .impact-door-photo img, .impact-door-shop:focus-visible .impact-door-photo img { opacity: 1; transform: translateY(-26.5%) scale(calc(1.2 * 1.06)); }
-.impact-door-shop .impact-door-photo::after { background: linear-gradient(to top, rgb(0 0 0 / .92) 0%, rgb(0 0 0 / .6) 34%, transparent 52%); }
-.impact-door-fade { white-space: nowrap; background: linear-gradient(90deg, rgb(245 243 238) 0%, rgb(245 243 238 / .4) 45%, rgb(245 243 238 / 0) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* Shop door: the OGCW x partners artwork gets the space above the words to
+   itself and sits exactly centred in it (its black melts into the door's);
+   the words sit under it like the other doors; the headline fades out from
+   the middle of "Jordan" (.impact-door-fade) */
+.impact-door-shop { display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: #000; }
+.impact-door-shop .impact-door-photo { position: relative; inset: auto; flex: 1 1 0; min-height: 0; overflow: hidden; }
+.impact-door-shop .impact-door-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 50%; transform: scale(2.3); transform-origin: 50% 50%; opacity: .95; filter: none; }
+.impact-door-shop:hover .impact-door-photo img, .impact-door-shop:focus-visible .impact-door-photo img { opacity: 1; transform: scale(calc(2.3 * 1.06)); }
+.impact-door-shop .impact-door-photo::after { display: none; }
+.impact-door-shop .impact-door-body { flex: none; min-height: 0; }
+@media (max-width: 1023px) { .impact-door-shop .impact-door-photo { min-height: 110px; } }.impact-door-fade { white-space: nowrap; background: linear-gradient(90deg, rgb(245 243 238) 0%, rgb(245 243 238 / .4) 45%, rgb(245 243 238 / 0) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Newsletter door: the OGCW campaign photo. It is bright (a white, glitchy
+   print), so it stays vivid rather than dimmed like the other doors, framed
+   on the face, with the shade only where the words sit (bottom left) */
+.impact-door-subscribe .impact-door-photo img { opacity: .92; object-position: 64% 36%; filter: saturate(1.04) contrast(1.02); }
+.impact-door-subscribe:hover .impact-door-photo img, .impact-door-subscribe:focus-visible .impact-door-photo img { opacity: 1; }
+.impact-door-subscribe .impact-door-photo::after {
+  background:
+    linear-gradient(to top, rgb(0 0 0 / .9) 0%, rgb(0 0 0 / .62) 30%, rgb(0 0 0 / .18) 58%, transparent 78%),
+    linear-gradient(90deg, rgb(0 0 0 / .5) 0%, rgb(0 0 0 / .18) 42%, transparent 62%);
+}
+.impact-door-subscribe .impact-door-photo::after {
+  background:
+    linear-gradient(to top, rgb(0 0 0 / .9) 0%, rgb(0 0 0 / .62) 30%, rgb(0 0 0 / .18) 58%, transparent 78%),
+    linear-gradient(90deg, rgb(0 0 0 / .5) 0%, rgb(0 0 0 / .18) 42%, transparent 62%),
+    linear-gradient(to bottom, rgb(0 0 0 / .38) 0%, transparent 28%);
+}
+@media (max-width: 1023px) {
+  .impact-door-subscribe .impact-door-photo::after { background: linear-gradient(to top, rgb(0 0 0 / .92) 0%, rgb(0 0 0 / .62) 55%, rgb(0 0 0 / .4) 100%); }
+}
