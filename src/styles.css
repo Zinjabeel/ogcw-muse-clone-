@@ -3124,7 +3124,7 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
    Gold theme: the hero stays black (its own dark colours, gold kept warm),
    so the photos and headlines sit on black above the soft-white page
    ------------------------------------------------------------------ */
-:root[data-theme="gold"] :is(.cover, .gallery, .gallery2) {
+:root[data-theme="gold"] :is(.impact, .cover, .gallery, .gallery2) {
   --ogcw-bg: #0b0b0b;
   --ogcw-accent: #e8c46a;
   --ogcw-surface: #161616;
@@ -3132,9 +3132,10 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   --ogcw-text-2: #b5b2ab;
   --ogcw-border: #2c2c2c;
   --ogcw-glow: #e8c46a;
+  --ogcw-accent-foreground: #0b0b0b;
   color-scheme: dark;
 }
-:root[data-theme="gold"] .cover { background: #0b0b0b; color: var(--ogcw-text); }
+:root[data-theme="gold"] :is(.cover, .impact) { background: #0b0b0b; color: var(--ogcw-text); }
 :root[data-theme="gold"] .gallery { --wash: 20%; }
 :root[data-theme="gold"] .gallery2 { --wash: 18%; }
 :root[data-theme="gold"] .gallery-bg img.is-on { opacity: .5; }
@@ -3153,6 +3154,6 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 @keyframes cookie-cat-in { from { opacity: 0; transform: translateY(10px); } }
 @media (prefers-reduced-motion: reduce) { .cookie-banner, .cookie-banner.is-leaving, .cookie-cat { animation: none; } }
 /* The hero fills the first screen under the tall header */
-@media (min-width: 1024px) { .gallery, .gallery2, .cover, .cover-inner { min-height: calc(100svh - 122px); } }
+@media (min-width: 1024px) { .impact, .gallery, .gallery2, .cover, .cover-inner { min-height: calc(100svh - 122px); } }
 /* This week straight under the news masthead: room to breathe */
 .bs-band-front + .bs-week { margin-top: clamp(28px, 4vw, 48px); }

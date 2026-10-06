@@ -116,7 +116,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
     if (!el) return;
     let frame = 0;
     const update = () => {
-      const hero = [...document.querySelectorAll<HTMLElement>(".cover, .gallery, .gallery2")].find((item) => item.offsetHeight > 0);
+      const hero = [...document.querySelectorAll<HTMLElement>(".impact, .cover, .gallery, .gallery2")].find((item) => item.offsetHeight > 0);
       const distance = hero ? Math.max(120, hero.getBoundingClientRect().bottom + window.scrollY - 56 - 122) : 160;
       const p = Math.min(1, Math.max(0, window.scrollY / distance));
       el.style.setProperty("--hp", p.toFixed(3));
