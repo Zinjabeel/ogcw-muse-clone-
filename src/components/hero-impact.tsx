@@ -5,6 +5,7 @@ import { EditableImage, T } from "./site-text";
 import { CARDS } from "./hero-gallery";
 import tourMaViePoster from "@/assets/hero/tour-ma-vie.webp";
 import partnersImage from "@/assets/hero/ogcw-partners.webp";
+import newsletterImage from "@/assets/hero/ogcw-newsletter.webp";
 
 // Impact grid hero (the default in the hero switcher): the Complex-style
 // front. The lead is Doja Cat's Tour Ma Vie: a short note and a block CTA
@@ -33,7 +34,7 @@ const DOOR_OVERRIDES: Partial<Record<string, { label: string; title: string; cta
     cta: "See the drops",
     photo: partnersImage,
   },
-  subscribe: { label: "Newsletter", title: "The week in culture, straight to your inbox", cta: "Sign up free" },
+  subscribe: { label: "Newsletter", title: "The week in culture, straight to your inbox", cta: "Sign up free", photo: newsletterImage },
 };
 
 export function HeroImpact() {
