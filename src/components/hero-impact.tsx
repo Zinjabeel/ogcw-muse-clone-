@@ -22,16 +22,16 @@ const TOUR_URL = "https://dojacat.com";
 const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
 
 // This hero's own words and photos for two doors (the gallery hero keeps its
-// own). The shop door teases the Jordan calendar, its last line fading out to
-// show there's more inside; dates as both Just Fresh Kicks and Sneaker Files
-// list them (Oct 2026).
-const DOOR_OVERRIDES: Partial<Record<string, { label: string; title: string; cta: string; photo?: string; fade?: boolean }>> = {
+// own). The shop door teases the Jordan calendar: the headline fades out
+// from the middle of the second "Jordan" (`fade` is the part that fades), to
+// show the list carries on inside.
+const DOOR_OVERRIDES: Partial<Record<string, { label: string; title: string; cta: string; photo?: string; fade?: string }>> = {
   shop: {
     label: "Shop · Release dates",
-    title: "Jordan release dates: the Air Jordan 1 High OG “Royal” on 10 October, the 6 “White Infrared” on 7 November and the 11 “Space Jam” on 12 December, then",
+    title: "Jordan release dates: the Air Jor",
+    fade: "dan 1 High",
     cta: "See the drops",
     photo: partnersImage,
-    fade: true,
   },
   subscribe: { label: "Newsletter", title: "The week in culture, straight to your inbox", cta: "Sign up free" },
 };
@@ -76,7 +76,7 @@ export function HeroImpact() {
                 </span>
                 <span className="impact-door-body">
                   <span className="impact-door-label"><T k={`${key}.label`}>{own?.label ?? door.label}</T></span>
-                  <span className={`impact-door-title${own?.fade ? " is-fading" : ""}`}><T k={`${key}.title`}>{own?.title ?? door.title}</T></span>
+                  <span className="impact-door-title"><T k={`${key}.title`}>{own?.title ?? door.title}</T>{own?.fade && <span className="impact-door-fade"><T k={`${key}.title-fade`}>{own.fade}</T></span>}</span>
                   <span className="impact-door-go"><T k={`${key}.cta`}>{own?.cta ?? door.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
                 </span>
               </>

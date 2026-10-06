@@ -121,9 +121,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
       const p = Math.min(1, Math.max(0, window.scrollY / distance));
       el.style.setProperty("--hp", p.toFixed(3));
       el.classList.toggle("is-slim", p >= 1);
-      // The hero goes out of focus as it leaves: 0 at the top, 1 (fully
-      // blurred) by the time only its last fifth is still on screen
-      if (hero) hero.style.setProperty("--hero-out", Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * 0.8))).toFixed(3));
+      // The hero drifts gently out of focus as it leaves: it starts slowly
+      // (eased) and only reaches its faint full softness as it scrolls away
+      if (hero) {
+        const out = Math.min(1, Math.max(0, window.scrollY / hero.offsetHeight));
+        hero.style.setProperty("--hero-out", (out * out).toFixed(3));
+      }
     };
     const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
     update();
