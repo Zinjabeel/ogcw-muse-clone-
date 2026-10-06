@@ -3157,3 +3157,25 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 @media (min-width: 1024px) { .impact, .gallery, .gallery2, .cover, .cover-inner { min-height: calc(100svh - 122px); } }
 /* This week straight under the news masthead: room to breathe */
 .bs-band-front + .bs-week { margin-top: clamp(28px, 4vw, 48px); }
+
+/* Impact hero, full bleed (6 Oct 2026): the photos fill the whole hero edge
+   to edge (no frame, no margin around it), and the hero is a little shorter
+   than the first screen. The OGCW watermark would only sit behind the
+   photos now, so it goes. */
+.impact { padding: 0; align-content: stretch; grid-template-rows: minmax(0, 1fr); }
+.impact-watermark { display: none; }
+.impact-frame { width: 100%; border: 0; background: none; box-shadow: none; }
+.impact-lead-body { padding: clamp(24px, 4vw, 56px) clamp(24px, 4vw, 56px) clamp(28px, 4.5vw, 60px) max(24px, 4vw); }
+.impact-door { padding: clamp(18px, 2vw, 28px) max(18px, 4vw) clamp(18px, 2vw, 28px) clamp(18px, 2vw, 28px); }
+.impact-credit { right: max(14px, 1.2vw); }
+@media (min-width: 1024px) {
+  .impact { min-height: 0; height: max(520px, calc((100svh - 122px) * .88)); }
+  .impact-lead { min-height: 0; }
+}
+@media (max-width: 1023px) {
+  .impact-door { padding: 18px 20px; }
+}
+@media (min-width: 1024px) {
+  .impact-door { min-height: 0; display: flex; align-items: flex-end; }
+  .impact-door-body { min-height: 0; width: 100%; }
+}
