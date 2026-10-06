@@ -3212,5 +3212,40 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .impact-tour .impact-lead-title { font-size: clamp(48px, 13vw, 76px); }
 }
 @media (prefers-reduced-motion: reduce) { .impact-poster-img { animation: none; transition: none; } }
-/* A little room between the hero and the OGCW News masthead */
-:is(.impact, .cover, .gallery, .gallery2) ~ main > .broadsheet:first-child { padding-top: clamp(56px, 6vw, 96px); }
+/* A little room between the hero and the OGCW News masthead: under the
+   Impact hero it is part of the hero, so it stays black (see below) */
+:is(.cover, .gallery, .gallery2) ~ main > .broadsheet:first-child { padding-top: clamp(56px, 6vw, 96px); }
+
+/* The hero goes out of focus as the page scrolls past it (--hero-out, set
+   in ogcw-layout.tsx: 0 at the top, 1 when only a sliver is left): a soft
+   blur and a little dimming, so the eye moves on to the news. */
+.impact-frame, .gallery-cards, .g2-inner, .cover-inner, .cover-photo {
+  filter: blur(calc(var(--hero-out, 0) * 12px)) brightness(calc(1 - var(--hero-out, 0) * .3));
+}
+.impact-frame { will-change: filter; }
+
+/* Impact hero: the gap before the news is the hero's own black */
+.impact { --hero-gap: clamp(56px, 6vw, 96px); padding-bottom: var(--hero-gap); }
+@media (min-width: 1024px) {
+  .impact { height: calc(max(520px, calc((100svh - 122px) * .88)) + var(--hero-gap)); }
+}
+
+/* Shop door: the Jordan calendar teaser, its last line fading out to show
+   the list carries on inside; the partners card sits behind it */
+.impact-door-title.is-fading {
+  display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  font-size: clamp(18px, 1.35vw, 24px); line-height: 1.15;
+  -webkit-mask-image: linear-gradient(#000, #000), linear-gradient(90deg, #000 30%, transparent 92%);
+  -webkit-mask-size: 100% calc(100% - 1.15em), 100% 1.15em; -webkit-mask-position: top, bottom; -webkit-mask-repeat: no-repeat;
+  mask-image: linear-gradient(#000, #000), linear-gradient(90deg, #000 30%, transparent 92%);
+  mask-size: 100% calc(100% - 1.15em), 100% 1.15em; mask-position: top, bottom; mask-repeat: no-repeat;
+}
+/* The partners card stands on the right (its black melts into the door's),
+   the words on the left over a dark wash */
+.impact-door-shop { background: #000; }
+.impact-door-shop .impact-door-photo img { object-fit: contain; object-position: right center; transform: scale(1.14); transform-origin: 100% 52%; opacity: .95; filter: none; }
+.impact-door-shop:hover .impact-door-photo img, .impact-door-shop:focus-visible .impact-door-photo img { opacity: 1; transform: scale(calc(1.14 * 1.06)); }
+.impact-door-shop .impact-door-photo::after { background: linear-gradient(90deg, rgb(0 0 0 / .96) 0%, rgb(0 0 0 / .85) 32%, rgb(0 0 0 / .2) 50%, transparent 60%); }
+.impact-door-shop .impact-door-body { max-width: 47%; }
+.impact-door-shop .impact-door-title.is-fading { font-size: clamp(16px, 1.05vw, 19px); line-height: 1.2; -webkit-line-clamp: 4; -webkit-mask-size: 100% calc(100% - 1.2em), 100% 1.2em; mask-size: 100% calc(100% - 1.2em), 100% 1.2em; }
+@media (max-width: 639px) { .impact-door-shop .impact-door-body { max-width: 58%; } }

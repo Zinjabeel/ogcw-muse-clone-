@@ -4,6 +4,7 @@ import { useSiteText } from "@/lib/site-text";
 import { EditableImage, T } from "./site-text";
 import { CARDS } from "./hero-gallery";
 import tourMaViePoster from "@/assets/hero/tour-ma-vie.webp";
+import partnersImage from "@/assets/hero/ogcw-partners.webp";
 
 // Impact grid hero (the default in the hero switcher): the Complex-style
 // front. The lead is Doja Cat's Tour Ma Vie: a short note and a block CTA
@@ -19,6 +20,21 @@ import tourMaViePoster from "@/assets/hero/tour-ma-vie.webp";
 const TOUR_URL = "https://dojacat.com";
 
 const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
+
+// This hero's own words and photos for two doors (the gallery hero keeps its
+// own). The shop door teases the Jordan calendar, its last line fading out to
+// show there's more inside; dates as both Just Fresh Kicks and Sneaker Files
+// list them (Oct 2026).
+const DOOR_OVERRIDES: Partial<Record<string, { label: string; title: string; cta: string; photo?: string; fade?: boolean }>> = {
+  shop: {
+    label: "Shop · Release dates",
+    title: "Jordan release dates: the Air Jordan 1 High OG “Royal” on 10 October, the 6 “White Infrared” on 7 November and the 11 “Space Jam” on 12 December, then",
+    cta: "See the drops",
+    photo: partnersImage,
+    fade: true,
+  },
+  subscribe: { label: "Newsletter", title: "The week in culture, straight to your inbox", cta: "Sign up free" },
+};
 
 export function HeroImpact() {
   const site = useSiteText();
@@ -50,22 +66,26 @@ export function HeroImpact() {
         {/* The three doors beside it */}
         <div className="impact-doors">
           {DOORS.map((door) => {
+            const own = DOOR_OVERRIDES[door.id];
+            const key = own ? `hero.impact.${door.id}` : `hero.card.${door.id}`;
+            const photo = own?.photo ? (site.image(key)?.src ?? own.photo) : (site.image(`hero.card.${door.id}`)?.src ?? door.photo);
             const inner = (
               <>
                 <span className="impact-door-photo">
-                  <img src={site.image(`hero.card.${door.id}`)?.src ?? door.photo} alt="" loading="lazy" />
+                  <img src={photo} alt="" loading="lazy" />
                 </span>
                 <span className="impact-door-body">
-                  <span className="impact-door-label"><T k={`hero.card.${door.id}.label`}>{door.label}</T></span>
-                  <span className="impact-door-title"><T k={`hero.card.${door.id}.title`}>{door.title}</T></span>
-                  <span className="impact-door-go"><T k={`hero.card.${door.id}.cta`}>{door.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
+                  <span className="impact-door-label"><T k={`${key}.label`}>{own?.label ?? door.label}</T></span>
+                  <span className={`impact-door-title${own?.fade ? " is-fading" : ""}`}><T k={`${key}.title`}>{own?.title ?? door.title}</T></span>
+                  <span className="impact-door-go"><T k={`${key}.cta`}>{own?.cta ?? door.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
                 </span>
               </>
             );
+            const className = `impact-door impact-door-${door.id}`;
             return "to" in door.dest ? (
-              <Link key={door.id} to={door.dest.to} className="impact-door">{inner}</Link>
+              <Link key={door.id} to={door.dest.to} className={className}>{inner}</Link>
             ) : (
-              <Link key={door.id} to="/" hash={door.dest.hash} className="impact-door">{inner}</Link>
+              <Link key={door.id} to="/" hash={door.dest.hash} className={className}>{inner}</Link>
             );
           })}
         </div>
