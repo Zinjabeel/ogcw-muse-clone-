@@ -1,3 +1,11 @@
+> [!NOTE]
+> **This repository is a standalone clone** of OGCW (One Great Culture World),
+> made on 7 October 2026 from Zinjabeel/ogcw-muse for design experiments.
+> It is **not** connected to Lovable and must never be pushed to
+> Zinjabeel/ogcw-muse. The Lovable note below applies to the original only.
+> It shares the live Sanity project (z0ih0mun) and Supabase project with the
+> real site, so changing content or data there changes the real site too:
+> design and code changes are safe, content/data changes are not.
 <!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
