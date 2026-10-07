@@ -39,17 +39,17 @@ export const SLOTS = [
   // The week
   { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["lil-baby-new-album-november-6"] },
   { id: "week-thread", area: "The week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["dior-ss27-jonathan-anderson", "drake-solar-eclipse-choosin-texas-publishing", "milan-fashion-week-ss27-review"] },
-  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["lcd-soundsystem-nyc-residency-100th-show", "taylor-swift-the-life-of-a-showgirl-the-encore"] },
-  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["al-doyle-hollywood-saviour"] },
+  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["jay-z-30-tour-sofi-finale", "ye-st-petersburg-gazprom-arena"] },
+  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["dave-raindance-year"] },
   { id: "week-brief", area: "The week", name: "In brief", note: "Five short items, numbered", max: 5, defaults: ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"] },
   { id: "week-cluster", area: "The week", name: "Big news", note: "Three places, each fading between two stories every few seconds", max: 6, defaults: ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch", "mercury-prize-2026-shortlist", "emmys-2026-winners", "venice-2026-woman-unknown-golden-lion"] },
 
   // The rap desk
   { id: "rap-spotlight", area: "Rap desk", name: "Spotlight", note: "The big story on the rap desk", max: 1, defaults: ["yung-lean-thats-it-gta-vi-future-metro-boomin"], section: "music" },
-  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Two headlines under the spotlight in Explore", max: 2, defaults: ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"], section: "music" },
+  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Two headlines under the spotlight in Explore", max: 2, defaults: ["quavo-qromelife-pharrell", "anderson-paak-cordae-heavy-is-the-crown"], section: "music" },
 
   // The OGCW 10
-  { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Five stories, ranked: the order here is the order on the page", max: 5, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "miley-cyrus-bass-persuades-number-one", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
+  { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Five stories, ranked: the order here is the order on the page", max: 5, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "drake-iceman-top-three-fomo", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
 
   // The sports desk
   { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["nba-2026-27-opening-night"], section: "sports" },

@@ -1098,7 +1098,7 @@ export const EVENTS: UpcomingEvent[] = [
   { date: "2026-10-02", end: "2026-10-03", category: "Music", title: "BTS in Bogotá", detail: "The Arirang World Tour opens its Latin America leg", slug: "bts-arirang-world-tour-latin-america" },
   { date: "2026-10-06", category: "Fashion", title: "Louis Vuitton closes Paris Fashion Week", detail: "The last show of the spring/summer 2027 season", slug: "paris-fashion-week-ss27" },
   { date: "2026-10-16", category: "Film", title: "Whalefall", detail: "20th Century Studios’ adaptation of Daniel Kraus’s novel" },
-  { date: "2026-10-16", end: "2026-10-18", category: "Music", title: "Miley Cyrus at the Hollywood Bowl", detail: "Two rare shows, with Model/Actriz opening", slug: "miley-cyrus-bass-persuades-number-one" },
+  { date: "2026-10-23", end: "2026-10-24", category: "Music", title: "Jay-Z at SoFi Stadium", detail: "The JAY-Z 30 Tour finale", slug: "jay-z-30-tour-sofi-finale" },
   { date: "2026-10-20", category: "Games", title: "Hearthstone: Reign of the Black Empire", detail: "The next expansion, announced at BlizzCon", slug: "blizzcon-2026-diablo-v-starcraft" },
   { date: "2026-10-22", category: "Music", title: "Mercury Prize 2026", detail: "The winner is named live in Newcastle", slug: "mercury-prize-2026-shortlist" },
   { date: "2026-10-23", category: "Film", title: "Klara and the Sun", detail: "Taika Waititi adapts Kazuo Ishiguro’s novel" },
