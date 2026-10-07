@@ -5,6 +5,7 @@ import { HeroGallery } from "../components/hero-gallery";
 import { HeroGallery2 } from "../components/hero-gallery-2";
 import { HeroImpact } from "../components/hero-impact";
 import { FrontPage } from "../components/front-page";
+import { ConnectSection } from "../components/connect-section";
 import { EditSection } from "../components/site-text";
 
 export const Route = createFileRoute("/")({
@@ -29,6 +30,9 @@ function HomePage() {
     </EditSection>
 
     {/* The front page, band by band (src/components/front-page.tsx) */}
-    <main><FrontPage /></main>
+    <main>
+      <FrontPage />
+      <EditSection name="About & newsletter"><ConnectSection /></EditSection>
+    </main>
   </SiteShell>;
 }

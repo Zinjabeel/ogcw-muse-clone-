@@ -1123,9 +1123,9 @@ export const EVENTS: UpcomingEvent[] = [
 export type Song = { artist: string; title: string; album: string; year: number; note: string; spotify: string; cover: string };
 const spotifyCover = (id: string) => `https://i.scdn.co/image/ab67616d0000b273${id}`;
 export const SONGS: Song[] = [
+  { artist: "Cardi B feat. Kehlani", title: "Safe", album: "AM I THE DRAMA?", year: 2025, note: "Best Hip-Hop at the 2026 VMAs.", spotify: "5q9I5RmmrLC4U2mW2BnF3K", cover: spotifyCover("4449c12628ef639dd6500c4a") },
   { artist: "Taylor Swift", title: "Patient Zero", album: "The Life of a Showgirl: The Encore", year: 2026, note: "The lead single from The Life of a Showgirl: The Encore, out 25 September.", spotify: "49JeKZqejPtqJKpK7x9Ew4", cover: spotifyCover("b2de0f5e12f0b369fde79953") },
   { artist: "BTS", title: "Swim", album: "ARIRANG", year: 2026, note: "Song of the Year at the 2026 VMAs, and the centrepiece of the Arirang tour.", spotify: "68lbSrXDORS51pmyjZv712", cover: spotifyCover("dfa17fad7f190c901603270e") },
-  { artist: "Cardi B feat. Kehlani", title: "Safe", album: "AM I THE DRAMA?", year: 2025, note: "Best Hip-Hop at the 2026 VMAs.", spotify: "5q9I5RmmrLC4U2mW2BnF3K", cover: spotifyCover("4449c12628ef639dd6500c4a") },
   { artist: "Bad Bunny", title: "NUEVAYoL", album: "DeBÍ TiRAR MáS FOToS", year: 2025, note: "Best Latin at the 2026 VMAs.", spotify: "5TFD2bmFKGhoCRbX61nXY5", cover: spotifyCover("bbd45c8d36e0e045ef640411") },
   { artist: "LISA", title: "Dream", album: "Alter Ego", year: 2025, note: "Best Pop at the 2026 VMAs, for the short film with Kentaro Sakaguchi.", spotify: "5fFdUV9NMDxPjgkS54My63", cover: spotifyCover("4a5dbcceaff49f85a1f1e756") },
 ];

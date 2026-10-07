@@ -34,7 +34,7 @@ export const SLOTS = [
 
   // The Wire, the first band under the hero
   { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["vmas-2026-winners"] },
-  { id: "wire-latest", area: "The Wire", name: "Just in", note: "Six numbered stories beside the main story; empty places take the newest stories not placed anywhere else", max: 6, defaults: [] },
+  { id: "wire-latest", area: "The Wire", name: "Just in", note: "Five numbered stories beside the main story in Explore; empty places take the newest stories not placed anywhere else", max: 5, defaults: [] },
 
   // The week
   { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["lil-baby-new-album-november-6"] },
@@ -46,20 +46,20 @@ export const SLOTS = [
 
   // The rap desk
   { id: "rap-spotlight", area: "Rap desk", name: "Spotlight", note: "The big story on the rap desk", max: 1, defaults: ["yung-lean-thats-it-gta-vi-future-metro-boomin"], section: "music" },
-  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Four stories beside the No. 1 rapper vote", max: 4, defaults: ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"], section: "music" },
+  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Two headlines under the spotlight in Explore", max: 2, defaults: ["rap-number-ones-2026", "lil-durk-not-guilty-murder-for-hire", "keffe-d-guilty-tupac-shakur-murder", "jhene-aiko-westside-whimsy-number-one"], section: "music" },
 
   // The OGCW 10
-  { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Ten stories, ranked: the order here is the order on the page", max: 10, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "miley-cyrus-bass-persuades-number-one", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
+  { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Five stories, ranked: the order here is the order on the page", max: 5, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "miley-cyrus-bass-persuades-number-one", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
 
   // The sports desk
   { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["nba-2026-27-opening-night"], section: "sports" },
-  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Three stories beside it", max: 3, defaults: ["ballon-dor-2026-london", "athletes-fashion-month-2026", "duplantis-ultimate-championship-budapest"], section: "sports" },
+  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Two headlines under it", max: 2, defaults: ["ballon-dor-2026-london", "athletes-fashion-month-2026"], section: "sports" },
 
   // Games & streaming
   { id: "games-lead", area: "Games & streaming", name: "Games: main story", note: "The big games story", max: 1, defaults: ["october-2026-games"], section: "games" },
-  { id: "games-more", area: "Games & streaming", name: "Games: more", note: "Three games stories under it", max: 3, defaults: ["witcher-3-remastered-launch", "switch-2-calendar-september-direct", "physint-bill-skarsgard-xbox"], section: "games" },
+  { id: "games-more", area: "Games & streaming", name: "Games: more", note: "Two headlines under it", max: 2, defaults: ["witcher-3-remastered-launch", "switch-2-calendar-september-direct"], section: "games" },
   { id: "streaming-lead", area: "Games & streaming", name: "Streaming: main story", note: "The big streaming story", max: 1, defaults: ["neuro-sama-pattern-recognition-first-concert"], section: "streaming" },
-  { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Three streaming stories under it", max: 3, defaults: ["streamer-awards-2026-applications", "made-on-youtube-2026", "twitch-state-of-gaming-2026"], section: "streaming" },
+  { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Two headlines under it", max: 2, defaults: ["streamer-awards-2026-applications", "made-on-youtube-2026"], section: "streaming" },
 
   // Culture & fashion
   { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["courreges-drew-henry-debut"], section: "culture" },

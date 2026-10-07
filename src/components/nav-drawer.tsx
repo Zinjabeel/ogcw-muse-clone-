@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import { EPISODES, EVENTS, SECTIONS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop, type UpcomingEvent } from "@/data/content";
+import { EPISODES, SECTIONS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop } from "@/data/content";
 import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
@@ -11,7 +11,7 @@ import { S, T } from "./site-text";
 // over the site. Each section is a numbered line in large serif type with
 // what is in it; pointing at one (or tabbing or arrowing to it) shows its
 // latest stories on the right, and the whole screen takes that section's
-// colour, as the hero does. Along the bottom: the next few upcoming events,
+// colour, as the hero does. Along the bottom:
 // the smaller pages and OGCW's socials. On phones the list stands alone,
 // each line with its latest headline under it.
 
@@ -84,20 +84,6 @@ function ItemLink({ item, className, onGo, children }: { item: Item; className: 
   return <Link to="/shop/$slug" params={{ slug: item.s.slug }} className={className} onClick={onGo}>{children}</Link>;
 }
 
-function EventLink({ event, onGo }: { event: UpcomingEvent; onGo: () => void }) {
-  const inner = (
-    <>
-      <span className="ix-ev-date"><b>{eventDay(event.date)}</b>{eventMonth(event.date)}</span>
-      <span className="ix-ev-text">
-        <span className="ix-ev-cat"><T>{event.category}</T></span>
-        <span className="ix-ev-title"><T>{event.title}</T></span>
-      </span>
-    </>
-  );
-  return event.slug
-    ? <Link to="/news/$slug" params={{ slug: event.slug }} className="ix-ev" onClick={onGo}>{inner}</Link>
-    : <div className="ix-ev">{inner}</div>;
-}
 
 export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose: () => void; onSearch: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -153,8 +139,6 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
     event.preventDefault();
     next?.focus();
   };
-
-  const upcoming = today ? EVENTS.filter((event) => (event.end ?? event.date) >= today.iso).slice(0, 3) : [];
 
   return (
     <dialog
@@ -259,14 +243,6 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
         </div>
 
         <div className="ix-foot">
-          <section className="ix-events" aria-labelledby="ix-events-title">
-            <p id="ix-events-title" className="ix-foot-head">
-              <T k="ix.coming">Coming up</T>
-            </p>
-            <ol>
-              {upcoming.map((event) => <li key={event.date + event.title}><EventLink event={event} onGo={go} /></li>)}
-            </ol>
-          </section>
           <div className="ix-foot-side">
             <nav className="ix-pages" aria-labelledby="ix-pages-title">
               <p id="ix-pages-title" className="ix-foot-head"><T k="ix.pages">More from OGCW</T></p>

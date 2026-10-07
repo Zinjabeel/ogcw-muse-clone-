@@ -6,8 +6,9 @@ import { useEffect } from "react";
 // Mouse only, and nothing for reduced motion.
 
 const SPOTLIGHT = ".mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door";
-const TILT = ".gallery-card[aria-current] .gallery-card-link, .g2-card[data-pos='0'] .g2-card-link, .kx-feature, .mix-pick, .shopcard";
+const TILT = ".gallery-card[aria-current] .gallery-card-link, .g2-card[data-pos='0'] .g2-card-link, .kx-feature, .mix-pick, .shopcard, .fx-shopcard";
 const MAX_TILT = 5; // degrees
+const MAX_TILT_SHOP = 14; // the shop cards on the front page lean further
 
 export function CardHover() {
   useEffect(() => {
@@ -34,9 +35,10 @@ export function CardHover() {
       const rect = card.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width - 0.5;
       const y = (event.clientY - rect.top) / rect.height - 0.5;
+      const max = card.classList.contains("fx-shopcard") ? MAX_TILT_SHOP : MAX_TILT;
       card.setAttribute("data-ch-tilt", "");
-      card.style.setProperty("--ch-rx", `${(-y * MAX_TILT).toFixed(2)}deg`);
-      card.style.setProperty("--ch-ry", `${(x * MAX_TILT).toFixed(2)}deg`);
+      card.style.setProperty("--ch-rx", `${(-y * max).toFixed(2)}deg`);
+      card.style.setProperty("--ch-ry", `${(x * max).toFixed(2)}deg`);
     };
     const leave = () => { if (tilted) untilt(tilted); tilted = null; };
     window.addEventListener("pointermove", move, { passive: true });
