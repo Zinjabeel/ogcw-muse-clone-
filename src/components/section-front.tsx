@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageIntro } from "./ogcw-layout";
 import { EpisodeCard, Img, SECTION_PATH, SongCard, StoryCard, StoryRow, WatchNext } from "./cards";
-import { ContentOfTheMonth } from "./content-of-the-month";
 import { EPISODES, formatDate, LIVE, SECTION_IDS, SECTIONS, SONGS, type SectionId } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { StoryMeta } from "./story-meta";
@@ -11,7 +10,7 @@ import { S, T } from "./site-text";
 // Front page for a section (/music, /games, /streaming, /culture): a lead
 // story beside a numbered list, the rest as a grid, related OGCW Originals and
 // a pointer to the next section. Music also carries the live listing and the
-// songs to check out; Streaming carries Content of the month.
+// songs to check out.
 
 export function SectionFront({ section }: { section: SectionId }) {
   const live = useStories();
@@ -69,12 +68,6 @@ export function SectionFront({ section }: { section: SectionId }) {
               {SONGS.map((song) => <li key={song.spotify}><SongCard song={song} /></li>)}
             </ul>
           </section>
-        )}
-
-        {section === "streaming" && (
-          <div className="og-block og-cotm">
-            <ContentOfTheMonth headingLevel="h2" />
-          </div>
         )}
 
         {rest.length > 0 && (

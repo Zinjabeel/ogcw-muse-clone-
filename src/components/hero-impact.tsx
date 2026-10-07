@@ -83,6 +83,7 @@ export function HeroImpact() {
               </>
             );
             const className = `impact-door impact-door-${door.id}`;
+            if (door.id === "shop") return <Link key={door.id} to="/shop/drops" className={className}>{inner}</Link>; // "See the drops": the release dates
             return "to" in door.dest ? (
               <Link key={door.id} to={door.dest.to} className={className}>{inner}</Link>
             ) : (
