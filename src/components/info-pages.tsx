@@ -272,7 +272,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     intro: "For brands, artists, labels, PR agencies and partners.",
     body: (
       <>
-        <p>OGCW reaches readers who care about music, games, streaming and culture. We work with partners who fit that audience, in ways that stay honest with it.</p>
+        <p>OGCW reaches readers who care about music, games, streaming, culture and sports. We work with partners who fit that audience, in ways that stay honest with it.</p>
         <h2>Advertising</h2>
         <p>Campaigns, sponsorships and branded content. Anything paid for is always clearly labelled as such, and it never appears as editorial. Email <Mail subject="Advertising">{BUSINESS_EMAIL}</Mail> with what you have in mind, your timing and your budget range.</p>
         <h2>Partnerships</h2>
@@ -314,10 +314,10 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     body: (
       <>
         <h2>About OGCW</h2>
-        <p>OGCW, One Great Culture World, is an independent editorial platform covering music, games, streaming and culture. Every story is reported, written in our own words and published with its sources.</p>
+        <p>OGCW, One Great Culture World, is an independent editorial platform covering music, games, streaming, culture and sports. Every story is reported, written in our own words and published with its sources.</p>
         <h2>OGCW at a glance</h2>
         <ul className="info-list">
-          <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming and culture</li>
+          <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming, culture and sports</li>
           <li>{EPISODES.length} episodes of OGCW Originals, our own video series</li>
           <li>The OGCW Shop: an edit from {SHOPS.length} retailers</li>
           <li>Available in four colour themes, free to read, with no account needed</li>

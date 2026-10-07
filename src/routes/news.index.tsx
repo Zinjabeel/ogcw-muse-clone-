@@ -10,7 +10,7 @@ export const Route = createFileRoute("/news/")({
   head: () => ({
     meta: [
       { title: "News — OGCW" },
-      { name: "description", content: "Every story from One Great Culture World: music, games, streaming and culture, newest first." },
+      { name: "description", content: "Every story from One Great Culture World: music, games, streaming, culture and sports, newest first." },
       { property: "og:title", content: "News — OGCW" },
       { property: "og:description", content: "Every story from One Great Culture World, newest first." },
       { property: "og:type", content: "website" },

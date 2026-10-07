@@ -16,6 +16,7 @@ const SECTIONS = [
   { title: "Games", value: "games" },
   { title: "Streaming", value: "streaming" },
   { title: "Culture", value: "culture" },
+  { title: "Sports", value: "sports" },
 ];
 
 // A photo: upload one, or paste a link (for example a YouTube thumbnail)

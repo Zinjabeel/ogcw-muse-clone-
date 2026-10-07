@@ -21,7 +21,8 @@ const STORAGE_KEY = "ogcw-theme";
 const isTheme = (value: unknown): value is ThemeId => THEMES.some((t) => t.id === value);
 
 // Runs in <head> before first paint so a saved theme never flashes the default.
-export const themeInitScript = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t==="gold"||t==="navy"||t==="aurora"){document.documentElement.dataset.theme=t}}catch(e){}})();`;
+// Gold (white and black, with gold) is the default; a saved "night" keeps the charcoal theme.
+export const themeInitScript = `(function(){var t=null;try{t=localStorage.getItem("${STORAGE_KEY}")}catch(e){}if(t!=="night"){document.documentElement.dataset.theme=(t==="navy"||t==="aurora")?t:"gold"}})();`;
 
 function applyTheme(id: ThemeId) {
   const root = document.documentElement;
@@ -47,7 +48,7 @@ function Swatch({ colors, size = 18 }: { colors: readonly string[]; size?: numbe
 }
 
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<ThemeId>("night");
+  const [theme, setTheme] = useState<ThemeId>("gold");
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -55,7 +56,7 @@ export function ThemeSwitcher() {
   // Pick up the theme the head script already applied
   useEffect(() => {
     const current = document.documentElement.dataset["theme"];
-    if (isTheme(current)) setTheme(current);
+    setTheme(isTheme(current) ? current : "night");
   }, []);
 
   // Close on a click outside or on Escape

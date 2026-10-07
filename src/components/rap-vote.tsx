@@ -1,0 +1,125 @@
+import { Check } from "lucide-react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { RAP_POLL, RAP_POLL_CHOICES, type RapPollChoice } from "@/data/content";
+import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
+import { storePreference } from "@/lib/consent";
+import { T } from "./site-text";
+
+// The No. 1 rapper vote on the rap desk: five names, each with the case for
+// them. After voting you see how everyone has voted so far, as bars behind
+// the names. Counts are kept by src/lib/rap-poll.ts.
+
+const STORAGE_KEY = "ogcw-vote-no1-rapper";
+
+// Whole-number shares that add up to 100 (largest remainder)
+function shares(counts: RapPollCounts, total: number): RapPollCounts {
+  const exact = RAP_POLL_CHOICES.map((choice) => ({ choice, value: total ? (counts[choice] * 100) / total : 0 }));
+  const result = Object.fromEntries(exact.map(({ choice, value }) => [choice, Math.floor(value)])) as RapPollCounts;
+  if (!total) return result;
+  let left = 100 - Object.values(result).reduce((sum, value) => sum + value, 0);
+  for (const { choice } of [...exact].sort((a, b) => (b.value % 1) - (a.value % 1))) {
+    if (left <= 0) break;
+    result[choice] += 1;
+    left -= 1;
+  }
+  return result;
+}
+
+export function RapPoll() {
+  const [mine, setMine] = useState<RapPollChoice | null>(null);
+  const [counts, setCounts] = useState<RapPollCounts | null>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
+
+  // A browser that has already voted goes straight to the results
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      // storage blocked: this visit starts with a fresh ballot
+    }
+    const choice = RAP_POLL_CHOICES.find((id) => id === saved);
+    if (!choice) return;
+    getRapPoll()
+      .then((result) => {
+        // The count has started again since that vote: vote afresh
+        if (result[choice] === 0) return;
+        setMine(choice);
+        setCounts(result);
+      })
+      .catch(() => {});
+  }, []);
+
+  const vote = async (choice: RapPollChoice) => {
+    if (mine || status === "sending") return;
+    setStatus("sending");
+    try {
+      const result = await voteRapPoll({ data: choice });
+      setMine(choice);
+      setCounts(result);
+      setStatus("idle");
+      storePreference(STORAGE_KEY, choice); // remembered only if the reader allows preferences
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  const total = counts ? Object.values(counts).reduce((sum, value) => sum + value, 0) : 0;
+  const share = counts ? shares(counts, total) : null;
+  const leader = counts ? RAP_POLL_CHOICES.reduce((best, choice) => (counts[choice] > counts[best] ? choice : best)) : null;
+  const picked = RAP_POLL.contenders.find((c) => c.id === mine);
+
+  return (
+    <div className="poll">
+      <ol className="poll-list" aria-label="The five names on the ballot">
+        {RAP_POLL.contenders.map((contender, index) => {
+          const crop = contender.photo.crop ?? { pos: "50% 30%" };
+          const inner = (
+            <>
+              {share && <span className="poll-bar" aria-hidden="true" />}
+              <span className="poll-num" aria-hidden="true">{index + 1}</span>
+              <span className="poll-face"><img src={contender.photo.src} alt="" loading="lazy" style={{ objectPosition: crop.pos }} /></span>
+              <span className="poll-text">
+                <span className="poll-name">
+                  {contender.name}
+                  {mine === contender.id && <span className="poll-mine"><Check size={12} strokeWidth={2.5} aria-hidden="true" /> <T>Your vote</T></span>}
+                </span>
+                <span className="poll-case"><T>{contender.case}</T></span>
+              </span>
+              {share ? (
+                <span className="poll-share">{share[contender.id]}<small>%</small></span>
+              ) : (
+                <span className="poll-cta" aria-hidden="true"><T>Vote</T></span>
+              )}
+            </>
+          );
+          const style = { "--share": `${share?.[contender.id] ?? 0}%`, "--i": index } as CSSProperties;
+          return (
+            <li key={contender.id}>
+              {share ? (
+                <div className="poll-option is-result" data-mine={mine === contender.id || undefined} data-lead={leader === contender.id || undefined} style={style}>
+                  {inner}
+                  <span className="sr-only">: {share[contender.id]}% of {total} votes</span>
+                </div>
+              ) : (
+                <button type="button" className="poll-option" style={style} disabled={status === "sending"} onClick={() => vote(contender.id)} aria-label={`Vote for ${contender.name}. ${contender.case}`}>
+                  {inner}
+                </button>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+      <p className="poll-foot" aria-live="polite">
+        {status === "sending" && "Counting your vote…"}
+        {status === "error" && "Your vote didn’t go through. Try again."}
+        {status === "idle" && !share && "Pick a name to vote. You’ll see how everyone else voted straight after."}
+        {status === "idle" && share && picked && (
+          <>
+            <strong>{total.toLocaleString("en-GB")} {total === 1 ? "vote" : "votes"}</strong> <T>so far. You picked</T> {picked.name}.
+          </>
+        )}
+      </p>
+    </div>
+  );
+}

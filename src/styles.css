@@ -2,6 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "./styles/monocle-tokens.css";
+@import "./styles/front.css";
 
 @custom-variant dark (&:is(.dark *));
 

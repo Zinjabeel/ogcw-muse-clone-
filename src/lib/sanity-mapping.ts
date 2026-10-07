@@ -14,7 +14,7 @@ export type SanityStory = {
   photo?: SanityPhoto; body?: SanityBlock[]; sources?: { name?: string; url?: string }[];
 };
 
-export const SECTION_IDS: SectionId[] = ["music", "games", "streaming", "culture"];
+export const SECTION_IDS: SectionId[] = ["music", "games", "streaming", "culture", "sports"];
 
 // "image-abc123-1600x900-jpg" → the image on Sanity's CDN
 export function imageUrl(image: SanityImage | undefined, width: number) {

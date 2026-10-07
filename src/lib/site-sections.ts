@@ -12,6 +12,17 @@ export const SITE_SECTIONS = [
   "Search",
   // The home page, top to bottom
   "Hero",
+  "The Wire",
+  "More news",
+  "Drops",
+  "Shop window",
+  "The OGCW 10",
+  "Sports desk",
+  "Games & streaming",
+  "Watch",
+  "Culture & fashion",
+  "Stay in the culture",
+  // Earlier parts of the home page (their saved edits stay filed here)
   "OGCW News",
   "Upcoming events",
   "This week",
@@ -44,7 +55,7 @@ export function pageSection(pathname: string): SiteSection {
   const first = pathname.split("/")[1] ?? "";
   if (first === "") return "Other";
   if (first === "news") return pathname.split("/")[2] ? "Article pages" : "News page";
-  if (["music", "games", "streaming", "culture"].includes(first)) return "Section pages";
+  if (["music", "games", "streaming", "culture", "sports"].includes(first)) return "Section pages";
   const pages: Record<string, SiteSection> = { explore: "Explore page", shop: "Shop pages", originals: "Originals", blog: "Blog", trends: "Trends", about: "About page", tour: "Tour page" };
   return pages[first] ?? "Other";
 }

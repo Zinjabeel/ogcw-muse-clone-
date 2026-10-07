@@ -16,13 +16,14 @@ import { pageSection } from "@/lib/site-sections";
 // from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
 // those widths they sit in "More".
 type Tier = "all" | "mid" | "wide";
-const nav: { label: string; to: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about"; tier: Tier }[] = [
+const nav: { label: string; to: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/blog" | "/about"; tier: Tier }[] = [
   { label: "News", to: "/news", tier: "all" },
   { label: "Music", to: "/music", tier: "all" },
   { label: "Games", to: "/games", tier: "all" },
   { label: "Streaming", to: "/streaming", tier: "all" },
   { label: "Culture", to: "/culture", tier: "all" },
-  { label: "Originals", to: "/originals", tier: "mid" },
+  { label: "Sports", to: "/sports", tier: "all" },
+  { label: "Originals", to: "/originals", tier: "wide" },
   { label: "Shop", to: "/shop", tier: "mid" },
   { label: "Trends", to: "/trends", tier: "wide" },
   { label: "Blog", to: "/blog", tier: "wide" },

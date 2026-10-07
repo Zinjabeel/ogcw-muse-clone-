@@ -62,12 +62,13 @@ export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
 export type Source = { name: string; url: string };
 
-export type SectionId = "music" | "games" | "streaming" | "culture";
+export type SectionId = "music" | "games" | "streaming" | "culture" | "sports";
 export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
   music: { label: "Music", intro: "New releases, tours and the awards nights everyone is talking about." },
   games: { label: "Games", intro: "Launches, sales and the showcases setting up the next few years of play." },
   streaming: { label: "Streaming", intro: "The creators, records and charity marathons that live on Twitch, YouTube and Kick." },
   culture: { label: "Culture", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
+  sports: { label: "Sports", intro: "The games, records and athletes crossing over into music and fashion." },
 };
 export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 

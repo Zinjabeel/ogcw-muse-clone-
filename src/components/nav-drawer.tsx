@@ -16,7 +16,7 @@ import { S, T } from "./site-text";
 // each line with its latest headline under it.
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
-type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
+type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
 type Section = { label: string; to: SectionPath; note: string; heading: string; tone: string; items: Item[] };
 
 const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
@@ -31,6 +31,7 @@ function buildSections(stories: Stories): Section[] {
     { label: "Games", to: "/games", note: `${section("games").length} stories`, heading: "Latest in Games", tone: "#4f7f96", items: asItems(section("games").slice(0, 4)) },
     { label: "Streaming", to: "/streaming", note: `${section("streaming").length} stories`, heading: "Latest in Streaming", tone: "#5a4a8a", items: asItems(section("streaming").slice(0, 4)) },
     { label: "Culture", to: "/culture", note: `${section("culture").length} stories`, heading: "Latest in Culture", tone: "#6b3a3a", items: asItems(section("culture").slice(0, 4)) },
+    { label: "Sports", to: "/sports", note: `${section("sports").length} stories`, heading: "Latest in Sports", tone: "#2f5d46", items: asItems(section("sports").slice(0, 4)) },
     { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", tone: "#7b6f5a", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
     { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", tone: "#a91728", items: SHOPS.slice(0, 4).map((s) => ({ kind: "shop", s })) },
     { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", tone: "#3f6b5a", items: asItems(stories.trending.slice(0, 4)) },

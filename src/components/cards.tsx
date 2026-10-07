@@ -9,7 +9,7 @@ import { StoryMeta } from "./story-meta";
 import { S, T } from "./site-text";
 
 /** Where each section's front lives */
-export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture" } as const satisfies Record<SectionId, string>;
+export const SECTION_PATH = { music: "/music", games: "/games", streaming: "/streaming", culture: "/culture", sports: "/sports" } as const satisfies Record<SectionId, string>;
 
 // Shared pieces for the story, Originals and shop pages.
 

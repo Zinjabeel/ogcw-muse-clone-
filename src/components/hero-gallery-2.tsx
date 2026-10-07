@@ -25,7 +25,7 @@ const USUAL: Record<string, { tab: string; tone: string; cta: string }> = {
   "paris-fashion-week-ss27": { tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
   "taylor-swift-the-life-of-a-showgirl-the-encore": { tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
 };
-const SECTION_TONE: Record<SectionId, string> = { music: "#6e3320", games: "#4f7f96", streaming: "#5a4a8a", culture: "#6b3a3a" };
+const SECTION_TONE: Record<SectionId, string> = { music: "#6e3320", games: "#4f7f96", streaming: "#5a4a8a", culture: "#6b3a3a", sports: "#2f5d46" };
 
 const FEATURE_MS = 7000;
 const STRIP_MS = 2000;

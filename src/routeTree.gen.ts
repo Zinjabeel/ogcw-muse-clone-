@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SportsRouteImport } from './routes/sports'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as WorkRouteImport } from './routes/work'
@@ -80,6 +81,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SportsRoute = SportsRouteImport.update({
+  id: '/sports',
+  path: '/sports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StreamingRoute = StreamingRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/reset-password'
     | '/signup'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/reset-password'
     | '/signup'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/music'
     | '/reset-password'
     | '/signup'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   MusicRoute: typeof MusicRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SportsRoute: typeof SportsRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
   WorkRoute: typeof WorkRoute
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sports': {
+      id: '/sports'
+      path: '/sports'
+      fullPath: '/sports'
+      preLoaderRoute: typeof SportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/streaming': {
@@ -486,6 +506,7 @@ const rootRouteChildren: RootRouteChildren = {
   MusicRoute: MusicRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SportsRoute: SportsRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,
   WorkRoute: WorkRoute,
