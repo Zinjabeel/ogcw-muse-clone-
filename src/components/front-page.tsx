@@ -5,6 +5,7 @@ import { SECTIONS, SHOPS, SONGS, formatPrice, spotifyTrack, youtubeThumb, type A
 import { DROPS, NIGHTS, VIDEOS, type DropKind } from "@/data/drops";
 import { BRANDS, PRODUCTS, brandOf } from "@/data/shop";
 import { useStories } from "@/lib/stories";
+import { currentRound, myRankingVote, rankingTotals, voteRanking } from "@/lib/ranking-votes";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
@@ -529,10 +530,65 @@ function Ranking() {
           </li>
         ))}
       </ol>
+      <RankingVote stories={ranked} />
     </Band>
   );
 }
 
+// Readers' vote under the ranking: which of the ten should be No. 1? Bars
+// show the share of votes this week; counts come from Supabase as they are.
+function RankingVote({ stories }: { stories: Article[] }) {
+  const [round, setRound] = useState<string | null>(null);
+  const [totals, setTotals] = useState<Record<string, number> | null>(null);
+  const [mine, setMine] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
+  useEffect(() => {
+    const now = currentRound();
+    setRound(now);
+    setMine(myRankingVote(now));
+    rankingTotals(now).then(setTotals).catch(() => setTotals({}));
+  }, []);
+  const vote = async (slug: string) => {
+    if (!round || status === "sending") return;
+    setStatus("sending");
+    try {
+      await voteRanking(round, slug);
+      setMine(slug);
+      setTotals(await rankingTotals(round));
+      setStatus("idle");
+    } catch {
+      setStatus("error");
+    }
+  };
+  const total = totals ? stories.reduce((sum, story) => sum + (totals[story.slug] ?? 0), 0) : 0;
+  const show = !!mine && total > 0;
+  return (
+    <div className="fx-vote">
+      <div className="fx-vote-head">
+        <p className="fx-col-head"><T k="front.ranking.vote.kicker">Readers’ vote</T></p>
+        <h3 className="fx-vote-title"><T k="front.ranking.vote.title">Which one should be No. 1?</T></h3>
+        <p className="fx-vote-note" aria-live="polite">
+          {status === "error" ? "Your vote didn’t go through. Try again." : show ? `${total.toLocaleString("en-GB")} ${total === 1 ? "vote" : "votes"} this week. You can change yours.` : "One vote a week. You’ll see how everyone voted straight after."}
+        </p>
+      </div>
+      <ol className="fx-vote-list">
+        {stories.map((story, index) => {
+          const share = show ? Math.round(((totals?.[story.slug] ?? 0) * 100) / total) : 0;
+          return (
+            <li key={story.slug}>
+              <button type="button" className="fx-vote-opt" aria-pressed={mine === story.slug} disabled={status === "sending"} onClick={() => vote(story.slug)} style={{ ["--share" as string]: `${share}%` }}>
+                {show && <span className="fx-vote-bar" aria-hidden="true" />}
+                <span className="fx-vote-rank">{index + 1}</span>
+                <span className="fx-vote-name"><S story={story} f="title" /></span>
+                <span className="fx-vote-share">{show ? `${share}%` : mine === story.slug ? "Your vote" : "Vote"}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
 // ------------------------------------------------------------ Sports desk
 
 const FIXTURES = NIGHTS.filter((night) => night.tag === "Sports");
