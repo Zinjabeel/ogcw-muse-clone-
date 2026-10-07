@@ -288,12 +288,14 @@ function MoreNews() {
 
 // ------------------------------------------------------------ Shop strip
 
-// Six of the best products, one per brand, in two rows of three: each card
-// is the photo alone, leaning towards the pointer with a sheen that follows
-// it (src/components/card-hover.tsx), and under it the brand and a link to
-// browse that brand. The full shop is on /shop.
-const SHOWCASE = ["jordan-4-retro-grey", "nb-550-white-burgundy", "adidas-handball-spezial", "asics-gel-1130", "puma-speedcat-og", "dr-martens-1460"]
-  .flatMap((id) => getProduct(id) ?? []);
+// Six picks in two rows of three, hoodies on top and sneakers below: each
+// card is the photo alone, upright, leaning towards the pointer with a sheen
+// that follows it (src/components/card-hover.tsx), and under it the brand
+// and a link to browse that brand. The full shop is on /shop.
+const SHOWCASE = [
+  "nike-club-fleece-hoodie-black", "supreme-box-logo-hoodie-red", "carhartt-wip-heart-hoodie-grey",
+  "jordan-4-retro-grey", "nb-2002r-brown", "converse-chuck-hi-navy",
+].flatMap((id) => getProduct(id) ?? []);
 
 function ShopStrip() {
   return (
