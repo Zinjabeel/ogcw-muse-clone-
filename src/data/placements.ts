@@ -58,8 +58,8 @@ export const SLOTS = [
   // Games & streaming
   { id: "games-lead", area: "Games & streaming", name: "Games: main story", note: "The big games story", max: 1, defaults: ["october-2026-games"], section: "games" },
   { id: "games-more", area: "Games & streaming", name: "Games: more", note: "Two headlines under it", max: 2, defaults: ["witcher-3-remastered-launch", "switch-2-calendar-september-direct"], section: "games" },
-  { id: "streaming-lead", area: "Games & streaming", name: "Streaming: main story", note: "The big streaming story", max: 1, defaults: ["neuro-sama-pattern-recognition-first-concert"], section: "streaming" },
-  { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Two headlines under it", max: 2, defaults: ["streamer-awards-2026-applications", "made-on-youtube-2026"], section: "streaming" },
+  { id: "streaming-lead", area: "Games & streaming", name: "Streaming: main story", note: "The big streaming story", max: 1, defaults: ["kai-cenat-vivet-nyfw"], section: "streaming" },
+  { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Two headlines under it", max: 2, defaults: ["twitchcon-san-diego-2026", "worlds-2026-north-america"], section: "streaming" },
 
   // Culture & fashion
   { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["courreges-drew-henry-debut"], section: "culture" },
