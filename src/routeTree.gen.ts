@@ -24,6 +24,8 @@ import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as AdminSplatRouteImport } from './routes/admin.$'
+import { Route as ForumIndexRouteImport } from './routes/forum.index'
+import { Route as ForumRoomRouteImport } from './routes/forum.$room'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
@@ -37,6 +39,7 @@ import { Route as ShopDropsRouteImport } from './routes/shop.drops'
 import { Route as ShopGiftsRouteImport } from './routes/shop.gifts'
 import { Route as ShopSavedRouteImport } from './routes/shop.saved'
 import { Route as TourBtsArirangRouteImport } from './routes/tour.bts-arirang'
+import { Route as ForumTIdRouteImport } from './routes/forum.t.$id'
 import { Route as ShopPIdRouteImport } from './routes/shop.p.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -114,6 +117,16 @@ const AdminSplatRoute = AdminSplatRouteImport.update({
   path: '/admin/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumIndexRoute = ForumIndexRouteImport.update({
+  id: '/forum/',
+  path: '/forum/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumRoomRoute = ForumRoomRouteImport.update({
+  id: '/forum/$room',
+  path: '/forum/$room',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InfoSlugRoute = InfoSlugRouteImport.update({
   id: '/info/$slug',
   path: '/info/$slug',
@@ -179,6 +192,11 @@ const TourBtsArirangRoute = TourBtsArirangRouteImport.update({
   path: '/tour/bts-arirang',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumTIdRoute = ForumTIdRouteImport.update({
+  id: '/forum/t/$id',
+  path: '/forum/t/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopPIdRoute = ShopPIdRouteImport.update({
   id: '/shop/p/$id',
   path: '/shop/p/$id',
@@ -201,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -211,9 +230,11 @@ export interface FileRoutesByFullPath {
   '/shop/gifts': typeof ShopGiftsRoute
   '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
   '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesByTo {
@@ -232,6 +253,7 @@ export interface FileRoutesByTo {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -242,9 +264,11 @@ export interface FileRoutesByTo {
   '/shop/gifts': typeof ShopGiftsRoute
   '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum': typeof ForumIndexRoute
   '/news': typeof NewsIndexRoute
   '/originals': typeof OriginalsIndexRoute
   '/shop': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
   '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesById {
@@ -264,6 +288,7 @@ export interface FileRoutesById {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
@@ -274,9 +299,11 @@ export interface FileRoutesById {
   '/shop/gifts': typeof ShopGiftsRoute
   '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
   '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRouteTypes {
@@ -297,6 +324,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -307,9 +335,11 @@ export interface FileRouteTypes {
     | '/shop/gifts'
     | '/shop/saved'
     | '/tour/bts-arirang'
+    | '/forum/'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/forum/t/$id'
     | '/shop/p/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -328,6 +358,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -338,9 +369,11 @@ export interface FileRouteTypes {
     | '/shop/gifts'
     | '/shop/saved'
     | '/tour/bts-arirang'
+    | '/forum'
     | '/news'
     | '/originals'
     | '/shop'
+    | '/forum/t/$id'
     | '/shop/p/$id'
   id:
     | '__root__'
@@ -359,6 +392,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
@@ -369,9 +403,11 @@ export interface FileRouteTypes {
     | '/shop/gifts'
     | '/shop/saved'
     | '/tour/bts-arirang'
+    | '/forum/'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/forum/t/$id'
     | '/shop/p/$id'
   fileRoutesById: FileRoutesById
 }
@@ -391,6 +427,7 @@ export interface RootRouteChildren {
   TrendsRoute: typeof TrendsRoute
   WorkRoute: typeof WorkRoute
   AdminSplatRoute: typeof AdminSplatRoute
+  ForumRoomRoute: typeof ForumRoomRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
   OriginalsSlugRoute: typeof OriginalsSlugRoute
@@ -401,9 +438,11 @@ export interface RootRouteChildren {
   ShopGiftsRoute: typeof ShopGiftsRoute
   ShopSavedRoute: typeof ShopSavedRoute
   TourBtsArirangRoute: typeof TourBtsArirangRoute
+  ForumIndexRoute: typeof ForumIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   OriginalsIndexRoute: typeof OriginalsIndexRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ForumTIdRoute: typeof ForumTIdRoute
   ShopPIdRoute: typeof ShopPIdRoute
 }
 
@@ -514,6 +553,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/': {
+      id: '/forum/'
+      path: '/forum'
+      fullPath: '/forum/'
+      preLoaderRoute: typeof ForumIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/$room': {
+      id: '/forum/$room'
+      path: '/forum/$room'
+      fullPath: '/forum/$room'
+      preLoaderRoute: typeof ForumRoomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/info/$slug': {
       id: '/info/$slug'
       path: '/info/$slug'
@@ -605,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TourBtsArirangRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/t/$id': {
+      id: '/forum/t/$id'
+      path: '/forum/t/$id'
+      fullPath: '/forum/t/$id'
+      preLoaderRoute: typeof ForumTIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop/p/$id': {
       id: '/shop/p/$id'
       path: '/shop/p/$id'
@@ -631,6 +691,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrendsRoute: TrendsRoute,
   WorkRoute: WorkRoute,
   AdminSplatRoute: AdminSplatRoute,
+  ForumRoomRoute: ForumRoomRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,
   OriginalsSlugRoute: OriginalsSlugRoute,
@@ -641,9 +702,11 @@ const rootRouteChildren: RootRouteChildren = {
   ShopGiftsRoute: ShopGiftsRoute,
   ShopSavedRoute: ShopSavedRoute,
   TourBtsArirangRoute: TourBtsArirangRoute,
+  ForumIndexRoute: ForumIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   OriginalsIndexRoute: OriginalsIndexRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ForumTIdRoute: ForumTIdRoute,
   ShopPIdRoute: ShopPIdRoute,
 }
 export const routeTree = rootRouteImport

@@ -16,7 +16,7 @@ import { LanguagePicker } from "@/components/cookie-consent";
 // App Store / Google Play badges are marked "Coming soon" and don’t link.
 
 type FooterLink =
-  | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/blog" | "/about" }
+  | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/forum" | "/about" }
   | { label: string; home: string } // a section on the home page, by element id
   | { label: string; info: InfoSlug } // /info/<slug>
   | { label: string; href: string }; // mailto or external
@@ -27,7 +27,7 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "About OGCW", page: "/about" },
       { label: "OGCW Originals", page: "/originals" },
-      { label: "Blog", page: "/blog" },
+      { label: "Forum", page: "/forum" },
       { label: "Press", info: "press" },
       { label: "Brand", info: "brand" },
       { label: "Testimonials", info: "testimonials" },

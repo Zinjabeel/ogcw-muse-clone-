@@ -56,7 +56,7 @@ export function pageSection(pathname: string): SiteSection {
   if (first === "") return "Other";
   if (first === "news") return pathname.split("/")[2] ? "Article pages" : "News page";
   if (["music", "games", "streaming", "culture", "sports"].includes(first)) return "Section pages";
-  const pages: Record<string, SiteSection> = { explore: "Explore page", shop: "Shop pages", originals: "Originals", blog: "Blog", trends: "Trends", about: "About page", tour: "Tour page" };
+  const pages: Record<string, SiteSection> = { explore: "Explore page", shop: "Shop pages", originals: "Originals", blog: "Blog", forum: "Blog", trends: "Trends", about: "About page", tour: "Tour page" };
   return pages[first] ?? "Other";
 }
 
@@ -67,7 +67,7 @@ export function sectionOfKey(key: string): SiteSection {
     nav: "Navigation bar", more: "Navigation bar", ix: "Menu", footer: "Footer", hero: "Hero",
     home: "OGCW News", events: "Upcoming events", cotm: "Content of the month", "shop-promo": "Shop on the home page",
     explore: "Explore", kx: "Keep exploring", connect: "About & newsletter", "404": "Error page", story: "Article pages",
-    section: "Section pages", originals: "Originals", blog: "Blog", trends: "Trends", about: "About page", shop: "Shop pages", news: "News page",
+    section: "Section pages", originals: "Originals", blog: "Blog", forum: "Blog", trends: "Trends", about: "About page", shop: "Shop pages", news: "News page",
   };
   if (key.startsWith("home.week")) return "This week";
   return known[prefix] ?? "Other";

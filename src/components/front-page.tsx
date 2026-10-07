@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SECTIONS, SHOPS, SONGS, formatPrice, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, NIGHTS, VIDEOS, type DropKind } from "@/data/drops";
 import { BRANDS, PRODUCTS, brandOf } from "@/data/shop";
+import { ROOMS as FORUM_ROOMS } from "@/lib/forum";
 import { useStories } from "@/lib/stories";
 import { currentRound, myRankingVote, rankingTotals, voteRanking } from "@/lib/ranking-votes";
 import type { SiteSection } from "@/lib/site-sections";
@@ -727,7 +728,6 @@ function CultureFashion() {
 // ------------------------------------------------------------ Stay in the culture
 
 const TOPICS = ["The week’s biggest stories", "New music", "Release dates", "Sneakers & fashion", "Games", "Sports"];
-const ROOMS = ["Rap & R&B", "Sneakers", "Games", "Sports", "Fashion", "Streaming"];
 
 function Stay() {
   return (
@@ -741,11 +741,11 @@ function Stay() {
           <NewsletterForm />
         </div>
         <div className="fx-forum">
-          <p className="fx-kicker"><T k="front.stay.forum.kicker">Coming soon</T></p>
+          <p className="fx-kicker"><T k="front.stay.forum.kicker2">Now open</T></p>
           <h3 className="fx-forum-title"><T k="front.stay.forum.title">The OGCW Forum</T></h3>
-          <p className="fx-stay-copy"><T k="front.stay.forum.copy">A place to argue the rankings, swap release-day stories and vote on the week. Rooms opening first:</T></p>
-          <ul className="fx-rooms">{ROOMS.map((room) => <li key={room}># <T>{room}</T></li>)}</ul>
-          <Link to="/blog" className="fx-btn fx-btn-dark"><T k="front.stay.forum.cta">Read the blog meanwhile</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+          <p className="fx-stay-copy"><T k="front.stay.forum.copy2">Argue the rankings, swap release-day stories and vote on the week. Seven rooms:</T></p>
+          <ul className="fx-rooms">{FORUM_ROOMS.map((room) => <li key={room.id}><Link to="/forum/$room" params={{ room: room.id }}># {room.name}</Link></li>)}</ul>
+          <Link to="/forum" className="fx-btn fx-btn-dark"><T k="front.stay.forum.cta2">Open the forum</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </div>
       </div>
     </Band>

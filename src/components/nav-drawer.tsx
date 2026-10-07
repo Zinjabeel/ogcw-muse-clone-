@@ -16,7 +16,7 @@ import { S, T } from "./site-text";
 // each line with its latest headline under it.
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
-type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/blog" | "/about";
+type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/forum" | "/about";
 type Section = { label: string; to: SectionPath; note: string; heading: string; tone: string; items: Item[] };
 
 const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
@@ -35,7 +35,7 @@ function buildSections(stories: Stories): Section[] {
     { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", tone: "#7b6f5a", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
     { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", tone: "#a91728", items: SHOPS.slice(0, 4).map((s) => ({ kind: "shop", s })) },
     { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", tone: "#3f6b5a", items: asItems(stories.trending.slice(0, 4)) },
-    { label: "Blog", to: "/blog", note: "Long reads", heading: "The longest reads", tone: "#7a5a3c", items: asItems(longReads.slice(0, 4)) },
+    { label: "Forum", to: "/forum", note: "Seven rooms", heading: "The longest reads", tone: "#7a5a3c", items: asItems(longReads.slice(0, 4)) },
     { label: "About", to: "/about", note: "Who we are", heading: "Editors’ picks", tone: "#8c5e4a", items: asItems(stories.editorsPicks.slice(0, 4)) },
   ];
 }

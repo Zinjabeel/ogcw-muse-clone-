@@ -4,6 +4,7 @@
 @import "./styles/monocle-tokens.css";
 @import "./styles/front.css";
 @import "./styles/shop.css";
+@import "./styles/forum.css";
 
 @custom-variant dark (&:is(.dark *));
 
