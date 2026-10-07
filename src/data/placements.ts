@@ -35,6 +35,7 @@ export const SLOTS = [
   // The Wire, the first band under the hero
   { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["vmas-2026-winners"] },
   { id: "wire-latest", area: "The Wire", name: "Just in", note: "Five numbered stories beside the main story in Explore; empty places take the newest stories not placed anywhere else", max: 5, defaults: [] },
+  { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["j-cole-fall-off-tour-europe-berlin", "burna-boy-london-stadium-2027", "super-bowl-lxi-halftime-sofi-what-we-know", "drake-fomo-film-2027-tour", "latin-grammys-2026-nominations"] },
 
   // The week
   { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["lil-baby-new-album-november-6"] },

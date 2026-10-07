@@ -5,7 +5,7 @@ import { useEffect } from "react";
 // towards it. (The photo zoom is plain CSS, in styles.css under "Card hover".)
 // Mouse only, and nothing for reduced motion.
 
-const SPOTLIGHT = ".mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door";
+const SPOTLIGHT = ".mix-tile, .tr-buy, .tr-wrong-card, .about-social, .shopcard, .fx-shopcard, .ev-row, .bs-linked, .impact-lead, .impact-door";
 const TILT = ".gallery-card[aria-current] .gallery-card-link, .g2-card[data-pos='0'] .g2-card-link, .kx-feature, .mix-pick, .shopcard, .fx-shopcard";
 const MAX_TILT = 5; // degrees
 const MAX_TILT_SHOP = 14; // the shop cards on the front page lean further

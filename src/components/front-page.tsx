@@ -288,27 +288,24 @@ function MoreNews() {
 
 // ------------------------------------------------------------ Shop strip
 
-// Six of the best products, one per brand: a card that leans towards the
-// pointer (src/components/card-hover.tsx), the brand under it and a link
-// to browse that brand. The full shop is on /shop.
+// Six of the best products, one per brand, in two rows of three: each card
+// is the photo alone, leaning towards the pointer with a sheen that follows
+// it (src/components/card-hover.tsx), and under it the brand and a link to
+// browse that brand. The full shop is on /shop.
 const SHOWCASE = ["jordan-4-retro-grey", "nb-550-white-burgundy", "adidas-handball-spezial", "asics-gel-1130", "puma-speedcat-og", "dr-martens-1460"]
   .flatMap((id) => getProduct(id) ?? []);
 
 function ShopStrip() {
   return (
     <Band tone="grey" name="Shop window" id="shop-strip" className="fx-shop">
-      <Head id="shop-strip" k="front.shop" kicker="The OGCW Shop" title="The pairs everyone wants">
-        <Link to="/shop" className="fx-btn fx-btn-dark"><T k="front.shop.browse">Browse the shop</T> <ArrowRight size={15} aria-hidden="true" /></Link>
-      </Head>
+      <h2 id="shop-strip-title" className="fx-shop-title"><T k="front.shop.title2">Featured drops</T></h2>
       <ul className="fx-shop-row">
         {SHOWCASE.map((product) => {
           const brand = brandOf(product);
           return (
             <li key={product.id}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard">
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" aria-label={`${brand.name} ${product.name}${product.price !== undefined ? `, ${formatPrice(product.price)}` : ""}`}>
                 <img src={product.image} alt={`${brand.name} ${product.name}, ${product.colour}`} loading="lazy" />
-                <span className="fx-shopcard-name">{product.name}</span>
-                {product.price !== undefined && <span className="fx-shopcard-price">{formatPrice(product.price)}</span>}
               </Link>
               <Link to="/shop/$slug" params={{ slug: brand.slug }} className="fx-shopcard-brand">
                 <span>{brand.name}</span>
@@ -375,6 +372,7 @@ function Explore() {
   const [lead = stories.pick("vmas-2026-winners")] = stories.slot("front-lead");
   const latest = stories.slot("wire-latest");
   const ranked = stories.slot("ranking");
+  const more = stories.slot("explore-more");
   const drops = DROPS.filter((drop) => drop.date >= today).slice(0, 5);
   return (
     <Band tone="light" name="Explore" id="explore" className="fx-explore">
@@ -412,6 +410,15 @@ function Explore() {
         <Desk label="Games" to="/games" k="front.ex.games" lead={stories.slot("games-lead")[0]} more={stories.slot("games-more")} />
         <Desk label="Streaming" to="/streaming" k="front.ex.streaming" lead={stories.slot("streaming-lead")[0]} more={stories.slot("streaming-more")} />
       </div>
+
+      {more.length > 0 && (
+        <section className="fx-ex-more" aria-labelledby="explore-more-title">
+          <p id="explore-more-title" className="fx-col-head"><T k="front.ex.more">More stories</T></p>
+          <ul className="fx-ex-more-row">
+            {more.map((story) => <li key={story.slug}><Tile story={story} size="sm" /></li>)}
+          </ul>
+        </section>
+      )}
 
       <EditSection name="Rap desk"><MusicCard /></EditSection>
 
