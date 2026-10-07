@@ -31,7 +31,13 @@ import { Route as OriginalsIndexRouteImport } from './routes/originals.index'
 import { Route as OriginalsSlugRouteImport } from './routes/originals.$slug'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as ShopAllRouteImport } from './routes/shop.all'
+import { Route as ShopBrandsRouteImport } from './routes/shop.brands'
+import { Route as ShopDropsRouteImport } from './routes/shop.drops'
+import { Route as ShopGiftsRouteImport } from './routes/shop.gifts'
+import { Route as ShopSavedRouteImport } from './routes/shop.saved'
 import { Route as TourBtsArirangRouteImport } from './routes/tour.bts-arirang'
+import { Route as ShopPIdRouteImport } from './routes/shop.p.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -143,9 +149,39 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/shop/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopAllRoute = ShopAllRouteImport.update({
+  id: '/shop/all',
+  path: '/shop/all',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopBrandsRoute = ShopBrandsRouteImport.update({
+  id: '/shop/brands',
+  path: '/shop/brands',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopDropsRoute = ShopDropsRouteImport.update({
+  id: '/shop/drops',
+  path: '/shop/drops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopGiftsRoute = ShopGiftsRouteImport.update({
+  id: '/shop/gifts',
+  path: '/shop/gifts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopSavedRoute = ShopSavedRouteImport.update({
+  id: '/shop/saved',
+  path: '/shop/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TourBtsArirangRoute = TourBtsArirangRouteImport.update({
   id: '/tour/bts-arirang',
   path: '/tour/bts-arirang',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopPIdRoute = ShopPIdRouteImport.update({
+  id: '/shop/p/$id',
+  path: '/shop/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -169,10 +205,16 @@ export interface FileRoutesByFullPath {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -194,10 +236,16 @@ export interface FileRoutesByTo {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news': typeof NewsIndexRoute
   '/originals': typeof OriginalsIndexRoute
   '/shop': typeof ShopIndexRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -220,10 +268,16 @@ export interface FileRoutesById {
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/saved': typeof ShopSavedRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,10 +301,16 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/drops'
+    | '/shop/gifts'
+    | '/shop/saved'
     | '/tour/bts-arirang'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/shop/p/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -272,10 +332,16 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/drops'
+    | '/shop/gifts'
+    | '/shop/saved'
     | '/tour/bts-arirang'
     | '/news'
     | '/originals'
     | '/shop'
+    | '/shop/p/$id'
   id:
     | '__root__'
     | '/'
@@ -297,10 +363,16 @@ export interface FileRouteTypes {
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/drops'
+    | '/shop/gifts'
+    | '/shop/saved'
     | '/tour/bts-arirang'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/shop/p/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -323,10 +395,16 @@ export interface RootRouteChildren {
   NewsSlugRoute: typeof NewsSlugRoute
   OriginalsSlugRoute: typeof OriginalsSlugRoute
   ShopSlugRoute: typeof ShopSlugRoute
+  ShopAllRoute: typeof ShopAllRoute
+  ShopBrandsRoute: typeof ShopBrandsRoute
+  ShopDropsRoute: typeof ShopDropsRoute
+  ShopGiftsRoute: typeof ShopGiftsRoute
+  ShopSavedRoute: typeof ShopSavedRoute
   TourBtsArirangRoute: typeof TourBtsArirangRoute
   NewsIndexRoute: typeof NewsIndexRoute
   OriginalsIndexRoute: typeof OriginalsIndexRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ShopPIdRoute: typeof ShopPIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -485,11 +563,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/all': {
+      id: '/shop/all'
+      path: '/shop/all'
+      fullPath: '/shop/all'
+      preLoaderRoute: typeof ShopAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/brands': {
+      id: '/shop/brands'
+      path: '/shop/brands'
+      fullPath: '/shop/brands'
+      preLoaderRoute: typeof ShopBrandsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/drops': {
+      id: '/shop/drops'
+      path: '/shop/drops'
+      fullPath: '/shop/drops'
+      preLoaderRoute: typeof ShopDropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/gifts': {
+      id: '/shop/gifts'
+      path: '/shop/gifts'
+      fullPath: '/shop/gifts'
+      preLoaderRoute: typeof ShopGiftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/saved': {
+      id: '/shop/saved'
+      path: '/shop/saved'
+      fullPath: '/shop/saved'
+      preLoaderRoute: typeof ShopSavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tour/bts-arirang': {
       id: '/tour/bts-arirang'
       path: '/tour/bts-arirang'
       fullPath: '/tour/bts-arirang'
       preLoaderRoute: typeof TourBtsArirangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/p/$id': {
+      id: '/shop/p/$id'
+      path: '/shop/p/$id'
+      fullPath: '/shop/p/$id'
+      preLoaderRoute: typeof ShopPIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -515,10 +635,16 @@ const rootRouteChildren: RootRouteChildren = {
   NewsSlugRoute: NewsSlugRoute,
   OriginalsSlugRoute: OriginalsSlugRoute,
   ShopSlugRoute: ShopSlugRoute,
+  ShopAllRoute: ShopAllRoute,
+  ShopBrandsRoute: ShopBrandsRoute,
+  ShopDropsRoute: ShopDropsRoute,
+  ShopGiftsRoute: ShopGiftsRoute,
+  ShopSavedRoute: ShopSavedRoute,
   TourBtsArirangRoute: TourBtsArirangRoute,
   NewsIndexRoute: NewsIndexRoute,
   OriginalsIndexRoute: OriginalsIndexRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ShopPIdRoute: ShopPIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

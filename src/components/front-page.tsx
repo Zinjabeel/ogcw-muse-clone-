@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronLeft, ChevronRight, Play, 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SECTIONS, SHOPS, SONGS, formatPrice, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, NIGHTS, VIDEOS, type DropKind } from "@/data/drops";
+import { BRANDS, PRODUCTS, brandOf } from "@/data/shop";
 import { useStories } from "@/lib/stories";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
@@ -452,8 +453,8 @@ function Drops() {
 // ------------------------------------------------------------ Shop window
 
 const LOGOS: Record<string, string> = { nike: nikeLogo, adidas: adidasLogo, stockx: stockxLogo, uniqlo: uniqloLogo };
-// Two picks from every brand, dealt a brand at a time
-const PICKS = [0, 1].flatMap((round) => SHOPS.map((shop) => ({ shop, product: shop.products[round]! }))).filter((pick) => pick.product);
+// Eight picks from the shop: what's trending, one per brand
+const PICKS = PRODUCTS.filter((product, index, all) => product.tags?.includes("trending") && all.findIndex((other) => other.brand === product.brand && other.tags?.includes("trending")) === index).slice(0, 8);
 
 function ShopWindow() {
   return (
@@ -469,14 +470,14 @@ function ShopWindow() {
           </span>
         </Link>
         <ul className="fx-products">
-          {PICKS.map(({ shop, product }) => (
-            <li key={shop.slug + product.name + product.detail}>
-              <a href={product.url} target="_blank" rel="noopener noreferrer" className="fx-product">
-                <span className="fx-product-photo"><img src={product.image.replace(/([?&])w=\d+/, "$1w=500")} alt={`${shop.name} ${product.name}`} loading="lazy" /></span>
-                <span className="fx-product-brand">{shop.name}</span>
+          {PICKS.map((product) => (
+            <li key={product.id}>
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-product">
+                <span className="fx-product-photo"><img src={product.image} alt={`${brandOf(product).name} ${product.name}`} loading="lazy" /></span>
+                <span className="fx-product-brand">{brandOf(product).name}</span>
                 <span className="fx-product-name">{product.name}</span>
-                <span className="fx-product-price">{formatPrice(product.price)}</span>
-              </a>
+                <span className="fx-product-price">{product.price !== undefined ? formatPrice(product.price) : "Price at the retailer"}</span>
+              </Link>
             </li>
           ))}
         </ul>
@@ -485,7 +486,10 @@ function ShopWindow() {
         {SHOPS.map((shop) => (
           <li key={shop.slug}><Link to="/shop/$slug" params={{ slug: shop.slug }} className="fx-brand" data-brand={shop.slug}><img src={LOGOS[shop.slug]} alt={shop.name} /></Link></li>
         ))}
-        <li><Link to="/shop" className="fx-brand fx-brand-all"><T k="front.shop.brands">All brands</T></Link></li>
+        {BRANDS.filter((brand) => !LOGOS[brand.slug]).slice(0, 8).map((brand) => (
+          <li key={brand.slug}><Link to="/shop/$slug" params={{ slug: brand.slug }} className="fx-brand">{brand.name}</Link></li>
+        ))}
+        <li><Link to="/shop" className="fx-brand fx-brand-all"><T k="front.shop.brands">All 27 brands</T></Link></li>
       </ul>
     </Band>
   );
