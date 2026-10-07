@@ -28,7 +28,7 @@ const DIRECTORY = [
   { label: "Games", note: "Launches and showcases", el: (c: string) => <Link to="/games" className={c}><T>Games</T></Link> },
   { label: "Streaming", note: "Creators and records", el: (c: string) => <Link to="/streaming" className={c}><T>Streaming</T></Link> },
   { label: "Culture", note: "Fashion, TV and sneakers", el: (c: string) => <Link to="/culture" className={c}><T>Culture</T></Link> },
-  { label: "Originals", note: "OGCW-made video", el: (c: string) => <Link to="/originals" className={c}><T>Originals</T></Link> },
+  { label: "Originals", note: "Interviews and podcasts", el: (c: string) => <Link to="/originals" className={c}><T>Originals</T></Link> },
   { label: "Shop", note: "The OGCW edit", el: (c: string) => <Link to="/shop" className={c}><T>Shop</T></Link> },
   { label: "Trends", note: "The culture index", el: (c: string) => <Link to="/trends" className={c}><T>Trends</T></Link> },
 ];

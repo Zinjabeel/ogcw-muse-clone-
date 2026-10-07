@@ -2,15 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { EpisodeCard, Poster } from "../components/cards";
-import { EPISODES } from "../data/content";
+import { EpisodeCard, episodeLabel, Poster } from "../components/cards";
+import { EPISODES, formatDate } from "../data/content";
 import { T } from "@/components/site-text";
 
 export const Route = createFileRoute("/originals/")({
   head: () => ({
     meta: [
       { title: "OGCW Originals — OGCW" },
-      { name: "description", content: "Exclusive OGCW-made video: interviews, reportage, lists and analysis you won’t find anywhere else." },
+      { name: "description", content: "The conversations worth your time: long-form interviews and podcasts with rappers, streamers and stars, picked by OGCW." },
       { property: "og:title", content: "OGCW Originals" },
       { property: "og:type", content: "website" },
     ],
@@ -27,16 +27,16 @@ function Originals() {
 
   return (
     <SiteShell>
-      <PageIntro kicker="OGCW Originals" title="Originals" copy="Exclusive OGCW-made video: interviews, reportage, countdowns and short documentaries you won’t find anywhere else." />
+      <PageIntro kicker="Picked by OGCW" title="Originals" copy="The conversations worth your time: long-form interviews and podcasts with rappers, streamers and stars. Every episode plays from its creator’s official channel." />
       <main className="page-wrap pb-24">
         {featured && (
           <Link to="/originals/$slug" params={{ slug: featured.slug }} className="og-feature">
             <Poster episode={featured} size="lg" />
             <span className="og-feature-text">
-              <span className="og-kicker"><T>Up next ·</T> {featured.series}</span>
+              <span className="og-kicker"><T>Watch first ·</T> {episodeLabel(featured)}</span>
               <span className="og-lead-title"><T>{featured.title}</T></span>
               <span className="og-lead-deck"><T>{featured.summary}</T></span>
-              <span className="og-meta">{featured.kind} · {featured.length} · Coming soon</span>
+              <span className="og-meta">{featured.guest} · {featured.length} · {formatDate(featured.date)}</span>
               <span className="og-cta"><T k="originals.open">Open the episode</T> <ArrowRight size={16} aria-hidden="true" /></span>
             </span>
           </Link>
@@ -46,7 +46,7 @@ function Originals() {
           <div className="og-section-head">
             <h2 id="all-episodes" className="og-section-title"><T k="originals.all">All episodes</T></h2>
           </div>
-          <div className="og-filters" role="group" aria-label="Filter by series">
+          <div className="og-filters" role="group" aria-label="Filter by show">
             {SERIES.map((s) => (
               <button key={s} type="button" className="og-chip" aria-pressed={series === s} onClick={() => setSeries(s)}>{s}</button>
             ))}

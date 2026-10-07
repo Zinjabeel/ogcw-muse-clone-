@@ -2580,35 +2580,28 @@ a:hover > .og-img img, a:focus-visible > .og-img img { transform: scale(calc(var
 .og-sources a { font-size: 14px; line-height: 1.45; color: var(--ogcw-text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ogcw-accent) 70%, transparent); text-underline-offset: 3px; }
 .og-sources a:hover { color: var(--ogcw-accent); }
 
-/* OGCW Originals posters: the episode's still, darkened towards the bottom,
-   with the series and title set on it. The photo is always dark under the
-   type (whatever the theme), so the type is always light. */
+/* Originals posters: the show's own thumbnail (which carries its own
+   artwork and title), shaded only at the edges so the show and guest along
+   the top and the running time stay light on dark in any theme. */
 .og-poster { position: relative; display: flex; flex-direction: column; aspect-ratio: 16 / 9; padding: 16px 18px; overflow: hidden; border-radius: 8px; container-type: inline-size; background: #111111; color: #ebe8e2; font-family: var(--ogcw-ui); --play-bg: var(--ogcw-accent); --play-fg: var(--ogcw-bg); }
 .og-poster-top { display: flex; justify-content: space-between; gap: 4px 12px; padding-bottom: 10px; border-bottom: 1px solid rgb(235 232 226 / .24); font-size: 10px; font-weight: 700; line-height: 1.3; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 1px 8px rgb(0 0 0 / .4); }
 .og-poster-top > :last-child { opacity: .75; text-align: right; }
 .og-poster-still { position: absolute; inset: 0; z-index: 0; }
-.og-poster-still::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(8 8 8 / .88), rgb(8 8 8 / .3) 58%, rgb(8 8 8 / .55)); }
-.og-poster-title { text-shadow: 0 1px 14px rgb(0 0 0 / .35); }
+.og-poster-still::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(8 8 8 / .72), rgb(8 8 8 / 0) 30%, rgb(8 8 8 / 0) 72%, rgb(8 8 8 / .5)); }
 .og-poster > :not(.og-poster-still) { position: relative; z-index: 1; }
-.og-poster-title { max-width: calc(100% - 110px); margin-top: auto; font-family: var(--ogcw-display); font-size: 22px; font-size: 6.4cqi; line-height: 1.04; letter-spacing: -.01em; text-wrap: balance; }
 .og-poster > .og-poster-play { position: absolute; right: 16px; bottom: 16px; display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 14px 0 12px; border-radius: 999px; background: var(--play-bg); color: var(--play-fg); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; transition: transform .25s cubic-bezier(.2,.8,.2,1); }
 .og-poster > .og-poster-length { position: absolute; right: 16px; bottom: 16px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
 a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06); }
 .og-poster-lg { padding: 20px 22px; }
-.og-poster-lg .og-poster-title { max-width: 70%; font-size: 5.2cqi; }
 @media (min-width: 1024px) { .og-poster-lg { padding: 32px 36px; } .og-poster-lg .og-poster-top { font-size: 11px; } .og-poster-lg > .og-poster-length { right: 36px; bottom: 32px; } }
-/* In the player the title is the page's h1, just below */
-.og-player .og-poster-title { visibility: hidden; }
 /* Small posters (menu, search): stack the top row; the tiniest keep only the mark */
 @container (max-width: 260px) {
   .og-poster-top { flex-direction: column; }
   .og-poster-top > :last-child { text-align: left; }
-  .og-poster-title { max-width: none; font-size: 11cqi; }
   .og-poster > .og-poster-length, .og-poster > .og-poster-play { display: none; }
 }
-@container (max-width: 120px) { .og-poster-top > :last-child, .og-poster-title { display: none; } .og-poster-top { border: 0; font-size: 7px; letter-spacing: .06em; } }
+@container (max-width: 120px) { .og-poster-top > :last-child { display: none; } .og-poster-top { border: 0; font-size: 7px; letter-spacing: .06em; } }
 .search-result .og-poster { padding: 8px 7px; }
-@container (max-width: 560px) { .og-poster-lg .og-poster-title { max-width: 100%; font-size: 8cqi; } }
 
 .og-episode .og-poster, .bs-video-card .og-poster { margin-bottom: 14px; }
 .drawer-thumb-poster .og-poster { height: 100%; aspect-ratio: auto; padding: 10px 12px; border-radius: 0; }
@@ -2627,15 +2620,11 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .og-player-play svg { margin-left: 4px; }
 .og-player-button:hover .og-player-play, .og-player-button:focus-visible .og-player-play { transform: scale(1.08); }
 @media (min-width: 1024px) { .og-player-play { width: 96px; height: 96px; } }
-.og-player-notice { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 24px; border-radius: 8px; background: color-mix(in srgb, var(--ogcw-bg) 90%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--ogcw-text); text-align: center; animation: bs-fade .3s ease both; }
-.og-player-notice > svg { color: var(--ogcw-accent); }
-.og-player-notice-title { font-family: var(--ogcw-display); font-size: clamp(24px, 2.6vw, 34px); line-height: 1.1; }
-.og-player-notice-copy { max-width: 28rem; font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.5; color: var(--ogcw-text-2); }
-.og-player-notice-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 20px; }
-.og-player-notice-actions .og-cta { margin-top: 0; }
-@media (max-width: 639px) {
-  .og-player-notice { position: static; margin-top: 12px; border: 1px solid var(--ogcw-border); background: var(--ogcw-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
-}
+.og-player-frame { aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; background: #000; }
+.og-player-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.og-player-source { margin-top: 10px; font-family: var(--ogcw-ui); font-size: 13px; color: var(--ogcw-text-2); }
+.og-player-source a { display: inline-flex; align-items: center; gap: 3px; color: var(--ogcw-text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ogcw-accent) 70%, transparent); text-underline-offset: 3px; }
+.og-player-source a:hover { color: var(--ogcw-accent); }
 
 .og-episode-layout { display: grid; gap: 56px; margin-top: 40px; }
 @media (min-width: 1024px) {
@@ -2753,7 +2742,7 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .og-directory li:hover .og-directory-note svg { color: var(--ogcw-accent); transform: translateX(3px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .og-progress, .og-live .og-kicker::before, .og-news-top, .og-news-grid, .og-hits, .og-player-notice, .nav-more-menu { animation: none; }
+  .og-progress, .og-live .og-kicker::before, .og-news-top, .og-news-grid, .og-hits, .nav-more-menu { animation: none; }
   .og-progress { display: none; }
   .og-img img, .og-product-photo img, .og-poster-play, .og-player-play { transition: none; }
 }

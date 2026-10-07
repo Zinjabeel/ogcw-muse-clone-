@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import type { Article, Episode, Hit, Photo, Product, SectionId, Shop, Song } from "@/data/content";
-import { formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
+import { formatDate, formatPrice, SECTIONS, spotifyTrack, youtubeThumb, youtubeUrl } from "@/data/content";
 import { SpotifyIcon } from "./spotify";
 import { StoryMeta } from "./story-meta";
 import { S, T } from "./site-text";
@@ -55,17 +55,16 @@ export function StoryRow({ story, index }: { story: Article; index?: number }) {
   );
 }
 
-/** Originals poster: the episode’s still, darkened, with the series and title
- *  set on it. The play pill carries the running time. */
+/** Originals poster: the show’s own thumbnail, with the show and guest along
+ *  the top. The play pill carries the running time. */
 export function Poster({ episode, size = "md", play = true }: { episode: Episode; size?: "md" | "lg"; play?: boolean }) {
   return (
     <span className={`og-poster og-poster-${size}`}>
       <Img photo={episode.still} className="og-poster-still" />
       <span className="og-poster-top">
-        <span className="og-poster-mark"><T k="cards.originals">OGCW Originals</T></span>
-        <span>{episode.series} · Ep. {episode.number}</span>
+        <span className="og-poster-mark">{episode.series}</span>
+        <span>{episode.guest}</span>
       </span>
-      <span className="og-poster-title"><T>{episode.title}</T></span>
       {play ? (
         <span className="og-poster-play">
           <Play size={size === "lg" ? 16 : 13} fill="currentColor" strokeWidth={0} aria-hidden="true" />
@@ -78,9 +77,9 @@ export function Poster({ episode, size = "md", play = true }: { episode: Episode
   );
 }
 
-/** "Series · format", without repeating a series named after its format */
+/** "Show · channel", without repeating a show that is its own channel */
 export const episodeLabel = (episode: Episode) =>
-  episode.series.toLowerCase() === episode.kind.toLowerCase() ? episode.series : `${episode.series} · ${episode.kind}`;
+  episode.series.toLowerCase() === episode.channel.toLowerCase() ? episode.series : `${episode.series} · ${episode.channel}`;
 
 export function EpisodeCard({ episode }: { episode: Episode }) {
   return (
@@ -88,7 +87,7 @@ export function EpisodeCard({ episode }: { episode: Episode }) {
       <Poster episode={episode} />
       <span className="og-kicker">{episodeLabel(episode)}</span>
       <span className="og-card-title"><T>{episode.title}</T></span>
-      <span className="og-meta">{episode.length} · Coming soon</span>
+      <span className="og-meta">{episode.length} · {formatDate(episode.date)}</span>
     </Link>
   );
 }

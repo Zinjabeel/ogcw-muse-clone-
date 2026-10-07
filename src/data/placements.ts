@@ -62,8 +62,8 @@ export const SLOTS = [
   { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Two headlines under it", max: 2, defaults: ["twitchcon-san-diego-2026", "worlds-2026-north-america"], section: "streaming" },
 
   // Culture & fashion
-  { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["courreges-drew-henry-debut"], section: "culture" },
-  { id: "culture-more", area: "Culture & fashion", name: "More culture", note: "Four stories beside it", max: 4, defaults: ["saint-laurent-ss27-vaccarello", "sneaker-drops-late-september-2026", "lego-one-piece-netflix", "coyote-vs-acme-digital-release"], section: "culture" },
+  { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["complexcon-2026-playboi-carti-ten-years"], section: "culture" },
+  { id: "culture-more", area: "Culture & fashion", name: "More culture", note: "Four stories beside it", max: 4, defaults: ["rock-hall-2026-wu-tang-clan-queen-latifah", "megan-thee-stallion-marie-claire-act-iii", "saint-laurent-ss27-vaccarello", "tyla-apop-world-tour-paris"], section: "culture" },
 
   // The Explore page (not the front page, so its stories may show elsewhere)
   { id: "explore-pick", area: "Explore page", name: "Editor’s pick", note: "The big tile on the Explore page", max: 1, defaults: ["tokyo-game-show-2026-typhoon"], list: true },

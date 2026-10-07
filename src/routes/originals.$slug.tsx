@@ -1,21 +1,21 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Bell, Play } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Play } from "lucide-react";
 import { useState } from "react";
 import { SiteShell } from "../components/ogcw-layout";
-import { EpisodeCard, Poster, StoryRow } from "../components/cards";
-import { EPISODES, getEpisode, type Episode } from "../data/content";
+import { EpisodeCard, episodeLabel, Poster, StoryRow } from "../components/cards";
+import { EPISODES, formatDate, getEpisode, youtubeUrl, type Episode } from "../data/content";
 import { useStories } from "../lib/stories";
 import { T } from "@/components/site-text";
 
-// One OGCW Originals episode: the player, then the episode text, chapters and
-// credits, related stories, and "Latest episodes" to keep watching.
+// One Originals episode: the player, then our note on why it is worth your
+// time, its chapters and credits, related stories, and more to watch.
 export const Route = createFileRoute("/originals/$slug")({
   beforeLoad: ({ params }) => {
     if (!getEpisode(params.slug)) throw notFound();
   },
   head: ({ params }) => {
     const episode = getEpisode(params.slug);
-    const title = episode ? `${episode.title} — OGCW Originals` : "OGCW Originals";
+    const title = episode ? `${episode.title} — ${episode.series} | OGCW Originals` : "OGCW Originals";
     return {
       meta: [
         { title },
@@ -28,27 +28,26 @@ export const Route = createFileRoute("/originals/$slug")({
   component: EpisodePage,
 });
 
-// No episodes are online yet, so the player shows a premiere notice rather
-// than pretending to play. TODO: embed the real video once it exists.
+// The show's thumbnail until you press play, then the creator's own YouTube
+// player (the privacy-enhanced embed, which sets no cookies until it plays).
 function Player({ episode }: { episode: Episode }) {
-  const [notice, setNotice] = useState(false);
+  const [playing, setPlaying] = useState(false);
   return (
     <div className="og-player">
-      <button type="button" className="og-player-button" onClick={() => setNotice(true)} aria-label={`Play ${episode.title}`}>
-        <Poster episode={episode} size="lg" play={false} />
-        <span className="og-player-play" aria-hidden="true"><Play size={30} fill="currentColor" strokeWidth={0} /></span>
-      </button>
-      {notice && (
-        <div className="og-player-notice" role="status">
-          <Bell size={22} aria-hidden="true" />
-          <p className="og-player-notice-title"><T>This episode premieres soon</T></p>
-          <p className="og-player-notice-copy"><T>Sign up to the newsletter and we’ll tell you the moment it’s live.</T></p>
-          <div className="og-player-notice-actions">
-            <Link to="/" hash="newsletter-title" className="og-cta"><T>Get notified</T></Link>
-            <button type="button" className="og-text-button" onClick={() => setNotice(false)}>Close</button>
-          </div>
+      {playing ? (
+        <div className="og-player-frame">
+          <iframe src={`https://www.youtube-nocookie.com/embed/${episode.youtube}?autoplay=1&rel=0`} title={`${episode.title} (${episode.series})`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
         </div>
+      ) : (
+        <button type="button" className="og-player-button" onClick={() => setPlaying(true)} aria-label={`Play ${episode.title}`}>
+          <Poster episode={episode} size="lg" play={false} />
+          <span className="og-player-play" aria-hidden="true"><Play size={30} fill="currentColor" strokeWidth={0} /></span>
+        </button>
       )}
+      <p className="og-player-source">
+        <T>Plays from</T> {episode.channel} <T>on YouTube</T> ·{" "}
+        <a href={youtubeUrl(episode.youtube)} target="_blank" rel="noopener noreferrer"><T>Watch on YouTube</T> <ArrowUpRight size={13} aria-hidden="true" /></a>
+      </p>
     </div>
   );
 }
@@ -60,13 +59,14 @@ function EpisodePage() {
   if (!episode) return null;
   const more = EPISODES.filter((e) => e.slug !== episode.slug);
   const related = episode.related.map(stories.get).filter((a) => a !== undefined);
+  const credits: [string, string][] = [["Show", episode.series], ["Channel", episode.channel], ["Host", episode.host], ["Guest", episode.guest], ["First published", formatDate(episode.date)]];
 
   return (
     <SiteShell>
       <main>
         <div className="page-wrap og-episode-page">
           <nav className="og-crumbs" aria-label="Breadcrumb">
-            <Link to="/originals"><T>OGCW Originals</T></Link>
+            <Link to="/originals"><T>Originals</T></Link>
             <span aria-hidden="true">/</span>
             <span><T>{episode.series}</T></span>
           </nav>
@@ -75,24 +75,28 @@ function EpisodePage() {
 
           <div className="og-episode-layout">
             <div>
-              <p className="og-kicker">{episode.series} · Episode {episode.number}</p>
+              <p className="og-kicker">{episodeLabel(episode)}</p>
               <h1 className="og-article-title og-episode-title"><T>{episode.title}</T></h1>
-              <p className="og-meta og-episode-meta">{episode.kind} · {episode.length} · Coming soon</p>
+              <p className="og-meta og-episode-meta">{episode.kind} · {episode.length} · {formatDate(episode.date)}</p>
               <div className="og-prose">
                 <p className="og-lede"><T>{episode.summary}</T></p>
                 {episode.body.map((text, index) => <p key={index}>{text}</p>)}
               </div>
             </div>
             <aside className="og-episode-aside">
-              <p className="og-aside-title"><T>Chapters</T></p>
-              <ol className="og-chapters">
-                {episode.chapters.map(([time, label]) => (
-                  <li key={time}><span className="og-chapter-time">{time}</span>{label}</li>
-                ))}
-              </ol>
+              {episode.chapters.length > 0 && (
+                <>
+                  <p className="og-aside-title"><T>Chapters</T></p>
+                  <ol className="og-chapters">
+                    {episode.chapters.map(([time, label]) => (
+                      <li key={time}><span className="og-chapter-time">{time}</span>{label}</li>
+                    ))}
+                  </ol>
+                </>
+              )}
               <p className="og-aside-title"><T>Credits</T></p>
               <dl className="og-credits">
-                {episode.credits.map(([term, value]) => (
+                {credits.map(([term, value]) => (
                   <div key={term}><dt>{term}</dt><dd>{value}</dd></div>
                 ))}
               </dl>

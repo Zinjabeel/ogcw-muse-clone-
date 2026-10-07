@@ -156,7 +156,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>About OGCW</h2>
         <Faq items={[
           ["What is OGCW?", "OGCW, One Great Culture World, is an independent platform for culture and the stories around it. The idea is simple: bring culture and what’s happening right now, from all over the world, together in one place."],
-          ["What do you cover?", <>Music, games, streaming and culture, from fashion and film to television and sneakers, plus OGCW Originals, our own video series. See <Link to="/about">About OGCW</Link> for more.</>],
+          ["What do you cover?", <>Music, games, streaming and culture, from fashion and film to television and sneakers, plus Originals, our pick of the best interviews and podcasts with rappers, streamers and stars. See <Link to="/about">About OGCW</Link> for more.</>],
           ["Who writes OGCW?", <>The OGCW desk. Every story carries the name of the writer, and the <Link to="/about">About page</Link> lists the desk and what each writer covers.</>],
           ["Where do your facts come from?", "Every story ends with a Sources list: the reporting, official announcements and records it is based on. Our stories are written in our own words, and we link to the original sources so you can check them."],
         ]} />
@@ -318,7 +318,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>OGCW at a glance</h2>
         <ul className="info-list">
           <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming, culture and sports</li>
-          <li>{EPISODES.length} episodes of OGCW Originals, our own video series</li>
+          <li>{EPISODES.length} Originals: the best interviews and podcasts, picked by us</li>
           <li>The OGCW Shop: an edit from {SHOPS.length} retailers</li>
           <li>Available in four colour themes, free to read, with no account needed</li>
         </ul>
@@ -390,7 +390,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <li>use the site for anything unlawful, or to harass or harm anyone.</li>
         </ul>
         <h2>3. Our content</h2>
-        <p>The text, design and OGCW Originals are ours, or used with permission. Photos are credited where they appear and on our <Page slug="credits">photo credits</Page> page, and remain the property of their photographers under their licences. Names and logos of other brands belong to their owners.</p>
+        <p>The text and design are ours, or used with permission. The interviews and podcasts on our Originals page are embedded from their creators’ official YouTube channels and belong to them. Photos are credited where they appear and on our <Page slug="credits">photo credits</Page> page, and remain the property of their photographers under their licences. Names and logos of other brands belong to their owners.</p>
         <h2>4. What you send us</h2>
         <p>When you send us a tip, a submission, a note under a story or a vote, you confirm that you have the right to share it and that it isn’t unlawful or harmful. You allow us to use it to run OGCW and to report stories. We won’t publish your name or your words without asking, except where you have sent them to us for publication.</p>
         <h2>5. Polls and questions</h2>
@@ -558,7 +558,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           ))}
         </ul>
         <p>Video thumbnails (streamers, music videos, and trailers and showcases from Capcom, PlayStation, Xbox, Nintendo, Netflix, Ketchup Entertainment, CD Projekt Red, Mojang and the ONE PIECE channel) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify. The Nike, Adidas, StockX and Uniqlo logos are their owners’ trademarks, shown to link to their shops (logo files via Wikimedia Commons).</p>
-        <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
+        <p>Shop, hero and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>
     ),

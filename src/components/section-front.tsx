@@ -84,7 +84,7 @@ export function SectionFront({ section }: { section: SectionId }) {
         {more.length > 0 && (
           <section className="og-block" aria-labelledby={`${section}-originals`}>
             <div className="og-section-head">
-              <h2 id={`${section}-originals`} className="og-section-title"><T k="section.originals">From OGCW Originals</T></h2>
+              <h2 id={`${section}-originals`} className="og-section-title"><T k="section.originals">From Originals</T></h2>
               <Link to="/originals" className="og-more-link"><T k="section.originals.all">All originals</T></Link>
             </div>
             <div className="og-grid-3">

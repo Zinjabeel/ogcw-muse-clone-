@@ -12,7 +12,7 @@ import { SOCIALS, SocialIcon } from "@/components/socials";
 const SOCIAL_NOTES: Record<(typeof SOCIALS)[number]["name"], string> = {
   Instagram: "Photos from the shows, the streets and the studio",
   TikTok: "The day’s stories in a minute",
-  YouTube: "OGCW Originals, interviews and short docs",
+  YouTube: "Clips, interviews and short videos",
   X: "Breaking news as it happens",
 };
 
@@ -45,7 +45,7 @@ const deskList = (inSection: (id: SectionId) => Article[]) => [
   { to: "/games", name: "Games", note: "Launches, sales and the showcases ahead", count: `${inSection("games").length} stories` },
   { to: "/streaming", name: "Streaming", note: "The creators and records on Twitch, YouTube and Kick", count: `${inSection("streaming").length} stories` },
   { to: "/culture", name: "Culture", note: "Fashion, television and sneakers", count: `${inSection("culture").length} stories` },
-  { to: "/originals", name: "Originals", note: "Our own interviews, reportage and short docs", count: `${EPISODES.length} episodes` },
+  { to: "/originals", name: "Originals", note: "The best interviews and podcasts with rappers, streamers and stars", count: `${EPISODES.length} episodes` },
   { to: "/shop", name: "Shop", note: "The pieces behind the stories, picked by our desk", count: `${SHOPS.length} shops` },
 ] as const;
 
