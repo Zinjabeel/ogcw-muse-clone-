@@ -11,7 +11,7 @@
 :root[data-theme="gold"] .sx [data-band="gold"] { background: linear-gradient(135deg, #e6c36a 0%, #d4aa4c 60%, #c99c3e 100%); }
 
 /* The shop bar */
-.sx-bar { position: sticky; top: 56px; z-index: 40; background: #0b0b0b; color: #efece6; box-shadow: 0 1px 0 #222; }
+.sx-bar { position: sticky; top: calc(56px * var(--unzoom, 1)); z-index: 40; background: #0b0b0b; color: #efece6; box-shadow: 0 1px 0 #222; }
 .sx-bar-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: clamp(16px, 3vw, 40px); width: min(calc(100% - 2 * clamp(16px, 4vw, 64px)), 1480px); margin-inline: auto; padding-block: 14px; }
 .sx-wordmark { font-family: var(--ogcw-display); font-size: 24px; font-weight: 600; letter-spacing: .08em; color: #efece6; white-space: nowrap; }
 .sx-wordmark span { color: var(--sx-gold); font-style: italic; letter-spacing: 0; }

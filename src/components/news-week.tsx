@@ -176,9 +176,8 @@ function BigNews({ stories }: { stories: Article[] }) {
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
     >
       <div className="bs-cluster-head">
-        <p className="bs-cluster-tag"><span className="bs-bignews-pulse" aria-hidden="true" /><T k="home.week.big.tag">Big news</T></p>
+        <p className="bs-cluster-tag"><T k="home.week.big.tag">Big news</T></p>
         <h4 id="big-news-title" className="bs-cluster-title"><T k="home.week.big.title">The stories everyone is talking about</T></h4>
-        <p className="bs-cluster-intro"><T k="home.week.big.intro">Six of the week’s biggest stories, three at a time. Each place moves on to the next every few seconds; point at one to keep it still.</T></p>
       </div>
       <ol className="bs-cluster-row">
         {places.map((queue, place) => {

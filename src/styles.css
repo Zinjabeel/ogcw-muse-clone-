@@ -1575,10 +1575,12 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
 }
 
 /* The connected story under the live story */
-.bs-linked { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-top: var(--spacing-16); padding: 12px 14px; border: 1px solid var(--ogcw-border); border-radius: 10px; background: color-mix(in srgb, var(--ogcw-surface) 70%, transparent); transition: border-color .2s ease; }
-.bs-linked-tag { padding: 4px 8px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .08em; text-transform: uppercase; }
-.bs-linked-title { font-family: var(--ogcw-display); font-size: 16px; line-height: 1.25; }
-.bs-linked svg { color: var(--ogcw-text-2); transition: transform .2s ease, color .2s ease; }
+/* A label over the headline, an arrow on the right, and a gold rule down the
+   left edge to tie it to the story above */
+.bs-linked { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "tag arrow" "title arrow"; align-items: center; gap: 6px 14px; margin-top: var(--spacing-16); padding: 12px 14px 13px 16px; border: 1px solid var(--ogcw-border); border-left: 3px solid var(--ogcw-accent); transition: border-color .2s ease; }
+.bs-linked-tag { grid-area: tag; font-size: 10.5px; font-weight: 800; line-height: 1; letter-spacing: .14em; text-transform: uppercase; color: var(--ogcw-accent); }
+.bs-linked-title { grid-area: title; font-family: var(--ogcw-display); font-size: 16.5px; line-height: 1.25; text-wrap: pretty; }
+.bs-linked svg { grid-area: arrow; color: var(--ogcw-text-2); transition: transform .2s ease, color .2s ease; }
 .bs-linked:hover { border-color: var(--ogcw-accent); }
 .bs-linked:hover svg { color: var(--ogcw-accent); transform: translateX(3px); }
 
@@ -1595,10 +1597,10 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
 /* Connected: three stories in a numbered row */
 .bs-cluster { margin-top: var(--spacing-40); padding-top: var(--spacing-32); border-top: 1px solid var(--ogcw-border); }
 .bs-cluster-head { display: grid; gap: 10px; max-width: 46rem; margin-bottom: var(--spacing-24); }
-.bs-cluster-tag { width: fit-content; padding: 5px 11px; border: 1px solid var(--ogcw-accent); border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-accent); }
+.bs-cluster-tag { display: flex; align-items: center; gap: 10px; width: fit-content; font-size: 12px; font-weight: 800; line-height: 1; letter-spacing: .16em; text-transform: uppercase; color: var(--ogcw-accent); }
+.bs-cluster-tag::before { content: ""; width: 22px; height: 3px; background: currentColor; }
 .bs-cluster-title { font-family: var(--ogcw-display); font-size: 28px; font-weight: 400; line-height: 1.1; letter-spacing: -.005em; text-wrap: balance; }
 @media (min-width: 768px) { .bs-cluster-title { font-size: 34px; } }
-.bs-cluster-intro { font-family: var(--ogcw-serif); font-size: 16px; line-height: 1.5; color: var(--ogcw-text-2); }
 .bs-cluster-row { display: grid; gap: var(--spacing-32); }
 .bs-cluster-row > li + li { padding-top: var(--spacing-32); border-top: 1px solid var(--ogcw-border); }
 @media (min-width: 768px) {
@@ -1607,9 +1609,6 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
   .bs-cluster-row > li + li::before { content: ""; position: absolute; top: 0; bottom: 0; left: -24px; width: 1px; background: var(--ogcw-border); }
 }
 /* Big news: each place stacks its stories in the same spot and cross-fades */
-.bs-bignews .bs-cluster-tag { display: inline-flex; align-items: center; gap: 8px; background: var(--ogcw-accent); color: var(--ogcw-bg); }
-.bs-bignews-pulse { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: bs-pulse 1.6s ease-in-out infinite; }
-@keyframes bs-pulse { 50% { opacity: .25; } }
 .bs-bignews-stack { display: grid; }
 .bs-bignews-card { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity .9s ease, visibility 0s linear .9s; }
 .bs-bignews-card.is-on { opacity: 1; visibility: visible; transition: opacity .9s ease, visibility 0s; }
@@ -1618,7 +1617,7 @@ a:is(:hover, :focus-visible) :is(.bs-spotify, .og-spotify) { background: var(--o
 .bs-bignews-dots { display: flex; gap: 6px; margin-top: 14px; }
 .bs-bignews-dots i { width: 18px; height: 3px; border-radius: 2px; background: var(--ogcw-border); transition: background-color .6s ease, width .6s ease; }
 .bs-bignews-dots i.is-on { width: 30px; background: var(--ogcw-accent); }
-@media (prefers-reduced-motion: reduce) { .bs-bignews-card, .bs-bignews-card .bs-photo-more img { transition: none; } .bs-bignews-pulse { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .bs-bignews-card, .bs-bignews-card .bs-photo-more img { transition: none; } }
 .bs-cluster-step { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 6px; border-radius: 50%; background: var(--ogcw-accent); color: var(--ogcw-bg); font-size: 11px; letter-spacing: 0; vertical-align: 1px; }
 
 /* ------------------------------------------------------------------
@@ -2037,7 +2036,7 @@ a:hover > .og-img img, a:focus-visible > .og-img img { transform: scale(calc(var
 .og-label { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 4px; font: 800 9.5px/1 var(--ogcw-ui); letter-spacing: .12em; }
 .og-label-certified { background: var(--ogcw-accent); color: var(--ogcw-bg); }
 .og-label-trendiest { border: 1px solid var(--ogcw-accent); color: var(--ogcw-accent); }
-.og-label-newest { background: color-mix(in srgb, var(--ogcw-text) 12%, transparent); color: var(--ogcw-text); }
+.og-label-newest { border: 1px solid color-mix(in srgb, var(--ogcw-text) 32%, transparent); color: var(--ogcw-text-2); }
 .og-rating { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--ogcw-text); }
 .og-rating svg { color: var(--ogcw-accent); }
 .og-rating small { font-weight: 500; font-size: inherit; color: var(--ogcw-text-2); }
@@ -3252,4 +3251,21 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 }
 @media (max-width: 1023px) {
   .impact-door-subscribe .impact-door-photo::after { background: linear-gradient(to top, rgb(0 0 0 / .92) 0%, rgb(0 0 0 / .62) 55%, rgb(0 0 0 / .4) 100%); }
+}
+
+/* ------------------------------------------------------------------
+   Desktop scale (7 Oct 2026). On laptops and big screens the page itself
+   (everything under the header and the hero, and the footer) is shown at
+   90%, so more fits on the screen and nothing feels oversized. The column
+   keeps its width on screen (--page-width is raised to match), so only the
+   type, photos and spacing get smaller. The header, the hero and the
+   full-screen layers (menu, search, studio, cookie panel) keep their size.
+   Sticky bars that must sit flush under the header use --unzoom.
+   ------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  .site-root > :not(.bg-glow, .site-header-space, .site-header, .impact, .cover, .gallery, .gallery2, dialog, .og-progress, .cookie-banner) {
+    zoom: .9;
+    --unzoom: 1.1112;
+    --page-width: max(1334px, 74%);
+  }
 }

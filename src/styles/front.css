@@ -9,7 +9,6 @@
   --fx-gold: #e2b84f;
   --fx-gold-ink: #0b0b0b;
   --fx-pad: clamp(52px, 6vw, 96px);
-  --fx-gutter: clamp(16px, 4vw, 64px);
 }
 :root[data-theme="gold"] [data-band="light"] {
   --ogcw-bg: #ffffff;
@@ -53,8 +52,19 @@
 
 .fx-band { position: relative; padding-block: var(--fx-pad); background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-serif); }
 :root[data-theme="gold"] [data-band="grey"].fx-band { background: radial-gradient(ellipse 70% 120% at 15% 0%, rgb(255 255 255 / .45), transparent 60%), radial-gradient(ellipse 60% 100% at 90% 100%, rgb(0 0 0 / .07), transparent 65%), #d9d9d6; }
-.fx-wrap { width: min(calc(100% - 2 * var(--fx-gutter)), 1440px); margin-inline: auto; }
+/* One column for the whole front page: the same width and edges as This
+   week, the About/newsletter band and the footer (.page-wrap), so every
+   section starts and ends on the same lines */
+.fx-wrap { width: min(calc(100% - 32px), var(--page-width)); margin-inline: auto; }
+@media (min-width: 1024px) { .fx-wrap { width: min(calc(100% - 64px), var(--page-width)); } }
+@media (min-width: 1280px) { .front .fx-news .bs-band-front { margin-inline: 0; } }
 .front [id] { scroll-margin-top: 80px; }
+
+/* Photos on the front page are all treated the same: square, flat, no shadow */
+.front .bs-photo { border-radius: 0; box-shadow: none; }
+
+/* The news bar's Search reads like the links beside it */
+.front .fx-newsbar-search { padding-block: 12px; font-size: 12px; font-weight: 500; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); }
 
 /* Heads, labels, links and buttons (also used by the shop and the forum) */
 .fx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: clamp(24px, 3vw, 40px); padding-bottom: 16px; border-bottom: 2px solid var(--ogcw-text); }
