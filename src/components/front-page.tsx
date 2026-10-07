@@ -291,13 +291,16 @@ function MoreNews() {
 // Six picks in two rows of three, hoodies on top and sneakers below: each
 // card is the photo alone, upright, leaning towards the pointer with a sheen
 // that follows it (src/components/card-hover.tsx), and under it the brand
-// and a link to browse that brand. The full shop is on /shop.
+// and a link to browse that brand. Under the cards, three stories about the
+// brands and releases on show ("Drop news", chosen in the studio). The full
+// shop is on /shop.
 const SHOWCASE = [
   "nike-club-fleece-hoodie-black", "supreme-box-logo-hoodie-red", "carhartt-wip-heart-hoodie-grey",
   "jordan-4-retro-grey", "nb-2002r-brown", "converse-chuck-hi-navy",
 ].flatMap((id) => getProduct(id) ?? []);
 
 function ShopStrip() {
+  const news = useStories().slot("shop-news");
   return (
     <Band tone="grey" name="Shop window" id="shop-strip" className="fx-shop">
       <h2 id="shop-strip-title" className="fx-shop-title"><T k="front.shop.title2">Featured drops</T></h2>
@@ -317,6 +320,24 @@ function ShopStrip() {
           );
         })}
       </ul>
+      {news.length > 0 && (
+        <section className="fx-shop-news" aria-labelledby="shop-news-title">
+          <p id="shop-news-title" className="fx-shop-news-head"><T k="front.shop.news">Drop news</T></p>
+          <ul>
+            {news.map((story) => (
+              <li key={story.slug}>
+                <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-shop-news-item">
+                  <BsPhoto photo={story.photo} className="fx-photo fx-shop-news-thumb" />
+                  <span>
+                    <span className="fx-label"><S story={story} f="kicker" /></span>
+                    <span className="fx-shop-news-title"><S story={story} f="title" /></span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Band>
   );
 }

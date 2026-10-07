@@ -132,6 +132,15 @@
 .fx-shopcard[data-ch-tilt]::after { opacity: 1; }
 .fx-shopcard[data-ch-tilt], .fx-shopcard:focus-visible { box-shadow: 0 0 0 1px rgb(226 184 79 / .55), 0 0 30px -6px rgb(226 184 79 / .5), 0 40px 60px -28px rgb(0 0 0 / .6); outline: none; }
 .fx-shopcard-brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 4px; color: #0a0a0a; font-family: var(--ogcw-display); font-size: 17px; font-weight: 600; }
+/* Drop news: three stories about the brands and releases above */
+.fx-shop-news { max-width: 1000px; margin: clamp(30px, 3.2vw, 42px) auto 0; padding-top: 18px; border-top: 1px solid rgb(10 10 10 / .14); }
+.fx-shop-news-head { margin: 0 0 14px; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-align: center; text-transform: uppercase; color: var(--ogcw-accent); }
+.fx-shop-news ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 28px; margin: 0; padding: 0; list-style: none; }
+.fx-shop-news-item { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px; align-items: center; color: #0a0a0a; }
+.fx-shop-news-item > span:last-child { display: grid; gap: 4px; }
+.fx-shop-news-thumb { width: 84px; aspect-ratio: 1; border-radius: 10px; }
+.fx-shop-news-title { display: -webkit-box; overflow: hidden; font-family: var(--ogcw-display); font-size: 15.5px; font-weight: 600; line-height: 1.25; -webkit-line-clamp: 3; -webkit-box-orient: vertical; transition: color .2s ease; }
+.fx-shop-news-item:hover .fx-shop-news-title, .fx-shop-news-item:focus-visible .fx-shop-news-title { color: var(--ogcw-accent); }
 .fx-shopcard-go { display: inline-flex; align-items: center; gap: 5px; font-family: var(--ogcw-ui); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #45453f; transition: gap .2s ease, color .2s ease; }
 .fx-shopcard-brand:hover .fx-shopcard-go { gap: 9px; color: #000; }
 .fx-shopcard-brand:hover > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
@@ -240,6 +249,7 @@
   .fx-music-row, .fx-music-vote { grid-template-columns: minmax(0, 1fr); flex-direction: column; align-items: flex-start; }
   .fx-culture-grid { grid-template-columns: 1fr 1fr; }
   .fx-culture-grid > .fx-tile-xl { grid-column: 1 / -1; grid-row: auto; }
+  .fx-shop-news ul { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .fx-desks, .fx-culture-grid, .fx-ex-more-row { grid-template-columns: 1fr 1fr; gap: 14px; }

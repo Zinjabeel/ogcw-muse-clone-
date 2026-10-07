@@ -39,7 +39,7 @@ function coverLines(title: string): string[] {
 type RailItem = { id: string; kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string; story?: Article };
 
 const railStory = (story: Article): RailItem => ({ id: story.slug, kicker: story.kicker, title: story.title, meta: SECTIONS[story.section].label, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug: story.slug, story });
-const LIVE_ITEM: RailItem = { id: "live", kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
+const LIVE_ITEM: RailItem = { id: "live", kicker: "Live", title: LIVE.title, meta: LIVE.next ? `${LIVE.next} · Tour dates` : "Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
   const inner = (

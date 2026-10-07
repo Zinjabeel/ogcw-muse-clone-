@@ -55,6 +55,7 @@ import galleriaPhoto from "../assets/news/galleria-milano.jpg";
 import courregesPhoto from "../assets/news/courreges-1965.jpg";
 import haskinsPhoto from "../assets/news/dennis-haskins.jpg";
 import { unsplash, youtubeThumb, youtubeUrl } from "./media";
+import { ARIRANG_TOUR, stopLabel, upcomingStops } from "./tours";
 import { STORY_BODIES } from "./stories";
 
 export type Crop = { pos: string; zoom?: number };
@@ -1129,11 +1130,14 @@ export const SONGS: Song[] = [
   { artist: "LISA", title: "Dream", album: "Alter Ego", year: 2025, note: "Best Pop at the 2026 VMAs, for the short film with Kentaro Sakaguchi.", spotify: "5fFdUV9NMDxPjgkS54My63", cover: spotifyCover("4a5dbcceaff49f85a1f1e756") },
 ];
 
-// The live listing on the Music front
+// The live listing on the Music front (and the hero's "Also on OGCW" row):
+// the next stop on the tour, worked out from the dates, then the three after
+const [btsNext, ...btsLater] = upcomingStops(ARIRANG_TOUR, new Date().toISOString().slice(0, 10));
 export const LIVE = {
   kicker: "Live · Tickets",
   title: "BTS: Arirang World Tour",
-  meta: "Bogotá 2–3 Oct · Lima · Santiago · La Plata · São Paulo",
+  meta: btsNext ? [stopLabel(btsNext, "short"), ...btsLater.slice(0, 3).map((stop) => stop.city)].join(" · ") : "Tour dates",
+  next: btsNext ? stopLabel(btsNext) : "",
   url: "https://ibighit.com/bts/eng/",
   photo: { src: btsStadiumPhoto, alt: "A full stadium in Paris waiting for BTS", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 55%" } } satisfies Photo,
 };

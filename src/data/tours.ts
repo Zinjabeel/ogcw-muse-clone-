@@ -6,6 +6,21 @@
 export type TourStop = { city: string; country: string; venue: string; dates: string[]; attendance?: string; gross?: string };
 export type TourLeg = { name: string; stops: TourStop[] };
 
+/** The stops still to play, the first of them possibly playing today (ISO date) */
+export const upcomingStops = (tour: { legs: TourLeg[] }, today: string) =>
+  tour.legs.flatMap((leg) => leg.stops).filter((stop) => stop.dates[stop.dates.length - 1]! >= today);
+
+/** "Lima, 7–10 October" (long) or "Lima 7–10 Oct" (short) */
+export function stopLabel(stop: TourStop, style: "long" | "short" = "long") {
+  const month = new Intl.DateTimeFormat("en-GB", { month: style, timeZone: "UTC" });
+  const first = new Date(stop.dates[0]!), last = new Date(stop.dates[stop.dates.length - 1]!);
+  const day = (d: Date) => d.getUTCDate();
+  const span = stop.dates.length === 1 ? `${day(first)} ${month.format(first)}`
+    : first.getUTCMonth() === last.getUTCMonth() ? `${day(first)}–${day(last)} ${month.format(last)}`
+    : `${day(first)} ${month.format(first)} – ${day(last)} ${month.format(last)}`;
+  return style === "long" ? `${stop.city}, ${span}` : `${stop.city} ${span}`;
+}
+
 export const ARIRANG_TOUR = {
   name: "Arirang World Tour",
   artist: "BTS",

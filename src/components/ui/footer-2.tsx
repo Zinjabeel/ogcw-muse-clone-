@@ -26,7 +26,7 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
     title: "Company",
     links: [
       { label: "About OGCW", page: "/about" },
-      { label: "OGCW Originals", page: "/originals" },
+      { label: "Originals", page: "/originals" },
       { label: "Forum", page: "/forum" },
       { label: "Press", info: "press" },
       { label: "Brand", info: "brand" },
