@@ -1,13 +1,14 @@
-import { Check } from "lucide-react";
-import { useEffect, useState, type CSSProperties } from "react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { RAP_POLL, RAP_POLL_CHOICES, type RapPollChoice } from "@/data/content";
 import { getRapPoll, voteRapPoll, type RapPollCounts } from "@/lib/rap-poll";
 import { storePreference } from "@/lib/consent";
 import { T } from "./site-text";
 
-// The No. 1 rapper vote on the rap desk: five names, each with the case for
-// them. After voting you see how everyone has voted so far, as bars behind
-// the names. Counts are kept by src/lib/rap-poll.ts.
+// The No. 1 rapper vote on the rap desk: twelve names in a sliding row with
+// an arrow on each side, each with the case for them. After voting you see
+// how everyone has voted so far, as bars behind the names. Counts are kept
+// by src/lib/rap-poll.ts.
 
 const STORAGE_KEY = "ogcw-vote-no1-rapper";
 
@@ -64,6 +65,16 @@ export function RapPoll() {
     }
   };
 
+  // The arrows move the row on by a screenful of names, wrapping at the ends
+  const track = useRef<HTMLOListElement>(null);
+  const slide = (direction: 1 | -1) => {
+    const row = track.current;
+    if (!row) return;
+    const end = row.scrollWidth - row.clientWidth;
+    const next = row.scrollLeft + direction * row.clientWidth;
+    row.scrollTo({ left: next > end + 4 ? 0 : next < -4 ? end : next, behavior: "smooth" });
+  };
+
   const total = counts ? Object.values(counts).reduce((sum, value) => sum + value, 0) : 0;
   const share = counts ? shares(counts, total) : null;
   const leader = counts ? RAP_POLL_CHOICES.reduce((best, choice) => (counts[choice] > counts[best] ? choice : best)) : null;
@@ -71,7 +82,9 @@ export function RapPoll() {
 
   return (
     <div className="poll">
-      <ol className="poll-list" aria-label="The five names on the ballot">
+      <div className="poll-rail">
+      <button type="button" className="poll-arrow poll-arrow-prev" aria-label="Previous names" onClick={() => slide(-1)}><ChevronLeft size={18} aria-hidden="true" /></button>
+      <ol ref={track} className="poll-list" aria-label="The names on the ballot">
         {RAP_POLL.contenders.map((contender, index) => {
           const crop = contender.photo.crop ?? { pos: "50% 30%" };
           const inner = (
@@ -110,6 +123,8 @@ export function RapPoll() {
           );
         })}
       </ol>
+      <button type="button" className="poll-arrow poll-arrow-next" aria-label="More names" onClick={() => slide(1)}><ChevronRight size={18} aria-hidden="true" /></button>
+      </div>
       <p className="poll-foot" aria-live="polite">
         {status === "sending" && "Counting your vote…"}
         {status === "error" && "Your vote didn’t go through. Try again."}

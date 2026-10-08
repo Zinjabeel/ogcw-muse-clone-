@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Play, Search } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { SECTIONS, SONGS, formatPrice, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, VIDEOS } from "@/data/drops";
 import { brandOf, getProduct } from "@/data/shop";
@@ -288,16 +288,22 @@ function MoreNews() {
 
 // ------------------------------------------------------------ Shop strip
 
-// Six picks in two rows of three, hoodies on top and sneakers below: each
-// card is the photo alone, upright, leaning towards the pointer with a sheen
-// that follows it (src/components/card-hover.tsx), and under it the brand
-// and a link to browse that brand. Under the cards, three stories about the
-// brands and releases on show ("Drop news", chosen in the studio). The full
-// shop is on /shop.
+// Six picks in two rows of three, shirts on top and sneakers below, set like
+// a shop window: each product alone on the same black stage (cut out from
+// its photo), leaning towards the pointer with a sheen that follows it
+// (src/components/card-hover.tsx), then its name and a Shop now button.
+// Under the cards, "Drop news": three stories about what's on show, shown
+// with the same product art where they have one (chosen in the studio).
+// The full shop is on /shop.
 const SHOWCASE = [
-  "nike-club-fleece-hoodie-black", "supreme-box-logo-hoodie-red", "carhartt-wip-heart-hoodie-grey",
-  "jordan-4-retro-grey", "nb-2002r-brown", "converse-chuck-hi-navy",
+  "adidas-argentina-1998-home", "adidas-argentina-2006-away", "adidas-france-home-retro",
+  "jordan-4-retro-grey", "jordan-4-retro-sage", "jordan-1-high-og-silver",
 ].flatMap((id) => getProduct(id) ?? []);
+
+/** Drop news art: the product on show that each story is about */
+const DROP_ART: Record<string, { src: string; alt: string }> = {
+  "air-jordan-release-dates-october-december-2026": { src: "/shop/jordan-4-retro-grey.webp", alt: "An Air Jordan 4 in white, grey and black on a black background" },
+};
 
 function ShopStrip() {
   const news = useStories().slot("shop-news");
@@ -309,12 +315,13 @@ function ShopStrip() {
           const brand = brandOf(product);
           return (
             <li key={product.id}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" aria-label={`${brand.name} ${product.name}${product.price !== undefined ? `, ${formatPrice(product.price)}` : ""}`}>
-                <img src={product.image} alt={`${brand.name} ${product.name}, ${product.colour}`} loading="lazy" />
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" tabIndex={-1} aria-hidden="true">
+                <img src={product.image} alt="" loading="lazy" />
               </Link>
-              <Link to="/shop/$slug" params={{ slug: brand.slug }} className="fx-shopcard-brand">
-                <span>{brand.name}</span>
-                <span className="fx-shopcard-go"><T k="front.shop.card">Browse</T> <ArrowRight size={13} aria-hidden="true" /></span>
+              <p className="fx-shopcard-title">{product.name.toLowerCase().includes(brand.name.toLowerCase()) ? product.name : `${brand.name} ${product.name}`}</p>
+              <p className="fx-shopcard-sub">{product.colour}{product.price !== undefined && <> · {formatPrice(product.price)}</>}</p>
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard-cta" aria-label={`Shop ${brand.name} ${product.name}, ${product.colour}`}>
+                <T k="front.shop.cta">Shop now</T>
               </Link>
             </li>
           );
@@ -324,17 +331,23 @@ function ShopStrip() {
         <section className="fx-shop-news" aria-labelledby="shop-news-title">
           <p id="shop-news-title" className="fx-shop-news-head"><T k="front.shop.news">Drop news</T></p>
           <ul>
-            {news.map((story) => (
-              <li key={story.slug}>
-                <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-shop-news-item">
-                  <BsPhoto photo={story.photo} className="fx-photo fx-shop-news-thumb" />
-                  <span>
+            {news.map((story) => {
+              const art = DROP_ART[story.slug];
+              return (
+                <li key={story.slug}>
+                  <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-shop-news-item">
+                    {art ? (
+                      <span className="fx-shop-news-art fx-shop-news-art-cut"><img src={art.src} alt={art.alt} loading="lazy" /></span>
+                    ) : (
+                      <BsPhoto photo={story.photo} className="fx-photo fx-shop-news-art" />
+                    )}
                     <span className="fx-label"><S story={story} f="kicker" /></span>
                     <span className="fx-shop-news-title"><S story={story} f="title" /></span>
-                  </span>
-                </Link>
-              </li>
-            ))}
+                    <span className="fx-shop-news-deck"><S story={story} f="deck" /></span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -348,10 +361,24 @@ function ShopStrip() {
 // opens in place
 const [SONG] = SONGS as [Song, ...Song[]];
 
+// The vote opens by itself when the mouse comes over the card and folds away
+// a moment after it leaves; the button still opens and closes it for
+// keyboards and touch screens.
 function MusicCard() {
   const [open, setOpen] = useState(false);
+  const leaving = useRef(0);
+  const enter = (event: ReactPointerEvent) => {
+    if (event.pointerType !== "mouse") return;
+    window.clearTimeout(leaving.current);
+    setOpen(true);
+  };
+  const leave = (event: ReactPointerEvent) => {
+    if (event.pointerType !== "mouse") return;
+    leaving.current = window.setTimeout(() => setOpen(false), 600);
+  };
+  useEffect(() => () => window.clearTimeout(leaving.current), []);
   return (
-    <section className="fx-music" data-band="dark" aria-labelledby="music-card-title">
+    <section className="fx-music" data-band="dark" aria-labelledby="music-card-title" onPointerEnter={enter} onPointerLeave={leave}>
       <div className="fx-music-row">
         <a className="fx-music-song" href={spotifyTrack(SONG.spotify)} target="_blank" rel="noopener noreferrer" aria-label={`${SONG.title} by ${SONG.artist}, on Spotify`}>
           <span className="fx-music-cover"><img src={SONG.cover} alt="" loading="lazy" /><span aria-hidden="true"><Play size={14} fill="currentColor" strokeWidth={0} /></span></span>

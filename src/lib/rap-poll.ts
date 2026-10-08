@@ -17,7 +17,7 @@ export const getRapPoll = createServerFn({ method: "GET" }).handler(async () => 
 
 export const voteRapPoll = createServerFn({ method: "POST" })
   .inputValidator((choice: unknown) => {
-    if (!isChoice(choice)) throw new Error("Not one of the five names on the ballot");
+    if (!isChoice(choice)) throw new Error("Not one of the names on the ballot");
     return choice;
   })
   .handler(async ({ data }) => {

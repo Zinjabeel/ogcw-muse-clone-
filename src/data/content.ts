@@ -26,6 +26,13 @@ import colePhoto from "../assets/news/j-cole-2010.jpg";
 import coleArenaPhoto from "../assets/news/j-cole-arena.jpg";
 import futurePhoto from "../assets/news/future-2014.jpg";
 import cardiPhoto from "../assets/news/cardi-b-vma.jpg";
+import pollCartiPhoto from "../assets/news/poll-playboi-carti.jpg";
+import pollTylerPhoto from "../assets/news/poll-tyler-the-creator.jpg";
+import pollDojaPhoto from "../assets/news/poll-doja-cat.jpg";
+import pollCentralCeePhoto from "../assets/news/poll-central-cee.jpg";
+import pollDavePhoto from "../assets/news/poll-dave.jpg";
+import pollMeganPhoto from "../assets/news/poll-megan-thee-stallion.jpg";
+import pollRockyPhoto from "../assets/news/poll-asap-rocky.jpg";
 import durkPhoto from "../assets/news/lil-durk.jpg";
 import tupacStarPhoto from "../assets/news/tupac-shakur-star.jpg";
 import jhenePhoto from "../assets/news/jhene-aiko.jpg";
@@ -1068,11 +1075,11 @@ export const CONTENT_OF_THE_MONTH: RankedCreator[] = [
 export const AWARDS_SOURCE = { name: "Wikipedia: 2025 Streamer Awards", url: "https://en.wikipedia.org/wiki/2025_Streamer_Awards" };
 
 // ---------------------------------------------------------------- The No. 1 rapper vote
-// The poll on the rap desk (home page): five names, each with the case for
-// them from "Five rappers, five number ones". The ids are what the vote
-// counter keeps (src/lib/rap-poll.ts).
+// The poll on the rap desk (home page): twelve names, each with the case for
+// them from our own stories. The ids are what the vote counter keeps
+// (src/lib/rap-poll.ts).
 
-export const RAP_POLL_CHOICES = ["kendrick", "drake", "cole", "future", "cardi"] as const;
+export const RAP_POLL_CHOICES = ["kendrick", "drake", "cole", "future", "cardi", "carti", "tyler", "doja", "centralcee", "dave", "megan", "rocky"] as const;
 export type RapPollChoice = (typeof RAP_POLL_CHOICES)[number];
 export type Contender = { id: RapPollChoice; name: string; photo: Photo; case: string };
 export const RAP_POLL: { question: string; story: string; contenders: Contender[] } = {
@@ -1084,6 +1091,13 @@ export const RAP_POLL: { question: string; story: string; contenders: Contender[
     { id: "cole", name: "J. Cole", photo: { src: colePhoto, alt: "J. Cole smiling on stage", credit: "H D, CC BY 2.0", crop: { pos: "55% 22%" } }, case: "The Fall-Off went straight to No. 1" },
     { id: "future", name: "Future", photo: { src: futurePhoto, alt: "Future in sunglasses and a leather jacket", credit: "thecomeupshow, CC BY 2.0", crop: { pos: "50% 20%" } }, case: "12th No. 1 album, one more than Eminem" },
     { id: "cardi", name: "Cardi B", photo: { src: cardiPhoto, alt: "Cardi B at the 2018 VMAs", credit: "Nicole Alexander, CC BY 3.0", crop: { pos: "40% 35%" } }, case: "Best Hip-Hop at the 2026 VMAs for “Safe”" },
+    { id: "carti", name: "Playboi Carti", photo: { src: pollCartiPhoto, alt: "Playboi Carti on stage in a red jacket", credit: "Wojciech Pędzich, CC BY 4.0", crop: { pos: "50% 18%" } }, case: "Artistic director and Sunday headliner of the tenth ComplexCon" },
+    { id: "tyler", name: "Tyler, the Creator", photo: { src: pollTylerPhoto, alt: "Tyler, the Creator on stage in a furry hat", credit: "Raph_PH, CC BY 2.0", crop: { pos: "50% 25%" } }, case: "Apple Music’s Artist of the Year for 2025" },
+    { id: "doja", name: "Doja Cat", photo: { src: pollDojaPhoto, alt: "Doja Cat performing with pink hair", credit: "LavishRuby, CC BY 3.0", crop: { pos: "62% 30%" } }, case: "Tour Ma Vie: 31 nights in North American arenas" },
+    { id: "centralcee", name: "Central Cee", photo: { src: pollCentralCeePhoto, alt: "Central Cee on stage in a cap", credit: "200izo, CC BY-SA 4.0", crop: { pos: "50% 20%" } }, case: "The first UK rapper past 10 billion Spotify streams" },
+    { id: "dave", name: "Dave", photo: { src: pollDavePhoto, alt: "Dave performing under blue stage light", credit: "Jasonhm121, CC BY-SA 4.0", crop: { pos: "50% 22%" } }, case: "Brit Award for hip hop, grime and rap act in 2026" },
+    { id: "megan", name: "Megan Thee Stallion", photo: { src: pollMeganPhoto, alt: "Megan Thee Stallion singing on stage", credit: "BABYGIRLTOS on YouTube, CC BY 3.0", crop: { pos: "55% 25%" } }, case: "Made her Broadway debut in Moulin Rouge! this year" },
+    { id: "rocky", name: "A$AP Rocky", photo: { src: pollRockyPhoto, alt: "A$AP Rocky in a white hoodie", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 18%" } }, case: "Don’t Be Dumb debuted at No. 1 in January" },
   ],
 };
 

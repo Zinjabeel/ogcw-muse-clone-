@@ -113,47 +113,49 @@
 .fx-more-news .bs-carousel-arrow { background: #fff; border-color: #fff; color: #000; }
 .fx-more-news .bs-carousel-arrow:hover, .fx-more-news .bs-carousel-arrow:focus-visible { background: var(--fx-gold); border-color: var(--fx-gold); color: #000; }
 
-/* ---------------- Featured drops (a soft, warm grey that fades into the
-   white below, with room to breathe after More news). Two rows of three
-   photo cards that lean towards the pointer, with a glossy edge, a light
-   that follows the pointer and a faint gold glow while you hold one. */
-.fx-shop { padding-block: clamp(44px, 4.2vw, 64px) clamp(40px, 3.8vw, 56px); }
-:root[data-theme="gold"] .fx-shop[data-band="grey"].fx-band { background: radial-gradient(ellipse 80% 60% at 50% 0%, rgb(255 255 255 / .7), transparent 70%), linear-gradient(180deg, #ecebe7 0%, #f1f0ec 60%, #fbfbfa 100%); }
+/* ---------------- Featured drops, set like a shop window (after
+   complex.com): a flat light-grey band, each product alone on the same
+   black stage, then its name, its colour and price, and Shop now. The
+   cards lean towards the pointer, with a soft sheen that follows it and a
+   faint gold edge while you hold one. */
+.fx-shop { padding-block: clamp(44px, 4.2vw, 64px); }
+:root[data-theme="gold"] .fx-shop[data-band="grey"].fx-band { background: #e7e7e5; }
 .fx-shop-title {
-  width: fit-content; margin: 0 auto clamp(20px, 2.2vw, 30px);
+  width: fit-content; margin: 0 auto clamp(24px, 2.6vw, 36px);
   font-family: var(--ogcw-display); font-size: clamp(30px, 3.2vw, 46px); font-weight: 600; line-height: 1.05; letter-spacing: -.02em;
   background: linear-gradient(100deg, #7a560c 0%, #b8892f 30%, #e2b84f 48%, #c99a35 62%, #8a6410 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 @media (forced-colors: active) { .fx-shop-title { background: none; color: CanvasText; } }
-.fx-shop-row { display: grid; grid-template-columns: repeat(3, minmax(0, 230px)); justify-content: center; gap: clamp(28px, 2.8vw, 40px) clamp(48px, 6vw, 96px); margin: 0; padding: 0; list-style: none; perspective: 1400px; }
-.fx-shop-row > li { display: grid; gap: 12px; }
+.fx-shop-row { display: grid; grid-template-columns: repeat(3, minmax(0, 270px)); justify-content: center; gap: clamp(36px, 3.6vw, 52px) clamp(28px, 3vw, 48px); margin: 0; padding: 0; list-style: none; perspective: 1400px; }
+.fx-shop-row > li { display: grid; align-content: start; }
 .fx-shopcard {
-  position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 18px; isolation: isolate;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / .06), 0 2px 4px rgb(0 0 0 / .06), 0 24px 44px -24px rgb(0 0 0 / .5);
+  position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; isolation: isolate;
+  background: #0a0a0a;
+  box-shadow: 0 22px 40px -26px rgb(0 0 0 / .6);
   transform-style: preserve-3d; transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s ease;
 }
-.fx-shopcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
-.fx-shopcard:hover img, .fx-shopcard:focus-visible img { transform: scale(1.045); }
-/* The gloss: a bright top edge and a soft diagonal sheen, always there */
-.fx-shopcard::before { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; background: linear-gradient(135deg, rgb(255 255 255 / .34), rgb(255 255 255 / 0) 36%, rgb(255 255 255 / 0) 72%, rgb(255 255 255 / .14)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .7), inset 0 0 0 1px rgb(255 255 255 / .2); pointer-events: none; }
+.fx-shopcard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
+.fx-shopcard:hover img { transform: scale(1.05); }
 /* The shine that follows the pointer */
-.fx-shopcard::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; background: radial-gradient(340px circle at var(--ch-x, 50%) var(--ch-y, 0%), rgb(255 255 255 / .42), rgb(255 232 170 / .12) 42%, transparent 66%); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+.fx-shopcard::after { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(320px circle at var(--ch-x, 50%) var(--ch-y, 0%), rgb(255 255 255 / .14), rgb(255 232 170 / .05) 42%, transparent 66%); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
 .fx-shopcard[data-ch-tilt]::after { opacity: 1; }
-.fx-shopcard[data-ch-tilt], .fx-shopcard:focus-visible { box-shadow: 0 0 0 1px rgb(226 184 79 / .55), 0 0 30px -6px rgb(226 184 79 / .5), 0 40px 60px -28px rgb(0 0 0 / .6); outline: none; }
-.fx-shopcard-brand { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 4px; color: #0a0a0a; font-family: var(--ogcw-display); font-size: 17px; font-weight: 600; }
-/* Drop news: three stories about the brands and releases above */
-.fx-shop-news { max-width: 1000px; margin: clamp(30px, 3.2vw, 42px) auto 0; padding-top: 18px; border-top: 1px solid rgb(10 10 10 / .14); }
-.fx-shop-news-head { margin: 0 0 14px; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-align: center; text-transform: uppercase; color: var(--ogcw-accent); }
-.fx-shop-news ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 28px; margin: 0; padding: 0; list-style: none; }
-.fx-shop-news-item { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px; align-items: center; color: #0a0a0a; }
-.fx-shop-news-item > span:last-child { display: grid; gap: 4px; }
-.fx-shop-news-thumb { width: 84px; aspect-ratio: 1; border-radius: 10px; }
-.fx-shop-news-title { display: -webkit-box; overflow: hidden; font-family: var(--ogcw-display); font-size: 15.5px; font-weight: 600; line-height: 1.25; -webkit-line-clamp: 3; -webkit-box-orient: vertical; transition: color .2s ease; }
+.fx-shopcard[data-ch-tilt] { box-shadow: 0 0 0 1px rgb(226 184 79 / .5), 0 0 28px -8px rgb(226 184 79 / .45), 0 36px 56px -28px rgb(0 0 0 / .65); }
+.fx-shopcard-title { margin: 16px 0 3px; font-family: var(--ogcw-ui); font-size: 15.5px; font-weight: 700; line-height: 1.3; color: #0a0a0a; }
+.fx-shopcard-sub { margin: 0 0 12px; font-family: var(--ogcw-ui); font-size: 13px; line-height: 1.35; color: #5a5a55; }
+.fx-shopcard-cta { justify-self: start; display: inline-flex; align-items: center; min-height: 36px; padding: 0 16px; border: 1px solid #0a0a0a; border-radius: 3px; color: #0a0a0a; font: 800 11.5px/1 var(--ogcw-ui); letter-spacing: .08em; text-transform: uppercase; transition: background-color .2s ease, color .2s ease; }
+.fx-shopcard-cta:hover, .fx-shopcard-cta:focus-visible { background: #0a0a0a; color: #fff; outline: none; }
+/* Drop news: three stories about what's on show, in bigger cards with the
+   same product art */
+.fx-shop-news { max-width: 906px; margin: clamp(44px, 4.4vw, 60px) auto 0; padding-top: 22px; border-top: 1px solid rgb(10 10 10 / .16); }
+.fx-shop-news-head { margin: 0 0 18px; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-align: center; text-transform: uppercase; color: var(--ogcw-accent); }
+.fx-shop-news ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px clamp(28px, 3vw, 48px); margin: 0; padding: 0; list-style: none; }
+.fx-shop-news-item { display: grid; align-content: start; gap: 8px; color: #0a0a0a; }
+.fx-shop-news-art { display: block; aspect-ratio: 16 / 10; margin-bottom: 6px; overflow: hidden; background: #0a0a0a; }
+.fx-shop-news-art-cut img { width: 100%; height: 100%; object-fit: contain; transform: scale(1.18); transition: transform .7s cubic-bezier(.2, .8, .2, 1); }
+.fx-shop-news-item:hover .fx-shop-news-art-cut img { transform: scale(1.24); }
+.fx-shop-news-title { display: -webkit-box; overflow: hidden; font-family: var(--ogcw-display); font-size: 19px; font-weight: 600; line-height: 1.22; -webkit-line-clamp: 3; -webkit-box-orient: vertical; transition: color .2s ease; }
+.fx-shop-news-deck { display: -webkit-box; overflow: hidden; font-family: var(--ogcw-serif); font-size: 14.5px; line-height: 1.45; color: #55554f; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .fx-shop-news-item:hover .fx-shop-news-title, .fx-shop-news-item:focus-visible .fx-shop-news-title { color: var(--ogcw-accent); }
-.fx-shopcard-go { display: inline-flex; align-items: center; gap: 5px; font-family: var(--ogcw-ui); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #45453f; transition: gap .2s ease, color .2s ease; }
-.fx-shopcard-brand:hover .fx-shopcard-go { gap: 9px; color: #000; }
-.fx-shopcard-brand:hover > span:first-child { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------------- Explore (white): lead + just in, four desks, the music card, the ranking and dates */
 .fx-ex-top { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 52px); align-items: start; padding-bottom: clamp(32px, 3.4vw, 48px); border-bottom: 1px solid var(--ogcw-border); }
@@ -197,7 +199,22 @@
 .fx-music-q em { color: var(--fx-gold); }
 .fx-music .fx-more { color: #fff; }
 .fx-music-poll { margin-top: 20px; padding-top: 20px; border-top: 1px solid #262626; }
-.fx-music .poll-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+/* The ballot: a row of names that slides, an arrow on each side */
+.fx-music .poll-rail { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: 10px; }
+.fx-music .poll-list { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; }
+.fx-music .poll-list::-webkit-scrollbar { display: none; }
+.fx-music .poll-list > li { flex: 0 0 calc((100% - 40px) / 5); scroll-snap-align: start; }
+/* Each name is an upright card: face, name, the case for them, then Vote */
+.fx-music .poll-list .poll-option { display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; min-height: 236px; padding: 22px 14px 16px; text-align: center; }
+.fx-music .poll-list button.poll-option:hover, .fx-music .poll-list button.poll-option:focus-visible { transform: translateY(-3px); }
+.fx-music .poll-list .poll-num { position: absolute; top: 10px; left: 12px; display: block; font-size: 14px; }
+.fx-music .poll-list .poll-face { flex: none; width: 76px; height: 76px; }
+.fx-music .poll-list .poll-text { justify-items: center; gap: 6px; }
+.fx-music .poll-list .poll-name { justify-content: center; font-size: 18px; }
+.fx-music .poll-list .poll-case { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; color: #a6a6a6; }
+.fx-music .poll-list :is(.poll-cta, .poll-share) { margin-top: auto; }
+.poll-arrow { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #3a3a3a; border-radius: 50%; background: #000; color: #fff; cursor: pointer; transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.poll-arrow:hover, .poll-arrow:focus-visible { border-color: var(--fx-gold); background: var(--fx-gold); color: #000; outline: none; }
 .fx-music .poll-option { color: #fff; }
 .fx-music .poll-foot { color: #a6a6a6; }
 
@@ -251,7 +268,7 @@
   .fx-desks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fx-music-row { grid-template-columns: minmax(0, 1fr) auto; }
   .fx-music-row > .fx-more { display: none; }
-  .fx-music .poll-list { grid-template-columns: minmax(0, 1fr); }
+  .fx-music .poll-list > li { flex-basis: calc((100% - 20px) / 3); }
 }
 @media (max-width: 860px) {
   .fx-head { flex-direction: column; align-items: flex-start; }
@@ -266,13 +283,19 @@
   .fx-ex-more-row > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
   /* Still three across, so the hoodies stay on top and the sneakers below */
   .fx-shop-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 20px; padding-inline: 6px; }
-  .fx-shopcard { border-radius: 12px; }
-  .fx-shopcard-brand { flex-direction: column; align-items: flex-start; gap: 2px; padding: 0 2px; font-size: 14px; }
-  .fx-shopcard-go { font-size: 10px; letter-spacing: .1em; }
+  .fx-music .poll-rail { grid-template-columns: 32px minmax(0, 1fr) 32px; gap: 6px; }
+  .poll-arrow { width: 32px; height: 32px; }
+  .fx-music .poll-list > li { flex-basis: calc((100% - 10px) / 2); }
+  .fx-music .poll-list .poll-option { min-height: 220px; padding-inline: 10px; }
+  .fx-music .poll-list .poll-face { width: 64px; height: 64px; }
+  .fx-music .poll-list .poll-name { font-size: 16px; }
+  .fx-shopcard-title { margin-top: 10px; font-size: 12.5px; }
+  .fx-shopcard-sub { display: none; }
+  .fx-shopcard-cta { min-height: 30px; padding: 0 10px; font-size: 10px; }
   .fx-culture-grid .fx-tile-title, .fx-desks .fx-tile-title { font-size: 16px; }
   .fx-clip { grid-template-columns: 96px minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   .fx-shopcard img { transition: none; }
-  .fx-shopcard:hover img, .fx-shopcard:focus-visible img { transform: none; }
+  .fx-shopcard:hover img, .fx-shop-news-item:hover .fx-shop-news-art-cut img { transform: none; }
 }
