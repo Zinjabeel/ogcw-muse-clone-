@@ -35,7 +35,7 @@ export const SLOTS = [
   // The Wire, the first band under the hero
   { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["vmas-2026-winners"] },
   { id: "wire-latest", area: "The Wire", name: "Just in", note: "Five numbered stories beside the main story in Explore; empty places take the newest stories not placed anywhere else", max: 5, defaults: [] },
-  { id: "shop-news", area: "Featured drops", name: "Drop news", note: "Three stories under the Featured drops cards, about the brands and releases on show", max: 3, defaults: ["air-jordan-release-dates-october-december-2026", "supreme-fall-winter-2026-nike-timberland", "carhartt-wip-fall-winter-2026"] },
+  { id: "shop-news", area: "Featured drops", name: "Drop news", note: "Three stories under the Featured drops cards, about the brands and releases on show", max: 3, defaults: ["one-piece-nike-air-max-plus-devil-fruits", "retro-football-shirts-world-cup-2026", "air-jordan-release-dates-october-december-2026"] },
   { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["j-cole-fall-off-tour-europe-berlin", "burna-boy-london-stadium-2027", "super-bowl-lxi-halftime-sofi-what-we-know", "drake-fomo-film-2027-tour", "latin-grammys-2026-nominations"] },
 
   // The week
@@ -54,8 +54,8 @@ export const SLOTS = [
   { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Five stories, ranked: the order here is the order on the page", max: 5, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "drake-iceman-top-three-fomo", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
 
   // The sports desk
-  { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["nba-2026-27-opening-night"], section: "sports" },
-  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Two headlines under it", max: 2, defaults: ["ballon-dor-2026-london", "athletes-fashion-month-2026"], section: "sports" },
+  { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["nfl-week-5-2026-what-to-watch"], section: "sports" },
+  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Two headlines under it", max: 2, defaults: ["fury-joshua-cardiff-december-11-netflix", "premier-league-returns-liverpool-man-city-anfield"], section: "sports" },
 
   // Games & streaming
   { id: "games-lead", area: "Games & streaming", name: "Games: main story", note: "The big games story", max: 1, defaults: ["october-2026-games"], section: "games" },

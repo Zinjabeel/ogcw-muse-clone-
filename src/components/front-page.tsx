@@ -289,19 +289,23 @@ function MoreNews() {
 // ------------------------------------------------------------ Shop strip
 
 // Six picks in two rows of three, shirts on top and sneakers below, set like
-// a shop window: each product alone on the same black stage (cut out from
-// its photo), leaning towards the pointer with a sheen that follows it
+// a shop window: each product alone on a plain stage (the shirts cut out onto
+// black, the One Piece Air Max Plus pack on the colours of its three Devil
+// Fruits), leaning towards the pointer with a sheen that follows it
 // (src/components/card-hover.tsx), then its name and a Shop now button.
 // Under the cards, "Drop news": three stories about what's on show, shown
 // with the same product art where they have one (chosen in the studio).
 // The full shop is on /shop.
 const SHOWCASE = [
   "adidas-argentina-1998-home", "adidas-argentina-2006-away", "adidas-france-home-retro",
-  "jordan-4-retro-grey", "jordan-4-retro-sage", "jordan-1-high-og-silver",
+  "one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera",
 ].flatMap((id) => getProduct(id) ?? []);
 
-/** Drop news art: the product on show that each story is about */
-const DROP_ART: Record<string, { src: string; alt: string }> = {
+/** Drop news art: the products on show that each story is about ("wide":
+ * a picture already cut to the card's shape, shown whole) */
+const DROP_ART: Record<string, { src: string; alt: string; wide?: boolean }> = {
+  "one-piece-nike-air-max-plus-devil-fruits": { src: "/shop/one-piece-air-max-plus-pack.webp", alt: "The three One Piece x Nike Air Max Plus pairs, in berry, purple and orange", wide: true },
+  "retro-football-shirts-world-cup-2026": { src: "/shop/retro-shirts-trio.webp", alt: "Argentina’s 1998 home and 2006 away shirts and a France home shirt on a black background", wide: true },
   "air-jordan-release-dates-october-december-2026": { src: "/shop/jordan-4-retro-grey.webp", alt: "An Air Jordan 4 in white, grey and black on a black background" },
 };
 
@@ -337,7 +341,7 @@ function ShopStrip() {
                 <li key={story.slug}>
                   <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-shop-news-item">
                     {art ? (
-                      <span className="fx-shop-news-art fx-shop-news-art-cut"><img src={art.src} alt={art.alt} loading="lazy" /></span>
+                      <span className={`fx-shop-news-art fx-shop-news-art-cut${art.wide ? " is-wide" : ""}`}><img src={art.src} alt={art.alt} loading="lazy" /></span>
                     ) : (
                       <BsPhoto photo={story.photo} className="fx-photo fx-shop-news-art" />
                     )}

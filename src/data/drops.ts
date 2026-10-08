@@ -1,9 +1,9 @@
 // Drops: the release calendar on the front page (sneakers, music, games,
-// film) and the big nights coming up (awards, shows, games) that The Wire
+// film and the big fights) and the big nights coming up (awards, shows, games) that The Wire
 // lists. Every date comes from the source named beside it, or from the OGCW
 // story it links to. Past dates drop off by themselves.
 
-export type DropKind = "Sneakers" | "Music" | "Games" | "Film";
+export type DropKind = "Sneakers" | "Music" | "Games" | "Film" | "Fight";
 export type Drop = {
   date: string; // ISO day
   kind: DropKind;
@@ -22,13 +22,16 @@ export const DROPS: Drop[] = [
   { date: "2026-10-10", kind: "Sneakers", name: "Air Jordan 1 High OG “Royal”", detail: "$185", source: KICKS },
   { date: "2026-10-16", kind: "Film", name: "Whalefall", detail: "20th Century Studios, in cinemas" },
   { date: "2026-10-17", kind: "Sneakers", name: "Air Jordan 5 “Halloween”", detail: "$215", source: KICKS },
+  { date: "2026-10-17", kind: "Fight", name: "Dubois v Wardley 2", detail: "WBO heavyweight title, the O2", slug: "dubois-wardley-2-o2-october-17" },
   { date: "2026-10-20", kind: "Games", name: "Hearthstone: Reign of the Black Empire", detail: "The expansion announced at BlizzCon", slug: "blizzcon-2026-diablo-v-starcraft" },
   { date: "2026-10-23", kind: "Games", name: "Call of Duty: Modern Warfare 4", detail: "PS5, Xbox, PC and, for the first time, Switch 2", slug: "october-2026-games" },
   { date: "2026-10-23", kind: "Film", name: "Klara and the Sun", detail: "Taika Waititi adapts Kazuo Ishiguro" },
   { date: "2026-10-23", kind: "Music", name: "Anderson .Paak & Cordae: Heavy Is the Crown", detail: "Their joint album, with J. Cole and 9th Wonder in the credits", slug: "anderson-paak-cordae-heavy-is-the-crown" },
+  { date: "2026-10-24", kind: "Fight", name: "UFC 333: Volkanovski v Evloev", detail: "Etihad Arena, Abu Dhabi", slug: "ufc-333-volkanovski-evloev-yan-dvalishvili-3" },
   { date: "2026-10-24", kind: "Sneakers", name: "Air Jordan 12 “Egg Nog”", detail: "$215", source: KICKS },
   { date: "2026-10-25", kind: "Sneakers", name: "Air Jordan 41 “University Red”", detail: "$205", source: KICKS },
   { date: "2026-10-29", kind: "Games", name: "Phantom Blade Zero", detail: "PS5 and PC", slug: "october-2026-games" },
+  { date: "2026-10-31", kind: "Fight", name: "Canelo v Mbilli", detail: "WBC super-middleweight title, Riyadh", slug: "canelo-mbilli-october-31-riyadh" },
   { date: "2026-10-31", kind: "Sneakers", name: "Air Jordan 14 “Forest Green”", detail: "$215", source: KICKS },
   { date: "2026-10-31", kind: "Sneakers", name: "Air Jordan 4 “Light Army”", detail: "$220", source: KICKS },
   { date: "2026-11-04", kind: "Games", name: "World of Warcraft: Forever", detail: "Blizzard’s new way to play", slug: "blizzcon-2026-diablo-v-starcraft" },
@@ -37,6 +40,7 @@ export const DROPS: Drop[] = [
   { date: "2026-11-07", kind: "Sneakers", name: "Air Jordan 6 “White Infrared”", detail: "$215", source: KICKS },
   { date: "2026-11-07", kind: "Sneakers", name: "Air Jordan 15 and 17 Low “Black Pack”", detail: "$240 each", source: KICKS },
   { date: "2026-11-11", kind: "Sneakers", name: "Air Jordan 11 “Lapis” (women’s)", detail: "$235", source: KICKS },
+  { date: "2026-11-14", kind: "Fight", name: "UFC 334: Gane v Hokit", detail: "Plus Harrison v Nunes, Madison Square Garden", slug: "ufc-334-gane-hokit-harrison-nunes-msg" },
   { date: "2026-11-14", kind: "Sneakers", name: "Air Jordan 11 “Green Screen”", detail: "$255", source: KICKS },
   { date: "2026-11-19", kind: "Games", name: "Grand Theft Auto VI", detail: "PS5 and Xbox Series X|S, at midnight", slug: "gta-vi-countdown" },
   { date: "2026-11-19", kind: "Music", name: "The GTA VI soundtrack album", detail: "34 tracks, with Future, Travis Scott and Yung Lean", slug: "yung-lean-thats-it-gta-vi-future-metro-boomin" },
@@ -46,6 +50,8 @@ export const DROPS: Drop[] = [
   { date: "2026-11-27", kind: "Sneakers", name: "Air Jordan 4 “Bred”", detail: "$230", source: KICKS },
   { date: "2026-12-04", kind: "Games", name: "Monster Hunter Wilds on Switch 2", detail: "Capcom’s hunt goes portable", slug: "monster-hunter-wilds-switch-2" },
   { date: "2026-12-05", kind: "Sneakers", name: "Air Jordan 10 “Sacramento”", detail: "$215", source: KICKS },
+  { date: "2026-12-11", kind: "Fight", name: "Fury v Joshua", detail: "Principality Stadium, Cardiff, on Netflix", slug: "fury-joshua-cardiff-december-11-netflix" },
+  { date: "2026-12-12", kind: "Fight", name: "UFC 335: Oliveira v Lopes", detail: "T-Mobile Arena, Las Vegas", slug: "ufc-335-oliveira-lopes-pereira-pavlovich" },
   { date: "2026-12-12", kind: "Sneakers", name: "Air Jordan 11 “Space Jam”", detail: "$235", source: KICKS },
   { date: "2026-12-18", kind: "Film", name: "Avengers: Doomsday", detail: "Marvel’s next Avengers film" },
   { date: "2026-12-19", kind: "Sneakers", name: "Air Jordan 4 “Pink Thunder”", detail: "$220", source: KICKS },
@@ -57,15 +63,26 @@ export const DROPS: Drop[] = [
 export type Night = { date: string; end?: string; tag: string; name: string; detail: string; slug?: string };
 export const NIGHTS: Night[] = [
   { date: "2026-10-10", end: "2026-10-11", tag: "Live", name: "Ye in St Petersburg", detail: "Two nights at Gazprom Arena", slug: "ye-st-petersburg-gazprom-arena" },
+  { date: "2026-10-11", tag: "Sports", name: "Liverpool v Man City", detail: "The leaders at Anfield", slug: "premier-league-returns-liverpool-man-city-anfield" },
   { date: "2026-10-13", tag: "Live", name: "Trueno at Palau Sant Jordi", detail: "El Último Baile in Barcelona", slug: "trueno-el-ultimo-baile-spain" },
+  { date: "2026-10-14", tag: "Sports", name: "Man City v PSG", detail: "Champions League, Matchday 2", slug: "champions-league-matchday-2-man-city-psg" },
+  { date: "2026-10-17", tag: "Fight", name: "Dubois v Wardley 2", detail: "WBO heavyweight title, the O2", slug: "dubois-wardley-2-o2-october-17" },
   { date: "2026-10-20", tag: "Sports", name: "NBA opening night", detail: "The Knicks raise their banner", slug: "nba-2026-27-opening-night" },
   { date: "2026-10-22", tag: "Awards", name: "Mercury Prize 2026", detail: "Named live in Newcastle", slug: "mercury-prize-2026-shortlist" },
   { date: "2026-10-23", end: "2026-10-24", tag: "Live", name: "Jay-Z at SoFi Stadium", detail: "The JAY-Z 30 Tour finale", slug: "jay-z-30-tour-sofi-finale" },
+  { date: "2026-10-24", tag: "Fight", name: "UFC 333", detail: "Volkanovski v Evloev, Abu Dhabi", slug: "ufc-333-volkanovski-evloev-yan-dvalishvili-3" },
+  { date: "2026-10-25", tag: "Sports", name: "El Clásico", detail: "Barcelona v Real Madrid, Camp Nou", slug: "el-clasico-october-25-2026-camp-nou" },
+  { date: "2026-10-25", tag: "Sports", name: "NFL in Paris", detail: "Steelers v Saints, Stade de France", slug: "nfl-international-games-2026-london-paris-madrid-munich" },
   { date: "2026-10-26", tag: "Sports", name: "Ballon d’Or", detail: "In London, for the first time", slug: "ballon-dor-2026-london" },
+  { date: "2026-10-31", tag: "Fight", name: "Canelo v Mbilli", detail: "WBC super-middleweight title, Riyadh", slug: "canelo-mbilli-october-31-riyadh" },
   { date: "2026-11-12", tag: "Awards", name: "The Streamer Awards 2026", detail: "Streaming’s big night, in Los Angeles", slug: "streamer-awards-2026-applications" },
   { date: "2026-11-13", end: "2026-11-15", tag: "Streaming", name: "TwitchCon San Diego", detail: "Three days at the convention center", slug: "twitch-state-of-gaming-2026" },
+  { date: "2026-11-14", tag: "Fight", name: "UFC 334", detail: "Gane v Hokit, Harrison v Nunes, MSG", slug: "ufc-334-gane-hokit-harrison-nunes-msg" },
+  { date: "2026-11-28", tag: "Fight", name: "Kabayel v Hysa", detail: "WBC heavyweight title, Düsseldorf", slug: "boxing-schedule-october-december-2026" },
   { date: "2026-12-10", tag: "Awards", name: "The Game Awards 2026", detail: "Live from the Peacock Theater" },
-  { date: "2026-12-11", tag: "Sports", name: "NBA Cup final", detail: "Hinkle Fieldhouse, Indianapolis", slug: "nba-2026-27-opening-night" },
+  { date: "2026-12-11", tag: "Fight", name: "Fury v Joshua", detail: "Principality Stadium, Cardiff, on Netflix", slug: "fury-joshua-cardiff-december-11-netflix" },
+  { date: "2026-12-11", tag: "Sports", name: "NBA Cup final", detail: "Hinkle Fieldhouse, Indianapolis", slug: "nba-cup-2026-groups-hinkle-fieldhouse" },
+  { date: "2026-12-12", tag: "Fight", name: "UFC 335", detail: "Oliveira v Lopes, Las Vegas", slug: "ufc-335-oliveira-lopes-pereira-pavlovich" },
   { date: "2026-12-19", tag: "Live", name: "Neuro-sama & Evil Neuro live", detail: "The AI twins’ first concert", slug: "neuro-sama-pattern-recognition-first-concert" },
   { date: "2026-12-25", tag: "Sports", name: "NBA on Christmas Day", detail: "Five games, Knicks v Spurs in New York", slug: "nba-2026-27-opening-night" },
 ];
