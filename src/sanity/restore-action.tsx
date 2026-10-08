@@ -10,8 +10,8 @@ import { sectionOfKey } from "../lib/site-sections";
 // the ones it had come back, each in its part of the site. The restore is
 // itself kept as a new version, so it can be undone.
 
-type Item = { _key: string; _type: string; key?: string; value?: string; section?: string; usual?: string; alt?: string; url?: string; image?: unknown };
-type Snapshot = { at?: string; texts?: Item[]; images?: Item[] };
+type Item = { _key: string; _type: string; key?: string; value?: string; section?: string; usual?: string; alt?: string; url?: string; image?: unknown; page?: string; layout?: unknown };
+type Snapshot = { at?: string; texts?: Item[]; images?: Item[]; layouts?: Item[] };
 
 type EditDoc = { _id: string; _type: string; [field: string]: unknown };
 const docId = (key: string) => `siteEdit-${key.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 120)}`;
@@ -32,7 +32,8 @@ export const RestoreVersionAction: DocumentActionComponent = (props) => {
       const now = new Date().toISOString();
       const texts = (version.texts ?? []).filter((item) => item.key);
       const images = (version.images ?? []).filter((item) => item.key);
-      const keep = new Set([...texts, ...images].map((item) => docId(item.key!)));
+      const layouts = (version.layouts ?? []).filter((item) => item.key && item.layout);
+      const keep = new Set([...texts, ...images, ...layouts].map((item) => docId(item.key!)));
       const existing = await client.fetch<string[]>(`*[_type == "siteEdit"]._id`);
       const tx = client.transaction();
       for (const id of existing) if (!keep.has(id.replace(/^drafts\./, "")) || id.startsWith("drafts.")) tx.delete(id);
@@ -43,9 +44,14 @@ export const RestoreVersionAction: DocumentActionComponent = (props) => {
         const doc: EditDoc = { _id: docId(item.key!), _type: "siteEdit", key: item.key, kind: "image", section: item.section ?? sectionOfKey(item.key!), ...(item.alt ? { alt: item.alt } : {}), ...(item.image ? { image: item.image } : { url: item.url }), updatedAt: now, updatedBy: by };
         tx.createOrReplace(doc);
       }
+      // Texts and photos moved on their pages
+      for (const item of layouts) {
+        const page = item.page ?? item.key!.split("|")[0] ?? "/";
+        tx.createOrReplace({ _id: docId(item.key!), _type: "siteEdit", key: item.key, kind: "layout", page, section: item.section ?? sectionOfKey(item.key!), layout: item.layout, updatedAt: now, updatedBy: by });
+      }
       tx.delete("siteContent");
       const clean = (items: Item[]) => items.map(({ _key, _type, ...rest }) => ({ _key, _type, ...rest }));
-      tx.create({ _type: "siteSnapshot", at: now, by, summary: `Restored the version from ${when}`, texts: clean(texts), images: clean(images) });
+      tx.create({ _type: "siteSnapshot", at: now, by, summary: `Restored the version from ${when}`, texts: clean(texts), images: clean(images), layouts: clean(layouts) });
       await tx.commit();
       props.onComplete();
     } finally {

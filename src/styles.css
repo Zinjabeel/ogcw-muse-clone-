@@ -3043,6 +3043,20 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 @keyframes site-spin { to { transform: rotate(360deg); } }
 @media (max-width: 640px) { .site-edit-hint { display: none; } .site-savebar { bottom: 70px; } }
 
+/* Moved and resized texts (src/lib/site-text.tsx, layoutStyle): shifted from
+   where they usually sit, separately on computers and on phones */
+.site-lay { position: relative; z-index: 5; translate: var(--lay-mx, 0px) var(--lay-my, 0px); scale: var(--lay-ms, 1); transform-origin: 0 0; }
+/* A heading that paints its colour through its letters (the gold "Featured drops") keeps it when its words move */
+.site-lay-inline { display: inline-block; background: inherit; -webkit-background-clip: text; background-clip: text; }
+@media (min-width: 1024px) { .site-lay { translate: var(--lay-dx, 0px) var(--lay-dy, 0px); scale: var(--lay-ds, 1); } }
+/* The move handle (top left), the resize corner (bottom right) and Reset */
+.site-lay-handle { position: fixed; z-index: 90; display: inline-grid; place-items: center; width: 30px; height: 30px; border: 2px solid var(--ogcw-bg); border-radius: 50%; background: var(--ogcw-accent); color: var(--ogcw-bg); box-shadow: 0 6px 18px -6px rgb(0 0 0 / .6); cursor: grab; touch-action: none; animation: site-pop .15s ease both; }
+.site-lay-handle:active { cursor: grabbing; }
+.site-lay-handle.is-size { width: 20px; height: 20px; border-radius: 5px; cursor: nwse-resize; }
+.site-lay-handle.is-reset { display: inline-flex; gap: 5px; width: auto; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font: 700 11.5px/1 var(--ogcw-ui); cursor: pointer; }
+.site-lay-handle.is-reset:hover { background: var(--ogcw-text); color: var(--ogcw-bg); }
+.site-edit-frame.is-dragging { border-style: dashed; animation: none; }
+
 /* Design notes, for admins (src/components/design-notes.tsx): a layer over the
    whole page to draw and write on, and a toolbar at the top */
 .dn-toggle { position: relative; }

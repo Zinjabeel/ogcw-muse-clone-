@@ -15,7 +15,21 @@ export const siteEdit = defineType({
   type: "document",
   description: "Changed on the site itself: log in, point at a text and press “Edit”. Changing the text here and publishing works too.",
   fields: [
-    defineField({ name: "value", title: "Text on the site", type: "text", rows: 3, hidden: ({ document }) => document?.["kind"] === "image" }),
+    defineField({ name: "value", title: "Text on the site", type: "text", rows: 3, hidden: ({ document }) => document?.["kind"] === "image" || document?.["kind"] === "layout" }),
+    defineField({
+      name: "layout",
+      title: "Moved on the page",
+      type: "object",
+      readOnly: true,
+      description: "A text or photo dragged to another place or resized on this page (x and y in pixels from where it usually sits; size 1 = usual). Delete this edit to put it back.",
+      hidden: ({ document }) => document?.["kind"] !== "layout",
+      fields: (["d", "m"] as const).map((bp) => defineField({
+        name: bp,
+        title: bp === "d" ? "On computers" : "On phones and tablets",
+        type: "object",
+        fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", title: "Size", type: "number" })],
+      })),
+    }),
     defineField({ name: "image", title: "Photo on the site", type: "image", hidden: ({ document }) => document?.["kind"] !== "image" }),
     defineField({ name: "url", title: "…or a photo link", type: "url", hidden: ({ document }) => document?.["kind"] !== "image" }),
     defineField({ name: "alt", title: "Describe the photo", type: "string", hidden: ({ document }) => document?.["kind"] !== "image" }),
@@ -31,7 +45,7 @@ export const siteEdit = defineType({
   preview: {
     select: { value: "value", usual: "usual", kind: "kind", media: "image", at: "updatedAt", page: "page" },
     prepare: ({ value, usual, kind, media, at, page }) => ({
-      title: kind === "image" ? "Photo" : value || "(empty)",
+      title: kind === "image" ? "Photo" : kind === "layout" ? "Moved or resized" : value || "(empty)",
       subtitle: [usual && kind !== "image" ? `was “${usual}”` : "", page, formatWhen(at)].filter(Boolean).join(" · "),
       media,
     }),
@@ -71,6 +85,21 @@ const contentFields = [
         defineField({ name: "alt", title: "Describe the photo", type: "string" }),
       ],
       preview: { select: { title: "section", subtitle: "key", media: "image" } },
+    })],
+  }),
+  defineField({
+    name: "layouts",
+    title: "Moved and resized",
+    type: "array",
+    of: [defineArrayMember({
+      name: "siteLayout",
+      type: "object",
+      fields: [
+        defineField({ name: "key", title: "Where", type: "string", readOnly: true }),
+        defineField({ name: "page", title: "Page", type: "string", readOnly: true }),
+        defineField({ name: "layout", title: "Place and size", type: "object", fields: [defineField({ name: "d", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" })] }), defineField({ name: "m", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" })] })] }),
+      ],
+      preview: { select: { title: "key", subtitle: "page" } },
     })],
   }),
 ];

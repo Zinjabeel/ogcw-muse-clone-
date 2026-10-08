@@ -16,7 +16,7 @@ import { NotFoundPage } from "../components/not-found";
 import { getStorySummaries } from "../lib/sanity-stories";
 import { EMPTY_LAYOUT } from "../data/placements";
 import { EMPTY_SITE, SiteTextProvider } from "../lib/site-text";
-import { SiteEditor } from "../components/site-text";
+import { SiteEditor, SiteLayouts } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
 import { CardHover } from "../components/card-hover";
@@ -126,6 +126,8 @@ function RootComponent() {
             <Outlet />
           </StudioHost>
           <SiteEditor />
+          {/* Pictures an admin moved or resized, in their places for everyone */}
+          <SiteLayouts />
           <CardHover />
         </SiteTextProvider>
       </StoriesProvider>

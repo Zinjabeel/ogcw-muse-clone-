@@ -5,7 +5,7 @@ import { EMPTY_LAYOUT, isSlotId, type FrontLayout } from "@/data/placements";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
 import { byDate, toArticle, type SanityStory } from "./sanity-mapping";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
-import { EMPTY_SITE, type SiteContent } from "./site-text";
+import { EMPTY_SITE, type LayoutPos, type SiteContent, type SiteLayout } from "./site-text";
 
 // Stories from the Sanity studio (/admin), turned into the same shape as
 // the stories in src/data/content.ts so every page shows them the same way.
@@ -31,14 +31,21 @@ const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
 export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
 
-type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null };
+type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null };
 // Each edit is its own "Site edit" document; edits saved before that are
 // still in the old single "Site texts" document until the next save moves them
 type SiteDoc = { edits?: SiteItem[] | null; legacy?: { texts?: SiteItem[] | null; images?: SiteItem[] | null } | null } | null;
 const toSite = (doc: SiteDoc): SiteContent => {
-  const site: SiteContent = { texts: {}, images: {}, meta: {} };
+  const site: SiteContent = { texts: {}, images: {}, layouts: {}, meta: {} };
   const add = (item: SiteItem, kind: string | undefined, legacy: boolean) => {
     if (!item.key) return;
+    if (kind === "layout") {
+      // A text or photo moved on its page
+      const pos = (p?: LayoutPos | null) => (p && Number.isFinite(p.x) && Number.isFinite(p.y) ? { x: p.x, y: p.y, s: Number.isFinite(p.s) && p.s > 0 ? p.s : 1 } : undefined);
+      const d = pos(item.layout?.d), m = pos(item.layout?.m);
+      if (d || m) site.layouts[item.key] = { ...(d ? { d } : {}), ...(m ? { m } : {}) };
+      return;
+    }
     if (kind === "image") {
       if (!item.src) return;
       site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}) };
@@ -96,7 +103,7 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
     const ratings = ratingTotals();
     const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
       "site": {
-        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
+        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
         "legacy": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } }
       },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
