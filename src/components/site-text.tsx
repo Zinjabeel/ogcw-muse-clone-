@@ -7,6 +7,7 @@ import { itemKey, storyKey, useSiteText, type EditMeta, type Pending, type SiteC
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
 import { useWorkAccess } from "@/lib/work";
+import { DesignNotes } from "./design-notes";
 
 // Editing the site on the page, for admins (src/lib/site-text.tsx).
 //   <T k="home.news.title">OGCW News</T>      a text anyone sees, an admin can change
@@ -187,7 +188,7 @@ export function EditableImage({ k, src, alt, className, ...rest }: ImgHTMLAttrib
 // ---------------------------------------------------------------- Saving
 
 /** Writing to Sanity as the admin logged in to the studio on this browser */
-function adminClient(): SanityClient | null {
+export function adminClient(): SanityClient | null {
   try {
     const token = JSON.parse(localStorage.getItem(`__studio_auth_token_${SANITY_PROJECT_ID}`) ?? "null")?.token;
     if (!token) return null;
@@ -331,6 +332,8 @@ export function SiteEditor() {
       const from = event.target as Element | null;
       frame = requestAnimationFrame(() => {
         if (from?.closest?.(".site-edit-btn, .site-photo-menu, .site-savebar, .site-edit")) return void window.clearTimeout(hideTimer.current);
+        // Drawing design notes: no Edit buttons under the pen
+        if (from?.closest?.(".dn-layer, .dn-bar")) return hideSoon();
         const text = from?.closest?.("[data-edit]") as HTMLElement | null;
         if (text) return show(text, "text");
         const img = document.elementsFromPoint(x, y).find((el) => el instanceof HTMLImageElement && el.dataset["editImg"] !== undefined) as HTMLElement | undefined;
@@ -482,6 +485,8 @@ export function SiteEditor() {
           {editing ? <Eye size={15} aria-hidden="true" /> : <PenLine size={15} aria-hidden="true" />}
           {editing ? "Hide edit buttons" : "Edit site"}
         </button>
+        {/* Drawing and writing notes on the page, for Claude (src/components/design-notes.tsx) */}
+        <DesignNotes />
         {editing && <span className="site-edit-hint">Point at any text and press Edit</span>}
       </div>
 

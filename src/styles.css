@@ -3023,7 +3023,7 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 @keyframes site-pop { from { opacity: 0; transform: translateY(3px); } }.site-edit { position: fixed; left: 16px; bottom: 16px; z-index: 90; display: flex; align-items: center; gap: 10px; font-family: var(--ogcw-ui); }
 .site-edit-toggle { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: color-mix(in srgb, var(--ogcw-surface) 92%, transparent); color: var(--ogcw-text); font-size: 13px; font-weight: 700; box-shadow: var(--ogcw-shadow-lift); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
 .site-edit-toggle:hover, .site-edit-toggle:focus-visible { border-color: var(--ogcw-accent); outline: none; }
-.site-edit.is-on .site-edit-toggle { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
+.site-edit.is-on .site-edit-toggle:not(.dn-toggle) { background: var(--ogcw-accent); border-color: var(--ogcw-accent); color: var(--ogcw-bg); }
 .site-edit-hint { padding: 7px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ogcw-bg) 88%, transparent); font-size: 12px; color: var(--ogcw-text-2); box-shadow: var(--ogcw-shadow); }
 .site-savebar { position: fixed; left: 50%; bottom: 18px; z-index: 95; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; max-width: calc(100% - 32px); padding: 10px 10px 10px 18px; border: 1px solid var(--ogcw-border); border-radius: 18px; background: color-mix(in srgb, var(--ogcw-surface) 95%, transparent); color: var(--ogcw-text); font-family: var(--ogcw-ui); box-shadow: 0 24px 60px -20px rgb(0 0 0 / .6); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transform: translateX(-50%); animation: site-bar-in .35s cubic-bezier(.2, .8, .2, 1) both; }
 @keyframes site-bar-in { from { opacity: 0; transform: translate(-50%, 14px); } }
@@ -3042,6 +3042,44 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .site-spin { animation: site-spin 1s linear infinite; }
 @keyframes site-spin { to { transform: rotate(360deg); } }
 @media (max-width: 640px) { .site-edit-hint { display: none; } .site-savebar { bottom: 70px; } }
+
+/* Design notes, for admins (src/components/design-notes.tsx): a layer over the
+   whole page to draw and write on, and a toolbar at the top */
+.dn-toggle { position: relative; }
+.dn-toggle.is-on { background: #111; border-color: #111; color: #fff; }
+.dn-count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #ff3b30; color: #fff; font-size: 11px; font-weight: 800; }
+.dn-layer { position: absolute; top: 0; left: 0; z-index: 86; pointer-events: none; }
+.dn-svg { display: block; overflow: visible; pointer-events: auto; touch-action: none; cursor: crosshair; }
+.dn-tool-move .dn-svg { pointer-events: none; }
+.dn-tool-text .dn-svg { cursor: text; }
+.dn-tool-eraser .dn-svg { pointer-events: none; }
+.dn-tool-eraser .dn-mark { pointer-events: visiblePainted; cursor: pointer; }
+.dn-tool-eraser .dn-mark:hover { opacity: .45; }
+.dn-size { position: absolute; padding: 3px 8px; border-radius: 6px; font: 800 11.5px/1.4 var(--ogcw-ui); letter-spacing: .02em; white-space: nowrap; pointer-events: none; }
+.dn-text, .dn-typing { position: absolute; max-width: 340px; padding: 6px 10px; border-radius: 8px; font-family: var(--ogcw-ui); line-height: 1.3; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 6px 18px -6px rgb(0 0 0 / .5); }
+.dn-text { pointer-events: none; }
+.dn-text.is-erasable { pointer-events: auto; cursor: pointer; }
+.dn-text.is-erasable:hover { opacity: .45; }
+.dn-typing { width: 300px; border: 2px dashed currentColor; outline: none; resize: both; pointer-events: auto; }
+.dn-typing::placeholder { color: inherit; opacity: .55; font-weight: 500; }
+.dn-bar { position: fixed; bottom: 16px; left: 50%; z-index: 97; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 10px; max-width: calc(100% - 24px); padding: 8px 10px; border: 1px solid #2a2a2a; border-radius: 16px; background: rgb(14 14 14 / .94); color: #fff; font-family: var(--ogcw-ui); box-shadow: 0 24px 60px -20px rgb(0 0 0 / .7); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transform: translateX(-50%); animation: site-bar-in .3s cubic-bezier(.2, .8, .2, 1) both; }
+.dn-group { display: flex; align-items: center; gap: 3px; padding-right: 10px; border-right: 1px solid #2e2e2e; }
+.dn-group:nth-last-child(2) { border-right: 0; padding-right: 0; }
+.dn-btn { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: #cfcfcf; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.dn-btn:hover:not(:disabled) { background: #262626; color: #fff; }
+.dn-btn[aria-pressed="true"] { background: #ffe600; color: #000; }
+.dn-btn:disabled { opacity: .35; cursor: default; }
+.dn-dot { display: block; border-radius: 50%; background: currentColor; }
+.dn-swatch { width: 22px; height: 22px; margin: 0 2px; border: 2px solid #3a3a3a; border-radius: 50%; cursor: pointer; transition: transform .15s ease; }
+.dn-swatch:hover { transform: scale(1.12); }
+.dn-swatch[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 2px #000, 0 0 0 4px #fff; }
+.dn-status { display: inline-flex; align-items: center; gap: 6px; flex-basis: 100%; justify-content: center; margin: 0; font-size: 12px; font-weight: 600; color: #a8a8a8; }
+.dn-warn { color: #ffb340; }
+.dn-bar.is-top { top: 70px; bottom: auto; }
+/* The text-edit save bar moves up out of the way */
+.dn-open .site-savebar { bottom: 132px; }
+@media (max-width: 1100px) { .dn-bar:not(.is-top) { bottom: 66px; } }
+@media (max-width: 640px) { .dn-btn { width: 30px; height: 30px; } .dn-swatch { width: 18px; height: 18px; } .dn-open .site-savebar { bottom: 190px; } }
 
 /* ------------------------------------------------------------------
    Card hover (kept from the redesign experiment, src/components/card-hover.tsx):
