@@ -413,8 +413,6 @@ html.theme-fade, html.theme-fade * { transition: background-color .45s ease, col
   @media (prefers-reduced-motion: no-preference) {
     .gallery-stage { animation: gallery-leave linear both; animation-timeline: view(); animation-range: exit 0% exit 80%; }
     @keyframes gallery-leave { to { opacity: .25; transform: translateY(-48px) scale(.97); } }
-    .broadsheet .bs-masthead { animation: news-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 90%; }
-    @keyframes news-rise { from { opacity: 0; transform: translateY(40px); } }
   }
 }
 
@@ -1898,7 +1896,6 @@ button.poll-option:disabled { cursor: progress; opacity: .7; transform: none; }
    its rows wait; when it scrolls into view they slide up and fade in, one
    after another (--i). */
 .footer-reveal { transition: opacity .7s ease, transform .8s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i, 0) * 90ms); }
-.site-footer[data-reveal="hidden"] .footer-reveal { opacity: 0; transform: translateY(32px); }
 
 /* Where the About / Newsletter / Work with OGCW band ends the page, it fades
    from #1A1A1A into the footer's black over a short, subtle stretch (the
@@ -2746,11 +2743,7 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .og-img img, .og-product-photo img, .og-poster-play, .og-player-play { transition: none; }
 }
 
-/* A quiet reveal as each story scrolls into view (CSS only, where supported) */
-@keyframes bs-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@supports (animation-timeline: view()) {
-  .bs-reveal { animation: bs-reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
-}
+/* Stories used to rise into view on scroll; words now stay still (owner, 9 Oct 2026) */
 
 @media (prefers-reduced-motion: reduce) {
   .cover-photo, .cover-photo img, .cover-copy, .cover-kicker, .cover-line > span, .cover-deck, .cover-cta, .cover-rail { animation: none !important; }

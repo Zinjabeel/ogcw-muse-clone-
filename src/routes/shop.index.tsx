@@ -1,22 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Sparkle } from "lucide-react";
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
-import { AddToCart, Price, SaveButton, ShopShell, brandLine, euro } from "../components/shop-kit";
-import { BRANDS, PRODUCTS, SHOP_CATEGORIES, fullName, getBrand, getProduct, productsIn, productsOf, type ShopProduct } from "../data/shop";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkle } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
+import { AddToCart, Price, SaveButton, ShopSearch, ShopShell, brandLine, euro } from "../components/shop-kit";
+import { BRANDS, GIFT_BANDS, PRODUCTS, SNEAKER_DROPS, fullName, getProduct, productsOf, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
-// The shop home is a story told by scrolling. Each move from one part to
-// the next has its own effect:
-//   hero          the arched cards rise in; on the way out the frame shrinks and rounds
-//   what's new    the heading wipes in, the cards slide in from the right
-//   collections   the panel rises, the cards behind it fan out as you scroll
-//   find a piece  the tiles open one after another, the brand pills scatter
-//   the edit      the lines draw in, the pinned photo changes with each line
-//   our promise   the words light up one by one as you scroll
-//   the aisles    the five aisles zoom in
-//   let's go      the headline types itself
-// The scroll-linked parts use CSS scroll-driven animations; the rest switch
-// on once with an IntersectionObserver. With reduced motion, nothing moves.
+// The shop home, top to bottom:
+//   hero          the headline, the big search and a row of tall arched cards that turns by itself
+//   what's new    a rail that keeps turning, even under the pointer
+//   collections   slides up over What's new and takes its place (one small scroll is enough:
+//                 the page glides the rest of the way); its card changes every 2 seconds
+//   the edit      New in, Trending, Limited, Gift ideas, with the photo pinned beside the list
+//   the aisles    three big photo cards: sneakers, clothing, watches and chains
+//   stream        ten streaming services
+//   explore       featured drops, release dates, limited editions, brands, the gift guide
+// Words never move on scroll; only the cards and photos do. With reduced
+// motion nothing turns by itself and nothing glides.
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
@@ -32,8 +31,9 @@ export const Route = createFileRoute("/shop/")({
 
 const pick = (ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
 const count = (tag: string) => PRODUCTS.filter((product) => product.tags?.includes(tag as never)).length;
+const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const HERO = pick(["jordan-4-retro-grey", "rolex-submariner", "jordan-4-retro-sage", "adidas-argentina-1998-home", "omega-swatch-moonswatch", "nike-air-max-97-silver", "supreme-box-logo-hoodie-pink", "cartier-santos-steel", "adidas-samba-og-cloud-white-core-black-gum"]);
+const HERO = pick(["jordan-4-retro-grey", "rolex-submariner", "one-piece-air-max-plus-mera-mera", "adidas-argentina-1998-home", "omega-swatch-moonswatch", "nike-air-max-97-silver", "supreme-box-logo-hoodie-pink", "cartier-santos-steel", "jordan-4-retro-sage", "adidas-samba-og-cloud-white-core-black-gum"]);
 const NEW_IN = PRODUCTS.filter((product) => product.tags?.includes("new")).slice(0, 12);
 const COLLECTIONS = [
   { id: "jordans", label: "Jordans", items: pick(["jordan-4-retro-grey", "jordan-4-retro-sage", "jordan-1-high-og-silver", "stockx-air-jordan-4-retro-military-black-white-grey-black", "stockx-air-jordan-1-high-university-blue-white-university-blue-black", "jordan-6-retro-infrared", "jordan-5-retro-grape"]) },
@@ -41,102 +41,99 @@ const COLLECTIONS = [
   { id: "shirts", label: "Shirts", items: pick(["adidas-argentina-1998-home", "adidas-france-home-retro", "adidas-argentina-2006-away", "lakers-kobe-bryant-8-jersey", "nba-all-star-1995-jersey", "bape-mitchell-ness-bulls-jersey"]) },
   { id: "steel", label: "Steel", items: pick(["rolex-submariner", "patek-philippe-nautilus", "audemars-piguet-royal-oak-skeleton", "cartier-santos-steel", "omega-swatch-moonswatch", "tag-heuer-monaco"]) },
 ];
-// The brand pills in the bento: where each one lands (centre, in %) and its tilt
-const PILLS = [
-  { slug: "rolex", x: 22, y: 24, r: -9 },
-  { slug: "jordan", x: 62, y: 17, r: 8 },
-  { slug: "cartier", x: 82, y: 42, r: -13 },
-  { slug: "adidas", x: 38, y: 50, r: 5 },
-  { slug: "casio", x: 16, y: 74, r: 11 },
-  { slug: "omega", x: 66, y: 68, r: -6 },
-  { slug: "onitsuka-tiger", x: 42, y: 88, r: -11 },
-  { slug: "supreme", x: 85, y: 88, r: 9 },
-].flatMap((pill) => {
-  const brand = getBrand(pill.slug);
-  return brand ? [{ ...pill, name: brand.name }] : [];
-});
 const EDIT = [
   { tag: "new", label: "New in", note: "Fresh pairs, shirts and steel, added this season.", image: "one-piece-air-max-plus-mera-mera" },
   { tag: "trending", label: "Trending", note: "What people are wearing right now.", image: "adidas-samba-og-cloud-white-core-black-gum" },
   { tag: "limited", label: "Limited", note: "Collabs, grails and pieces that won’t come back.", image: "patek-philippe-nautilus" },
   { tag: "gift", label: "Gift ideas", note: "Easy wins, from a €20 Casio up.", image: "omega-swatch-moonswatch" },
 ].map((row) => ({ ...row, product: getProduct(row.image)!, count: count(row.tag) }));
-// The promise, word by word: *gold* words, and products in the line
-type Bit = string | { img: string };
-const PROMISE: Bit[] = ["OGCW", "doesn’t", "sell", "*anything.*", "We", "find", "the", "pair", { img: "jordan-4-retro-grey" }, "the", "shirt", { img: "adidas-argentina-1998-home" }, "the", "watch", { img: "rolex-submariner" }, "and", "the", "show", "worth", "your", "money,", "then", "send", "you", "*straight*", "to", "the", "shop", "that", "makes", "it.", "*No middleman, no markup.*"];
-const STREAM_LOGOS = pick(["netflix-standard", "spotify-premium", "ufc-fight-pass", "playstation-plus", "crunchyroll-premium", "dazn-standard"]);
-const category = (slug: string) => SHOP_CATEGORIES.find((item) => item.slug === slug)!;
-const AISLES = [
-  { key: "sneakers", label: "Sneakers", blurb: category("sneakers").blurb, search: { cat: "sneakers" }, image: getProduct("jordan-4-retro-grey")!.image, count: `${productsIn("Sneakers").length} pairs` },
-  { key: "clothing", label: "Clothing", blurb: "Football shirts, jerseys, merch and limited editions.", search: { cat: "clothing" }, image: getProduct("adidas-argentina-1998-home")!.image, count: `${productsIn("Clothing").length} pieces` },
-  { key: "watches", label: "Watches & chains", blurb: "Rolex to Casio, and gold chains.", search: { cat: "accessories" }, image: getProduct("rolex-submariner")!.image, count: `${productsIn("Accessories").length} pieces` },
-  { key: "drops", label: "Featured drops", blurb: "The One Piece pack, the Jordans on the calendar and the retro shirts.", search: { tag: "drops" }, image: "/shop/one-piece-air-max-plus-pack.webp", count: `${count("drops")} drops` },
-  { key: "streaming", label: "Streaming", blurb: category("streaming").blurb, search: { cat: "streaming" }, image: "", count: `${productsIn("Streaming").length} subscriptions` },
+// The three big photo cards (photos from Unsplash, credited under them)
+const LOOKS = [
+  { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers.webp", alt: "White Nike sneakers on dark asphalt beside a painted white line" },
+  { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
+  { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
 ];
+const STREAM = pick(["netflix-standard", "disney-plus", "max-streaming", "prime-video", "apple-tv-plus", "crunchyroll-premium", "spotify-premium", "youtube-premium", "dazn-standard", "playstation-plus"]);
 const brandCount = BRANDS.filter((brand) => productsOf(brand.slug).length > 0).length;
-const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** Switch on each [data-fx] part once, as it comes into view */
-function useStoryFx() {
-  const root = useRef<HTMLDivElement>(null);
+/** An index that moves on by itself every `ms` (never under reduced motion, never in a hidden tab) */
+function useTurn(ms: number, onTurn: () => void, deps: unknown[] = []) {
+  const turn = useRef(onTurn);
+  turn.current = onTurn;
   useEffect(() => {
-    const el = root.current;
+    if (reduced()) return;
+    const timer = window.setInterval(() => { if (!document.hidden) turn.current(); }, ms);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ms, ...deps]);
+}
+
+/** What's new and New collections stick in turn; a scroll that stops part
+ *  way between them glides on to the end, in the direction it was going */
+function useStackGlide(stack: RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = stack.current;
     if (!el) return;
-    const io = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add("is-in");
-        io.unobserve(entry.target);
-      }
-    }, { rootMargin: "0px 0px -18% 0px" });
-    el.querySelectorAll("[data-fx]").forEach((node) => io.observe(node));
-    el.classList.add("is-ready");
-    return () => io.disconnect();
-  }, []);
-  return root;
+    let last = window.scrollY;
+    let dir = 1;
+    let timer = 0;
+    const zone = () => {
+      const header = document.querySelector<HTMLElement>(".sx-top")?.getBoundingClientRect().height ?? 0;
+      const first = el.children[0] as HTMLElement | undefined;
+      const start = el.getBoundingClientRect().top + window.scrollY - header;
+      return { start, end: start + (first?.getBoundingClientRect().height ?? 0) };
+    };
+    const settle = () => {
+      const { start, end } = zone();
+      const y = window.scrollY;
+      if (y > start + 2 && y < end - 2) window.scrollTo({ top: dir > 0 ? end : start, behavior: reduced() ? "auto" : "smooth" });
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y !== last) dir = y > last ? 1 : -1;
+      last = y;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(settle, 140);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(timer); };
+  }, [stack]);
 }
 
 function ShopHome() {
-  const root = useStoryFx();
+  const stack = useRef<HTMLDivElement>(null);
+  useStackGlide(stack);
   return (
-    <ShopShell promise={false}>
-      <div className="sh" ref={root}>
+    <ShopShell>
+      <div className="sh">
         <Hero />
-        <div id="shop-story" className="sh-anchor" />
-        <WhatsNew />
-        <Collections />
-        <FindYourPiece />
+        <div className="sh-stack" ref={stack}>
+          <WhatsNew />
+          <Collections />
+        </div>
         <TheEdit />
-        <OurPromise />
-        <Aisles />
-        <LetsGo />
+        <Looks />
+        <StreamAndChill />
+        <Explore />
       </div>
     </ShopShell>
   );
 }
 
-/* ---------- The hero: badge, two lines, a line of copy, one button, the arched cards ---------- */
+/* ---------- The hero ---------- */
 
 function Hero() {
-  const go = (id: string) => () => document.getElementById(id)?.scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
   return (
     <section className="sh-hero" aria-labelledby="sh-hero-title">
-      <div className="sh-hero-frame">
-        <div className="sh-intro" aria-hidden="true"><span>OGCW</span></div>
-        <div className="sh-hero-copy">
-          <p className="sh-badge"><span className="sh-badge-dot" aria-hidden="true" /> {PRODUCTS.length} <T k="shop.hero.badge">picks from</T> {brandCount} <T k="shop.hero.badge2">brands, bought at the source</T></p>
-          <h1 id="sh-hero-title" className="sh-hero-title">
-            <span className="sh-line"><span><T k="shop.hero.l1">Wear the culture.</T></span></span>
-            <span className="sh-line"><span><T k="shop.hero.l2">Buy it at the source.</T></span></span>
-          </h1>
-          <p className="sh-hero-sub"><T k="shop.hero.sub">Sneakers, shirts, watches and streaming, picked by OGCW and bought from the shop that makes them.</T></p>
-          <div className="sh-hero-ctas">
-            <button type="button" className="sh-cta" onClick={go("shop-story")}><T k="shop.hero.cta">Start the story</T> <span className="sh-cta-dot"><ArrowDown size={16} aria-hidden="true" /></span></button>
-            <button type="button" className="sh-skip" onClick={go("aisles")}><T k="shop.hero.skip">Skip to the aisles</T></button>
-          </div>
-        </div>
-        <Arches />
+      <div className="sh-hero-copy">
+        <h1 id="sh-hero-title" className="sh-hero-title">
+          <span><T k="shop.hero.l1">Wear the culture.</T></span>
+          <span><T k="shop.hero.l2">Buy it at the source.</T></span>
+        </h1>
+        <p className="sh-hero-sub"><T k="shop.hero.sub">Sneakers, shirts, watches and streaming, picked by OGCW and bought from the shop that makes them.</T></p>
+        <ShopSearch big />
       </div>
+      <Arches />
     </section>
   );
 }
@@ -146,6 +143,7 @@ function Arches() {
   const start = useRef<number | null>(null);
   const n = HERO.length;
   const go = (step: number) => setActive((value) => (value + step + n) % n);
+  useTurn(3000, () => go(1));
   const down = (event: ReactPointerEvent) => { start.current = event.clientX; };
   const up = (event: ReactPointerEvent) => {
     if (start.current === null) return;
@@ -153,10 +151,8 @@ function Arches() {
     start.current = null;
     if (Math.abs(moved) > 40) go(moved < 0 ? 1 : -1);
   };
-  const centre = HERO[active]!;
   return (
     <div className="sh-arches" role="group" aria-roledescription="carousel" aria-label="Picks from the shop">
-      <button type="button" className="sh-arrow is-prev" onClick={() => go(-1)} aria-label="Previous pick"><ArrowLeft size={18} aria-hidden="true" /></button>
       <ul className="sh-arch-track" onPointerDown={down} onPointerUp={up} onPointerCancel={() => { start.current = null; }}>
         {HERO.map((product, index) => {
           let slot = index - active;
@@ -164,32 +160,35 @@ function Arches() {
           if (slot < -n / 2) slot += n;
           const shown = Math.abs(slot) <= 2;
           return (
-            <li key={product.id} className="sh-arch" data-centre={slot === 0 || undefined} data-far={Math.abs(slot) > 1 || undefined} style={{ "--slot": slot, "--abs": Math.abs(slot), "--i": index } as CSSProperties} aria-hidden={!shown}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-arch-card" tabIndex={shown ? 0 : -1} draggable={false}>
-                <img src={product.image} alt={fullName(product)} draggable={false} />
+            <li key={product.id} className="sh-arch" data-centre={slot === 0 || undefined} style={{ "--slot": slot, "--abs": Math.min(Math.abs(slot), 3) } as CSSProperties} aria-hidden={!shown}>
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-arch-card" tabIndex={shown ? 0 : -1} draggable={false} aria-label={`${fullName(product)}, ${product.colour}`}>
+                <img src={product.image} alt="" draggable={false} />
+                {slot === 0 && (
+                  <span className="sh-arch-chip">
+                    <strong>{product.name}</strong>
+                    <span>{product.price !== undefined ? euro(product.price) : <T k="shop.hero.atshop">Price at the shop</T>}</span>
+                  </span>
+                )}
               </Link>
             </li>
           );
         })}
       </ul>
-      <p className="sh-arch-chip" aria-live="polite" key={centre.id}>
-        <strong>{centre.name}</strong>
-        {centre.price !== undefined ? <><span>{euro(centre.price)}</span> <small><T k="shop.hero.guide">guide</T></small></> : <small><T k="shop.hero.atshop">Price at the shop</T></small>}
-      </p>
+      <button type="button" className="sh-arrow is-prev" onClick={() => go(-1)} aria-label="Previous pick"><ArrowLeft size={18} aria-hidden="true" /></button>
       <button type="button" className="sh-arrow is-next" onClick={() => go(1)} aria-label="Next pick"><ArrowRight size={18} aria-hidden="true" /></button>
     </div>
   );
 }
 
-/* ---------- What's new: a rail of cards with arrows and dots ---------- */
+/* ---------- What's new: a rail that keeps turning ---------- */
 
-function StageCard({ product }: { product: ShopProduct }) {
+function StageCard({ product, hidden = false }: { product: ShopProduct; hidden?: boolean }) {
   const tags = product.tags ?? [];
   const chip = tags.includes("limited") ? "Limited" : tags.includes("drops") ? "Drop" : tags.includes("new") ? "New" : undefined;
   return (
-    <article className="sh-card">
-      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-card-link">
-        <img src={product.image} alt={`${fullName(product)}, ${product.colour}`} loading="lazy" />
+    <article className="sh-card" aria-hidden={hidden || undefined}>
+      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-card-link" tabIndex={hidden ? -1 : undefined}>
+        <img src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" />
         {chip && <span className="sh-chip"><Sparkle size={11} aria-hidden="true" /> {chip}</span>}
         <span className="sh-card-text">
           <span className="sh-card-brand">{brandLine(product)}</span>
@@ -197,57 +196,53 @@ function StageCard({ product }: { product: ShopProduct }) {
           <Price product={product} />
         </span>
       </Link>
-      <SaveButton product={product} />
-      <AddToCart product={product} />
+      {!hidden && <SaveButton product={product} />}
+      {!hidden && <AddToCart product={product} />}
     </article>
   );
 }
 
 function WhatsNew() {
-  const rail = useRef<HTMLUListElement>(null);
-  const [page, setPage] = useState(0);
-  const [pages, setPages] = useState(1);
+  const n = NEW_IN.length;
+  // Three copies side by side, so the rail can turn on forever; after each
+  // step past the end it jumps back to the middle copy without a transition
+  const [index, setIndex] = useState(0);
+  const [instant, setInstant] = useState(false);
+  useTurn(3000, () => setIndex((value) => value + 1));
   useEffect(() => {
-    const el = rail.current;
-    if (!el) return;
-    let frame = 0;
-    const measure = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const total = Math.max(1, Math.ceil((el.scrollWidth - 4) / el.clientWidth));
-        setPages(total);
-        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-        setPage(atEnd ? total - 1 : Math.round(el.scrollLeft / el.clientWidth));
-      });
-    };
-    measure();
-    el.addEventListener("scroll", measure, { passive: true });
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", measure); ro.disconnect(); cancelAnimationFrame(frame); };
-  }, []);
-  const to = (next: number) => rail.current?.scrollTo({ left: next * rail.current.clientWidth, behavior: reduced() ? "auto" : "smooth" });
+    if (index >= 0 && index < n) return;
+    const timer = window.setTimeout(() => { setInstant(true); setIndex((value) => ((value % n) + n) % n); }, 760);
+    return () => window.clearTimeout(timer);
+  }, [index, n]);
+  useEffect(() => {
+    if (!instant) return;
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
+    return () => cancelAnimationFrame(frame);
+  }, [instant]);
+  const at = ((index % n) + n) % n;
   return (
-    <section className="sh-sec sh-new" data-fx aria-labelledby="sh-new-title">
+    <section className="sh-sec sh-new" aria-labelledby="sh-new-title">
       <div className="sh-panel">
         <header className="sh-head">
-          <h2 id="sh-new-title" className="sh-h2 sh-wipe"><T k="shop.story.new">See what’s new</T></h2>
+          <h2 id="sh-new-title" className="sh-h2"><T k="shop.story.new">See what’s new</T></h2>
           <Link to="/shop/all" search={{ tag: "new" }} className="sh-textlink"><T k="shop.story.new.all">Shop all new in</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </header>
-        <ul className="sh-rail" ref={rail}>
-          {NEW_IN.map((product, index) => (
-            <li key={product.id} className="sh-rail-item" style={{ "--i": index } as CSSProperties}><StageCard product={product} /></li>
-          ))}
-        </ul>
+        <div className="sh-loop">
+          <ul className={`sh-loop-track${instant ? " is-instant" : ""}`} style={{ "--i": index + n } as CSSProperties}>
+            {[0, 1, 2].flatMap((copy) => NEW_IN.map((product) => (
+              <li key={`${copy}-${product.id}`} className="sh-loop-item"><StageCard product={product} hidden={copy !== 1} /></li>
+            )))}
+          </ul>
+        </div>
         <div className="sh-rail-foot">
-          <div className="sh-dots" role="group" aria-label="Pages">
-            {Array.from({ length: pages }, (_, index) => (
-              <button key={index} type="button" className="sh-dot" aria-pressed={index === page} aria-label={`Page ${index + 1} of ${pages}`} onClick={() => to(index)} />
+          <div className="sh-dots" role="group" aria-label="Cards">
+            {NEW_IN.map((product, dot) => (
+              <button key={product.id} type="button" className="sh-dot" aria-pressed={dot === at} aria-label={`Show ${fullName(product)}`} onClick={() => setIndex(dot)} />
             ))}
           </div>
           <div className="sh-arrows">
-            <button type="button" className="sh-arrow" onClick={() => to(Math.max(0, page - 1))} disabled={page === 0} aria-label="Previous cards"><ArrowLeft size={18} aria-hidden="true" /></button>
-            <button type="button" className="sh-arrow" onClick={() => to(Math.min(pages - 1, page + 1))} disabled={page >= pages - 1} aria-label="Next cards"><ArrowRight size={18} aria-hidden="true" /></button>
+            <button type="button" className="sh-arrow" onClick={() => setIndex((value) => value - 1)} aria-label="Previous cards"><ArrowLeft size={18} aria-hidden="true" /></button>
+            <button type="button" className="sh-arrow" onClick={() => setIndex((value) => value + 1)} aria-label="Next cards"><ArrowRight size={18} aria-hidden="true" /></button>
           </div>
         </div>
       </div>
@@ -255,7 +250,7 @@ function WhatsNew() {
   );
 }
 
-/* ---------- New collections: tabs, one big card, two cards fanned out behind ---------- */
+/* ---------- New collections: one card, a new piece every 2 seconds ---------- */
 
 function Collections() {
   const [tab, setTab] = useState(0);
@@ -263,8 +258,9 @@ function Collections() {
   const items = COLLECTIONS[tab]!.items;
   const product = items[index % items.length]!;
   const step = (by: number) => setIndex((value) => (value + by + items.length) % items.length);
+  useTurn(2000, () => step(1), [tab]);
   return (
-    <section className="sh-sec sh-coll" data-fx aria-labelledby="sh-coll-title">
+    <section className="sh-sec sh-coll" aria-labelledby="sh-coll-title">
       <div className="sh-panel">
         <header className="sh-head">
           <h2 id="sh-coll-title" className="sh-h2"><T k="shop.story.coll">New collections</T></h2>
@@ -280,48 +276,20 @@ function Collections() {
           <span className="sh-back sh-back-1" aria-hidden="true" />
           <span className="sh-back sh-back-2" aria-hidden="true" />
           <button type="button" className="sh-arrow is-side is-prev" onClick={() => step(-1)} aria-label="Previous piece"><ArrowLeft size={18} aria-hidden="true" /></button>
-          <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-coll-card" key={product.id} aria-label={`${fullName(product)}, ${product.colour}`}>
-            <img src={product.image} alt="" />
-            <span className="sh-bubble is-a">{product.name}</span>
-            <span className="sh-bubble is-b">{product.price !== undefined ? euro(product.price) : "Price at the shop"}</span>
+          <div className="sh-coll-card">
+            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-coll-photo" key={product.id} tabIndex={-1} aria-hidden="true">
+              <img src={product.image} alt="" />
+            </Link>
+            <span className="sh-bubble is-a">{fullName(product)}</span>
+            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-coll-shop" aria-label={`Shop ${fullName(product)}`}>
+              <T k="shop.story.coll.shop">Shop</T> <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
             <span className="sh-coll-dots" aria-hidden="true">
               {items.map((item, i) => <span key={item.id} data-on={i === index % items.length || undefined} />)}
             </span>
-          </Link>
+          </div>
           <button type="button" className="sh-arrow is-side is-next" onClick={() => step(1)} aria-label="Next piece"><ArrowRight size={18} aria-hidden="true" /></button>
         </div>
-        <p className="sh-coll-line" aria-live="polite"><span>{brandLine(product)}</span> {product.colour}</p>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Find your piece: the bento, with brand pills that scatter ---------- */
-
-function FindYourPiece() {
-  const photo = getProduct("rolex-daytona-gold")!;
-  return (
-    <section className="sh-sec sh-bento" data-fx aria-labelledby="sh-bento-title">
-      <div className="sh-tile sh-bento-main" style={{ "--d": 0 } as CSSProperties}>
-        <p className="sh-bento-note"><T k="shop.story.bento.note">OGCW picks from the brands in our stories, from Rolex to Casio and Jordan to Onitsuka Tiger.</T></p>
-        <h2 id="sh-bento-title" className="sh-h2 sh-h2-xl"><T k="shop.story.bento.title">Find your piece here</T></h2>
-        <Link to="/shop/all" className="sh-bento-link">
-          <em><T k="shop.story.bento.link">From terrace classics to Swiss steel</T></em>
-          <span className="sh-circle"><ArrowRight size={18} aria-hidden="true" /></span>
-        </Link>
-        <img className="sh-bento-ghost" src={getProduct("jordan-1-high-og-silver")!.image} alt="" loading="lazy" />
-      </div>
-      <Link to="/shop/p/$id" params={{ id: photo.id }} className="sh-tile sh-bento-photo" style={{ "--d": 1 } as CSSProperties} aria-label={fullName(photo)}>
-        <img src={photo.image} alt="" loading="lazy" />
-      </Link>
-      <Link to="/shop/all" search={{ tag: "drops" }} className="sh-tile sh-bento-gold" style={{ "--d": 2 } as CSSProperties}>
-        <span className="sh-bento-gold-title"><Sparkle size={16} aria-hidden="true" /> <T k="shop.story.bento.drops">Shop the latest drops</T></span>
-        <span className="sh-bento-gold-text"><T k="shop.story.bento.drops.text">The One Piece Air Max Plus pack, the Jordans on the calendar and the retro shirts.</T></span>
-      </Link>
-      <div className="sh-tile sh-bento-pills" style={{ "--d": 3 } as CSSProperties}>
-        {PILLS.map((pill, index) => (
-          <Link key={pill.slug} to="/shop/$slug" params={{ slug: pill.slug }} className="sh-pill" style={{ "--x": pill.x, "--y": pill.y, "--r": `${pill.r}deg`, "--i": index } as CSSProperties}>{pill.name}</Link>
-        ))}
       </div>
     </section>
   );
@@ -345,7 +313,7 @@ function TheEdit() {
         <h2 id="sh-edit-title" className="sr-only">The edit</h2>
         <ol className="sh-edit-list">
           {EDIT.map((row, index) => (
-            <li key={row.tag} ref={(node) => { rows.current[index] = node; }} data-row={index} data-fx className="sh-edit-row" data-on={index === active || undefined}>
+            <li key={row.tag} ref={(node) => { rows.current[index] = node; }} data-row={index} className="sh-edit-row" data-on={index === active || undefined}>
               <Link to="/shop/all" search={{ tag: row.tag }} className="sh-edit-link" onFocus={() => setActive(index)} onMouseEnter={() => setActive(index)}>
                 <span className="sh-edit-name"><T k={`shop.story.edit.${row.tag}`}>{row.label}</T></span>
                 <span className="sh-edit-num">0{index + 1}</span>
@@ -360,7 +328,6 @@ function TheEdit() {
           <div className="sh-edit-frame">
             {EDIT.map((row, index) => <img key={row.tag} src={row.product.image} alt="" loading="lazy" data-on={index === active || undefined} />)}
             <span className="sh-edit-tag">{EDIT[active]!.label}</span>
-            <span className="sh-edit-steps">{EDIT.map((row, index) => <span key={row.tag} data-on={index === active || undefined} />)}</span>
           </div>
         </div>
       </div>
@@ -368,52 +335,52 @@ function TheEdit() {
   );
 }
 
-/* ---------- The promise: the words light up as you scroll ---------- */
+/* ---------- The aisles: three big photo cards ---------- */
 
-function OurPromise() {
-  const words = PROMISE.length;
-  const text = PROMISE.map((bit) => (typeof bit === "string" ? bit.replace(/\*/g, "") : "")).filter(Boolean).join(" ");
+function Looks() {
   return (
-    <section className="sh-sec sh-words" aria-label="How the OGCW Shop works">
-      <div className="sh-words-pin">
-        <p className="sh-words-text" style={{ "--n": words } as CSSProperties} aria-label={text}>
-          {PROMISE.map((bit, index) => {
-            const style = { "--i": index } as CSSProperties;
-            if (typeof bit !== "string") {
-              const product = getProduct(bit.img)!;
-              return <Fragment key={index}><span className="sh-w sh-w-img" style={style} aria-hidden="true"><img src={product.image} alt="" loading="lazy" /></span>{" "}</Fragment>;
-            }
-            const gold = bit.startsWith("*");
-            return <Fragment key={index}><span className={`sh-w${gold ? " is-gold" : ""}`} style={style} aria-hidden="true">{bit.replace(/\*/g, "")}</span>{" "}</Fragment>;
-          })}
-        </p>
-      </div>
+    <section className="sh-sec sh-looks" aria-labelledby="sh-looks-title">
+      <header className="sh-looks-head">
+        <h2 id="sh-looks-title" className="sh-h2"><T k="shop.looks.title">Shop the aisles</T></h2>
+        <p><T k="shop.looks.text">From terrace classics to Swiss steel: the pairs, shirts, watches and chains in our stories, each bought from the shop that makes it.</T></p>
+      </header>
+      <ul className="sh-looks-grid">
+        {LOOKS.map((look) => (
+          <li key={look.key}>
+            <Link to="/shop/all" search={look.search} className="sh-look">
+              <img src={look.image} alt={look.alt} loading="lazy" />
+              <span className="sh-look-text">
+                <span className="sh-look-name"><T k={`shop.looks.${look.key}`}>{look.label}</T></span>
+                <span className="sh-look-more"><T k="shop.looks.more">Discover more</T> <ArrowRight size={13} aria-hidden="true" /></span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <p className="sh-credit"><T k="shop.looks.credit">Photos: Justus Menke, Nathaniel Cherian and Alberto Rodríguez Santana on Unsplash.</T></p>
     </section>
   );
 }
 
-/* ---------- The aisles: where the story ends and the shopping starts ---------- */
+/* ---------- Stream and chill: ten services ---------- */
 
-function Aisles() {
+function StreamAndChill() {
   return (
-    <section className="sh-sec sh-aisles" id="aisles" aria-labelledby="sh-aisles-title">
-      <header className="sh-head sh-aisles-head">
-        <h2 id="sh-aisles-title" className="sh-h2"><T k="shop.story.aisles">Pick your aisle</T></h2>
-        <p className="sh-aisles-sub"><T k="shop.story.aisles.sub">Every piece, sorted. Choose one and dig in.</T></p>
+    <section className="sh-sec sh-stream" aria-labelledby="sh-stream-title">
+      <header className="sh-head">
+        <h2 id="sh-stream-title" className="sh-h2"><T k="shop.stream.title">Pick your favourite way to stream and chill</T></h2>
+        <Link to="/shop/all" search={{ cat: "streaming" }} className="sh-textlink"><T k="shop.stream.all">Every subscription</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
-      <ul className="sh-aisle-grid">
-        {AISLES.map((aisle) => (
-          <li key={aisle.key} className={`sh-aisle is-${aisle.key}`}>
-            <Link to="/shop/all" search={aisle.search} className="sh-aisle-link">
-              {aisle.image ? <img className="sh-aisle-img" src={aisle.image} alt="" loading="lazy" /> : (
-                <span className="sh-aisle-logos" aria-hidden="true">{STREAM_LOGOS.map((product) => <img key={product.id} src={product.image} alt="" loading="lazy" />)}</span>
-              )}
-              <span className="sh-aisle-text">
-                <span className="sh-aisle-count">{aisle.count}</span>
-                <span className="sh-aisle-name"><T k={`shop.story.aisle.${aisle.key}`}>{aisle.label}</T></span>
-                <span className="sh-aisle-blurb"><T k={`shop.story.aisle.${aisle.key}.blurb`}>{aisle.blurb}</T></span>
+      <ul className="sh-stream-grid">
+        {STREAM.map((product) => (
+          <li key={product.id}>
+            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-service">
+              <img src={product.image} alt="" loading="lazy" />
+              <span className="sh-service-text">
+                <span className="sh-service-name">{product.name}</span>
+                <span className="sh-service-note">{product.colour}</span>
               </span>
-              <span className="sh-circle"><ArrowUpRight size={18} aria-hidden="true" /></span>
+              <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
           </li>
         ))}
@@ -422,60 +389,67 @@ function Aisles() {
   );
 }
 
-/* ---------- Let's go: the headline types itself, then the shop's small print ---------- */
+/* ---------- Explore ---------- */
 
-const TYPED = ["Let’s go", "shopping."];
+const dayMonth = (iso: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 
-function LetsGo() {
-  let letter = 0;
+function Explore() {
+  const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10));
+  useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
+  const next = SNEAKER_DROPS.find((drop) => drop.date >= today);
+  const limited = getProduct("patek-philippe-nautilus")!;
   return (
-    <section className="sh-sec sh-close" data-fx aria-labelledby="sh-close-title">
-      <Link to="/shop/all" className="sh-close-circle" aria-label="Shop everything"><ArrowUpRight size={26} aria-hidden="true" /></Link>
-      <div className="sh-panel">
-        <div className="sh-close-top">
-          <h2 id="sh-close-title" className="sh-type" aria-label={TYPED.join(" ")}>
-            {TYPED.map((line, row) => (
-              <span key={line} className="sh-type-line" aria-hidden="true">
-                {[...line].map((char) => <span key={letter} style={{ "--i": letter++ } as CSSProperties}>{char}</span>)}
-                {row === TYPED.length - 1 && <span className="sh-caret" style={{ "--i": letter } as CSSProperties} />}
-              </span>
-            ))}
-          </h2>
-          <p className="sh-close-text"><T k="shop.story.close.text">Picked by OGCW and bought from the shop that makes it. Every price is a guide; each shop sets the final one.</T></p>
-        </div>
-        <div className="sh-close-cols">
-          <div>
-            <p className="sh-close-mark">OGCW<span>Shop</span></p>
-            <p className="sh-close-small"><T k="shop.story.close.small">The shop of One Great Culture World.</T></p>
-          </div>
-          <div>
-            <h3><T k="shop.story.close.aisles">Aisles</T></h3>
-            <ul>{AISLES.map((aisle) => <li key={aisle.key}><Link to="/shop/all" search={aisle.search}>{aisle.label}</Link></li>)}</ul>
-          </div>
-          <div>
-            <h3><T k="shop.story.close.how">How it works</T></h3>
-            <ol>
-              <li><T k="shop.story.close.how1">Add what you like to the cart.</T></li>
-              <li><T k="shop.story.close.how2">Checkout lists each item by its shop.</T></li>
-              <li><T k="shop.story.close.how3">Buy it there: they handle sizes, payment and delivery.</T></li>
-            </ol>
-          </div>
-          <div>
-            <h3><T k="shop.story.close.more">More</T></h3>
-            <ul>
-              <li><Link to="/shop/drops"><T k="shop.bar.release-dates">Release dates</T></Link></li>
-              <li><Link to="/shop/brands"><T k="shop.bar.brands-a-to-z">Brands A to Z</T></Link></li>
-              <li><Link to="/shop/gifts"><T k="shop.bar.gift-guide">Gift guide</T></Link></li>
-              <li><Link to="/info/$slug" params={{ slug: "faq" }}><T k="shop.promise.faq">Questions?</T></Link></li>
-            </ul>
-          </div>
-        </div>
-        <p className="sh-close-strip">
-          <span><T k="shop.story.close.strip1">Guide prices in euros</T></span>
-          <span><T k="shop.story.close.strip2">Photos: Wikimedia Commons and Unsplash, credited on each product</T></span>
-          <span><T k="shop.story.close.strip3">OGCW sells nothing itself</T></span>
-        </p>
-      </div>
+    <section className="sh-sec sh-explore" aria-labelledby="sh-explore-title">
+      <header className="sh-head">
+        <h2 id="sh-explore-title" className="sh-h2"><T k="shop.explore.title">Explore</T></h2>
+      </header>
+      <ul className="sh-explore-grid">
+        <li className="is-drops">
+          <Link to="/shop/all" search={{ tag: "drops" }} className="sh-tile sh-tile-photo">
+            <img src="/shop/one-piece-air-max-plus-pack.webp" alt="" loading="lazy" />
+            <span className="sh-tile-text">
+              <span className="sh-tile-kicker">{count("drops")} <T k="shop.explore.drops.n">pieces</T></span>
+              <span className="sh-tile-name"><T k="shop.explore.drops">Featured drops</T></span>
+              <span className="sh-tile-note"><T k="shop.explore.drops.note">The One Piece pack, the Jordans on the calendar and the retro shirts.</T></span>
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/shop/drops" className="sh-tile sh-tile-date">
+            <span className="sh-tile-kicker"><T k="shop.explore.dates.kicker">Next on the calendar</T></span>
+            {next ? (
+              <>
+                <span className="sh-tile-big">{dayMonth(next.date)}</span>
+                <span className="sh-tile-note">{next.name}</span>
+              </>
+            ) : <span className="sh-tile-note"><T k="shop.explore.dates.none">New dates soon.</T></span>}
+            <span className="sh-tile-name"><T k="shop.explore.dates">Release dates</T> <ArrowRight size={15} aria-hidden="true" /></span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/shop/all" search={{ tag: "limited" }} className="sh-tile sh-tile-photo is-stage">
+            <img src={limited.image} alt="" loading="lazy" />
+            <span className="sh-tile-text">
+              <span className="sh-tile-kicker">{count("limited")} <T k="shop.explore.limited.n">pieces</T></span>
+              <span className="sh-tile-name"><T k="shop.explore.limited">Limited editions</T></span>
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/shop/brands" className="sh-tile sh-tile-az">
+            <span className="sh-tile-letters" aria-hidden="true">A&nbsp;B&nbsp;C<br />X&nbsp;Y&nbsp;Z</span>
+            <span className="sh-tile-kicker">{brandCount} <T k="shop.explore.brands.n">brands</T></span>
+            <span className="sh-tile-name"><T k="shop.explore.brands">Brands A to Z</T> <ArrowRight size={15} aria-hidden="true" /></span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/shop/gifts" className="sh-tile sh-tile-gift">
+            <span className="sh-tile-bands">{GIFT_BANDS.map((band) => <span key={band.id}>{band.label}</span>)}</span>
+            <span className="sh-tile-name"><T k="shop.explore.gifts">Gift guide</T> <ArrowRight size={15} aria-hidden="true" /></span>
+          </Link>
+        </li>
+      </ul>
     </section>
   );
 }
+

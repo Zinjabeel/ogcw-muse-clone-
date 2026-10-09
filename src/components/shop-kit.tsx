@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, ChevronDown, Heart, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { brandOf, buyUrl, fullName, retailerOf, type ShopProduct } from "@/data/shop";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { BRANDS, brandOf, buyUrl, fullName, productsOf, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
@@ -135,90 +135,123 @@ export function BuyButton({ product }: { product: ShopProduct }) {
   );
 }
 
-const AISLES = [
-  { label: "Sneakers", cat: "sneakers" },
-  { label: "Clothing", cat: "clothing" },
-  { label: "Watches & chains", cat: "accessories" },
-  { label: "Streaming", cat: "streaming" },
+/** The shop's sections: the only links in its header */
+const SECTIONS = [
+  { key: "shop", label: "Shop", to: "/shop", tag: "" },
+  { key: "trendiest", label: "Trendiest", to: "/shop/all", tag: "trending" },
+  { key: "featured-drops", label: "Featured drops", to: "/shop/all", tag: "drops" },
+  { key: "latest", label: "Latest", to: "/shop/all", tag: "new" },
+  { key: "upcoming", label: "Upcoming", to: "/shop/drops", tag: "" },
+  { key: "check-this-out", label: "Check this out", to: "/shop/all", tag: "limited" },
 ] as const;
 
-const MORE = [
-  { label: "Featured drops", to: "/shop/all", search: { tag: "drops" } },
-  { label: "New in", to: "/shop/all", search: { tag: "new" } },
-  { label: "Trending", to: "/shop/all", search: { tag: "trending" } },
-  { label: "Limited editions", to: "/shop/all", search: { tag: "limited" } },
-  { label: "Shop all", to: "/shop/all", search: {} },
-  { label: "Release dates", to: "/shop/drops", search: {} },
-  { label: "Brands A to Z", to: "/shop/brands", search: {} },
-  { label: "Gift guide", to: "/shop/gifts", search: {} },
-] as const;
-
-const keyOf = (label: string) => label.toLowerCase().replace(/[^a-z]+/g, "-").replace(/-$/, "");
-
-function ShopBar() {
-  const { saved } = useSaved();
-  const { count } = useCart();
+/** The shop's search: big in the hero, slim on the aisle pages */
+export function ShopSearch({ big = false, initial = "" }: { big?: boolean; initial?: string }) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-  const more = useRef<HTMLDetailsElement>(null);
-  const location = useRouterState({ select: (state) => state.location });
-  const search = location.search as Record<string, unknown>;
+  const id = useId();
+  const [query, setQuery] = useState(initial);
+  useEffect(() => setQuery(initial), [initial]);
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     navigate({ to: "/shop/all", search: query.trim() ? { q: query.trim() } : {} });
   };
-  // The "More" list closes when you pick something or click elsewhere
-  useEffect(() => {
-    if (more.current) more.current.open = false;
-  }, [location.pathname, location.searchStr]);
-  useEffect(() => {
-    const close = (event: PointerEvent) => {
-      if (more.current?.open && !more.current.contains(event.target as Node)) more.current.open = false;
-    };
-    document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
-  }, []);
-
   return (
-    <div className="sx-bar">
-      <div className="sx-bar-row">
-        <nav className="sx-pills" aria-label="Shop aisles">
-          <Link to="/shop" className="sx-pill" data-on={location.pathname === "/shop" || location.pathname === "/shop/" || undefined}><T k="shop.bar.home">Shop</T></Link>
-          {AISLES.map((aisle) => (
-            <Link key={aisle.cat} to="/shop/all" search={{ cat: aisle.cat }} className="sx-pill" data-on={(location.pathname === "/shop/all" && search["cat"] === aisle.cat) || undefined}>
-              <T k={`shop.bar.${keyOf(aisle.label)}`}>{aisle.label}</T>
+    <form className={`sx-search${big ? " is-big" : ""}`} role="search" onSubmit={onSubmit}>
+      <Search size={big ? 20 : 16} strokeWidth={2} aria-hidden="true" />
+      <label htmlFor={id} className="sr-only">Search the shop</label>
+      <input id={id} type="search" placeholder="Search sneakers, shirts, watches or streaming" value={query} onChange={(event) => setQuery(event.target.value)} />
+      {big && <button type="submit" className="sx-gold"><T k="shop.search.go">Search</T></button>}
+    </form>
+  );
+}
+
+/** "A to Z": point at it, pick a letter, pick a brand */
+function BrandIndex() {
+  const groups = useMemo(() => {
+    const brands = BRANDS.filter((brand) => productsOf(brand.slug).length > 0).sort((a, b) => a.name.localeCompare(b.name));
+    const map = new Map<string, typeof brands>();
+    for (const brand of brands) {
+      const first = brand.name[0]!.toUpperCase();
+      const letter = /[A-Z]/.test(first) ? first : "#";
+      map.set(letter, [...(map.get(letter) ?? []), brand]);
+    }
+    return map;
+  }, []);
+  const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+  const [open, setOpen] = useState(false);
+  const [letter, setLetter] = useState(() => letters.find((item) => groups.has(item)) ?? "A");
+  const root = useRef<HTMLDivElement>(null);
+  const pointer = useRef("");
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    const onPointer = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointer);
+    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
+  }, [open]);
+  const brands = groups.get(letter) ?? [];
+  return (
+    <div className="sx-az" ref={root} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      {/* A mouse opens it by pointing, so a click keeps it open; touch and keys toggle it */}
+      <button type="button" className="sx-az-btn" aria-expanded={open} aria-controls="shop-az" onPointerDown={(event) => { pointer.current = event.pointerType; }} onClick={() => { const mouse = pointer.current === "mouse"; pointer.current = ""; setOpen((value) => (mouse ? true : !value)); }}>
+        <T k="shop.az">A to Z</T> <ChevronDown size={14} aria-hidden="true" />
+      </button>
+      {open && (
+        <div id="shop-az" className="sx-az-panel">
+          <div className="sx-az-letters" role="group" aria-label="Brands by letter">
+            {letters.map((item) => (
+              <button key={item} type="button" disabled={!groups.has(item)} aria-pressed={item === letter} onMouseEnter={() => groups.has(item) && setLetter(item)} onFocus={() => setLetter(item)} onClick={() => setLetter(item)}>{item}</button>
+            ))}
+          </div>
+          <ul className="sx-az-brands">
+            {brands.map((brand) => (
+              <li key={brand.slug}><Link to="/shop/$slug" params={{ slug: brand.slug }}>{brand.name} <span>{productsOf(brand.slug).length}</span></Link></li>
+            ))}
+          </ul>
+          <Link to="/shop/brands" className="sx-az-all"><T k="shop.az.all">Every brand</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The shop's own header: One Great Culture World, its sections, saved, the cart and A to Z */
+function ShopHeader() {
+  const { saved } = useSaved();
+  const { count } = useCart();
+  const location = useRouterState({ select: (state) => state.location });
+  const tag = (location.search as Record<string, unknown>)["tag"];
+  const here = (section: (typeof SECTIONS)[number]) =>
+    section.to === "/shop" ? location.pathname === "/shop" || location.pathname === "/shop/" : location.pathname === section.to && (section.tag ? tag === section.tag : true);
+  return (
+    <EditSection name="Shop pages">
+      <header className="sx-top">
+        <div className="sx-top-row">
+          <Link to="/shop" className="sx-brand"><T k="shop.brand.name">One Great Culture World</T></Link>
+          <div className="sx-top-tools">
+            <Link to="/shop/saved" className="sx-round" aria-label={`Saved, ${saved.length} items`}>
+              <Heart size={17} strokeWidth={2} aria-hidden="true" />
+              {saved.length > 0 && <span className="sx-count">{saved.length}</span>}
+            </Link>
+            <button type="button" className="sx-round" onClick={() => cart.setOpen(true)} aria-label={`Shopping cart, ${count} items`}>
+              <ShoppingCart size={17} strokeWidth={2} aria-hidden="true" />
+              {count > 0 && <span className="sx-count">{count}</span>}
+            </button>
+            <BrandIndex />
+          </div>
+        </div>
+        <nav className="sx-nav" aria-label="Shop sections">
+          {SECTIONS.map((section) => (
+            <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} aria-current={here(section) ? "page" : undefined}>
+              <T k={`shop.nav.${section.key}`}>{section.label}</T>
             </Link>
           ))}
-          <details className="sx-more" ref={more}>
-            <summary className="sx-pill"><T k="shop.bar.more">More</T> <ChevronDown size={14} aria-hidden="true" /></summary>
-            <ul className="sx-more-list">
-              {MORE.map((item) => (
-                <li key={item.label}>
-                  <Link to={item.to} search={item.search}><T k={`shop.bar.${keyOf(item.label)}`}>{item.label}</T></Link>
-                </li>
-              ))}
-            </ul>
-          </details>
         </nav>
-        <Link to="/shop" className="sx-wordmark" aria-label="OGCW Shop home">OGCW<span>Shop</span></Link>
-        <div className="sx-bar-tools">
-          <form className="sx-search" role="search" onSubmit={onSubmit}>
-            <Search size={15} aria-hidden="true" />
-            <label htmlFor="shop-search" className="sr-only">Search the shop</label>
-            <input id="shop-search" type="search" placeholder="Search the shop" value={query} onChange={(event) => setQuery(event.target.value)} />
-          </form>
-          <Link to="/shop/saved" className="sx-round" aria-label={`Saved, ${saved.length} items`}>
-            <Heart size={17} strokeWidth={2} aria-hidden="true" />
-            {saved.length > 0 && <span className="sx-count">{saved.length}</span>}
-          </Link>
-          <button type="button" className="sx-cart-btn" onClick={() => cart.setOpen(true)} aria-label={`Shopping cart, ${count} items`}>
-            <ShoppingCart size={16} strokeWidth={2} aria-hidden="true" />
-            <span className="sx-cart-label"><T k="shop.bar.cart">Cart</T></span>
-            {count > 0 && <span className="sx-count">{count}</span>}
-          </button>
-        </div>
-      </div>
-    </div>
+      </header>
+    </EditSection>
   );
 }
 
@@ -306,17 +339,13 @@ function CartDrawer() {
   );
 }
 
-const DISPLAY_FONT = "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&display=swap";
-
-/** Every shop page: the site header, the shop bar, the page, the shop's promise and the cart */
+/** Every shop page: the shop's own header (no site header: the shop opens
+ *  in its own tab), the page, the shop's promise, the site footer and the cart */
 export function ShopShell({ children, promise = true }: { children: ReactNode; promise?: boolean }) {
   return (
-    <SiteShell>
-      {/* The shop's wide display face, loaded only on shop pages */}
-      <link rel="stylesheet" href={DISPLAY_FONT} precedence="default" />
+    <SiteShell header={<ShopHeader />}>
       <EditSection name="Shop pages">
         <div className="sx">
-          <ShopBar />
           <main className="sx-main">{children}</main>
           {promise && (
             <section className="sx-promise" aria-label="How the shop works">

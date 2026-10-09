@@ -10,8 +10,7 @@ import { T } from "@/components/site-text";
 // A product, on a dark stage like a watchmaker's page: the product big on
 // black, its name in wide capitals, the guide price, Add to cart and "Shop
 // at" its shop, save, then arrows and dots through the rest of its aisle,
-// with the next piece peeking in from the right on a yellow panel. Under
-// it: the facts, the story it's in, more from the brand and more like it.
+// the arrows step to the next piece. Under it: the facts, the story it's in, more from the brand and more like it.
 export const Route = createFileRoute("/shop/p/$id")({
   beforeLoad: ({ params }) => {
     if (!getProduct(params.id)) throw notFound();
@@ -124,10 +123,7 @@ function ProductPage() {
           </div>
         </div>
 
-        <Link to="/shop/p/$id" params={{ id: next.id }} className="px-peek" aria-label={`Next: ${fullName(next)}`} key={next.id}>
-          <img src={next.image} alt="" />
-          <span className="px-peek-label"><T k="shop.pdp.next">Next</T> <ArrowRight size={14} aria-hidden="true" /></span>
-        </Link>
+
       </section>
 
       <div className="sx-wrap">

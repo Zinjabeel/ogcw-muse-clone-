@@ -73,7 +73,7 @@ function MoreMenu({ pathname }: { pathname: string }) {
         <div id="nav-more-menu" className="nav-more-menu">
           <ul className="nav-more-wide">
             {nav.filter((item) => item.tier !== "all").map((item) => (
-              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} className="nav-more-link"><T k={`nav.${item.to.slice(1)}`}>{item.label}</T></Link></li>
+              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} {...(item.to === "/shop" ? { target: "_blank" } : {})} className="nav-more-link"><T k={`nav.${item.to.slice(1)}`}>{item.label}</T></Link></li>
             ))}
           </ul>
           <ul>
@@ -98,7 +98,28 @@ function MoreMenu({ pathname }: { pathname: string }) {
 const SiteMenuContext = createContext({ menuOpen: false, openMenu: () => {}, openSearch: () => {} });
 export const useSiteMenu = () => useContext(SiteMenuContext);
 
-export function SiteShell({ children }: { children: ReactNode }) {
+/** The shop is a site of its own: every link into it from the rest of the
+ *  site opens it in a new tab (not while an admin is typing in a link). */
+function useShopInNewTab(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target as Element | null;
+      const link = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target || link.origin !== window.location.origin || !/^\/shop(\/|$)/.test(link.pathname)) return;
+      if (target?.closest(".site-t.is-active, [contenteditable='true'], [contenteditable='plaintext-only']")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(link.href, "_blank", "noopener");
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [enabled]);
+}
+
+/** `header` replaces the site header, menu and search (the shop brings its own) */
+export function SiteShell({ children, header }: { children: ReactNode; header?: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -106,14 +127,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const openSearch = useCallback(() => setSearchOpen(true), []);
   const closeSearch = useCallback(() => setSearchOpen(false), []);
-  const header = useRef<HTMLElement>(null);
+  const siteHeader = useRef<HTMLElement>(null);
+  useShopInNewTab(!header);
 
   // The header starts tall (the logo big in the middle, the sections in a row
   // under it) and shrinks as the page scrolls, until it is the usual slim bar
   // by the first section after the hero (or after 160px on other pages):
   // --hp runs from 0 (tall) to 1 (slim) and the CSS does the rest.
   useEffect(() => {
-    const el = header.current;
+    const el = siteHeader.current;
     if (!el) return;
     let frame = 0;
     const update = () => {
@@ -138,12 +160,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <SiteMenuContext.Provider value={{ menuOpen, openMenu, openSearch }}>
-      <div className="site-root min-h-screen bg-background text-foreground">
+      <div className={`site-root min-h-screen bg-background text-foreground${header ? " site-root-shop" : ""}`}>
+        {header ?? (<>
         <BackgroundGradientGlow />
         <EditSection name="Navigation bar">
         {/* Holds the header's place: the header itself is fixed and shrinks on scroll */}
         <div className="site-header-space" aria-hidden="true" />
-        <header ref={header} className="site-header fixed inset-x-0 top-0 z-50">
+        <header ref={siteHeader} className="site-header fixed inset-x-0 top-0 z-50">
           <div className="site-header-row mx-auto grid max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
             {/* The menu button on the left; the logo starts big in the middle and moves beside it as the header shrinks */}
             <div className="flex items-center gap-3 justify-self-start">
@@ -157,6 +180,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.to}
                   to={item.to}
+                  {...(item.to === "/shop" ? { target: "_blank" } : {})}
                   className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
                   aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
                 >
@@ -174,11 +198,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </div>
         </header>
         </EditSection>
+        </>)}
         {/* Texts on the page itself are filed under the page, unless a part says otherwise */}
         <EditSection name={pageSection(pathname)}>{children}</EditSection>
         <EditSection name="Footer"><Footer2 /></EditSection>
-        <EditSection name="Menu"><NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} /></EditSection>
-        <EditSection name="Search"><SearchOverlay open={searchOpen} onClose={closeSearch} /></EditSection>
+        {!header && <EditSection name="Menu"><NavDrawer open={menuOpen} onClose={closeMenu} onSearch={openSearch} /></EditSection>}
+        {!header && <EditSection name="Search"><SearchOverlay open={searchOpen} onClose={closeSearch} /></EditSection>}
         <EditSection name="Cookie panel"><CookieConsent /></EditSection>
       </div>
     </SiteMenuContext.Provider>

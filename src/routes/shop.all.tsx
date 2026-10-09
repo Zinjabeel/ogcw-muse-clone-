@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
-import { ProductGrid, ShopShell } from "../components/shop-kit";
+import { ProductGrid, ShopSearch, ShopShell } from "../components/shop-kit";
 import { BRANDS, GIFT_BANDS, PRODUCTS, SHOP_CATEGORIES, brandOf, retailerOf } from "../data/shop";
 import { T } from "@/components/site-text";
 
@@ -151,6 +151,7 @@ function ShopAll() {
         <div className="sx-results">
           <div className="sx-toolbar">
             <button type="button" className="sx-filter-toggle" onClick={() => setOpen(true)}><SlidersHorizontal size={16} aria-hidden="true" /> <T k="shop.filters">Filter</T></button>
+            <ShopSearch initial={search.q ?? ""} />
             <p className="sx-count-line" aria-live="polite">{products.length} {products.length === 1 ? "product" : "products"}</p>
             <label className="sx-sort">
               <span><T k="shop.sort">Sort</T></span>
