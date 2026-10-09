@@ -3314,3 +3314,36 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
     --page-width: max(1334px, 74%);
   }
 }
+
+/* ------------------------------------------------------------------
+   The intro when you enter the site (src/components/site-intro.tsx),
+   after Cypher Capital's loader: the words slide in from the middle and
+   spread apart around the OGCW mark, which then docks into the header
+   logo. The same wordmark rests at the foot of every page (.footer-mark).
+   ------------------------------------------------------------------ */
+.site-intro { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--ogcw-bg); color: var(--ogcw-text); transition: background-color .4s cubic-bezier(.2, .8, .2, 1); }
+html:not([data-entry]) .site-intro { display: none; }
+.site-intro[data-leaving] { background-color: transparent; pointer-events: none; }
+.site-intro-mark {
+  --extra: clamp(24px, 6vw, 120px); --shift-start: 35% 0; --shift-end: -35% 0; --extra-x: var(--extra); --extra-y: 0px;
+  display: flex; align-items: center; gap: .32em; font: 600 clamp(34px, 5.2vw, 92px)/1 var(--ogcw-display); letter-spacing: -.01em; white-space: nowrap;
+}
+.site-intro-word { animation: intro-reveal-start .8s cubic-bezier(0, 0, 0, 1) .12s both, intro-spread-start 1.5s cubic-bezier(.5, 0, 0, 1) .92s both; }
+.site-intro-word:last-child { animation-name: intro-reveal-end, intro-spread-end; }
+@keyframes intro-reveal-start { from { translate: var(--shift-start); opacity: 0; } }
+@keyframes intro-reveal-end { from { translate: var(--shift-end); opacity: 0; } }
+@keyframes intro-spread-start { from { margin-inline-end: 0; margin-block-end: 0; } to { margin-inline-end: var(--extra-x); margin-block-end: var(--extra-y); } }
+@keyframes intro-spread-end { from { margin-inline-start: 0; margin-block-start: 0; } to { margin-inline-start: var(--extra-x); margin-block-start: var(--extra-y); } }
+.site-intro-dock { display: inline-block; color: var(--ogcw-accent); font-size: .62em; letter-spacing: .08em; transform-origin: 50%; animation: intro-mark 1.4s cubic-bezier(.2, .8, .2, 1) .2s both; }
+@keyframes intro-mark { from { opacity: 0; transform: perspective(600px) rotateY(-90deg) scale(.6); } }
+.site-intro[data-docking] .site-intro-dock { animation: none; transform: translate(var(--dock-x, 0px), var(--dock-y, 0px)) scale(var(--dock-scale, 1)); transition: transform .8s cubic-bezier(.5, 0, 0, 1), opacity .2s ease; }
+.site-intro[data-leaving] .site-intro-dock { opacity: 0; }
+.site-intro[data-docking] .site-intro-word { filter: opacity(0); transition: filter .4s cubic-bezier(.5, 0, 0, 1); }
+html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
+@media (max-width: 700px) {
+  .site-intro-mark { --shift-start: 0 35%; --shift-end: 0 -35%; --extra-x: 0px; --extra-y: clamp(16px, 5vh, 48px); flex-direction: column; gap: .2em; font-size: clamp(34px, 11vw, 52px); }
+}
+
+.footer-mark { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(32px, 4vw, 64px) clamp(16px, 4vw, 64px) clamp(20px, 2.4vw, 36px); border-top: 1px solid var(--ogcw-border); color: var(--ogcw-text); font: 600 clamp(30px, 6.4vw, 128px)/1 var(--ogcw-display); letter-spacing: -.02em; white-space: nowrap; }
+.footer-mark-logo { color: var(--ogcw-accent); font-size: .5em; letter-spacing: .08em; }
+@media (max-width: 700px) { .footer-mark { font-size: 6.6vw; } }

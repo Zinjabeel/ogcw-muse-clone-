@@ -20,6 +20,7 @@ import { SiteEditor, SiteLayouts } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
 import { CardHover } from "../components/card-hover";
+import { SiteIntro, introInitScript } from "../components/site-intro";
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -100,7 +101,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Apply the visitor’s saved colour theme and hero before first paint */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript + heroInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript + heroInitScript + introInitScript }} />
         <HeadContent />
       </head>
       <body>
@@ -129,6 +130,8 @@ function RootComponent() {
           {/* Pictures an admin moved or resized, in their places for everyone */}
           <SiteLayouts />
           <CardHover />
+          {/* The intro when you enter the site: the wordmark spreads, then docks into the logo */}
+          <SiteIntro />
         </SiteTextProvider>
       </StoriesProvider>
     </QueryClientProvider>

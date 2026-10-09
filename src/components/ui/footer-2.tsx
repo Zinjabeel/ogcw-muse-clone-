@@ -183,6 +183,12 @@ export function Footer2() {
           </div>
         </div>
       </div>
+      {/* Where the intro's wordmark comes to rest (src/components/site-intro.tsx) */}
+      <div className="footer-mark" aria-hidden="true">
+        <span>One Great</span>
+        <span className="footer-mark-logo">OGCW</span>
+        <span>Culture World</span>
+      </div>
     </footer>
   );
 }

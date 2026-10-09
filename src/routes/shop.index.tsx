@@ -1,21 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkle } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
-import { AddToCart, Price, SaveButton, ShopSearch, ShopShell, brandLine, euro } from "../components/shop-kit";
+import { ArrowLeft, ArrowRight, Sparkle } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { AddToCart, Price, SaveButton, ShopShell, brandLine } from "../components/shop-kit";
 import { BRANDS, GIFT_BANDS, PRODUCTS, SNEAKER_DROPS, fullName, getProduct, productsOf, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
-// The shop home, top to bottom:
-//   hero          the headline, the big search and a row of tall arched cards that turns by itself
+// The shop home, top to bottom (after Killstar's store):
+//   hero          one photo, edge to edge, with the headline and a link at the bottom
 //   what's new    a rail that keeps turning, even under the pointer
-//   collections   slides up over What's new and takes its place (one small scroll is enough:
-//                 the page glides the rest of the way); its card changes every 2 seconds
-//   the edit      New in, Trending, Limited, Gift ideas, with the photo pinned beside the list
-//   the aisles    three big photo cards: sneakers, clothing, watches and chains
-//   stream        ten streaming services
+//   new season    a still photo the size of the section, with a link; it slides
+//                 up over What's new, and a short scroll glides the rest of the way
+//   the edit      New in, Trending, Limited, Gift ideas, with a wide photo pinned beside them
+//   the aisles    three tall photo cards side by side: sneakers, clothing, watches and chains
+//   trendiest     four tall product cards side by side
 //   explore       featured drops, release dates, limited editions, brands, the gift guide
-// Words never move on scroll; only the cards and photos do. With reduced
-// motion nothing turns by itself and nothing glides.
+// Words never move on scroll; only cards and photos do. With reduced motion
+// nothing turns by itself and nothing glides.
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
@@ -33,150 +33,133 @@ const pick = (ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
 const count = (tag: string) => PRODUCTS.filter((product) => product.tags?.includes(tag as never)).length;
 const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const HERO = pick(["jordan-4-retro-grey", "rolex-submariner", "one-piece-air-max-plus-mera-mera", "adidas-argentina-1998-home", "omega-swatch-moonswatch", "nike-air-max-97-silver", "supreme-box-logo-hoodie-pink", "cartier-santos-steel", "jordan-4-retro-sage", "adidas-samba-og-cloud-white-core-black-gum"]);
 const NEW_IN = PRODUCTS.filter((product) => product.tags?.includes("new")).slice(0, 12);
-const COLLECTIONS = [
-  { id: "jordans", label: "Jordans", items: pick(["jordan-4-retro-grey", "jordan-4-retro-sage", "jordan-1-high-og-silver", "stockx-air-jordan-4-retro-military-black-white-grey-black", "stockx-air-jordan-1-high-university-blue-white-university-blue-black", "jordan-6-retro-infrared", "jordan-5-retro-grape"]) },
-  { id: "terrace", label: "Terrace", items: pick(["adidas-samba-og-cloud-white-core-black-gum", "adidas-gazelle-indoor-blue", "adidas-handball-spezial", "adidas-sl-72-og-red", "onitsuka-tiger-mexico-66-yellow", "puma-speedcat-og"]) },
-  { id: "shirts", label: "Shirts", items: pick(["adidas-argentina-1998-home", "adidas-france-home-retro", "adidas-argentina-2006-away", "lakers-kobe-bryant-8-jersey", "nba-all-star-1995-jersey", "bape-mitchell-ness-bulls-jersey"]) },
-  { id: "steel", label: "Steel", items: pick(["rolex-submariner", "patek-philippe-nautilus", "audemars-piguet-royal-oak-skeleton", "cartier-santos-steel", "omega-swatch-moonswatch", "tag-heuer-monaco"]) },
-];
 const EDIT = [
   { tag: "new", label: "New in", note: "Fresh pairs, shirts and steel, added this season.", image: "one-piece-air-max-plus-mera-mera" },
   { tag: "trending", label: "Trending", note: "What people are wearing right now.", image: "adidas-samba-og-cloud-white-core-black-gum" },
   { tag: "limited", label: "Limited", note: "Collabs, grails and pieces that won’t come back.", image: "patek-philippe-nautilus" },
   { tag: "gift", label: "Gift ideas", note: "Easy wins, from a €20 Casio up.", image: "omega-swatch-moonswatch" },
 ].map((row) => ({ ...row, product: getProduct(row.image)!, count: count(row.tag) }));
-// The three big photo cards (photos from Unsplash, credited under them)
+// Photos from Unsplash (Justus Menke, Nathaniel Cherian, Alberto Rodríguez Santana,
+// Nicolas Ladino Silva, Danist Soh)
 const LOOKS = [
   { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers.webp", alt: "White Nike sneakers on dark asphalt beside a painted white line" },
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
   { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
 ];
-const STREAM = pick(["netflix-standard", "disney-plus", "max-streaming", "prime-video", "apple-tv-plus", "crunchyroll-premium", "spotify-premium", "youtube-premium", "dazn-standard", "playstation-plus"]);
+const TRENDIEST = pick(["nike-air-max-97-silver", "adidas-samba-og-cloud-white-core-black-gum", "supreme-box-logo-hoodie-pink", "rolex-submariner"]);
 const brandCount = BRANDS.filter((brand) => productsOf(brand.slug).length > 0).length;
 
 /** An index that moves on by itself every `ms` (never under reduced motion, never in a hidden tab) */
-function useTurn(ms: number, onTurn: () => void, deps: unknown[] = []) {
+function useTurn(ms: number, onTurn: () => void) {
   const turn = useRef(onTurn);
   turn.current = onTurn;
   useEffect(() => {
     if (reduced()) return;
     const timer = window.setInterval(() => { if (!document.hidden) turn.current(); }, ms);
     return () => window.clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ms, ...deps]);
+  }, [ms]);
 }
 
-/** What's new and New collections stick in turn; a scroll that stops part
- *  way between them glides on to the end, in the direction it was going */
-function useStackGlide(stack: RefObject<HTMLDivElement | null>) {
+/** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
+function glideTo(top: number, ms: number, done: () => void) {
+  if (reduced()) { window.scrollTo(0, top); done(); return; }
+  const from = window.scrollY;
+  const distance = top - from;
+  const start = performance.now();
+  const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  let frame = 0;
+  const stop = () => { cancelAnimationFrame(frame); off(); done(); };
+  const off = () => { window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); };
+  window.addEventListener("wheel", stop, { passive: true });
+  window.addEventListener("touchstart", stop, { passive: true });
+  window.addEventListener("keydown", stop);
+  const step = (now: number) => {
+    const p = Math.min(1, (now - start) / ms);
+    window.scrollTo(0, from + distance * ease(p));
+    if (p < 1) frame = requestAnimationFrame(step);
+    else { off(); done(); }
+  };
+  frame = requestAnimationFrame(step);
+}
+
+/** What's new and the new-season photo stick in turn. The photo's progress
+ *  over What's new is --p (0 to 1), and a scroll that stops part way glides
+ *  on to the end, in the direction it was going */
+function useStack(stack: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = stack.current;
     if (!el) return;
     let last = window.scrollY;
     let dir = 1;
     let timer = 0;
+    let gliding = false;
+    let frame = 0;
     const zone = () => {
       const header = document.querySelector<HTMLElement>(".sx-top")?.getBoundingClientRect().height ?? 0;
       const first = el.children[0] as HTMLElement | undefined;
       const start = el.getBoundingClientRect().top + window.scrollY - header;
       return { start, end: start + (first?.getBoundingClientRect().height ?? 0) };
     };
+    const paint = () => {
+      const { start, end } = zone();
+      const p = Math.min(1, Math.max(0, (window.scrollY - start) / Math.max(1, end - start)));
+      el.style.setProperty("--p", p.toFixed(4));
+    };
     const settle = () => {
+      if (gliding) return;
       const { start, end } = zone();
       const y = window.scrollY;
-      if (y > start + 2 && y < end - 2) window.scrollTo({ top: dir > 0 ? end : start, behavior: reduced() ? "auto" : "smooth" });
+      if (y <= start + 2 || y >= end - 2) return;
+      gliding = true;
+      glideTo(dir > 0 ? end : start, 1100, () => { gliding = false; });
     };
     const onScroll = () => {
       const y = window.scrollY;
-      if (y !== last) dir = y > last ? 1 : -1;
+      if (y !== last && !gliding) dir = y > last ? 1 : -1;
       last = y;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(paint);
       window.clearTimeout(timer);
-      timer = window.setTimeout(settle, 140);
+      timer = window.setTimeout(settle, 90);
     };
+    paint();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(timer); };
+    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(timer); cancelAnimationFrame(frame); };
   }, [stack]);
 }
 
 function ShopHome() {
   const stack = useRef<HTMLDivElement>(null);
-  useStackGlide(stack);
+  useStack(stack);
   return (
     <ShopShell>
       <div className="sh">
         <Hero />
         <div className="sh-stack" ref={stack}>
           <WhatsNew />
-          <Collections />
+          <NewSeason />
         </div>
         <TheEdit />
         <Looks />
-        <StreamAndChill />
+        <Trendiest />
         <Explore />
       </div>
     </ShopShell>
   );
 }
 
-/* ---------- The hero ---------- */
+/* ---------- The hero: one photo, the headline and a link ---------- */
 
 function Hero() {
   return (
     <section className="sh-hero" aria-labelledby="sh-hero-title">
+      <img className="sh-hero-img" src="/shop/looks/hero.webp" alt="Four friends in long coats and trainers standing in a city street at night" />
       <div className="sh-hero-copy">
-        <h1 id="sh-hero-title" className="sh-hero-title">
-          <span><T k="shop.hero.l1">Wear the culture.</T></span>
-          <span><T k="shop.hero.l2">Buy it at the source.</T></span>
-        </h1>
-        <p className="sh-hero-sub"><T k="shop.hero.sub">Sneakers, shirts, watches and streaming, picked by OGCW and bought from the shop that makes them.</T></p>
-        <ShopSearch big />
+        <h1 id="sh-hero-title" className="sh-hero-title"><T k="shop.hero.title">Wear the culture</T></h1>
+        <Link to="/shop/all" search={{ tag: "new" }} className="sh-hero-cta"><T k="shop.hero.cta">Shop the latest</T></Link>
       </div>
-      <Arches />
     </section>
-  );
-}
-
-function Arches() {
-  const [active, setActive] = useState(0);
-  const start = useRef<number | null>(null);
-  const n = HERO.length;
-  const go = (step: number) => setActive((value) => (value + step + n) % n);
-  useTurn(3000, () => go(1));
-  const down = (event: ReactPointerEvent) => { start.current = event.clientX; };
-  const up = (event: ReactPointerEvent) => {
-    if (start.current === null) return;
-    const moved = event.clientX - start.current;
-    start.current = null;
-    if (Math.abs(moved) > 40) go(moved < 0 ? 1 : -1);
-  };
-  return (
-    <div className="sh-arches" role="group" aria-roledescription="carousel" aria-label="Picks from the shop">
-      <ul className="sh-arch-track" onPointerDown={down} onPointerUp={up} onPointerCancel={() => { start.current = null; }}>
-        {HERO.map((product, index) => {
-          let slot = index - active;
-          if (slot > n / 2) slot -= n;
-          if (slot < -n / 2) slot += n;
-          const shown = Math.abs(slot) <= 2;
-          return (
-            <li key={product.id} className="sh-arch" data-centre={slot === 0 || undefined} style={{ "--slot": slot, "--abs": Math.min(Math.abs(slot), 3) } as CSSProperties} aria-hidden={!shown}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-arch-card" tabIndex={shown ? 0 : -1} draggable={false} aria-label={`${fullName(product)}, ${product.colour}`}>
-                <img src={product.image} alt="" draggable={false} />
-                {slot === 0 && (
-                  <span className="sh-arch-chip">
-                    <strong>{product.name}</strong>
-                    <span>{product.price !== undefined ? euro(product.price) : <T k="shop.hero.atshop">Price at the shop</T>}</span>
-                  </span>
-                )}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-      <button type="button" className="sh-arrow is-prev" onClick={() => go(-1)} aria-label="Previous pick"><ArrowLeft size={18} aria-hidden="true" /></button>
-      <button type="button" className="sh-arrow is-next" onClick={() => go(1)} aria-label="Next pick"><ArrowRight size={18} aria-hidden="true" /></button>
-    </div>
   );
 }
 
@@ -250,62 +233,47 @@ function WhatsNew() {
   );
 }
 
-/* ---------- New collections: one card, a new piece every 2 seconds ---------- */
+/* ---------- The new season: one still photo with a link ---------- */
 
-function Collections() {
-  const [tab, setTab] = useState(0);
-  const [index, setIndex] = useState(0);
-  const items = COLLECTIONS[tab]!.items;
-  const product = items[index % items.length]!;
-  const step = (by: number) => setIndex((value) => (value + by + items.length) % items.length);
-  useTurn(2000, () => step(1), [tab]);
+function NewSeason() {
   return (
-    <section className="sh-sec sh-coll" aria-labelledby="sh-coll-title">
-      <div className="sh-panel">
-        <header className="sh-head">
-          <h2 id="sh-coll-title" className="sh-h2"><T k="shop.story.coll">New collections</T></h2>
-          <div className="sh-tabs" role="group" aria-label="Collections">
-            {COLLECTIONS.map((item, i) => (
-              <button key={item.id} type="button" className="sh-tab" aria-pressed={i === tab} onClick={() => { setTab(i); setIndex(0); }}>
-                <T k={`shop.story.coll.${item.id}`}>{item.label}</T>
-              </button>
-            ))}
-          </div>
-        </header>
-        <div className="sh-coll-stage">
-          <span className="sh-back sh-back-1" aria-hidden="true" />
-          <span className="sh-back sh-back-2" aria-hidden="true" />
-          <button type="button" className="sh-arrow is-side is-prev" onClick={() => step(-1)} aria-label="Previous piece"><ArrowLeft size={18} aria-hidden="true" /></button>
-          <div className="sh-coll-card">
-            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-coll-photo" key={product.id} tabIndex={-1} aria-hidden="true">
-              <img src={product.image} alt="" />
-            </Link>
-            <span className="sh-bubble is-a">{fullName(product)}</span>
-            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-coll-shop" aria-label={`Shop ${fullName(product)}`}>
-              <T k="shop.story.coll.shop">Shop</T> <ArrowUpRight size={15} aria-hidden="true" />
-            </Link>
-            <span className="sh-coll-dots" aria-hidden="true">
-              {items.map((item, i) => <span key={item.id} data-on={i === index % items.length || undefined} />)}
-            </span>
-          </div>
-          <button type="button" className="sh-arrow is-side is-next" onClick={() => step(1)} aria-label="Next piece"><ArrowRight size={18} aria-hidden="true" /></button>
-        </div>
-      </div>
+    <section className="sh-sec sh-season" aria-labelledby="sh-season-title">
+      <Link to="/shop/all" search={{ tag: "new" }} className="sh-season-card">
+        <img src="/shop/looks/new-season.webp" alt="Air Jordans lined up on a lit shop shelf" loading="lazy" />
+        <span className="sh-season-text">
+          <span id="sh-season-title" className="sh-season-title"><T k="shop.season.title">The new season</T></span>
+          <span className="sh-season-cta"><T k="shop.season.cta">Shop new in</T></span>
+        </span>
+      </Link>
     </section>
   );
 }
 
-/* ---------- The edit: a numbered list, the photo pinned beside it ---------- */
+/* ---------- The edit: a numbered list, a wide photo pinned beside it ---------- */
 
 function TheEdit() {
   const [active, setActive] = useState(0);
   const rows = useRef<(HTMLLIElement | null)[]>([]);
+  // The row nearest the middle of the screen is the one shown
   useEffect(() => {
-    const io = new IntersectionObserver((entries) => {
-      for (const entry of entries) if (entry.isIntersecting) setActive(Number((entry.target as HTMLElement).dataset["row"]));
-    }, { rootMargin: "-46% 0px -46% 0px" });
-    rows.current.forEach((row) => row && io.observe(row));
-    return () => io.disconnect();
+    let frame = 0;
+    const update = () => {
+      const middle = window.innerHeight / 2;
+      let best = 0;
+      let gap = Infinity;
+      rows.current.forEach((row, index) => {
+        if (!row) return;
+        const box = row.getBoundingClientRect();
+        const distance = Math.abs(box.top + box.height / 2 - middle);
+        if (distance < gap) { gap = distance; best = index; }
+      });
+      setActive(best);
+    };
+    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
   }, []);
   return (
     <section className="sh-sec sh-edit" aria-labelledby="sh-edit-title">
@@ -313,8 +281,8 @@ function TheEdit() {
         <h2 id="sh-edit-title" className="sr-only">The edit</h2>
         <ol className="sh-edit-list">
           {EDIT.map((row, index) => (
-            <li key={row.tag} ref={(node) => { rows.current[index] = node; }} data-row={index} className="sh-edit-row" data-on={index === active || undefined}>
-              <Link to="/shop/all" search={{ tag: row.tag }} className="sh-edit-link" onFocus={() => setActive(index)} onMouseEnter={() => setActive(index)}>
+            <li key={row.tag} ref={(node) => { rows.current[index] = node; }} className="sh-edit-row" data-on={index === active || undefined}>
+              <Link to="/shop/all" search={{ tag: row.tag }} className="sh-edit-link">
                 <span className="sh-edit-name"><T k={`shop.story.edit.${row.tag}`}>{row.label}</T></span>
                 <span className="sh-edit-num">0{index + 1}</span>
                 <span className="sh-edit-note"><T k={`shop.story.edit.${row.tag}.note`}>{row.note}</T></span>
@@ -335,7 +303,7 @@ function TheEdit() {
   );
 }
 
-/* ---------- The aisles: three big photo cards ---------- */
+/* ---------- The aisles: three tall photo cards side by side ---------- */
 
 function Looks() {
   return (
@@ -351,37 +319,38 @@ function Looks() {
               <img src={look.image} alt={look.alt} loading="lazy" />
               <span className="sh-look-text">
                 <span className="sh-look-name"><T k={`shop.looks.${look.key}`}>{look.label}</T></span>
-                <span className="sh-look-more"><T k="shop.looks.more">Discover more</T> <ArrowRight size={13} aria-hidden="true" /></span>
+                <span className="sh-look-more"><T k="shop.looks.more">Discover more</T></span>
               </span>
             </Link>
           </li>
         ))}
       </ul>
-      <p className="sh-credit"><T k="shop.looks.credit">Photos: Justus Menke, Nathaniel Cherian and Alberto Rodríguez Santana on Unsplash.</T></p>
     </section>
   );
 }
 
-/* ---------- Stream and chill: ten services ---------- */
+/* ---------- Trendiest: four tall product cards side by side ---------- */
 
-function StreamAndChill() {
+function Trendiest() {
   return (
-    <section className="sh-sec sh-stream" aria-labelledby="sh-stream-title">
-      <header className="sh-head">
-        <h2 id="sh-stream-title" className="sh-h2"><T k="shop.stream.title">Pick your favourite way to stream and chill</T></h2>
-        <Link to="/shop/all" search={{ cat: "streaming" }} className="sh-textlink"><T k="shop.stream.all">Every subscription</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+    <section className="sh-sec sh-picks" aria-labelledby="sh-picks-title">
+      <header className="sh-looks-head">
+        <h2 id="sh-picks-title" className="sh-h2"><T k="shop.picks.title">Trendiest right now</T></h2>
+        <Link to="/shop/all" search={{ tag: "trending" }} className="sh-textlink"><T k="shop.picks.all">Shop trendiest</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
-      <ul className="sh-stream-grid">
-        {STREAM.map((product) => (
-          <li key={product.id}>
-            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-service">
-              <img src={product.image} alt="" loading="lazy" />
-              <span className="sh-service-text">
-                <span className="sh-service-name">{product.name}</span>
-                <span className="sh-service-note">{product.colour}</span>
+      <ul className="sh-picks-grid">
+        {TRENDIEST.map((product) => (
+          <li key={product.id} className="sh-pick">
+            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-pick-link">
+              <span className="sh-pick-photo"><img src={product.image} alt={`${fullName(product)}, ${product.colour}`} loading="lazy" /></span>
+              <span className="sh-pick-badge"><T k="shop.picks.badge">Trending</T></span>
+              <span className="sh-pick-text">
+                <span className="sh-pick-name">{fullName(product)}</span>
+                <Price product={product} />
               </span>
-              <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
+            <SaveButton product={product} />
+            <AddToCart product={product} />
           </li>
         ))}
       </ul>
@@ -452,4 +421,3 @@ function Explore() {
     </section>
   );
 }
-

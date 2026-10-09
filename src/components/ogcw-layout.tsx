@@ -174,7 +174,7 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
                 <Menu size={18} />
               </button>
             </div>
-            <Link to="/" className="site-logo" aria-label="OGCW home">OGCW</Link>
+            <Link to="/" className="site-logo" aria-label="OGCW home" data-site-logo="">OGCW</Link>
             <nav className="site-nav hidden items-center lg:flex" aria-label="Main navigation">
               {nav.map((item) => (
                 <Link
