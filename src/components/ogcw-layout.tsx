@@ -111,7 +111,14 @@ function useShopInNewTab(enabled: boolean) {
       if (target?.closest(".site-t.is-active, [contenteditable='true'], [contenteditable='plaintext-only']")) return;
       event.preventDefault();
       event.stopPropagation();
-      window.open(link.href, "_blank", "noopener");
+      // A real link with target _blank, so the browser opens a new tab as for any link
+      const open = document.createElement("a");
+      open.href = link.href;
+      open.target = "_blank";
+      open.rel = "noopener";
+      document.body.appendChild(open);
+      open.click();
+      open.remove();
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);

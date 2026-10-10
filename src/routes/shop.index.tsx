@@ -1,27 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Sparkle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { AddToCart, Price, SaveButton, ShopShell, brandLine } from "../components/shop-kit";
-import { BRANDS, GIFT_BANDS, PRODUCTS, SNEAKER_DROPS, fullName, getProduct, productsOf, type ShopProduct } from "../data/shop";
+import { AddToCart, BlankCard, SaveButton, ShopShell } from "../components/shop-kit";
+import { SNEAKER_DROPS, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // The shop home, top to bottom (after Killstar's store):
 //   hero          one photo, edge to edge, with the headline and a link at the bottom
-//   what's new    a rail that keeps turning, even under the pointer
+//   what's new    square cards that keep gliding by, even under the pointer
 //   new season    a still photo the size of the section, with a link; it slides
 //                 up over What's new, and a short scroll glides the rest of the way
-//   the edit      New in, Trending, Limited, Gift ideas, with a wide photo pinned beside them
-//   the aisles    three tall photo cards side by side: sneakers, clothing, watches and chains
-//   trendiest     four tall product cards side by side
+//   the edit      eight cards, four over four
+//   the aisles    three tall photo cards side by side
+//   collections   four rows of four cards, black, white, black, white
 //   explore       featured drops, release dates, limited editions, brands, the gift guide
-// Words never move on scroll; only cards and photos do. With reduced motion
-// nothing turns by itself and nothing glides.
+// For now only the One Piece Air Max Plus pairs show; every other product is
+// a blank card (owner, 10 Oct 2026). No prices or counts anywhere. Words never
+// move on scroll; with reduced motion nothing moves at all.
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
-      { title: "The OGCW Shop: sneakers, shirts, watches and streaming" },
-      { name: "description", content: "Sneakers, football shirts, watches, chains and streaming subscriptions, picked by OGCW and bought straight from the shop that makes them." },
+      { title: "The OGCW Shop" },
+      { name: "description", content: "Sneakers, football shirts, watches, chains and streaming, picked by OGCW and bought straight from the shop that makes them." },
       { property: "og:title", content: "The OGCW Shop" },
       { property: "og:type", content: "website" },
     ],
@@ -29,17 +30,13 @@ export const Route = createFileRoute("/shop/")({
   component: ShopHome,
 });
 
-const pick = (ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
-const count = (tag: string) => PRODUCTS.filter((product) => product.tags?.includes(tag as never)).length;
 const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ONE_PIECE = ["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera"].flatMap((id) => getProduct(id) ?? []);
+/** A row of `size` slots: the given products first, blank cards after */
+const slots = (products: ShopProduct[], size: number): (ShopProduct | null)[] => Array.from({ length: size }, (_, i) => products[i] ?? null);
 
-const NEW_IN = PRODUCTS.filter((product) => product.tags?.includes("new")).slice(0, 12);
-const EDIT = [
-  { tag: "new", label: "New in", note: "Fresh pairs, shirts and steel, added this season.", image: "one-piece-air-max-plus-mera-mera" },
-  { tag: "trending", label: "Trending", note: "What people are wearing right now.", image: "adidas-samba-og-cloud-white-core-black-gum" },
-  { tag: "limited", label: "Limited", note: "Collabs, grails and pieces that won’t come back.", image: "patek-philippe-nautilus" },
-  { tag: "gift", label: "Gift ideas", note: "Easy wins, from a €20 Casio up.", image: "omega-swatch-moonswatch" },
-].map((row) => ({ ...row, product: getProduct(row.image)!, count: count(row.tag) }));
+const RAIL = slots(ONE_PIECE, 10);
+const EDIT = slots(ONE_PIECE, 8);
 // Photos from Unsplash (Justus Menke, Nathaniel Cherian, Alberto Rodríguez Santana,
 // Nicolas Ladino Silva, Danist Soh)
 const LOOKS = [
@@ -47,19 +44,13 @@ const LOOKS = [
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
   { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
 ];
-const TRENDIEST = pick(["nike-air-max-97-silver", "adidas-samba-og-cloud-white-core-black-gum", "supreme-box-logo-hoodie-pink", "rolex-submariner"]);
-const brandCount = BRANDS.filter((brand) => productsOf(brand.slug).length > 0).length;
-
-/** An index that moves on by itself every `ms` (never under reduced motion, never in a hidden tab) */
-function useTurn(ms: number, onTurn: () => void) {
-  const turn = useRef(onTurn);
-  turn.current = onTurn;
-  useEffect(() => {
-    if (reduced()) return;
-    const timer = window.setInterval(() => { if (!document.hidden) turn.current(); }, ms);
-    return () => window.clearInterval(timer);
-  }, [ms]);
-}
+// The collection rows: names the owner can change with the site editor
+const ROWS = [
+  { key: "nike", title: "Nike x One Piece", tone: "dark" as const, items: slots(ONE_PIECE, 4) },
+  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light" as const, items: slots([], 4) },
+  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark" as const, items: slots([], 4) },
+  { key: "worldcup", title: "Retro shirts for the World Cup", tone: "light" as const, items: slots([], 4) },
+];
 
 /** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
 function glideTo(top: number, ms: number, done: () => void) {
@@ -142,7 +133,7 @@ function ShopHome() {
         </div>
         <TheEdit />
         <Looks />
-        <Trendiest />
+        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} items={row.items} />)}
         <Explore />
       </div>
     </ShopShell>
@@ -163,21 +154,15 @@ function Hero() {
   );
 }
 
-/* ---------- What's new: a rail that keeps turning ---------- */
+/* ---------- A square card: a product, or a blank one still to come ---------- */
 
-function StageCard({ product, hidden = false }: { product: ShopProduct; hidden?: boolean }) {
-  const tags = product.tags ?? [];
-  const chip = tags.includes("limited") ? "Limited" : tags.includes("drops") ? "Drop" : tags.includes("new") ? "New" : undefined;
+function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | null; hidden?: boolean; tone?: "dark" | "light" | undefined }) {
+  if (!product || !isLive(product)) return <BlankCard tone={tone} />;
   return (
-    <article className="sh-card" aria-hidden={hidden || undefined}>
-      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-card-link" tabIndex={hidden ? -1 : undefined}>
-        <img src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" />
-        {chip && <span className="sh-chip"><Sparkle size={11} aria-hidden="true" /> {chip}</span>}
-        <span className="sh-card-text">
-          <span className="sh-card-brand">{brandLine(product)}</span>
-          <span className="sh-card-name">{product.name}</span>
-          <Price product={product} />
-        </span>
+    <article className="sh-square" aria-hidden={hidden || undefined}>
+      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-square-link" tabIndex={hidden ? -1 : undefined}>
+        <span className="sh-square-photo"><img src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" /></span>
+        <span className="sh-square-name">{fullName(product)}</span>
       </Link>
       {!hidden && <SaveButton product={product} />}
       {!hidden && <AddToCart product={product} />}
@@ -185,24 +170,9 @@ function StageCard({ product, hidden = false }: { product: ShopProduct; hidden?:
   );
 }
 
+/* ---------- What's new: square cards gliding by without a stop ---------- */
+
 function WhatsNew() {
-  const n = NEW_IN.length;
-  // Three copies side by side, so the rail can turn on forever; after each
-  // step past the end it jumps back to the middle copy without a transition
-  const [index, setIndex] = useState(0);
-  const [instant, setInstant] = useState(false);
-  useTurn(3000, () => setIndex((value) => value + 1));
-  useEffect(() => {
-    if (index >= 0 && index < n) return;
-    const timer = window.setTimeout(() => { setInstant(true); setIndex((value) => ((value % n) + n) % n); }, 760);
-    return () => window.clearTimeout(timer);
-  }, [index, n]);
-  useEffect(() => {
-    if (!instant) return;
-    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setInstant(false)));
-    return () => cancelAnimationFrame(frame);
-  }, [instant]);
-  const at = ((index % n) + n) % n;
   return (
     <section className="sh-sec sh-new" aria-labelledby="sh-new-title">
       <div className="sh-panel">
@@ -210,23 +180,13 @@ function WhatsNew() {
           <h2 id="sh-new-title" className="sh-h2"><T k="shop.story.new">See what’s new</T></h2>
           <Link to="/shop/all" search={{ tag: "new" }} className="sh-textlink"><T k="shop.story.new.all">Shop all new in</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </header>
-        <div className="sh-loop">
-          <ul className={`sh-loop-track${instant ? " is-instant" : ""}`} style={{ "--i": index + n } as CSSProperties}>
-            {[0, 1, 2].flatMap((copy) => NEW_IN.map((product) => (
-              <li key={`${copy}-${product.id}`} className="sh-loop-item"><StageCard product={product} hidden={copy !== 1} /></li>
+        <div className="sh-marquee">
+          {/* Two copies one after the other, so the row can glide on forever */}
+          <ul className="sh-marquee-track" style={{ "--n": RAIL.length } as CSSProperties}>
+            {[0, 1].flatMap((copy) => RAIL.map((product, i) => (
+              <li key={`${copy}-${i}`} className="sh-marquee-item"><ShopCard product={product} hidden={copy === 1} /></li>
             )))}
           </ul>
-        </div>
-        <div className="sh-rail-foot">
-          <div className="sh-dots" role="group" aria-label="Cards">
-            {NEW_IN.map((product, dot) => (
-              <button key={product.id} type="button" className="sh-dot" aria-pressed={dot === at} aria-label={`Show ${fullName(product)}`} onClick={() => setIndex(dot)} />
-            ))}
-          </div>
-          <div className="sh-arrows">
-            <button type="button" className="sh-arrow" onClick={() => setIndex((value) => value - 1)} aria-label="Previous cards"><ArrowLeft size={18} aria-hidden="true" /></button>
-            <button type="button" className="sh-arrow" onClick={() => setIndex((value) => value + 1)} aria-label="Next cards"><ArrowRight size={18} aria-hidden="true" /></button>
-          </div>
         </div>
       </div>
     </section>
@@ -249,55 +209,19 @@ function NewSeason() {
   );
 }
 
-/* ---------- The edit: a numbered list, a wide photo pinned beside it ---------- */
+/* ---------- The edit: eight cards, four over four ---------- */
 
 function TheEdit() {
-  const [active, setActive] = useState(0);
-  const rows = useRef<(HTMLLIElement | null)[]>([]);
-  // The row nearest the middle of the screen is the one shown
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      const middle = window.innerHeight / 2;
-      let best = 0;
-      let gap = Infinity;
-      rows.current.forEach((row, index) => {
-        if (!row) return;
-        const box = row.getBoundingClientRect();
-        const distance = Math.abs(box.top + box.height / 2 - middle);
-        if (distance < gap) { gap = distance; best = index; }
-      });
-      setActive(best);
-    };
-    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
-  }, []);
   return (
-    <section className="sh-sec sh-edit" aria-labelledby="sh-edit-title">
+    <section className="sh-sec sh-grid8" aria-labelledby="sh-edit-title">
       <div className="sh-panel">
-        <h2 id="sh-edit-title" className="sr-only">The edit</h2>
-        <ol className="sh-edit-list">
-          {EDIT.map((row, index) => (
-            <li key={row.tag} ref={(node) => { rows.current[index] = node; }} className="sh-edit-row" data-on={index === active || undefined}>
-              <Link to="/shop/all" search={{ tag: row.tag }} className="sh-edit-link">
-                <span className="sh-edit-name"><T k={`shop.story.edit.${row.tag}`}>{row.label}</T></span>
-                <span className="sh-edit-num">0{index + 1}</span>
-                <span className="sh-edit-note"><T k={`shop.story.edit.${row.tag}.note`}>{row.note}</T></span>
-                <span className="sh-edit-count">{row.count} pieces <ArrowRight size={15} aria-hidden="true" /></span>
-              </Link>
-              <img className="sh-edit-inline" src={row.product.image} alt="" loading="lazy" />
-            </li>
-          ))}
-        </ol>
-        <div className="sh-edit-pin" aria-hidden="true">
-          <div className="sh-edit-frame">
-            {EDIT.map((row, index) => <img key={row.tag} src={row.product.image} alt="" loading="lazy" data-on={index === active || undefined} />)}
-            <span className="sh-edit-tag">{EDIT[active]!.label}</span>
-          </div>
-        </div>
+        <header className="sh-head">
+          <h2 id="sh-edit-title" className="sh-h2"><T k="shop.edit.title">The edit</T></h2>
+          <Link to="/shop/all" className="sh-textlink"><T k="shop.edit.all">Shop everything</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+        </header>
+        <ul className="sh-cards sh-cards-4">
+          {EDIT.map((product, i) => <li key={i}><ShopCard product={product} /></li>)}
+        </ul>
       </div>
     </section>
   );
@@ -329,30 +253,17 @@ function Looks() {
   );
 }
 
-/* ---------- Trendiest: four tall product cards side by side ---------- */
+/* ---------- The collection rows: four cards each, black and white in turn ---------- */
 
-function Trendiest() {
+function CollectionRow({ slug, title, tone, items }: { slug: string; title: string; tone: "dark" | "light"; items: (ShopProduct | null)[] }) {
   return (
-    <section className="sh-sec sh-picks" aria-labelledby="sh-picks-title">
-      <header className="sh-looks-head">
-        <h2 id="sh-picks-title" className="sh-h2"><T k="shop.picks.title">Trendiest right now</T></h2>
-        <Link to="/shop/all" search={{ tag: "trending" }} className="sh-textlink"><T k="shop.picks.all">Shop trendiest</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+    <section className="sh-row" data-tone={tone} aria-label={title}>
+      <header className="sh-head">
+        <h2 className="sh-h2"><T k={`shop.row.${slug}`}>{title}</T></h2>
+        <Link to="/shop/all" className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
-      <ul className="sh-picks-grid">
-        {TRENDIEST.map((product) => (
-          <li key={product.id} className="sh-pick">
-            <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-pick-link">
-              <span className="sh-pick-photo"><img src={product.image} alt={`${fullName(product)}, ${product.colour}`} loading="lazy" /></span>
-              <span className="sh-pick-badge"><T k="shop.picks.badge">Trending</T></span>
-              <span className="sh-pick-text">
-                <span className="sh-pick-name">{fullName(product)}</span>
-                <Price product={product} />
-              </span>
-            </Link>
-            <SaveButton product={product} />
-            <AddToCart product={product} />
-          </li>
-        ))}
+      <ul className="sh-cards sh-cards-4">
+        {items.map((product, i) => <li key={i}><ShopCard product={product} tone={tone} /></li>)}
       </ul>
     </section>
   );
@@ -366,7 +277,6 @@ function Explore() {
   const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10));
   useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
   const next = SNEAKER_DROPS.find((drop) => drop.date >= today);
-  const limited = getProduct("patek-philippe-nautilus")!;
   return (
     <section className="sh-sec sh-explore" aria-labelledby="sh-explore-title">
       <header className="sh-head">
@@ -377,7 +287,6 @@ function Explore() {
           <Link to="/shop/all" search={{ tag: "drops" }} className="sh-tile sh-tile-photo">
             <img src="/shop/one-piece-air-max-plus-pack.webp" alt="" loading="lazy" />
             <span className="sh-tile-text">
-              <span className="sh-tile-kicker">{count("drops")} <T k="shop.explore.drops.n">pieces</T></span>
               <span className="sh-tile-name"><T k="shop.explore.drops">Featured drops</T></span>
               <span className="sh-tile-note"><T k="shop.explore.drops.note">The One Piece pack, the Jordans on the calendar and the retro shirts.</T></span>
             </span>
@@ -396,25 +305,21 @@ function Explore() {
           </Link>
         </li>
         <li>
-          <Link to="/shop/all" search={{ tag: "limited" }} className="sh-tile sh-tile-photo is-stage">
-            <img src={limited.image} alt="" loading="lazy" />
-            <span className="sh-tile-text">
-              <span className="sh-tile-kicker">{count("limited")} <T k="shop.explore.limited.n">pieces</T></span>
-              <span className="sh-tile-name"><T k="shop.explore.limited">Limited editions</T></span>
-            </span>
+          <Link to="/shop/all" search={{ tag: "limited" }} className="sh-tile sh-tile-plain">
+            <span className="sh-tile-kicker"><T k="shop.explore.limited.kicker">Collabs and grails</T></span>
+            <span className="sh-tile-name"><T k="shop.explore.limited">Limited editions</T> <ArrowRight size={15} aria-hidden="true" /></span>
           </Link>
         </li>
         <li>
           <Link to="/shop/brands" className="sh-tile sh-tile-az">
             <span className="sh-tile-letters" aria-hidden="true">A&nbsp;B&nbsp;C<br />X&nbsp;Y&nbsp;Z</span>
-            <span className="sh-tile-kicker">{brandCount} <T k="shop.explore.brands.n">brands</T></span>
             <span className="sh-tile-name"><T k="shop.explore.brands">Brands A to Z</T> <ArrowRight size={15} aria-hidden="true" /></span>
           </Link>
         </li>
         <li>
-          <Link to="/shop/gifts" className="sh-tile sh-tile-gift">
-            <span className="sh-tile-bands">{GIFT_BANDS.map((band) => <span key={band.id}>{band.label}</span>)}</span>
-            <span className="sh-tile-name"><T k="shop.explore.gifts">Gift guide</T> <ArrowRight size={15} aria-hidden="true" /></span>
+          <Link to="/shop/saved" className="sh-tile sh-tile-gift">
+            <span className="sh-tile-kicker"><T k="shop.explore.saved.kicker">Your list</T></span>
+            <span className="sh-tile-name"><T k="shop.explore.saved">Saved pieces</T> <ArrowRight size={15} aria-hidden="true" /></span>
           </Link>
         </li>
       </ul>

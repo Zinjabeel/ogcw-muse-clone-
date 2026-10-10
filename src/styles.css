@@ -3316,34 +3316,27 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 }
 
 /* ------------------------------------------------------------------
-   The intro when you enter the site (src/components/site-intro.tsx),
-   after Cypher Capital's loader: the words slide in from the middle and
-   spread apart around the OGCW mark, which then docks into the header
-   logo. The same wordmark rests at the foot of every page (.footer-mark).
+   The intro when you enter the shop (src/components/site-intro.tsx),
+   after Cypher Capital's loader: "One Great Culture World" rises in, folds
+   down to "OGCW" and glides up into the shop header's logo. The spread
+   wordmark at the foot of the shop's pages is .footer-mark.
    ------------------------------------------------------------------ */
-.site-intro { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--ogcw-bg); color: var(--ogcw-text); transition: background-color .4s cubic-bezier(.2, .8, .2, 1); }
+.site-intro { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--ogcw-bg); color: var(--ogcw-text); transition: background-color .45s cubic-bezier(.2, .8, .2, 1); }
 html:not([data-entry]) .site-intro { display: none; }
-.site-intro[data-leaving] { background-color: transparent; pointer-events: none; }
-.site-intro-mark {
-  --extra: clamp(24px, 6vw, 120px); --shift-start: 35% 0; --shift-end: -35% 0; --extra-x: var(--extra); --extra-y: 0px;
-  display: flex; align-items: center; gap: .32em; font: 600 clamp(34px, 5.2vw, 92px)/1 var(--ogcw-display); letter-spacing: -.01em; white-space: nowrap;
-}
-.site-intro-word { animation: intro-reveal-start .8s cubic-bezier(0, 0, 0, 1) .12s both, intro-spread-start 1.5s cubic-bezier(.5, 0, 0, 1) .92s both; }
-.site-intro-word:last-child { animation-name: intro-reveal-end, intro-spread-end; }
-@keyframes intro-reveal-start { from { translate: var(--shift-start); opacity: 0; } }
-@keyframes intro-reveal-end { from { translate: var(--shift-end); opacity: 0; } }
-@keyframes intro-spread-start { from { margin-inline-end: 0; margin-block-end: 0; } to { margin-inline-end: var(--extra-x); margin-block-end: var(--extra-y); } }
-@keyframes intro-spread-end { from { margin-inline-start: 0; margin-block-start: 0; } to { margin-inline-start: var(--extra-x); margin-block-start: var(--extra-y); } }
-.site-intro-dock { display: inline-block; color: var(--ogcw-accent); font-size: .62em; letter-spacing: .08em; transform-origin: 50%; animation: intro-mark 1.4s cubic-bezier(.2, .8, .2, 1) .2s both; }
-@keyframes intro-mark { from { opacity: 0; transform: perspective(600px) rotateY(-90deg) scale(.6); } }
-.site-intro[data-docking] .site-intro-dock { animation: none; transform: translate(var(--dock-x, 0px), var(--dock-y, 0px)) scale(var(--dock-scale, 1)); transition: transform .8s cubic-bezier(.5, 0, 0, 1), opacity .2s ease; }
-.site-intro[data-leaving] .site-intro-dock { opacity: 0; }
-.site-intro[data-docking] .site-intro-word { filter: opacity(0); transition: filter .4s cubic-bezier(.5, 0, 0, 1); }
+.site-intro[data-stage="clear"] { background-color: transparent; pointer-events: none; }
+.site-intro-mark { display: flex; align-items: baseline; font: 600 clamp(34px, 5.4vw, 96px)/1 var(--ogcw-display); letter-spacing: .02em; white-space: nowrap; animation: intro-rise .9s cubic-bezier(0, 0, 0, 1) .12s both; transition: transform 1.1s cubic-bezier(.65, 0, .35, 1), letter-spacing .9s cubic-bezier(.65, 0, .35, 1), opacity .3s ease; }
+@keyframes intro-rise { from { opacity: 0; translate: 0 22%; } }
+.site-intro-word { display: inline-flex; align-items: baseline; }
+.site-intro-rest, .site-intro-space { display: inline-block; overflow: hidden; vertical-align: bottom; transition: width .9s cubic-bezier(.65, 0, .35, 1), opacity .5s ease; }
+.site-intro[data-stage="fold"] .site-intro-rest, .site-intro[data-stage="fold"] .site-intro-space,
+.site-intro[data-stage="travel"] .site-intro-rest, .site-intro[data-stage="travel"] .site-intro-space,
+.site-intro[data-stage="clear"] .site-intro-rest, .site-intro[data-stage="clear"] .site-intro-space { width: 0 !important; opacity: 0; }
+.site-intro:not([data-stage="show"]) .site-intro-mark { letter-spacing: .08em; }
+.site-intro[data-stage="travel"] .site-intro-mark, .site-intro[data-stage="clear"] .site-intro-mark { transform: translate(var(--to-x, 0px), var(--to-y, 0px)) scale(var(--to-s, 1)); }
+.site-intro[data-stage="clear"] .site-intro-mark { opacity: 0; }
 html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
-@media (max-width: 700px) {
-  .site-intro-mark { --shift-start: 0 35%; --shift-end: 0 -35%; --extra-x: 0px; --extra-y: clamp(16px, 5vh, 48px); flex-direction: column; gap: .2em; font-size: clamp(34px, 11vw, 52px); }
-}
-
-.footer-mark { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(32px, 4vw, 64px) clamp(16px, 4vw, 64px) clamp(20px, 2.4vw, 36px); border-top: 1px solid var(--ogcw-border); color: var(--ogcw-text); font: 600 clamp(30px, 6.4vw, 128px)/1 var(--ogcw-display); letter-spacing: -.02em; white-space: nowrap; }
+@media (max-width: 700px) { .site-intro-mark { font-size: clamp(28px, 8.4vw, 44px); } }
+.footer-mark { display: none; }
+.site-root-shop .footer-mark { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(32px, 4vw, 64px) clamp(16px, 4vw, 64px) clamp(20px, 2.4vw, 36px); border-top: 1px solid var(--ogcw-border); color: var(--ogcw-text); font: 600 clamp(30px, 6.4vw, 128px)/1 var(--ogcw-display); letter-spacing: -.02em; white-space: nowrap; }
 .footer-mark-logo { color: var(--ogcw-accent); font-size: .5em; letter-spacing: .08em; }
 @media (max-width: 700px) { .footer-mark { font-size: 6.6vw; } }

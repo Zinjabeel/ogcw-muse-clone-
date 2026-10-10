@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { ProductGrid, ShopShell } from "../components/shop-kit";
-import { BRANDS, getBrand, productsOf, type ShopCategory } from "../data/shop";
+import { BRANDS, getBrand, isLive, productsOf, type ShopCategory } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // A brand's own shop: its name big, the OGCW note on it, its products
@@ -44,7 +44,7 @@ function BrandPage() {
             <a className="sx-btn sx-btn-line" href={brand.site} target="_blank" rel="noopener noreferrer"><T>Visit</T> {brand.name} <ArrowUpRight size={16} aria-hidden="true" /></a>
           </div>
           <div className="sx-brand-hero-art">
-            {all.slice(0, 3).map((product) => <img key={product.id} src={product.image} alt="" />)}
+            {all.slice(0, 3).map((product) => (isLive(product) ? <img key={product.id} src={product.image} alt="" /> : <span key={product.id} className="sx-blank-photo" />))}
           </div>
         </div>
       </section>
@@ -54,13 +54,11 @@ function BrandPage() {
           <div className="sx-tabs" role="group" aria-label="Department">
             {depts.map((item) => <button key={item} type="button" className="sx-opt" aria-pressed={dept === item} onClick={() => setDept(item)}>{item}</button>)}
           </div>
-          <p className="sx-count-line">{products.length} {products.length === 1 ? "product" : "products"}</p>
+          <span className="sx-count-line" />
           <label className="sx-sort">
             <span><T k="shop.sort">Sort</T></span>
             <select value={sort} onChange={(event) => setSort(event.target.value as Sort)}>
               <option value="featured">Featured</option>
-              <option value="low">Price: low to high</option>
-              <option value="high">Price: high to low</option>
             </select>
           </label>
         </div>
@@ -71,7 +69,7 @@ function BrandPage() {
         <header className="sx-head"><div><p className="sx-kicker"><T k="shop.brand.more.kicker">Keep shopping</T></p><h2 id="other-brands" className="sx-title"><T k="shop.brand.more">More brands</T></h2></div></header>
         <ul className="sx-brand-wall">
           {others.map((item) => (
-            <li key={item.slug}><Link to="/shop/$slug" params={{ slug: item.slug }} className="sx-brand-tile"><span className="sx-brand-name">{item.name}</span><span className="sx-brand-count">{productsOf(item.slug).length}</span></Link></li>
+            <li key={item.slug}><Link to="/shop/$slug" params={{ slug: item.slug }} className="sx-brand-tile"><span className="sx-brand-name">{item.name}</span></Link></li>
           ))}
         </ul>
       </section>

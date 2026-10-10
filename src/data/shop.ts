@@ -258,6 +258,10 @@ export const PRODUCTS: ShopProduct[] = [
 ];
 
 export const getProduct = (id: string) => PRODUCTS.find((product) => product.id === id);
+/** For now only these show: every other product is a blank card until the
+ *  owner fills the shop (owner's call, 10 Oct 2026) */
+export const LIVE_IDS = new Set(["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera"]);
+export const isLive = (product: ShopProduct) => LIVE_IDS.has(product.id);
 export const brandOf = (product: ShopProduct) => getBrand(product.brand)!;
 /** The shop it's bought from: the brand itself, or a resale / vintage shop */
 export const retailerOf = (product: ShopProduct) => getBrand(product.retailer ?? product.brand) ?? brandOf(product);

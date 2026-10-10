@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { ShopShell } from "../components/shop-kit";
-import { BRANDS, productsOf } from "../data/shop";
+import { BRANDS, isLive, productsOf } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // Every brand in the shop, A to Z, each with a photo of one of its products
@@ -18,7 +18,7 @@ function Brands() {
       <div className="sx-wrap sx-list-head">
         <nav className="sx-crumbs" aria-label="Breadcrumb"><Link to="/shop"><T>Shop</T></Link> <span aria-hidden="true">/</span> <span><T>Brands</T></span></nav>
         <h1 className="sx-page-title"><T k="shop.brands.title">Brands A–Z</T></h1>
-        <p className="sx-page-blurb">{BRANDS.length} brands, from the sneaker giants to the workwear and tech in our stories.</p>
+        <p className="sx-page-blurb"><T k="shop.brands.blurb">Every brand in the shop, from the sneaker giants to the watchmakers in our stories.</T></p>
         <nav className="sx-letters" aria-label="Jump to a letter">{letters.map((letter) => <a key={letter} href={`#brands-${letter}`}>{letter}</a>)}</nav>
       </div>
       <div className="sx-wrap sx-section">
@@ -31,10 +31,10 @@ function Brands() {
                 return (
                   <li key={brand.slug}>
                     <Link to="/shop/$slug" params={{ slug: brand.slug }} className="sx-brand-card">
-                      <span className="sx-brand-card-img">{products[0] && <img src={products[0].image} alt="" loading="lazy" />}</span>
+                      <span className="sx-brand-card-img">{products[0] && isLive(products[0]) && <img src={products[0].image} alt="" loading="lazy" />}</span>
                       <span className="sx-brand-card-name">{brand.name}</span>
                       <span className="sx-brand-card-blurb">{brand.blurb}</span>
-                      <span className="sx-link">{products.length} products <ArrowRight size={14} aria-hidden="true" /></span>
+                      <span className="sx-link"><T k="shop.brands.go">Shop the brand</T> <ArrowRight size={14} aria-hidden="true" /></span>
                     </Link>
                   </li>
                 );

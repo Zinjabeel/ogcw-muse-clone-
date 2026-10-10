@@ -1,76 +1,69 @@
 import { useEffect, useRef, useState } from "react";
 
-// The intro when you enter the site, rebuilt from Cypher Capital's loader:
-// on a full-screen layer in the page colour, "One Great" and "Culture World"
-// slide in from the middle (0.8 s), then spread apart (1.5 s) around the
-// OGCW mark. The mark then docks into the header's logo (0.8 s,
-// cubic-bezier(.5, 0, 0, 1)) while the words fade, swaps for the real logo,
-// and the layer clears. The same spread wordmark sits at the foot of every
-// page (footer-2.tsx). Once per tab, and never with reduced motion.
+// The intro when you enter the shop (and only the shop), after Cypher
+// Capital's loader: on a full-screen layer in the page colour "One Great
+// Culture World" rises in, the letters after each initial fold away until
+// only "OGCW" is left, and that mark glides up into the shop header's logo
+// while the layer clears. Once per tab, never with reduced motion; a click
+// or a key skips it.
 
-const KEY = "ogcw-intro-seen";
+const KEY = "ogcw-shop-intro-seen";
 
 /** Runs before the page paints: marks <html data-entry> when the intro should play */
-export const introInitScript = `(function(){try{if(sessionStorage.getItem("${KEY}")||matchMedia("(prefers-reduced-motion: reduce)").matches)return;document.documentElement.setAttribute("data-entry","")}catch(e){}})();`;
+export const introInitScript = `(function(){try{if(!/^\\/shop(\\/|$)/.test(location.pathname)||sessionStorage.getItem("${KEY}")||matchMedia("(prefers-reduced-motion: reduce)").matches)return;document.documentElement.setAttribute("data-entry","")}catch(e){}})();`;
 
-const DELAY = 120;
-const REVEAL = 800;
-const SPREAD = 1500;
-const DOCK = 800;
-const SWAP = 200;
-const BG = 400;
+const WORDS = ["One", "Great", "Culture", "World"];
+const REVEAL = 1500; // rise in, then hold
+const FOLD = 900; // the letters fold away
+const TRAVEL = 1100; // the mark glides to the logo
+const CLEAR = 450; // the layer fades out
 
 export function SiteIntro() {
-  const [stage, setStage] = useState<"idle" | "live" | "docking" | "leaving" | "done">("idle");
-  const mark = useRef<HTMLSpanElement>(null);
+  const [stage, setStage] = useState<"show" | "fold" | "travel" | "clear" | "done">("show");
+  const mark = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = document.documentElement;
     if (!root.hasAttribute("data-entry")) { setStage("done"); return; }
     try { sessionStorage.setItem(KEY, "1"); } catch { /* storage blocked: it plays again next time */ }
-    setStage("live");
+    const el = mark.current;
     const timers: number[] = [];
+    const finish = () => { timers.forEach((timer) => window.clearTimeout(timer)); root.removeAttribute("data-entry"); root.removeAttribute("data-entry-swap"); setStage("done"); };
+    // Fold: give each hidden part its measured width, so it can shrink to nothing
     timers.push(window.setTimeout(() => {
-      // Dock: move the mark onto the header logo, matching its height
+      el?.querySelectorAll<HTMLElement>(".site-intro-rest, .site-intro-space").forEach((part) => { part.style.width = `${part.getBoundingClientRect().width}px`; });
+      requestAnimationFrame(() => requestAnimationFrame(() => setStage("fold")));
+    }, REVEAL));
+    // Travel: move the folded mark onto the header logo, matching its size
+    timers.push(window.setTimeout(() => {
       const target = document.querySelector<HTMLElement>("[data-site-logo]");
-      const el = mark.current;
       if (target && el) {
         const from = el.getBoundingClientRect();
         const to = target.getBoundingClientRect();
-        const scale = Math.max(0.2, Math.min(1.4, to.height / from.height));
-        el.style.setProperty("--dock-x", `${to.left + to.width / 2 - (from.left + from.width / 2)}px`);
-        el.style.setProperty("--dock-y", `${to.top + to.height / 2 - (from.top + from.height / 2)}px`);
-        el.style.setProperty("--dock-scale", String(scale));
+        const scale = Math.max(0.15, Math.min(1.5, to.height / from.height));
+        el.style.setProperty("--to-x", `${to.left + to.width / 2 - (from.left + from.width / 2)}px`);
+        el.style.setProperty("--to-y", `${to.top + to.height / 2 - (from.top + from.height / 2)}px`);
+        el.style.setProperty("--to-s", String(scale));
       }
-      setStage("docking");
-    }, DELAY + REVEAL + SPREAD));
-    timers.push(window.setTimeout(() => { root.setAttribute("data-entry-swap", ""); setStage("leaving"); }, DELAY + REVEAL + SPREAD + DOCK));
-    timers.push(window.setTimeout(() => {
-      root.removeAttribute("data-entry");
-      root.removeAttribute("data-entry-swap");
-      setStage("done");
-    }, DELAY + REVEAL + SPREAD + DOCK + Math.max(SWAP, BG) + 60));
-    // Leaving early (a click or a key) skips straight to the page
-    const skip = () => { timers.forEach((timer) => window.clearTimeout(timer)); root.removeAttribute("data-entry"); root.removeAttribute("data-entry-swap"); setStage("done"); };
-    window.addEventListener("keydown", skip, { once: true });
-    return () => { timers.forEach((timer) => window.clearTimeout(timer)); window.removeEventListener("keydown", skip); };
+      setStage("travel");
+    }, REVEAL + FOLD + 100));
+    timers.push(window.setTimeout(() => { root.setAttribute("data-entry-swap", ""); setStage("clear"); }, REVEAL + FOLD + 100 + TRAVEL));
+    timers.push(window.setTimeout(finish, REVEAL + FOLD + 100 + TRAVEL + CLEAR));
+    window.addEventListener("keydown", finish, { once: true });
+    return () => { timers.forEach((timer) => window.clearTimeout(timer)); window.removeEventListener("keydown", finish); };
   }, []);
 
   if (stage === "done") return null;
   return (
-    <div
-      className="site-intro"
-      data-live={stage !== "idle" || undefined}
-      data-docking={stage === "docking" || stage === "leaving" || undefined}
-      data-leaving={stage === "leaving" || undefined}
-      aria-hidden="true"
-      role="presentation"
-      onClick={() => { document.documentElement.removeAttribute("data-entry"); setStage("done"); }}
-    >
-      <div className="site-intro-mark">
-        <span className="site-intro-word">One Great</span>
-        <span className="site-intro-dock" ref={mark}>OGCW</span>
-        <span className="site-intro-word">Culture World</span>
+    <div className="site-intro" data-stage={stage} aria-hidden="true" role="presentation" onClick={() => { document.documentElement.removeAttribute("data-entry"); setStage("done"); }}>
+      <div className="site-intro-mark" ref={mark}>
+        {WORDS.map((word, i) => (
+          <span key={word} className="site-intro-word">
+            {i > 0 && <span className="site-intro-space">&nbsp;</span>}
+            <span className="site-intro-initial">{word[0]}</span>
+            <span className="site-intro-rest">{word.slice(1)}</span>
+          </span>
+        ))}
       </div>
     </div>
   );

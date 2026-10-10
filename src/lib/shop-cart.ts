@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { getProduct, type ShopProduct } from "@/data/shop";
+import { getProduct, isLive, type ShopProduct } from "@/data/shop";
 import { storePreference } from "./consent";
 
 // The shop cart: which products, how many of each, a promo code to take to
@@ -80,7 +80,7 @@ export function useCart() {
   const current = useSyncExternalStore(subscribe, read, () => EMPTY);
   const items: CartItem[] = current.lines.flatMap((line) => {
     const product = getProduct(line.id);
-    return product ? [{ ...line, product }] : [];
+    return product && isLive(product) ? [{ ...line, product }] : [];
   });
   const count = items.reduce((sum, item) => sum + item.qty, 0);
   // Only products with a guide price count towards the subtotal

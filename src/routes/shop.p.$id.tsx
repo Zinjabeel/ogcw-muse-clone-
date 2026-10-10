@@ -1,22 +1,24 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Link2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AddToCart, BuyButton, Price, ProductGrid, SaveButton, ShopShell, brandLine } from "../components/shop-kit";
+import { AddToCart, BuyButton, ProductGrid, SaveButton, ShopShell, brandLine } from "../components/shop-kit";
 import { DROPS } from "../data/drops";
-import { PRODUCTS, SHOP_CATEGORIES, brandOf, fullName, getProduct, productsIn, productsOf, retailerOf } from "../data/shop";
+import { PRODUCTS, SHOP_CATEGORIES, brandOf, fullName, getProduct, isLive, productsIn, productsOf, retailerOf } from "../data/shop";
 import { useStories } from "@/lib/stories";
 import { T } from "@/components/site-text";
 
 // A product, on a dark stage like a watchmaker's page: the product big on
-// black, its name in wide capitals, the guide price, Add to cart and "Shop
+// black, its name, Add to cart and "Shop
 // at" its shop, save, then arrows and dots through the rest of its aisle,
 // the arrows step to the next piece. Under it: the facts, the story it's in, more from the brand and more like it.
 export const Route = createFileRoute("/shop/p/$id")({
   beforeLoad: ({ params }) => {
-    if (!getProduct(params.id)) throw notFound();
+    const product = getProduct(params.id);
+    if (!product || !isLive(product)) throw notFound(); // the rest of the shop is still to come
   },
   head: ({ params }) => {
-    const product = getProduct(params.id);
+    const found = getProduct(params.id);
+    const product = found && isLive(found) ? found : undefined;
     const title = product ? `${fullName(product)}: OGCW Shop` : "OGCW Shop";
     return { meta: [{ title }, { name: "description", content: product ? `${fullName(product)}, ${product.colour}. Picked by OGCW, bought from ${retailerOf(product).name}.` : "" }, { property: "og:title", content: title }] };
   },
@@ -29,7 +31,7 @@ function ProductPage() {
   const stories = useStories();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-  const aisle = product ? productsIn(product.category) : [];
+  const aisle = product ? productsIn(product.category).filter(isLive) : [];
   const at = aisle.findIndex((item) => item.id === id);
   const prev = aisle[(at - 1 + aisle.length) % aisle.length];
   const next = aisle[(at + 1) % aisle.length];
@@ -52,8 +54,8 @@ function ProductPage() {
   const shop = retailerOf(product);
   const category = SHOP_CATEGORIES.find((item) => item.id === product.category)!;
   const story = product.story ? stories.get(product.story) : undefined;
-  const fromBrand = productsOf(brand.slug).filter((item) => item.id !== product.id).slice(0, 4);
-  const alike = PRODUCTS.filter((item) => item.id !== product.id && item.brand !== brand.slug && (item.kind === product.kind || item.category === product.category)).slice(0, 8);
+  const fromBrand = productsOf(brand.slug).filter((item) => item.id !== product.id && isLive(item)).slice(0, 4);
+  const alike = PRODUCTS.filter((item) => item.id !== product.id && item.brand !== brand.slug && (item.kind === product.kind || item.category === product.category)).slice(0, 4);
   // A pair on the release calendar
   const drop = product.tags?.includes("drops") ? DROPS.find((item) => item.kind === "Sneakers" && item.name.includes(product.name.replace("Retro ", "").split(" ").slice(0, 4).join(" "))) : undefined;
   // Seven dots around this piece, so a long aisle still fits
@@ -91,7 +93,6 @@ function ProductPage() {
             <h1 id="px-name" className="px-name">{product.name}</h1>
             <p className="px-colour">{product.colour}</p>
             <div className="px-rule" />
-            <p className="px-price"><Price product={product} /> {product.price !== undefined && <small><T k="shop.pdp.guide">guide price</T></small>}</p>
             <div className="px-actions">
               <AddToCart product={product} full />
               <SaveButton product={product} big />
@@ -115,7 +116,6 @@ function ProductPage() {
               </li>
             ))}
           </ol>
-          <span className="px-count">{String(at + 1).padStart(2, "0")} / {String(aisle.length).padStart(2, "0")}</span>
           <div className="px-arrows">
             <Link to="/shop/p/$id" params={{ id: prev.id }} className="px-arrow" aria-label={`Previous: ${fullName(prev)}`}><ArrowLeft size={18} aria-hidden="true" /></Link>
             <span className="px-arrows-rule" aria-hidden="true" />

@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Play, Search } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { SECTIONS, SONGS, formatPrice, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
+import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, VIDEOS } from "@/data/drops";
-import { brandOf, getProduct } from "@/data/shop";
+import { brandOf, getProduct, isLive } from "@/data/shop";
 import { useStories } from "@/lib/stories";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
@@ -317,13 +317,21 @@ function ShopStrip() {
       <ul className="fx-shop-row">
         {SHOWCASE.map((product) => {
           const brand = brandOf(product);
+          // Only the live products show; the rest are blank until the shop is filled
+          if (!isLive(product)) return (
+            <li key={product.id} aria-hidden="true">
+              <span className="fx-shopcard fx-shopcard-blank" />
+              <span className="fx-blank-line" />
+              <span className="fx-blank-line is-short" />
+            </li>
+          );
           return (
             <li key={product.id}>
               <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" tabIndex={-1} aria-hidden="true">
                 <img src={product.image} alt="" loading="lazy" />
               </Link>
               <p className="fx-shopcard-title">{product.name.toLowerCase().includes(brand.name.toLowerCase()) ? product.name : `${brand.name} ${product.name}`}</p>
-              <p className="fx-shopcard-sub">{product.colour}{product.price !== undefined && <> · {formatPrice(product.price)}</>}</p>
+              <p className="fx-shopcard-sub">{product.colour}</p>
               <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard-cta" aria-label={`Shop ${brand.name} ${product.name}, ${product.colour}`}>
                 <T k="front.shop.cta">Shop now</T>
               </Link>

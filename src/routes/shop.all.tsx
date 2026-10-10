@@ -98,7 +98,6 @@ function ShopAll() {
         <nav className="sx-crumbs" aria-label="Breadcrumb"><Link to="/shop"><T>Shop</T></Link> <span aria-hidden="true">/</span> <span>{title}</span></nav>
         <div className="sx-aisle-title-row">
           <h1 className="sx-page-title">{title}</h1>
-          <p className="sx-aisle-n">{products.length} <span>{products.length === 1 ? "piece" : "pieces"}</span></p>
         </div>
         {blurb && <p className="sx-page-blurb">{blurb}</p>}
         <nav className="sx-aisle-tabs" aria-label="Aisles">
@@ -120,7 +119,7 @@ function ShopAll() {
               <button type="button" className="sx-opt" aria-pressed={!search.kind} onClick={() => set({ kind: undefined })}>All types</button>
               {kinds.map((item) => (
                 <button key={item.kind} type="button" className="sx-opt" aria-pressed={search.kind === item.kind} onClick={() => set({ kind: search.kind === item.kind ? undefined : item.kind })}>
-                  {item.kind} <span>{item.n}</span>
+                  {item.kind}
                 </button>
               ))}
             </fieldset>
@@ -132,17 +131,10 @@ function ShopAll() {
             ))}
           </fieldset>
           <fieldset className="sx-filter">
-            <legend><T k="shop.filters.price">Guide price</T></legend>
-            <button type="button" className="sx-opt" aria-pressed={!band} onClick={() => set({ price: undefined })}>Any price</button>
-            {GIFT_BANDS.map((item) => (
-              <button key={item.id} type="button" className="sx-opt" aria-pressed={band?.id === item.id} onClick={() => set({ price: item.id })}>{item.id === "big" ? "€200 and up" : item.label}</button>
-            ))}
-          </fieldset>
-          <fieldset className="sx-filter">
             <legend><T k="shop.filters.brand">Brand</T></legend>
             <div className="sx-brand-opts">
-              {brands.map(({ brand, n }) => (
-                <button key={brand.slug} type="button" className="sx-opt sx-opt-sm" aria-pressed={search.brand === brand.slug} onClick={() => set({ brand: search.brand === brand.slug ? undefined : brand.slug })}>{brand.name} <span>{n}</span></button>
+              {brands.map(({ brand }) => (
+                <button key={brand.slug} type="button" className="sx-opt sx-opt-sm" aria-pressed={search.brand === brand.slug} onClick={() => set({ brand: search.brand === brand.slug ? undefined : brand.slug })}>{brand.name}</button>
               ))}
             </div>
           </fieldset>
@@ -152,11 +144,11 @@ function ShopAll() {
           <div className="sx-toolbar">
             <button type="button" className="sx-filter-toggle" onClick={() => setOpen(true)}><SlidersHorizontal size={16} aria-hidden="true" /> <T k="shop.filters">Filter</T></button>
             <ShopSearch initial={search.q ?? ""} />
-            <p className="sx-count-line" aria-live="polite">{products.length} {products.length === 1 ? "product" : "products"}</p>
+            <span className="sx-count-line" />
             <label className="sx-sort">
               <span><T k="shop.sort">Sort</T></span>
               <select value={sort} onChange={(event) => set({ sort: event.target.value === "featured" ? undefined : (event.target.value as Sort) })}>
-                {SORTS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+                {SORTS.filter((item) => item.id === "featured" || item.id === "az").map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
           </div>
@@ -174,7 +166,7 @@ function ShopAll() {
               <Link to="/shop/all" className="sx-gold"><T k="shop.empty.cta">See everything</T></Link>
             </div>
           )}
-          <p className="sx-fine"><T k="shop.fine.list2">Guide prices in euros; the final price is set by each shop. Photos: Wikimedia Commons and Unsplash, credited on each product.</T></p>
+          <p className="sx-fine"><T k="shop.fine.list2">Each shop sets its own prices, stock and delivery.</T></p>
         </div>
       </div>
     </ShopShell>

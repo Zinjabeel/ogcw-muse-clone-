@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Check, Copy, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ShopShell, euro, guideTotal } from "../components/shop-kit";
+import { ShopShell } from "../components/shop-kit";
 import { buyUrl, fullName, retailerOf } from "../data/shop";
 import { cart, useCart, type CartLine } from "@/lib/shop-cart";
 import { T } from "@/components/site-text";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/shop/checkout")({
 });
 
 function Checkout() {
-  const { items, count, subtotal, unpriced, code } = useCart();
+  const { items, count, code } = useCart();
   const [opened, setOpened] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [undo, setUndo] = useState<CartLine[] | null>(null);
@@ -77,7 +77,6 @@ function Checkout() {
                     <header className="sx-co-shop-head">
                       <span className="sx-co-num">{index + 1}</span>
                       <h2>{group.shop.name}</h2>
-                      <span className="sx-co-shop-sum">{group.lines.length} {group.lines.length === 1 ? "item" : "items"}{group.total > 0 ? ` · ${euro(group.total)}${group.open ? "+" : ""} guide` : ""}</span>
                     </header>
                     <ul className="sx-co-items">
                       {group.lines.map(({ product, qty }) => {
@@ -87,7 +86,7 @@ function Checkout() {
                             <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-img"><img src={product.image} alt="" /></Link>
                             <div className="sx-cart-info">
                               <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-name">{fullName(product)}</Link>
-                              <span className="sx-cart-sub">{product.colour} · {qty} × {product.price !== undefined ? euro(product.price) : "price at the shop"}</span>
+                              <span className="sx-cart-sub">{product.colour}{qty > 1 ? ` · ${qty} pairs` : ""}</span>
                             </div>
                             <a className={done ? "sx-ghost" : "sx-gold"} href={buyUrl(product)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => setOpened((list) => (list.includes(product.id) ? list : [...list, product.id]))}>
                               {done ? <><Check size={15} aria-hidden="true" /> <T k="shop.co.opened">Opened</T></> : <><T k="shop.co.buy">Buy at</T> {group.shop.name} <ArrowUpRight size={15} aria-hidden="true" /></>}
@@ -104,11 +103,9 @@ function Checkout() {
             <aside className="sx-co-sum" aria-labelledby="co-sum">
               <h2 id="co-sum"><T k="shop.co.summary">Summary</T></h2>
               <dl className="sx-sum">
-                <div><dt><T k="shop.cart.subtotal">Subtotal (guide)</T></dt><dd>{euro(subtotal)}</dd></div>
-                {unpriced > 0 && <div><dt><T k="shop.cart.unpriced">Priced at the shop</T></dt><dd>{unpriced} {unpriced === 1 ? "item" : "items"}</dd></div>}
+                <div><dt><T k="shop.cart.prices">Prices</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
                 <div><dt><T k="shop.cart.shipping">Shipping</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
                 <div><dt><T k="shop.cart.tax">Tax</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
-                <div className="sx-sum-total"><dt><T k="shop.cart.total">Total</T></dt><dd>{guideTotal(subtotal, unpriced)}</dd></div>
               </dl>
               {code && (
                 <div className="sx-co-code">

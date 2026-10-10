@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { BRANDS, brandOf, buyUrl, fullName, productsOf, retailerOf, type ShopProduct } from "@/data/shop";
+import { BRANDS, PRODUCTS, brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
@@ -49,10 +49,20 @@ export function useSaved() {
 export const euro = (value: number) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: Number.isInteger(value) ? 0 : 2 }).format(value);
 
-export function Price({ product }: { product: ShopProduct }) {
-  return product.price !== undefined
-    ? <span className="sx-price">{euro(product.price)}</span>
-    : <span className="sx-price sx-price-none"><T k="shop.price.shop">Price at the shop</T></span>;
+/** Prices are not shown anywhere in the shop for now (owner, 10 Oct 2026); each shop has its own */
+export function Price(_: { product: ShopProduct }) {
+  return null;
+}
+
+/** A product still to come: an empty card with empty lines where the text goes */
+export function BlankCard({ tall = false, tone }: { tall?: boolean; tone?: "dark" | "light" | undefined }) {
+  return (
+    <div className={`sx-blank${tall ? " is-tall" : ""}`} data-tone={tone} aria-hidden="true">
+      <span className="sx-blank-photo" />
+      <span className="sx-blank-line" />
+      <span className="sx-blank-line is-short" />
+    </div>
+  );
 }
 
 /** The guide total: the priced items, with a "+" when some are priced at the shop */
@@ -97,6 +107,7 @@ export function AddToCart({ product, full = false }: { product: ShopProduct; ful
 }
 
 export function ProductTile({ product, size = "md" }: { product: ShopProduct; size?: "md" | "lg" }) {
+  if (!isLive(product)) return <BlankCard />;
   const tags = product.tags ?? [];
   const badge = tags.includes("limited") ? "Limited" : tags.includes("new") ? "New in" : tags.includes("drops") ? "Featured drop" : undefined;
   return (
@@ -184,13 +195,16 @@ export function ShopSearch({ initial = "" }: { initial?: string }) {
 
 /** "A to Z": point at it, pick a letter, pick a brand */
 function BrandIndex() {
+  // Every product under the first letter of its name; a letter with none
+  // takes the products with any word starting with it, so every letter is full
   const groups = useMemo(() => {
-    const brands = BRANDS.filter((brand) => productsOf(brand.slug).length > 0).sort((a, b) => a.name.localeCompare(b.name));
-    const map = new Map<string, typeof brands>();
-    for (const brand of brands) {
-      const first = brand.name[0]!.toUpperCase();
-      const letter = /[A-Z]/.test(first) ? first : "#";
-      map.set(letter, [...(map.get(letter) ?? []), brand]);
+    const all = PRODUCTS.map((product) => ({ product, name: fullName(product).replace(/[“”’"]/g, "") })).sort((a, b) => a.name.localeCompare(b.name));
+    const map = new Map<string, typeof all>();
+    for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+      let list = all.filter((item) => item.name[0]!.toUpperCase() === letter);
+      if (!list.length) list = all.filter((item) => item.name.split(/[\s/-]+/).some((word) => word[0]?.toUpperCase() === letter));
+      if (!list.length) list = all.filter((item) => `${item.name} ${item.product.colour}`.split(/[\s/-]+/).some((word) => word[0]?.toUpperCase() === letter));
+      if (list.length) map.set(letter, list);
     }
     return map;
   }, []);
@@ -209,7 +223,7 @@ function BrandIndex() {
     document.addEventListener("pointerdown", onPointer);
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
   }, [open]);
-  const brands = groups.get(letter) ?? [];
+  const entries = groups.get(letter) ?? [];
   return (
     <div className="sx-az" ref={root} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       {/* A mouse opens it by pointing, so a click keeps it open; touch and keys toggle it */}
@@ -224,11 +238,15 @@ function BrandIndex() {
             ))}
           </div>
           <ul className="sx-az-brands">
-            {brands.map((brand) => (
-              <li key={brand.slug}><Link to="/shop/$slug" params={{ slug: brand.slug }}>{brand.name} <span>{productsOf(brand.slug).length}</span></Link></li>
+            {entries.map(({ product, name }) => (
+              <li key={product.id}>
+                {isLive(product)
+                  ? <Link to="/shop/p/$id" params={{ id: product.id }}>{name}</Link>
+                  : <Link to="/shop/all" search={{ q: name }}>{name}</Link>}
+              </li>
             ))}
           </ul>
-          <Link to="/shop/brands" className="sx-az-all"><T k="shop.az.all">Every brand</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+          <Link to="/shop/brands" className="sx-az-all"><T k="shop.az.all.brands">Brands A to Z</T> <ArrowRight size={14} aria-hidden="true" /></Link>
         </div>
       )}
     </div>
@@ -315,7 +333,7 @@ function ShopHeader() {
           <div className="sx-top-left">
             <button type="button" className="sx-burger" aria-label="Open the shop menu" aria-expanded={menu} onClick={() => setMenu(true)}><Menu size={20} strokeWidth={1.8} aria-hidden="true" /></button>
             <BrandIndex />
-            <Link to="/shop" className="sx-brand" data-site-logo=""><T k="shop.brand.name">One Great Culture World</T></Link>
+            <Link to="/shop" className="sx-brand" data-site-logo="" aria-label="OGCW Shop home">OGCW</Link>
           </div>
           <nav className="sx-nav" aria-label="Shop sections">
             {SECTIONS.map((section) => (
@@ -344,7 +362,7 @@ function ShopHeader() {
 
 /** The cart: the efferd drawer from the right, with the items, quantities, the guide total and a promo code */
 function CartDrawer() {
-  const { items, count, subtotal, unpriced, code, open } = useCart();
+  const { items, count, code, open } = useCart();
   const [draft, setDraft] = useState("");
   const navigate = useNavigate();
   useEffect(() => setDraft(code), [code]);
@@ -380,7 +398,7 @@ function CartDrawer() {
                     </Link>
                     <div className="sx-cart-info">
                       <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-name" onClick={() => cart.setOpen(false)}>{fullName(product)}</Link>
-                      <span className="sx-cart-sub">{product.price !== undefined ? `${euro(product.price)} each` : "Price at the shop"} · {retailerOf(product).name}</span>
+                      <span className="sx-cart-sub">{retailerOf(product).name}</span>
                       <div className="sx-qty" role="group" aria-label={`Quantity of ${fullName(product)}`}>
                         <button type="button" onClick={() => cart.set(product.id, qty - 1)} aria-label="One less"><Minus size={13} aria-hidden="true" /></button>
                         <span aria-live="polite">{qty}</span>
@@ -388,7 +406,6 @@ function CartDrawer() {
                       </div>
                     </div>
                     <div className="sx-cart-end">
-                      <span className="sx-cart-total">{product.price !== undefined ? euro(product.price * qty) : "At the shop"}</span>
                       <button type="button" className="sx-cart-remove" onClick={() => cart.remove(product.id)} aria-label={`Remove ${fullName(product)}`}><Trash2 size={14} aria-hidden="true" /></button>
                     </div>
                   </li>
@@ -396,11 +413,9 @@ function CartDrawer() {
               </ul>
 
               <dl className="sx-sum">
-                <div><dt><T k="shop.cart.subtotal">Subtotal (guide)</T></dt><dd>{euro(subtotal)}</dd></div>
-                {unpriced > 0 && <div><dt><T k="shop.cart.unpriced">Priced at the shop</T></dt><dd>{unpriced} {unpriced === 1 ? "item" : "items"}</dd></div>}
+                <div><dt><T k="shop.cart.prices">Prices</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
                 <div><dt><T k="shop.cart.shipping">Shipping</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
                 <div><dt><T k="shop.cart.tax">Tax</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
-                <div className="sx-sum-total"><dt><T k="shop.cart.total">Total</T></dt><dd>{guideTotal(subtotal, unpriced)}</dd></div>
               </dl>
 
               <form className="sx-promo" onSubmit={(event) => { event.preventDefault(); cart.setCode(draft); }}>
@@ -418,7 +433,7 @@ function CartDrawer() {
         <DrawerFooter className="sx-drawer-foot">
           <DrawerClose className="sx-ghost"><T k="shop.cart.continue">Continue shopping</T></DrawerClose>
           <button type="button" className="sx-gold" disabled={items.length === 0} onClick={checkout}>
-            <T k="shop.cart.checkout">Checkout</T> {subtotal > 0 && <>({euro(subtotal)}{unpriced > 0 ? "+" : ""})</>}
+            <T k="shop.cart.checkout">Checkout</T>
           </button>
         </DrawerFooter>
       </DrawerContent>
