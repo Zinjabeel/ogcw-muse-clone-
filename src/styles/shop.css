@@ -67,7 +67,7 @@
 .sx-top-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .sx-burger, .sx-icon { position: relative; display: grid; flex: none; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: background-color .2s ease; }
 .sx-burger:hover, .sx-icon:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
-.sx-brand { margin-left: 6px; overflow: hidden; color: var(--ogcw-accent); font: 600 1.45rem/1 var(--ogcw-display); letter-spacing: .08em; text-overflow: ellipsis; white-space: nowrap; }
+.sx-brand { margin-left: 6px; overflow: hidden; color: var(--ogcw-logo-gold, #b8892a); font: 600 1.45rem/1 var(--ogcw-display); letter-spacing: .08em; text-overflow: ellipsis; white-space: nowrap; }
 .sx-top-tools { display: flex; align-items: center; justify-content: flex-end; gap: 4px; justify-self: end; }
 .sx-top-tools .sx-orb { margin-right: 8px; }
 .sx-nav { display: flex; align-items: center; justify-content: center; gap: 2px; }
@@ -77,7 +77,6 @@
 /* Over the hero photo on the shop home, until the page scrolls */
 .sx-top[data-over] { background: transparent; color: #fff; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
 .sx-top[data-over] .sx-nav-link[data-on] { color: #fff; box-shadow: inset 0 -2px 0 #fff; border-radius: 0; }
-.sx-top[data-over] .sx-brand { color: #ffe600; }
 .sx-top[data-over] .sx-az-btn { background: rgb(255 255 255 / .12); color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .3); }
 
 .sx-az { position: relative; padding-block: 12px; margin-block: -12px; }

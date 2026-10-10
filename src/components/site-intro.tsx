@@ -44,7 +44,6 @@ export function SiteIntro() {
         el.style.setProperty("--to-x", `${to.left + to.width / 2 - (from.left + from.width / 2)}px`);
         el.style.setProperty("--to-y", `${to.top + to.height / 2 - (from.top + from.height / 2)}px`);
         el.style.setProperty("--to-s", String(scale));
-        el.style.setProperty("--to-color", getComputedStyle(target).color);
       }
       setStage("travel");
     }, REVEAL + FOLD + 100));

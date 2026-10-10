@@ -3331,9 +3331,9 @@ html:not([data-entry]) .site-intro { display: none; }
 .site-intro[data-stage="fold"] .site-intro-rest, .site-intro[data-stage="fold"] .site-intro-space,
 .site-intro[data-stage="travel"] .site-intro-rest, .site-intro[data-stage="travel"] .site-intro-space,
 .site-intro[data-stage="clear"] .site-intro-rest, .site-intro[data-stage="clear"] .site-intro-space { width: 0 !important; opacity: 0; }
-/* As it folds to OGCW it turns the OGCW gold, then takes the logo's own colour on the way up */
-.site-intro:not([data-stage="show"]) .site-intro-mark { letter-spacing: .08em; color: var(--ogcw-accent); }
-.site-intro[data-stage="travel"] .site-intro-mark, .site-intro[data-stage="clear"] .site-intro-mark { color: var(--to-color, var(--ogcw-accent)); }
+/* As it folds to OGCW it turns gold, and stays gold all the way into the logo */
+:root { --ogcw-logo-gold: #b8892a; }
+.site-intro:not([data-stage="show"]) .site-intro-mark { letter-spacing: .08em; color: var(--ogcw-logo-gold); }
 .site-intro[data-stage="travel"] .site-intro-mark, .site-intro[data-stage="clear"] .site-intro-mark { transform: translate(var(--to-x, 0px), var(--to-y, 0px)) scale(var(--to-s, 1)); }
 .site-intro[data-stage="clear"] .site-intro-mark { opacity: 0; }
 html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
