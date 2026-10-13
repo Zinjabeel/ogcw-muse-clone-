@@ -3341,4 +3341,4 @@ html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
 .footer-mark { display: none; }
 .site-root-shop .footer-mark { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(32px, 4vw, 64px) clamp(16px, 4vw, 64px) clamp(20px, 2.4vw, 36px); border-top: 1px solid var(--ogcw-border); color: var(--ogcw-text); font: 600 clamp(30px, 6.4vw, 128px)/1 var(--ogcw-display); letter-spacing: -.02em; white-space: nowrap; }
 .footer-mark-logo { color: var(--ogcw-accent); font-size: .5em; letter-spacing: .08em; }
-@media (max-width: 700px) { .site-root-shop .footer-mark { gap: 10px; font-size: 6.2vw; } }
+@media (max-width: 700px) { .footer-mark { font-size: 6.6vw; } }
