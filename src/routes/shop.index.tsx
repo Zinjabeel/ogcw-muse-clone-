@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { AddToCart, BlankCard, SaveButton, ShopShell } from "../components/shop-kit";
+import { PlanetHero } from "../components/planet-hero";
 import { SNEAKER_DROPS, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // The shop home, top to bottom (after Killstar's store):
-//   hero          one photo, edge to edge, with the headline and a link at the bottom
+//   hero          Planet jumping: a window onto the next planet (components/planet-hero.tsx)
 //   what's new    square cards that keep gliding by, even under the pointer
 //   new season    a still photo the size of the section, with a link; it slides
 //                 up over What's new, and a short scroll glides the rest of the way
@@ -126,7 +127,7 @@ function ShopHome() {
   return (
     <ShopShell>
       <div className="sh">
-        <Hero />
+        <PlanetHero />
         <div className="sh-stack" ref={stack}>
           <WhatsNew />
           <NewSeason />
@@ -137,20 +138,6 @@ function ShopHome() {
         <Explore />
       </div>
     </ShopShell>
-  );
-}
-
-/* ---------- The hero: one photo, the headline and a link ---------- */
-
-function Hero() {
-  return (
-    <section className="sh-hero" aria-labelledby="sh-hero-title">
-      <img className="sh-hero-img" src="/shop/looks/hero.webp" alt="Four friends in long coats and trainers standing in a city street at night" />
-      <div className="sh-hero-copy">
-        <h1 id="sh-hero-title" className="sh-hero-title"><T k="shop.hero.title">Wear the culture</T></h1>
-        <Link to="/shop/all" search={{ tag: "new" }} className="sh-hero-cta"><T k="shop.hero.cta">Shop the latest</T></Link>
-      </div>
-    </section>
   );
 }
 
