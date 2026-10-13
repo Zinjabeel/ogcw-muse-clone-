@@ -36,7 +36,6 @@ const ONE_PIECE = ["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gom
 const slots = (products: ShopProduct[], size: number): (ShopProduct | null)[] => Array.from({ length: size }, (_, i) => products[i] ?? null);
 
 const RAIL = slots(ONE_PIECE, 10);
-const EDIT = slots(ONE_PIECE, 8);
 // Photos from Unsplash (Justus Menke, Nathaniel Cherian, Alberto Rodríguez Santana,
 // Nicolas Ladino Silva, Danist Soh)
 const LOOKS = [
@@ -44,18 +43,42 @@ const LOOKS = [
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
   { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
 ];
-/** A piece shown with its front and back photo (the owner's pictures); the
- *  back shows under the pointer, or after a tap on a touch screen */
-type Pick = { key: string; name: string; colour: string; front: string; back: string };
-const COMPLEXCON_PICKS: Pick[] = [
-  { key: "sp5der-pnk-hoodie", name: "Sp5der P*nk Web Hoodie", colour: "Pink", front: "/shop/picks/sp5der-pnk-hoodie-front.jpg", back: "/shop/picks/sp5der-pnk-hoodie-back.jpg" },
+/** A piece shown with two photos from the owner's "pictures for the shop
+ *  section" file (lines 1 and 2 are one piece, 3 and 4 the next...): the
+ *  second shows under the pointer, or after a tap on a touch screen. Names
+ *  are what the photos and their files show; where the official name
+ *  couldn't be confirmed, the name only describes the piece. */
+type Pick = { key: string; name: string; colour: string; front: string; back: string; /** what the second photo is, if not the back */ second?: string };
+const pick = (key: string, name: string, colour: string, front = `${key}-front`, back = `${key}-back`, second?: string): Pick =>
+  ({ key, name, colour, front: `/shop/picks/${front}.jpg`, back: `/shop/picks/${back}.jpg`, ...(second ? { second } : {}) });
+const SP5DER_PICKS = [
+  pick("sp5der-pnk-hoodie", "Sp5der P*nk Web Hoodie", "Pink"),
+  pick("sp5der-og-web-hoodie", "Sp5der OG Web Hoodie", "Black"),
+  pick("sp5der-splat-punk-hoodie", "Sp5der Splat Punk Hoodie", "Slate grey"),
+  pick("sp5der-beluga-hoodie", "Sp5der Beluga Hoodie", "Brown"),
 ];
+const CACTUS_JACK_PICKS = [
+  pick("days-before-rodeo-hoodie", "Cactus Jack x Sp5der Days Before Rodeo Hoodie", "Brown"),
+  pick("circus-maximus-hoodie", "Travis Scott Circus Maximus Tour ’23 Hoodie", "White"),
+  pick("utopia-hoodie", "Travis Scott Utopia Hoodie", "Brown"),
+  pick("apple-pie-hoodie", "Cactus Jack x McDonald’s Apple Pie Hoodie", "Black"),
+];
+const FOOTBALL_PICKS = [
+  pick("cactus-jack-barcelona-hoodie", "Cactus Jack x Nike x FC Barcelona Hoodie", "Washed black"),
+  pick("nocta-nike-canada-hoodie", "NOCTA x Nike Canada Hoodie", "Yellow and navy"),
+];
+// The owner's two links for this one are two colours of the same hoodie, not a front and a back
+const EDIT_PICKS = [
+  pick("nike-centre-swoosh-hoodie", "Nike Centre Swoosh Hoodie", "Teal or brown", "nike-centre-swoosh-hoodie-teal", "nike-centre-swoosh-hoodie-brown", "brown one"),
+  pick("tiger-totem-hoodie", "Washed Black Tiger and Totem Hoodie", "Washed black"),
+];
+const EDIT = slots(ONE_PIECE, 8 - EDIT_PICKS.length);
 // The collection rows: names the owner can change with the site editor
-const ROWS = [
-  { key: "nike", title: "Nike x One Piece", tone: "dark" as const, items: slots(ONE_PIECE, 4) },
-  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light" as const, items: slots([], 4) },
-  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark" as const, picks: COMPLEXCON_PICKS, items: slots([], 4 - COMPLEXCON_PICKS.length) },
-  { key: "worldcup", title: "Retro shirts for the World Cup", tone: "light" as const, items: slots([], 4) },
+const ROWS: { key: string; title: string; tone: "dark" | "light"; picks: Pick[]; items: (ShopProduct | null)[] }[] = [
+  { key: "nike", title: "Nike x One Piece", tone: "dark", picks: [], items: slots(ONE_PIECE, 4) },
+  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", picks: CACTUS_JACK_PICKS, items: slots([], 4 - CACTUS_JACK_PICKS.length) },
+  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", picks: SP5DER_PICKS, items: slots([], 4 - SP5DER_PICKS.length) },
+  { key: "worldcup", title: "Retro shirts for the World Cup", tone: "light", picks: FOOTBALL_PICKS, items: slots([], 4 - FOOTBALL_PICKS.length) },
 ];
 
 /** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
@@ -139,7 +162,7 @@ function ShopHome() {
         </div>
         <TheEdit />
         <Looks />
-        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} picks={"picks" in row ? row.picks : []} items={row.items} />)}
+        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} picks={row.picks} items={row.items} />)}
         <Explore />
       </div>
     </ShopShell>
@@ -226,7 +249,9 @@ function TheEdit() {
           <Link to="/shop/all" className="sh-textlink"><T k="shop.edit.all">Shop everything</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </header>
         <ul className="sh-cards sh-cards-4">
-          {EDIT.map((product, i) => <li key={i}><ShopCard product={product} /></li>)}
+          {EDIT.filter((product) => product).map((product, i) => <li key={i}><ShopCard product={product} /></li>)}
+          {EDIT_PICKS.map((item) => <li key={item.key}><PickCard pick={item} /></li>)}
+          {EDIT.filter((product) => !product).map((_, i) => <li key={`blank-${i}`}><ShopCard product={null} /></li>)}
         </ul>
       </div>
     </section>
@@ -288,7 +313,7 @@ function PickCard({ pick }: { pick: Pick }) {
         onPointerDown={(event) => { pointer.current = event.pointerType; }}
         onClick={() => { if (pointer.current !== "mouse") setBack((value) => !value); pointer.current = ""; }}
         aria-pressed={back}
-        aria-label={`${pick.name}, ${pick.colour}: show the ${back ? "front" : "back"}`}
+        aria-label={`${pick.name}, ${pick.colour}: show the ${back ? "front" : pick.second ?? "back"}`}
       >
         <img className="is-front" src={pick.front} alt="" loading="lazy" />
         <img className="is-back" src={pick.back} alt="" loading="lazy" />

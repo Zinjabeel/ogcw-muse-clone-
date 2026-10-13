@@ -454,7 +454,9 @@
 /* A pick with a front and a back photo (on their own white): the back fades in under the pointer */
 .sh-pick { display: grid; gap: 12px; }
 .sh-pick-photo { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; overflow: hidden; border: 0; border-radius: var(--sx-r-card); background: #fff; cursor: pointer; }
-.sh-pick-photo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 6%; object-fit: contain; transition: opacity .45s ease, transform .9s var(--sx-ease); }
+.sh-pick-photo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 6%; object-fit: contain; mix-blend-mode: multiply; transition: opacity .45s ease, transform .9s var(--sx-ease); }
+/* On a white row the card takes the blank cards' light grey, and the photos' white melts into it */
+.sh-row[data-tone="light"] .sh-pick-photo { background: #f1f1ef; }
 .sh-pick-photo .is-back { opacity: 0; }
 .sh-pick[data-back] .is-front { opacity: 0; }
 .sh-pick[data-back] .is-back { opacity: 1; }
