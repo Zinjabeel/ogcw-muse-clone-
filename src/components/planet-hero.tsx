@@ -1,259 +1,278 @@
 import { useRouter } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import { LIVE, SECTIONS, formatDate, getArticle, type Photo } from "../data/content";
+import { Pause, Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { SHOP_CATEGORIES, brandOf, fullName, getProduct, retailerOf, type ShopProduct } from "../data/shop";
 
-// The shop home's hero (owner's brief, 13 Oct 2026), built on the "Planet
-// jumping" design: after the OGCW intro the approach to Earth plays for about
-// three seconds with a thin 0-100% count and stops on the whole planet. A
-// rounded window in the middle (a canvas, tilting toward the pointer) looks
-// down on it. Click it and you dive through the clouds to a random place
-// OGCW has covered (a stadium, a concert, a convention in California...),
-// whose name and story come in where a planet's facts would be. Each click
-// after that jumps to the next place, and after the last one the window
-// goes back up to Earth and the order is shuffled again.
-// Everything is measured against the hero itself (not the window), so it
-// works inside the scrolling page and the site's 0.9 zoom. The approach
-// plays once per tab; after that, and with reduced motion, the hero opens
-// on Earth straight away.
+// The shop home's hero: a short film that plays by itself (owner's brief,
+// 13 Oct 2026; the look is the "Planet jumping" design). After the OGCW
+// intro the approach to Earth plays with a thin 0-100% count and holds on
+// the whole planet with its name and facts. Then it dives through the clouds
+// and comes out in the shop: the street, the sneaker aisle, the Nike x One
+// Piece pack, each of the three pairs, clothing, watches and chains. Every
+// scene has the same big name, with the facts column pointing at the real
+// shop page. After the last one it pulls back out to Earth and goes round
+// again. Nothing needs a click; the film waits while the hero is off screen
+// or the tab is hidden, and there is a pause button by the scene list. With
+// reduced motion the scenes simply cross-fade.
+// Everything is drawn on one canvas, sized to the hero (not the window), so
+// it works inside the scrolling page and the site's 0.9 zoom. The approach
+// plays once per tab; after that the film starts on Earth.
 
 const TO_EARTH = "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/fc3ded42-e845-41f3-a830-5cab512d79cd.mp4";
 // Moments in the Earth footage, as shares of its length
 const AT_EARTH = 0.3; // the whole planet in space: where the approach stops
-const AT_NEAR = 0.42; // closer in: what the window shows
 const AT_GROUND = 0.62; // through the clouds, just above the ground
-
 const KEY = "ogcw-planet-intro-seen";
-const EARTH_FACTS: [string, string][] = [
-  ["Distance:", "149.6 million km from the Sun."],
-  ["Year:", "365.25 Earth days."],
-  ["Temperature:", "Average surface temperature around 15 °C."],
-  ["Atmosphere:", "Mostly nitrogen and oxygen, supporting life and liquid water."],
-];
+const STAGE = "rgb(10,10,10)"; // the product photos' own black
 
-type Place = { key: string; name: string; where: string; photo: Photo; href: string; headline: string; deck: string; filed: string };
-const fromStory = (key: string, name: string, where: string, slug: string): Place[] => {
-  const story = getArticle(slug);
-  return story ? [{ key, name, where, photo: story.photo, href: `/news/${story.slug}`, headline: story.title, deck: story.deck, filed: `${formatDate(story.date)} · ${SECTIONS[story.section].label}` }] : [];
-};
-// Places from OGCW's own stories, each one where its photo was taken
-const PLACES: Place[] = [
-  ...fromStory("london", "London", "Wembley Stadium, London, during the Eras Tour", "taylor-swift-the-life-of-a-showgirl-the-encore"),
-  { key: "paris", name: "Paris", where: "Stade de France, Paris", photo: LIVE.photo, href: "/tour/bts-arirang", headline: LIVE.title, deck: "Two nights at the Stade de France in Paris drew 185,000 people.", filed: LIVE.kicker },
-  ...fromStory("anaheim", "Anaheim", "Anaheim Convention Center, California", "blizzcon-2026-diablo-v-starcraft"),
-  ...fromStory("hollywood", "Hollywood", "The Hollywood Walk of Fame, Los Angeles", "keffe-d-guilty-tupac-shakur-murder"),
-  ...fromStory("makuhari", "Makuhari", "Makuhari Messe, Chiba, Japan", "tokyo-game-show-2026-typhoon"),
-  ...fromStory("venice", "Venice", "The Palazzo del Cinema, Venice", "venice-2026-woman-unknown-golden-lion"),
+// How long each part lasts, in ms of film time
+const HOLD_EARTH = 2800;
+const HOLD_PLACE = 3800;
+const HOLD_PIECE = 3400;
+const CROSS = 1300;
+const LAND = 950;
+
+type Link = { text: string; href: string };
+type Row = [string, string | Link];
+type Look = { src: string; fit: "cover" | "contain"; pos?: [number, number] };
+type Scene = { key: string; label: string; title: string; look: Look | "earth"; rows: Row[]; hold: number };
+
+const aisle = (slug: string) => SHOP_CATEGORIES.find((category) => category.slug === slug)!;
+const ONE_PIECE = ["ope-ope", "gomu-gomu", "mera-mera"].flatMap((name) => getProduct(`one-piece-air-max-plus-${name}`) ?? []);
+/** The pair's nickname, the words in quotes: “Ope Ope” */
+const nickname = (product: ShopProduct) => /“([^”]+)”/.exec(product.name)?.[1] ?? product.name;
+const piece = (product: ShopProduct): Scene => ({
+  key: product.id,
+  label: nickname(product),
+  title: nickname(product),
+  look: { src: product.image, fit: "contain" },
+  rows: [
+    ["Piece:", { text: fullName(product), href: `/shop/p/${product.id}` }],
+    ["Colour:", product.colour],
+    ["Brand:", brandOf(product).name],
+    ["Bought from:", retailerOf(product).name],
+  ],
+  hold: HOLD_PIECE,
+});
+const SCENES: Scene[] = [
+  {
+    key: "earth", label: "Earth", title: "Earth", look: "earth", hold: HOLD_EARTH,
+    rows: [
+      ["Distance:", "149.6 million km from the Sun."],
+      ["Year:", "365.25 Earth days."],
+      ["Temperature:", "Average surface temperature around 15 °C."],
+      ["Atmosphere:", "Mostly nitrogen and oxygen, supporting life and liquid water."],
+    ],
+  },
+  {
+    key: "shop", label: "The shop", title: "The shop", look: { src: "/shop/looks/hero.webp", fit: "cover", pos: [0.5, 0.45] }, hold: HOLD_PLACE,
+    rows: [
+      ["Aisles:", "Sneakers, clothing, watches and chains, streaming."],
+      ["Picked by:", "OGCW."],
+      ["Bought from:", "Straight from the shop that makes it."],
+      ["Start here:", { text: "Shop the latest", href: "/shop/all?tag=new" }],
+    ],
+  },
+  {
+    key: "sneakers", label: "Sneakers", title: "Sneakers", look: { src: "/shop/looks/sneakers.webp", fit: "cover" }, hold: HOLD_PLACE,
+    rows: [
+      ["Aisle:", { text: "Sneakers", href: "/shop/all?cat=sneakers" }],
+      ["In it:", aisle("sneakers").blurb],
+      ["New in:", "One Piece x Air Max Plus."],
+      ["Picked by:", "OGCW."],
+    ],
+  },
+  {
+    key: "one-piece", label: "One Piece", title: "One Piece", look: { src: "/shop/one-piece-air-max-plus-pack.webp", fit: "contain" }, hold: HOLD_PIECE,
+    rows: [
+      ["Collection:", { text: "Nike x One Piece", href: "/shop/nike" }],
+      ["Model:", "Nike Air Max Plus."],
+      ["Pairs:", "Ope Ope, Gomu Gomu and Mera Mera."],
+      ["Aisle:", "Sneakers · Running."],
+    ],
+  },
+  ...ONE_PIECE.map(piece),
+  {
+    key: "clothing", label: "Clothing", title: "Clothing", look: { src: "/shop/looks/clothing.webp", fit: "cover" }, hold: HOLD_PLACE,
+    rows: [
+      ["Aisle:", { text: "Clothing", href: "/shop/all?cat=clothing" }],
+      ["In it:", aisle("clothing").blurb],
+      ["Picked by:", "OGCW."],
+      ["Bought from:", "Straight from the shop that makes it."],
+    ],
+  },
+  {
+    key: "watches", label: "Watches & chains", title: "Watches", look: { src: "/shop/looks/watches.webp", fit: "cover" }, hold: HOLD_PLACE,
+    rows: [
+      ["Aisle:", { text: "Watches & chains", href: "/shop/all?cat=accessories" }],
+      ["In it:", aisle("accessories").blurb],
+      ["Picked by:", "OGCW."],
+      ["Bought from:", "Straight from the shop that makes it."],
+    ],
+  },
 ];
-type Stop = { kind: "earth" } | { kind: "place"; place: Place };
-const shuffle = <T,>(items: T[]) => {
-  const out = [...items];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j]!, out[i]!];
-  }
-  return out;
-};
-const posOf = (photo: Photo): [number, number] => {
-  const [x = 50, y = 50] = (photo.crop?.pos ?? "50% 50%").split(" ").map((part) => parseFloat(part));
-  return [x / 100, y / 100];
-};
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-type Media = HTMLVideoElement | HTMLImageElement | HTMLCanvasElement;
-type Paint = { media: Media; zoom?: number; pos?: [number, number]; dim?: number };
-const DIM = 0.26; // place photos are darkened a little, so the white type reads on a bright sky
-const sizeOf = (media: Media) =>
-  media instanceof HTMLVideoElement ? [media.videoWidth, media.videoHeight] : media instanceof HTMLImageElement ? [media.naturalWidth, media.naturalHeight] : [media.width, media.height];
 
 export function PlanetHero() {
   const root = useRef<HTMLElement>(null);
   const router = useRouter();
   const go = useRef((href: string) => router.history.push(href));
   go.current = (href: string) => router.history.push(href);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  pausedRef.current = paused;
 
   useEffect(() => {
     const el = root.current;
     if (!el) return;
     const $ = <T extends Element>(selector: string) => el.querySelector<T>(selector)!;
-    const preloader = $<HTMLDivElement>(".pj-preloader");
-    const earth = $<HTMLVideoElement>(".pj-preloader video");
+    const earth = $<HTMLVideoElement>(".pj-source");
     const count = $<HTMLDivElement>(".pj-count");
     const countValue = $<HTMLSpanElement>(".pj-count-value");
-    const canvas = $<HTMLCanvasElement>(".pj-portal-canvas");
-    const list = $<HTMLElement>(".pj-list");
-    const portal = $<HTMLButtonElement>(".pj-portal");
-    const nextNumber = $<HTMLSpanElement>(".pj-next-number");
-    const nextName = $<HTMLElement>(".pj-next-name");
+    const canvas = $<HTMLCanvasElement>(".pj-canvas");
+    const list = $<HTMLElement>(".pj-scenes");
     const content = $<HTMLDivElement>(".pj-content");
     const title = $<HTMLHeadingElement>(".pj-title");
     const facts = $<HTMLDListElement>(".pj-facts");
-    const cursor = $<HTMLDivElement>(".pj-cursor");
     const ctx = canvas.getContext("2d");
-    // A still of the whole planet, taken where the approach stops
-    const still = document.createElement("canvas");
-    const sctx = still.getContext("2d");
-    if (!ctx || !sctx) return;
+    if (!ctx) return;
     earth.muted = true;
-    const photos = Object.fromEntries(PLACES.map((place) => {
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const images = new Map<string, HTMLImageElement>();
+    for (const scene of SCENES) {
+      if (scene.look === "earth" || images.has(scene.look.src)) continue;
       const img = new Image();
       img.decoding = "async";
-      img.src = place.photo.src;
-      return [place.key, img];
-    }));
+      img.src = scene.look.src;
+      images.set(scene.look.src, img);
+    }
 
     let alive = true;
     let visible = true;
-    let route: Stop[] = [{ kind: "earth" }, ...shuffle(PLACES).map((place): Stop => ({ kind: "place", place }))];
-    let at = 0;
-    let firstRender = true;
-    let busy = false;
-    let rotX = 0, rotY = 0, targetX = 0, targetY = 0;
-    let expansion = 0, maskScale = 0;
-    let travelPaint: ((context: CanvasRenderingContext2D) => void) | null = null;
-    let backdrop: Paint | null = null;
-    let W = 0, H = 0, radius = 90;
+    let W = 0, H = 0;
     let frame = 0, last = performance.now();
-    let cx = 0, cy = 0, px = 0, py = 0, cursorOn = false;
+    let clock = 0; // film time: only runs while the film is playing
+    const running = () => visible && !pausedRef.current && !document.hidden;
     const timers: number[] = [];
     const later = (ms: number, fn: () => void) => { timers.push(window.setTimeout(() => { if (alive) fn(); }, ms)); };
-    const frames = (n: number) => new Promise<void>((resolve) => { const step = () => (--n <= 0 ? resolve() : requestAnimationFrame(step)); requestAnimationFrame(step); });
-    /** The hero's box on screen and the zoom it sits under (screen px per hero px) */
-    const box = () => { const rect = el.getBoundingClientRect(); return { rect, k: rect.width / (el.offsetWidth || 1) || 1 }; };
-    /** Resolves on the first of `events`, or after `ms` */
-    const once = (target: EventTarget, events: string[], ms: number) =>
-      new Promise<void>((resolve) => {
-        const done = () => { events.forEach((name) => target.removeEventListener(name, done)); window.clearTimeout(timer); resolve(); };
-        events.forEach((name) => target.addEventListener(name, done, { once: true }));
-        const timer = window.setTimeout(done, ms);
-      });
-    const seek = (share: number) => {
-      if (!earth.duration) return Promise.resolve();
-      earth.pause();
-      const wait = once(earth, ["seeked", "error"], 3000);
-      earth.currentTime = earth.duration * share;
-      return wait;
-    };
-    const retrigger = (target: Element, cls: string) => { target.classList.remove(cls); void (target as HTMLElement).offsetWidth; target.classList.add(cls); };
-    const animateValue = (set: (v: number) => void, ms: number) =>
-      new Promise<void>((resolve) => {
-        const start = performance.now();
-        const step = (now: number) => {
-          if (!alive) return resolve();
-          const t = Math.min(1, (now - start) / ms);
-          set(ease(t));
-          if (t < 1) requestAnimationFrame(step); else resolve();
-        };
-        requestAnimationFrame(step);
-      });
 
-    /* ---------- Canvas ---------- */
-    const resizeCanvas = () => {
+    /* ---------- Film time: waits and tweens that stop when the film does ---------- */
+    type Tween = { start: number; ms: number; set?: (v: number) => void; resolve: () => void };
+    const tweens = new Set<Tween>();
+    const tween = (ms: number, set?: (v: number) => void) => new Promise<void>((resolve) => { tweens.add({ start: clock, ms, ...(set ? { set } : {}), resolve }); });
+    const wait = (ms: number) => tween(ms);
+    let diving: { until: number; resolve: () => void } | null = null;
+
+    /* ---------- What is on screen ---------- */
+    type Shot = { scene: Scene; since: number };
+    let shot: Shot = { scene: SCENES[0]!, since: 0 };
+    let incoming: Shot | null = null;
+    let mix = 0;
+    let style: "forward" | "back" | "land" = "forward";
+
+    const resize = () => {
       W = el.offsetWidth;
       H = el.offsetHeight;
-      radius = parseFloat(getComputedStyle(portal).borderTopLeftRadius) || 90;
       const d = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(W * d);
       canvas.height = Math.round(H * d);
       ctx.setTransform(d, 0, 0, d, 0, 0);
       fitTitle();
     };
-    /** Media drawn to cover the hero, screen-locked; `zoom` pushes in on `pos` */
-    const drawCover = (context: CanvasRenderingContext2D, { media, zoom = 1, pos = [0.5, 0.5], dim = 0 }: Paint) => {
-      if (media instanceof HTMLVideoElement && media.readyState < 2) return;
-      if (media instanceof HTMLImageElement && !media.complete) return;
-      const [mw = 0, mh = 0] = sizeOf(media);
+    /** A slow push in while a scene is on screen */
+    const drift = (since: number) => (still ? 1 : 1 + 0.045 * Math.min(1, (clock - since) / 6500));
+    const paint = (scene: Scene, zoom: number, alpha: number) => {
+      if (alpha <= 0) return;
+      ctx.globalAlpha = alpha;
+      if (scene.look === "earth") cover(earth, zoom, [0.5, 0.5]);
+      else {
+        const img = images.get(scene.look.src);
+        if (scene.look.fit === "cover") { if (img) cover(img, zoom, scene.look.pos ?? [0.5, 0.5]); ctx.fillStyle = "rgba(0,0,0,.24)"; ctx.fillRect(0, 0, W, H); }
+        else {
+          // A product on its black stage, big, above the name and the facts
+          ctx.fillStyle = STAGE;
+          ctx.fillRect(0, 0, W, H);
+          if (img?.complete && img.naturalWidth) {
+            const narrow = W < 700;
+            const ratio = img.naturalWidth / img.naturalHeight;
+            let h = H * (narrow ? 0.62 : 0.95);
+            let w = h * ratio;
+            // Clear of the scene list; on a phone a single pair may lose some black edge, the pack shot may not
+            const most = W * (narrow ? (ratio > 1.2 ? 1 : 1.15) : 0.76);
+            if (w > most) { w = most; h = w / ratio; }
+            w *= zoom;
+            h *= zoom;
+            ctx.drawImage(img, W / 2 - w / 2, H * (narrow ? 0.33 : 0.42) - h / 2, w, h);
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+    };
+    const cover = (media: HTMLVideoElement | HTMLImageElement, zoom: number, pos: [number, number]) => {
+      if (media instanceof HTMLVideoElement ? media.readyState < 2 : !media.complete) return;
+      const mw = media instanceof HTMLVideoElement ? media.videoWidth : media.naturalWidth;
+      const mh = media instanceof HTMLVideoElement ? media.videoHeight : media.naturalHeight;
       if (!mw || !mh) return;
       const scale = Math.max(W / mw, H / mh) * zoom;
       const w = mw * scale, h = mh * scale;
-      context.drawImage(media, (W - w) * pos[0], (H - h) * pos[1], w, h);
-      if (dim) { context.fillStyle = `rgba(0,0,0,${dim})`; context.fillRect(0, 0, W, H); }
+      ctx.drawImage(media, (W - w) * pos[0], (H - h) * pos[1], w, h);
     };
-    const drawShade = (context: CanvasRenderingContext2D) => {
-      const gradient = context.createLinearGradient(0, H * 0.52, 0, H);
+    const shade = () => {
+      const gradient = ctx.createLinearGradient(0, H * 0.52, 0, H);
       gradient.addColorStop(0, "rgba(0,0,0,0)");
       gradient.addColorStop(1, "rgba(0,0,0,.88)");
-      context.fillStyle = gradient;
-      context.fillRect(0, H * 0.52, W, H * 0.48);
-    };
-    /** ~44 points round a w x h rectangle with corners of radius r, centred on 0,0 */
-    const roundedRect = (w: number, h: number, r: number) => {
-      r = Math.min(r, w / 2, h / 2);
-      const points: [number, number][] = [];
-      const corners = [
-        [w / 2 - r, -h / 2 + r, -Math.PI / 2, 0],
-        [w / 2 - r, h / 2 - r, 0, Math.PI / 2],
-        [-w / 2 + r, h / 2 - r, Math.PI / 2, Math.PI],
-        [-w / 2 + r, -h / 2 + r, Math.PI, Math.PI * 1.5],
-      ] as const;
-      for (const [x, y, a0, a1] of corners) {
-        for (let i = 0; i <= 10; i++) {
-          const a = a0 + ((a1 - a0) * i) / 10;
-          points.push([x + Math.cos(a) * r, y + Math.sin(a) * r]);
-        }
-      }
-      return points;
-    };
-    /** A fake perspective, focal length 850 */
-    const project = (x: number, y: number, rx: number, ry: number, ox: number, oy: number): [number, number] => {
-      const ax = (rx * Math.PI) / 180, ay = (ry * Math.PI) / 180;
-      const xx = x * Math.cos(ay), yy = y * Math.cos(ax);
-      const z = x * Math.sin(ay) - y * Math.sin(ax);
-      const p = 850 / (850 + z);
-      return [ox + xx * p, oy + yy * p];
-    };
-    /** What the window shows while it waits: the way down, or the next place */
-    const windowPaint = (): Paint => {
-      const stop = route[at]!;
-      const next = route[(at + 1) % route.length]!;
-      if (stop.kind === "earth") return { media: earth };
-      if (next.kind === "earth") return { media: still, zoom: 1.12 };
-      return { media: photos[next.place.key]!, zoom: 1.12, pos: posOf(next.place.photo) };
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, H * 0.52, W, H * 0.48);
     };
     const draw = (now: number) => {
       if (!alive) return;
       frame = requestAnimationFrame(draw);
       const dt = Math.min(40, now - last);
       last = now;
-      rotX += (targetX - rotX) * Math.min(1, dt * 0.009);
-      rotY += (targetY - rotY) * Math.min(1, dt * 0.009);
-      if (cursorOn) {
-        cx += (px - cx) * 0.2;
-        cy += (py - cy) * 0.2;
-        cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0)`;
+      const on = running();
+      if (on) clock += dt;
+      // The dive plays the footage; it stops with the film
+      if (diving) {
+        if (!on && !earth.paused) earth.pause();
+        else if (on && earth.paused && earth.currentTime < diving.until) void earth.play().catch(() => {});
+        if (earth.currentTime >= diving.until || earth.ended) { earth.pause(); diving.resolve(); diving = null; }
+      }
+      if (on) {
+        for (const item of tweens) {
+          const t = Math.min(1, (clock - item.start) / Math.max(1, item.ms));
+          item.set?.(ease(t));
+          if (t >= 1) { tweens.delete(item); item.resolve(); }
+        }
       }
       if (!visible) return;
       ctx.clearRect(0, 0, W, H);
-      if (backdrop) { drawCover(ctx, backdrop); drawShade(ctx); }
-      const { rect: hero, k } = box();
-      const rect = portal.getBoundingClientRect();
-      const rw = rect.width / k, rh = rect.height / k;
-      const rcx = (rect.left - hero.left) / k + rw / 2, rcy = (rect.top - hero.top) / k + rh / 2;
-      const e = expansion;
-      const ox = rcx + (W / 2 - rcx) * e, oy = rcy + (H / 2 - rcy) * e;
-      const scale = e ? 1 : maskScale;
-      const w = (rw + (W - rw) * e) * scale, h = (rh + (H - rh) * e) * scale;
-      const r = radius * (1 - e) * scale, rx = rotX * (1 - e), ry = rotY * (1 - e);
-      if (w <= 1 || h <= 1) return;
-      const points = roundedRect(w, h, r).map(([x, y]) => project(x, y, rx, ry, ox, oy));
-      ctx.save();
-      ctx.beginPath();
-      points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-      ctx.closePath();
-      ctx.clip();
-      ctx.fillStyle = "#030303";
+      ctx.fillStyle = "#0a0908";
       ctx.fillRect(0, 0, W, H);
-      if (travelPaint) { travelPaint(ctx); drawShade(ctx); } else drawCover(ctx, windowPaint());
-      ctx.restore();
+      const push = still ? 0 : style === "forward" ? 0.22 : 0;
+      paint(shot.scene, drift(shot.since) * (1 + push * mix), 1);
+      if (incoming) {
+        const from = still ? 1 : style === "back" ? 1.35 : 1.14;
+        paint(incoming.scene, drift(incoming.since) * (from - (from - 1) * mix), mix);
+      }
+      shade();
     };
 
-    /* ---------- The page for the current stop ---------- */
-    const row = (key: string, value: string | Node) => {
+    /* ---------- The words for the scene on screen ---------- */
+    const row = ([key, value]: Row) => {
       const item = document.createElement("div");
       item.className = "pj-fact";
       const dt = document.createElement("dt");
       dt.textContent = key;
       const dd = document.createElement("dd");
-      dd.append(value);
+      if (typeof value === "string") dd.textContent = value;
+      else {
+        const link = document.createElement("a");
+        link.className = "pj-story";
+        link.href = value.href;
+        link.textContent = value.text;
+        dd.append(link);
+      }
       item.append(dt, dd);
       return item;
     };
@@ -265,124 +284,83 @@ export function PlanetHero() {
       const wide = title.scrollWidth;
       if (room > 0 && wide > room) title.style.fontSize = `${(parseFloat(getComputedStyle(title).fontSize) * room) / wide}px`;
     }
-    const render = () => {
-      const stop = route[at]!;
-      const nextAt = (at + 1) % route.length;
-      const next = route[nextAt]!;
-      el.dataset["stop"] = stop.kind === "earth" ? "earth" : stop.place.key;
-      title.textContent = (stop.kind === "earth" ? "Earth" : stop.place.name).toUpperCase();
-      const name = next.kind === "earth" ? "Earth" : stop.kind === "earth" ? "Somewhere on Earth" : next.place.name;
-      nextName.textContent = name;
-      nextNumber.textContent = stop.kind === "earth" ? "[??]" : `[${String(nextAt).padStart(2, "0")}]`;
-      portal.setAttribute("aria-label", stop.kind === "earth" ? "Travel to a random place on Earth" : `Travel to ${name}`);
-      if (stop.kind === "earth") facts.replaceChildren(...EARTH_FACTS.map(([key, value]) => row(key, value)));
-      else {
-        const { place } = stop;
-        const link = document.createElement("a");
-        link.href = place.href;
-        link.className = "pj-story";
-        link.textContent = place.headline;
-        facts.replaceChildren(row("Where:", place.where), row("Story:", link), row("In short:", place.deck), row("Filed:", place.filed));
-      }
-      list.replaceChildren(...route.map((item, i) => {
-        const span = document.createElement("span");
-        span.className = i === at ? "pj-item is-active" : "pj-item";
-        span.textContent = item.kind === "earth" ? "Earth" : item.place.name;
-        return span;
-      }));
-      if (!firstRender) retrigger(list, "is-switching");
-      firstRender = false;
+    let shown = -1;
+    const items = SCENES.map((scene) => {
+      const span = document.createElement("span");
+      span.className = "pj-item";
+      span.textContent = scene.label;
+      return span;
+    });
+    list.prepend(...items);
+    const retrigger = (target: Element, cls: string) => { target.classList.remove(cls); void (target as HTMLElement).offsetWidth; target.classList.add(cls); };
+    const render = (index: number) => {
+      const scene = SCENES[index]!;
+      el.dataset["scene"] = scene.key;
+      title.textContent = scene.title.toUpperCase();
+      facts.replaceChildren(...scene.rows.map(row));
+      items.forEach((item, i) => item.classList.toggle("is-active", i === index));
+      if (shown >= 0) retrigger(list, "is-switching");
+      shown = index;
       fitTitle();
     };
-    const revealMask = () => { retrigger(el, "mask-revealing"); maskScale = 0; return animateValue((v) => { maskScale = v; }, 1050); };
-    const revealPlanetContent = () => retrigger(el, "content-revealing");
 
-    /* ---------- Going to the next stop ---------- */
-    const travel = async () => {
-      if (busy || !el.classList.contains("intro-ready")) return;
-      busy = true;
-      targetX = targetY = 0;
-      const from = route[at]!;
-      const nextAt = (at + 1) % route.length;
-      const to = route[nextAt]!;
-      try {
-        el.classList.remove("content-revealing", "mask-revealing");
-        el.classList.add("is-transitioning");
-        if (from.kind === "earth" && to.kind === "place") {
-          // Down through the clouds, then the place comes up out of the ground
-          const photo: Paint = { media: photos[to.place.key]!, pos: posOf(to.place.photo), dim: DIM };
-          let fade = 0;
-          travelPaint = (context) => {
-            drawCover(context, { media: earth });
-            if (!fade) return;
-            context.globalAlpha = fade;
-            drawCover(context, { ...photo, zoom: 1.14 - 0.14 * fade });
-            context.globalAlpha = 1;
-          };
-          const ground = earth.duration * AT_GROUND;
+    /* ---------- The film ---------- */
+    const cut = async (index: number, kind: typeof style, ms: number) => {
+      el.classList.add("is-transitioning");
+      el.classList.remove("content-revealing");
+      style = kind;
+      incoming = { scene: SCENES[index]!, since: clock };
+      mix = 0;
+      await tween(ms, (v) => { mix = v; });
+      shot = incoming;
+      incoming = null;
+      mix = 0;
+      render(index);
+      el.classList.remove("is-transitioning");
+      retrigger(el, "content-revealing");
+    };
+    const seek = (share: number) => {
+      if (!earth.duration) return Promise.resolve();
+      earth.pause();
+      return new Promise<void>((resolve) => {
+        const done = () => { window.clearTimeout(timer); resolve(); };
+        const timer = window.setTimeout(done, 3000);
+        earth.addEventListener("seeked", done, { once: true });
+        earth.currentTime = earth.duration * share;
+      });
+    };
+    const film = async () => {
+      while (alive) {
+        await wait(SCENES[0]!.hold);
+        // Down through the clouds (with reduced motion, a plain cross-fade)
+        if (!still && earth.duration) {
+          el.classList.add("is-transitioning");
+          el.classList.remove("content-revealing");
           earth.playbackRate = 1.3;
-          await earth.play();
-          const landed = new Promise<void>((resolve) => {
-            const watch = () => {
-              if (!alive || earth.paused || earth.ended || earth.currentTime >= ground) { earth.pause(); return resolve(); }
-              requestAnimationFrame(watch);
-            };
-            requestAnimationFrame(watch);
-          });
-          await animateValue((v) => { expansion = v; }, 1100);
-          await Promise.race([landed, new Promise<void>((resolve) => later(4000, resolve))]);
-          await animateValue((v) => { fade = v; }, 900);
-          backdrop = photo;
-        } else {
-          // Into the next place (or back up to Earth): the window opens over it while it settles
-          const target: Paint = to.kind === "place" ? { media: photos[to.place.key]!, pos: posOf(to.place.photo), dim: DIM } : { media: still };
-          travelPaint = (context) => drawCover(context, { ...target, zoom: 1.12 - 0.12 * expansion, dim: (target.dim ?? 0) * expansion });
-          await animateValue((v) => { expansion = v; }, 1300);
-          backdrop = target;
+          await new Promise<void>((resolve) => { diving = { until: earth.duration * AT_GROUND, resolve }; });
+          await cut(1, "land", LAND);
+        } else await cut(1, "forward", CROSS);
+        void seek(AT_EARTH); // ready for the way back
+        for (let i = 2; i < SCENES.length && alive; i++) {
+          await wait(SCENES[i - 1]!.hold);
+          await cut(i, "forward", CROSS);
         }
-        if (to.kind === "earth") { route = [to, ...shuffle(PLACES).map((place): Stop => ({ kind: "place", place }))]; at = 0; }
-        else at = nextAt;
-        el.classList.add("is-committing");
-        render();
-        await frames(2);
-        travelPaint = null;
-        expansion = 0;
-        maskScale = 0;
-        el.classList.remove("is-transitioning", "is-committing");
-        if (from.kind === "earth" || to.kind === "earth") await seek(AT_NEAR); // the window looks down on Earth again
-        const reveal = revealMask();
-        later(100, revealPlanetContent);
-        await reveal;
-        later(450, () => { busy = false; });
-      } catch {
-        travelPaint = null;
-        expansion = 0;
-        maskScale = 1;
-        el.classList.remove("is-transitioning", "is-committing");
-        busy = false;
+        await wait(SCENES[SCENES.length - 1]!.hold);
+        // Back out to the whole planet
+        await cut(0, "back", CROSS + 400);
       }
     };
 
     /* ---------- The approach to Earth ---------- */
-    const startExperience = async () => {
-      // Keep the whole planet as the backdrop, then turn the footage on to the window's view
-      if (earth.readyState >= 2 && earth.videoWidth) {
-        still.width = earth.videoWidth;
-        still.height = earth.videoHeight;
-        sctx.drawImage(earth, 0, 0);
-        backdrop = { media: still };
-      }
-      await seek(AT_NEAR);
-      if (!alive) return;
-      await revealMask();
-      if (!alive) return;
+    const begin = () => {
       el.classList.add("intro-ready");
-      later(850, revealPlanetContent);
+      render(0);
+      retrigger(el, "content-revealing");
+      void film();
     };
     const runPreloader = () => {
       let seen = false;
       try { seen = !!sessionStorage.getItem(KEY); sessionStorage.setItem(KEY, "1"); } catch { /* storage blocked: it plays every time */ }
-      const quick = seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       let done = false;
       let tick = 0;
       const finish = () => {
@@ -392,20 +370,15 @@ export function PlanetHero() {
         earth.pause();
         countValue.textContent = "100";
         count.classList.add("is-leaving");
-        preloader.classList.add("is-background");
         el.classList.add("preload-complete");
-        void startExperience();
         later(750, () => { count.hidden = true; });
+        begin();
       };
       const whenReady = (fn: () => void) => (earth.readyState >= 1 ? fn() : earth.addEventListener("loadedmetadata", fn, { once: true }));
       const straightThere = () => whenReady(() => { void seek(AT_EARTH).then(finish); });
       earth.addEventListener("error", finish, { once: true });
-      if (quick) {
-        count.hidden = true;
-        straightThere();
-        later(4000, finish);
-        return;
-      }
+      later(15000, finish); // a very slow connection still gets the film
+      if (seen || still) { count.hidden = true; straightThere(); return; }
       el.classList.add("is-preloading");
       whenReady(() => {
         const stop = earth.duration * AT_EARTH;
@@ -419,46 +392,24 @@ export function PlanetHero() {
         };
         tick = requestAnimationFrame(update);
       });
-      later(15000, finish); // a very slow connection still gets the hero
     };
 
-    /* ---------- Pointer: the tilt, the cursor and the story links ---------- */
-    const onMove = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse") return;
-      const { rect, k } = box();
-      px = (event.clientX - rect.left) / k;
-      py = (event.clientY - rect.top) / k;
-      if (!cursorOn) { cx = px; cy = py; cursorOn = true; cursor.classList.add("is-visible"); }
-      if (!busy) {
-        targetY = (px / (W || 1) - 0.5) * 37.4;
-        targetX = (py / (H || 1) - 0.5) * -33;
-      }
-    };
-    const onLeave = () => { targetX = targetY = 0; cursorOn = false; cursor.classList.remove("is-visible"); };
-    const onEnter = () => cursor.classList.add("is-enter");
-    const onExit = () => cursor.classList.remove("is-enter");
-    const onClick = () => { void travel(); };
-    const onStory = (event: MouseEvent) => {
+    /* ---------- Links in the facts open the shop pages ---------- */
+    const onLink = (event: MouseEvent) => {
       const link = (event.target as Element).closest<HTMLAnchorElement>("a.pj-story");
       if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      go.current(link.getAttribute("href") ?? "/");
+      go.current(link.getAttribute("href") ?? "/shop");
     };
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerleave", onLeave);
-    portal.addEventListener("pointerenter", onEnter);
-    portal.addEventListener("pointerleave", onExit);
-    portal.addEventListener("click", onClick);
-    facts.addEventListener("click", onStory);
-    const resize = new ResizeObserver(() => resizeCanvas());
-    resize.observe(el);
-    const seen = new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; });
-    seen.observe(el);
+    facts.addEventListener("click", onLink);
+    const sizes = new ResizeObserver(() => resize());
+    sizes.observe(el);
+    const seenOnScreen = new IntersectionObserver(([entry]) => { visible = !!entry?.isIntersecting; });
+    seenOnScreen.observe(el);
     void document.fonts?.ready.then(() => { if (alive) fitTitle(); });
 
     /* ---------- Boot ---------- */
-    resizeCanvas();
-    render();
+    resize();
     frame = requestAnimationFrame(draw);
     // Wait for the OGCW intro (if it is playing) to clear first
     const html = document.documentElement;
@@ -473,48 +424,32 @@ export function PlanetHero() {
       cancelAnimationFrame(frame);
       timers.forEach((timer) => window.clearTimeout(timer));
       waiting?.disconnect();
-      resize.disconnect();
-      seen.disconnect();
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerleave", onLeave);
-      portal.removeEventListener("pointerenter", onEnter);
-      portal.removeEventListener("pointerleave", onExit);
-      portal.removeEventListener("click", onClick);
-      facts.removeEventListener("click", onStory);
+      sizes.disconnect();
+      seenOnScreen.disconnect();
+      facts.removeEventListener("click", onLink);
+      items.forEach((item) => item.remove());
       earth.pause();
     };
   }, []);
 
   return (
-    <section className="pj" ref={root} aria-label="Earth, and the places OGCW has covered">
-      <div className="pj-preloader" aria-label="Loading Earth">
-        <video src={TO_EARTH} muted playsInline preload="auto" />
-        <div className="pj-preloader-shade" />
-      </div>
+    <section className="pj" ref={root} aria-label="The OGCW Shop, a short film">
+      <video className="pj-source" src={TO_EARTH} muted playsInline preload="auto" aria-hidden="true" />
+      <canvas className="pj-canvas" aria-hidden="true" />
       <div className="pj-count" aria-live="polite">
         <span className="pj-count-value">0</span><span className="pj-percent">%</span>
       </div>
-      <div className="pj-shade" aria-hidden="true" />
 
-      <aside className="pj-list pj-chrome" aria-label="Places" />
-
-      <canvas className="pj-portal-canvas" aria-hidden="true" />
-      <div className="pj-portal-wrap pj-chrome" role="group" aria-label="Next destination">
-        <div className="pj-portal-heading">
-          <span>Next:</span>
-          <span><span className="pj-next-number">[??]</span> <strong className="pj-next-name">Somewhere on Earth</strong></span>
-        </div>
-        <button className="pj-portal" type="button" aria-label="Travel to a random place on Earth" />
-      </div>
+      <aside className="pj-list pj-scenes pj-chrome" aria-label="Scenes">
+        <button type="button" className="pj-pause" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? "Play the film" : "Pause the film"}>
+          {paused ? <Play size={13} fill="currentColor" aria-hidden="true" /> : <Pause size={13} fill="currentColor" aria-hidden="true" />}
+          <span>{paused ? "Play" : "Pause"}</span>
+        </button>
+      </aside>
 
       <div className="pj-content pj-chrome" aria-live="polite">
         <h1 className="pj-title">EARTH</h1>
         <dl className="pj-facts" />
-      </div>
-
-      <div className="pj-loading" aria-hidden="true">Preparing orbit…</div>
-      <div className="pj-cursor" aria-hidden="true">
-        <span className="pj-cursor-orbit" /><span className="pj-cursor-dot" /><span className="pj-cursor-label">Enter</span>
       </div>
     </section>
   );
