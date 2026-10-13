@@ -451,6 +451,18 @@
 .sh-square-photo img { width: 100%; height: 100%; object-fit: contain; }
 .sh-square-name { min-height: 2.6em; font-size: 15px; font-weight: 600; line-height: 1.3; }
 .sh-square .sx-add { top: calc(100cqw - 52px); right: 12px; }
+/* A pick with a front and a back photo (on their own white): the back fades in under the pointer */
+.sh-pick { display: grid; gap: 12px; }
+.sh-pick-photo { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; overflow: hidden; border: 0; border-radius: var(--sx-r-card); background: #fff; cursor: pointer; }
+.sh-pick-photo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 6%; object-fit: contain; transition: opacity .45s ease, transform .9s var(--sx-ease); }
+.sh-pick-photo .is-back { opacity: 0; }
+.sh-pick[data-back] .is-front { opacity: 0; }
+.sh-pick[data-back] .is-back { opacity: 1; }
+@media (hover: hover) {
+  .sh-pick:hover .is-front { opacity: 0; }
+  .sh-pick:hover .is-back { opacity: 1; }
+  .sh-pick:hover .sh-pick-photo img { transform: scale(1.03); }
+}
 .sx-blank { --blank: color-mix(in srgb, var(--ogcw-text) 7%, var(--ogcw-bg)); --blank-line: color-mix(in srgb, var(--ogcw-text) 12%, var(--ogcw-bg)); display: grid; gap: 10px; }
 .sx-blank[data-tone="dark"] { --blank: #161616; --blank-line: #232323; }
 .sx-blank[data-tone="light"] { --blank: #f1f1ef; --blank-line: #e3e3e0; }

@@ -44,11 +44,17 @@ const LOOKS = [
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
   { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
 ];
+/** A piece shown with its front and back photo (the owner's pictures); the
+ *  back shows under the pointer, or after a tap on a touch screen */
+type Pick = { key: string; name: string; colour: string; front: string; back: string };
+const COMPLEXCON_PICKS: Pick[] = [
+  { key: "sp5der-pnk-hoodie", name: "Sp5der P*nk Web Hoodie", colour: "Pink", front: "/shop/picks/sp5der-pnk-hoodie-front.jpg", back: "/shop/picks/sp5der-pnk-hoodie-back.jpg" },
+];
 // The collection rows: names the owner can change with the site editor
 const ROWS = [
   { key: "nike", title: "Nike x One Piece", tone: "dark" as const, items: slots(ONE_PIECE, 4) },
   { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light" as const, items: slots([], 4) },
-  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark" as const, items: slots([], 4) },
+  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark" as const, picks: COMPLEXCON_PICKS, items: slots([], 4 - COMPLEXCON_PICKS.length) },
   { key: "worldcup", title: "Retro shirts for the World Cup", tone: "light" as const, items: slots([], 4) },
 ];
 
@@ -133,7 +139,7 @@ function ShopHome() {
         </div>
         <TheEdit />
         <Looks />
-        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} items={row.items} />)}
+        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} picks={"picks" in row ? row.picks : []} items={row.items} />)}
         <Explore />
       </div>
     </ShopShell>
@@ -255,7 +261,7 @@ function Looks() {
 
 /* ---------- The collection rows: four cards each, black and white in turn ---------- */
 
-function CollectionRow({ slug, title, tone, items }: { slug: string; title: string; tone: "dark" | "light"; items: (ShopProduct | null)[] }) {
+function CollectionRow({ slug, title, tone, picks, items }: { slug: string; title: string; tone: "dark" | "light"; picks: Pick[]; items: (ShopProduct | null)[] }) {
   return (
     <section className="sh-row" data-tone={tone} aria-label={title}>
       <header className="sh-head">
@@ -263,9 +269,32 @@ function CollectionRow({ slug, title, tone, items }: { slug: string; title: stri
         <Link to="/shop/all" className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
       <ul className="sh-cards sh-cards-4">
+        {picks.map((pick) => <li key={pick.key}><PickCard pick={pick} /></li>)}
         {items.map((product, i) => <li key={i}><ShopCard product={product} tone={tone} /></li>)}
       </ul>
     </section>
+  );
+}
+
+/** Front photo, and the back under the pointer (a tap or a key flips it on a touch screen) */
+function PickCard({ pick }: { pick: Pick }) {
+  const [back, setBack] = useState(false);
+  const pointer = useRef("");
+  return (
+    <article className="sh-square sh-pick" data-back={back || undefined}>
+      <button
+        type="button"
+        className="sh-pick-photo"
+        onPointerDown={(event) => { pointer.current = event.pointerType; }}
+        onClick={() => { if (pointer.current !== "mouse") setBack((value) => !value); pointer.current = ""; }}
+        aria-pressed={back}
+        aria-label={`${pick.name}, ${pick.colour}: show the ${back ? "front" : "back"}`}
+      >
+        <img className="is-front" src={pick.front} alt="" loading="lazy" />
+        <img className="is-back" src={pick.back} alt="" loading="lazy" />
+      </button>
+      <span className="sh-square-name">{pick.name}</span>
+    </article>
   );
 }
 
