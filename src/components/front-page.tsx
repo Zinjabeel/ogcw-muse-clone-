@@ -288,23 +288,21 @@ function MoreNews() {
 
 // ------------------------------------------------------------ Shop strip
 
-// Six picks in two rows of three, shirts on top and sneakers below, set like
-// a shop window: each product alone on a plain stage (the shirts cut out onto
-// black, the One Piece Air Max Plus pack on the colours of its three Devil
-// Fruits), leaning towards the pointer with a sheen that follows it
-// (src/components/card-hover.tsx), then its name and a Shop now button.
+// Six picks in two rows of three, tops on top and sneakers below, set like a
+// shop window: each product alone on its own white stage (the second photo
+// under the pointer), leaning towards the pointer with a sheen that follows
+// it (src/components/card-hover.tsx), then its name and a Shop now button.
 // Under the cards, "Drop news": three stories about what's on show, shown
-// with the same product art where they have one (chosen in the studio).
+// with product art where they have one (chosen in the studio).
 // The full shop is on /shop.
 const SHOWCASE = [
-  "adidas-argentina-1998-home", "adidas-argentina-2006-away", "adidas-france-home-retro",
-  "one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera",
+  "sp5der-pnk-hoodie", "kaws-fragment-tee", "days-before-rodeo-hoodie",
+  "aj1-royal-2026", "travis-scott-af1-ice-blue", "fragment-travis-aj1-low-military-blue",
 ].flatMap((id) => getProduct(id) ?? []);
 
 /** Drop news art: the products on show that each story is about ("wide":
  * a picture already cut to the card's shape, shown whole) */
 const DROP_ART: Record<string, { src: string; alt: string; wide?: boolean }> = {
-  "one-piece-nike-air-max-plus-devil-fruits": { src: "/shop/one-piece-air-max-plus-pack.webp", alt: "The three One Piece x Nike Air Max Plus pairs, in berry, purple and orange", wide: true },
   "retro-football-shirts-world-cup-2026": { src: "/shop/retro-shirts-trio.webp", alt: "Argentina’s 1998 home and 2006 away shirts and a France home shirt on a black background", wide: true },
   "air-jordan-release-dates-october-december-2026": { src: "/shop/jordan-4-retro-grey.webp", alt: "An Air Jordan 4 in white, grey and black on a black background" },
 };
@@ -327,8 +325,9 @@ function ShopStrip() {
           );
           return (
             <li key={product.id}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" tabIndex={-1} aria-hidden="true">
+              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" data-stage={product.stage} data-two={product.back ? "" : undefined} tabIndex={-1} aria-hidden="true">
                 <img src={product.image} alt="" loading="lazy" />
+                {product.back && <img className="fx-shopcard-back" src={product.back} alt="" loading="lazy" />}
               </Link>
               <p className="fx-shopcard-title">{product.name.toLowerCase().includes(brand.name.toLowerCase()) ? product.name : `${brand.name} ${product.name}`}</p>
               <p className="fx-shopcard-sub">{product.colour}</p>

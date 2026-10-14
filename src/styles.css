@@ -3318,8 +3318,8 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 /* ------------------------------------------------------------------
    The intro when you enter the shop (src/components/site-intro.tsx),
    after Cypher Capital's loader: "One Great Culture World" rises in, folds
-   down to "OGCW" and glides up into the shop header's logo. The spread
-   wordmark at the foot of the shop's pages is .footer-mark.
+   down to "OGCW" and glides up into the shop header's logo. (The spread
+   wordmark that sat at the foot of the shop's pages was removed, 14 Oct.)
    ------------------------------------------------------------------ */
 .site-intro { position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--ogcw-bg); color: var(--ogcw-text); transition: background-color .45s cubic-bezier(.2, .8, .2, 1); }
 html:not([data-entry]) .site-intro { display: none; }
@@ -3338,7 +3338,3 @@ html:not([data-entry]) .site-intro { display: none; }
 .site-intro[data-stage="clear"] .site-intro-mark { opacity: 0; }
 html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
 @media (max-width: 700px) { .site-intro-mark { font-size: clamp(28px, 8.4vw, 44px); } }
-.footer-mark { display: none; }
-.site-root-shop .footer-mark { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: clamp(32px, 4vw, 64px) clamp(16px, 4vw, 64px) clamp(20px, 2.4vw, 36px); border-top: 1px solid var(--ogcw-border); color: var(--ogcw-text); font: 600 clamp(30px, 6.4vw, 128px)/1 var(--ogcw-display); letter-spacing: -.02em; white-space: nowrap; }
-.footer-mark-logo { color: var(--ogcw-accent); font-size: .5em; letter-spacing: .08em; }
-@media (max-width: 700px) { .site-root-shop .footer-mark { gap: 10px; font-size: 6.2vw; } }

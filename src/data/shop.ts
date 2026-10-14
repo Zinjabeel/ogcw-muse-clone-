@@ -126,9 +126,6 @@ export type ShopProduct = {
 export const PRODUCTS: ShopProduct[] = [
   // The live catalogue first: GOAT, Watchfinder & Co. and the owner's picks
   ...CATALOG,
-  { id: "one-piece-air-max-plus-ope-ope", brand: "nike", name: "One Piece x Air Max Plus “Ope Ope”", colour: "Very Berry / Green Quartz", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-ope-ope.webp", credit: "OGCW", tags: ["new","drops","limited"] },
-  { id: "one-piece-air-max-plus-gomu-gomu", brand: "nike", name: "One Piece x Air Max Plus “Gomu Gomu”", colour: "Space Purple / Atomic Green", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-gomu-gomu.webp", credit: "OGCW", tags: ["new","drops","limited"] },
-  { id: "one-piece-air-max-plus-mera-mera", brand: "nike", name: "One Piece x Air Max Plus “Mera Mera”", colour: "Brilliant Orange / Healing Jade", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-mera-mera.webp", credit: "OGCW", tags: ["new","drops","limited"] },
   { id: "jordan-4-retro-grey", brand: "jordan", name: "Air Jordan 4 Retro", colour: "White / Grey / Black", category: "Sneakers", kind: "Basketball", price: 210, image: "/shop/jordan-4-retro-grey.webp", credit: "Osyffar, CC0, via Wikimedia Commons, background removed", photoPage: "https://commons.wikimedia.org/wiki/File:Nike_Air_Jordan_IV.jpg", tags: ["trending","drops"], story: "sneaker-drops-late-september-2026" },
   { id: "jordan-4-retro-sage", brand: "jordan", name: "Air Jordan 4 Retro", colour: "White / Sage", category: "Sneakers", kind: "Basketball", price: 210, image: "/shop/jordan-4-retro-sage.webp", credit: "Jacek Halicki, CC BY-SA 4.0, via Wikimedia Commons, background removed", photoPage: "https://commons.wikimedia.org/wiki/File:2023_Buty_Nike_Air_Jordan.jpg", tags: ["new","drops"] },
   { id: "jordan-1-high-og-silver", brand: "jordan", name: "Air Jordan 1 Retro High OG", colour: "Silver", category: "Sneakers", kind: "Basketball", price: 180, image: "/shop/jordan-1-high-og-silver.webp", credit: "HI 622, CC BY-SA 4.0, via Wikimedia Commons, background removed", photoPage: "https://commons.wikimedia.org/wiki/File:Air_Jordan_1_Retro_High_OG_CO._Japan_silver.jpg", tags: ["drops"] },
@@ -271,9 +268,9 @@ export const PRODUCTS: ShopProduct[] = [
 ];
 
 export const getProduct = (id: string) => PRODUCTS.find((product) => product.id === id);
-/** What shows: the One Piece pairs and the live catalogue. The older
- *  placeholder products stay blank (owner's call, 10 Oct 2026) */
-export const LIVE_IDS = new Set(["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera", ...CATALOG_IDS]);
+/** What shows: the live catalogue. The older placeholder products stay
+ *  blank (owner's call, 10 Oct 2026); the One Piece pairs are gone (14 Oct) */
+export const LIVE_IDS = new Set([...CATALOG_IDS]);
 export const isLive = (product: ShopProduct) => LIVE_IDS.has(product.id);
 export const LIVE_PRODUCTS = PRODUCTS.filter(isLive);
 export const brandOf = (product: ShopProduct) => getBrand(product.brand)!;

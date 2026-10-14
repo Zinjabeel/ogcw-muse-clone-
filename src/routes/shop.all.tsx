@@ -21,7 +21,7 @@ const SORTS: { id: Sort; label: string }[] = [
   { id: "az", label: "Name: A to Z" },
 ];
 const TAGS = [
-  { id: "drops", label: "Featured drops", blurb: "The One Piece Air Max Plus pack, the Jordans on the release calendar and the retro shirts." },
+  { id: "drops", label: "Featured drops", blurb: "The Jordans and collabs on the release calendar, from the Air Jordan 1 ‘Royal’ to Awake NY’s Air Jordan 6." },
   { id: "new", label: "New in", blurb: "Added to the shop this season." },
   { id: "trending", label: "Trending", blurb: "What people are wearing right now." },
   { id: "limited", label: "Limited editions", blurb: "Collabs, grails and one-off pieces." },

@@ -303,10 +303,10 @@ function Explore() {
       <ul className="sh-explore-grid">
         <li className="is-drops">
           <Link to="/shop/all" search={{ tag: "drops" }} className="sh-tile sh-tile-photo">
-            <img src="/shop/one-piece-air-max-plus-pack.webp" alt="" loading="lazy" />
+            <img src="/shop/upcoming/aj11-space-jam-2026.png" alt="" loading="lazy" />
             <span className="sh-tile-text">
               <span className="sh-tile-name"><T k="shop.explore.drops">Featured drops</T></span>
-              <span className="sh-tile-note"><T k="shop.explore.drops.note">The Jordans on the calendar, the collabs and the One Piece pack.</T></span>
+              <span className="sh-tile-note"><T k="shop.explore.drops.note">The Jordans on the calendar and the collabs worth the wait.</T></span>
             </span>
           </Link>
         </li>

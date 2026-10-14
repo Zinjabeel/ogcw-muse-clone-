@@ -493,7 +493,7 @@ export function ShopShell({ children, promise = true }: { children: ReactNode; p
               <div className="sx-wrap sx-promise-row">
                 <p><strong><T k="shop.promise.1">Picked by OGCW</T></strong> <T k="shop.promise.1.copy">From the brands in our stories.</T></p>
                 <p><strong><T k="shop.promise.2b">Bought at the source</T></strong> <T k="shop.promise.2b.copy">Each shop handles stock, sizes, payment and delivery.</T></p>
-                <p><strong><T k="shop.promise.3">Guide prices</T></strong> <T k="shop.promise.3b.copy">In euros; each shop sets the final price.</T></p>
+                <p><strong><T k="shop.promise.3c">Prices at the shop</T></strong> <T k="shop.promise.3c.copy">Each shop sets its own price and currency.</T></p>
                 <Link to="/info/$slug" params={{ slug: "faq" }} className="sx-link"><T k="shop.promise.faq">Questions?</T> <ArrowRight size={14} aria-hidden="true" /></Link>
               </div>
             </section>
