@@ -46,13 +46,35 @@ export function useSaved() {
   return { saved, toggle, has: (id: string) => saved.includes(id) };
 }
 
-/** Euros without cents when there are none: €210, €19.50 */
-export const euro = (value: number) =>
-  new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: Number.isInteger(value) ? 0 : 2 }).format(value);
+/** US dollars, whole: $228, $6,825 (the shops' prices are in dollars) */
+export const dollars = (value: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 
-/** Prices are not shown anywhere in the shop for now (owner, 10 Oct 2026); each shop has its own */
-export function Price(_: { product: ShopProduct }) {
-  return null;
+/** The day the prices were read from the shops */
+export const PRICES_ON = "14 Oct 2026";
+
+/** A card's price: small, under the name (only where a list can be sorted or filtered by price) */
+export function Price({ product }: { product: ShopProduct }) {
+  return product.price ? <span className="sx-tile-price">{dollars(product.price)}</span> : <span className="sx-tile-price is-open">{product.url ? "Sold out" : "Price at the shop"}</span>;
+}
+
+/** The price on a product's page: the shop's price, where it's from and when, and the retail price */
+export function PriceLine({ product }: { product: ShopProduct }) {
+  const shop = retailerOf(product);
+  if (!product.price) {
+    return (
+      <p className="px-price is-open">
+        <strong>{product.url ? `Sold out at ${shop.name} right now` : `Price at ${shop.name}`}</strong>
+        <span>{product.url ? "Their page shows when it’s back." : "Search for it there for today’s price."}</span>
+      </p>
+    );
+  }
+  return (
+    <p className="px-price">
+      <strong>{dollars(product.price)}</strong>
+      <span>{shop.slug === "goat" ? "Lowest new price on GOAT" : `${shop.name}’s price`}, {PRICES_ON}{product.retail ? <> · retail {dollars(product.retail)}</> : null}</span>
+    </p>
+  );
 }
 
 /** A product still to come: an empty card with empty lines where the text goes */
@@ -66,8 +88,8 @@ export function BlankCard({ tall = false, tone }: { tall?: boolean; tone?: "dark
   );
 }
 
-/** The guide total: the priced items, with a "+" when some are priced at the shop */
-export const guideTotal = (subtotal: number, unpriced: number) => (subtotal > 0 ? `${euro(subtotal)}${unpriced > 0 ? " +" : ""}` : "At the shop");
+/** The total: the priced items, with a "+" when some are priced at the shop */
+export const guideTotal = (subtotal: number, unpriced: number) => (subtotal > 0 ? `${dollars(subtotal)}${unpriced > 0 ? " +" : ""}` : "At the shop");
 
 /** The brand line on a card: the brand, or "Via StockX" for a resale shop */
 export const brandLine = (product: ShopProduct) => {
@@ -91,16 +113,21 @@ export function SaveButton({ product, big = false }: { product: ShopProduct; big
   );
 }
 
-/** Add to cart: a round "+" on cards, a full button on the product page */
-export function AddToCart({ product, full = false }: { product: ShopProduct; full?: boolean }) {
+/** Add to cart: a round "+" on cards, a full button on the product page
+ *  (where a piece made in sizes asks for one first) */
+export function AddToCart({ product, full = false, size, onNeedSize }: { product: ShopProduct; full?: boolean; size?: string | undefined; onNeedSize?: () => void }) {
   const { items } = useCart();
-  const inCart = items.find((item) => item.id === product.id)?.qty ?? 0;
+  const inCart = items.filter((item) => item.id === product.id).reduce((sum, item) => sum + item.qty, 0);
   return (
     <button
       type="button"
       className={full ? "sx-add-full" : "sx-add"}
       aria-label={full ? undefined : `Add ${fullName(product)} to cart`}
-      onClick={(event) => { event.preventDefault(); event.stopPropagation(); cart.add(product.id); }}
+      onClick={(event) => {
+        event.preventDefault(); event.stopPropagation();
+        if (onNeedSize && !size) { onNeedSize(); return; }
+        cart.add(product.id, 1, size);
+      }}
     >
       {full ? <><ShoppingBag size={17} strokeWidth={2} aria-hidden="true" /> <T k="shop.add">Add to cart</T>{inCart > 0 && <span className="sx-add-n">{inCart}</span>}</> : <Plus size={18} strokeWidth={2.2} aria-hidden="true" />}
     </button>
@@ -129,7 +156,7 @@ export const firstTapShowsBack = (event: MouseEvent<HTMLElement>) => {
   window.setTimeout(() => { delete card.dataset["flipped"]; }, 4000);
 };
 
-export function ProductTile({ product, size = "md" }: { product: ShopProduct; size?: "md" | "lg" }) {
+export function ProductTile({ product, size = "md", priced = false }: { product: ShopProduct; size?: "md" | "lg"; priced?: boolean }) {
   if (!isLive(product)) return <BlankCard />;
   const tags = product.tags ?? [];
   const badge = tags.includes("limited") ? "Limited" : tags.includes("new") ? "New in" : tags.includes("drops") ? "Featured drop" : undefined;
@@ -142,7 +169,7 @@ export function ProductTile({ product, size = "md" }: { product: ShopProduct; si
         <span className="sx-tile-brand">{brandLine(product)}</span>
         <span className="sx-tile-name">{product.name}</span>
         <span className="sx-tile-colour">{product.colour}</span>
-        <Price product={product} />
+        {priced && <Price product={product} />}
       </Link>
       <SaveButton product={product} />
       <AddToCart product={product} />
@@ -150,10 +177,10 @@ export function ProductTile({ product, size = "md" }: { product: ShopProduct; si
   );
 }
 
-export function ProductGrid({ products, cols = 4 }: { products: ShopProduct[]; cols?: 3 | 4 | 5 }) {
+export function ProductGrid({ products, cols = 4, priced = false }: { products: ShopProduct[]; cols?: 3 | 4 | 5; priced?: boolean }) {
   return (
     <ul className={`sx-grid sx-grid-${cols}`}>
-      {products.map((product) => <li key={product.id}><ProductTile product={product} /></li>)}
+      {products.map((product) => <li key={product.id}><ProductTile product={product} priced={priced} /></li>)}
     </ul>
   );
 }
@@ -401,7 +428,7 @@ function ShopHeader() {
 
 /** The cart: the efferd drawer from the right, with the items, quantities, the guide total and a promo code */
 function CartDrawer() {
-  const { items, count, code, open } = useCart();
+  const { items, count, code, open, subtotal, unpriced } = useCart();
   const [draft, setDraft] = useState("");
   const navigate = useNavigate();
   useEffect(() => setDraft(code), [code]);
@@ -430,29 +457,30 @@ function CartDrawer() {
           ) : (
             <>
               <ul className="sx-cart-list">
-                {items.map(({ product, qty }) => (
-                  <li key={product.id} className="sx-cart-item">
-                    <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-img" onClick={() => cart.setOpen(false)}>
+                {items.map(({ product, qty, size }) => (
+                  <li key={`${product.id}-${size ?? ""}`} className="sx-cart-item">
+                    <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-img" data-stage={product.stage} onClick={() => cart.setOpen(false)}>
                       <img src={product.image} alt="" />
                     </Link>
                     <div className="sx-cart-info">
                       <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-cart-name" onClick={() => cart.setOpen(false)}>{fullName(product)}</Link>
-                      <span className="sx-cart-sub">{retailerOf(product).name}</span>
+                      <span className="sx-cart-sub">{[size && `${product.sizeLabel === "Waist" ? "Waist" : "Size"} ${size}`, retailerOf(product).name].filter(Boolean).join(" · ")}</span>
                       <div className="sx-qty" role="group" aria-label={`Quantity of ${fullName(product)}`}>
-                        <button type="button" onClick={() => cart.set(product.id, qty - 1)} aria-label="One less"><Minus size={13} aria-hidden="true" /></button>
+                        <button type="button" onClick={() => cart.set(product.id, qty - 1, size)} aria-label="One less"><Minus size={13} aria-hidden="true" /></button>
                         <span aria-live="polite">{qty}</span>
-                        <button type="button" onClick={() => cart.set(product.id, qty + 1)} aria-label="One more" disabled={qty >= 9}><Plus size={13} aria-hidden="true" /></button>
+                        <button type="button" onClick={() => cart.set(product.id, qty + 1, size)} aria-label="One more" disabled={qty >= 9}><Plus size={13} aria-hidden="true" /></button>
                       </div>
                     </div>
                     <div className="sx-cart-end">
-                      <button type="button" className="sx-cart-remove" onClick={() => cart.remove(product.id)} aria-label={`Remove ${fullName(product)}`}><Trash2 size={14} aria-hidden="true" /></button>
+                      <span className="sx-cart-price">{product.price ? dollars(product.price * qty) : "At the shop"}</span>
+                      <button type="button" className="sx-cart-remove" onClick={() => cart.remove(product.id, size)} aria-label={`Remove ${fullName(product)}`}><Trash2 size={14} aria-hidden="true" /></button>
                     </div>
                   </li>
                 ))}
               </ul>
 
               <dl className="sx-sum">
-                <div><dt><T k="shop.cart.prices">Prices</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
+                <div><dt><T k="shop.cart.subtotal">Subtotal</T></dt><dd>{guideTotal(subtotal, unpriced)}</dd></div>
                 <div><dt><T k="shop.cart.shipping">Shipping</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
                 <div><dt><T k="shop.cart.tax">Tax</T></dt><dd><T k="shop.cart.byshop">Set by each shop</T></dd></div>
               </dl>

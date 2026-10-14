@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Link2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { AddToCart, BuyButton, ProductGrid, SaveButton, ShopShell, brandLine } from "../components/shop-kit";
+import { AddToCart, BuyButton, PRICES_ON, PriceLine, ProductGrid, SaveButton, ShopShell, brandLine, dollars } from "../components/shop-kit";
 import { DROPS } from "../data/drops";
 import { PRODUCTS, SHOP_CATEGORIES, brandOf, fullName, getProduct, isLive, productsIn, productsOf, retailerOf } from "../data/shop";
 import { useStories } from "@/lib/stories";
@@ -25,6 +25,8 @@ export const Route = createFileRoute("/shop/p/$id")({
   component: ProductPage,
 });
 
+const longDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(iso));
+
 function ProductPage() {
   const { id } = Route.useParams();
   const product = getProduct(id);
@@ -32,6 +34,8 @@ function ProductPage() {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState(0);
+  const [size, setSize] = useState<string>();
+  const [askSize, setAskSize] = useState(false);
   const aisle = product ? productsIn(product.category).filter(isLive) : [];
   const at = aisle.findIndex((item) => item.id === id);
   const prev = aisle[(at - 1 + aisle.length) % aisle.length];
@@ -48,9 +52,10 @@ function ProductPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate, prev, next]);
-  useEffect(() => { setCopied(false); setView(0); }, [id]);
+  useEffect(() => { setCopied(false); setView(0); setSize(undefined); setAskSize(false); }, [id]);
 
   if (!product || !prev || !next) return null;
+  const sizes = product.sizes ?? [];
   const brand = brandOf(product);
   const shop = retailerOf(product);
   const category = SHOP_CATEGORIES.find((item) => item.id === product.category)!;
@@ -103,11 +108,28 @@ function ProductPage() {
             <h1 id="px-name" className="px-name">{product.name}</h1>
             <p className="px-colour">{product.colour}</p>
             {(product.note || product.released) && (
-              <p className="px-note">{product.note ?? `${new Date(product.released!) > new Date() ? "Comes out" : "Came out"} ${new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(product.released!))}`}</p>
+              <p className="px-note">{product.note ?? `${new Date(product.released!) > new Date() ? "Comes out" : "Came out"} ${longDate(product.released!)}`}</p>
             )}
+            <PriceLine product={product} />
             <div className="px-rule" />
+            {sizes.length > 1 ? (
+              <fieldset className="px-sizes" data-ask={askSize || undefined}>
+                <legend>
+                  <span>{product.sizeLabel ?? "Size"}</span>
+                  <span className="px-sizes-hint" aria-live="polite">{askSize ? "Pick a size first" : size ? `Size ${size}` : "Pick a size"}</span>
+                </legend>
+                <div className="px-size-grid" role="radiogroup" aria-label={product.sizeLabel ?? "Size"}>
+                  {sizes.map((item) => (
+                    <button key={item} type="button" role="radio" aria-checked={size === item} className="px-size" onClick={() => { setSize(item); setAskSize(false); }}>{item}</button>
+                  ))}
+                </div>
+                <p className="px-sizes-note">Sizes as {shop.name} lists them. Pick yours again at the shop’s checkout.</p>
+              </fieldset>
+            ) : sizes.length === 1 ? (
+              <p className="px-one-size"><span>{product.sizeLabel ?? "Size"}</span> {sizes[0]}</p>
+            ) : null}
             <div className="px-actions">
-              <AddToCart product={product} full />
+              <AddToCart product={product} full size={sizes.length === 1 ? sizes[0] : size} {...(sizes.length > 1 ? { onNeedSize: () => setAskSize(true) } : {})} />
               <SaveButton product={product} big />
             </div>
             <BuyButton product={product} />
@@ -140,13 +162,20 @@ function ProductPage() {
       </section>
 
       <div className="sx-wrap">
-        <dl className="px-facts">
-          <div><dt><T k="shop.pdp.brand">Brand</T></dt><dd>{brand.name}</dd></div>
-          <div><dt><T k="shop.pdp.type">Type</T></dt><dd>{product.kind}</dd></div>
-          <div><dt><T k="shop.pdp.colour">Colour</T></dt><dd>{product.colour}</dd></div>
-          <div><dt><T k="shop.pdp.shop">Bought from</T></dt><dd><a href={shop.site} target="_blank" rel="noopener noreferrer">{shop.name} <ArrowUpRight size={13} aria-hidden="true" /></a></dd></div>
-          <div><dt><T k="shop.pdp.photo">Photo</T></dt><dd>{product.photoPage ? <a href={product.photoPage} target="_blank" rel="noopener noreferrer">{product.credit}</a> : product.credit}</dd></div>
-        </dl>
+        <section className="px-details" aria-labelledby="px-details-title">
+          <h2 id="px-details-title" className="px-details-title"><T k="shop.pdp.details">The details</T></h2>
+          <dl className="px-facts">
+            <div><dt><T k="shop.pdp.brand">Brand</T></dt><dd>{brand.name}</dd></div>
+            <div><dt><T k="shop.pdp.type">Type</T></dt><dd>{product.kind}</dd></div>
+            {product.gender && <div><dt><T k="shop.pdp.for">Cut for</T></dt><dd>{product.gender === "men" ? "Men" : product.gender === "women" ? "Women" : "Anyone"}</dd></div>}
+            {(product.specs ?? [["Colour", product.colour]]).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+            {product.released && <div><dt><T k="shop.pdp.release">Release</T></dt><dd>{longDate(product.released)}</dd></div>}
+            {product.price && <div><dt><T k="shop.pdp.price">Price</T></dt><dd>{dollars(product.price)} at {shop.name}, {PRICES_ON}</dd></div>}
+            {product.retail && <div><dt><T k="shop.pdp.retail">Retail</T></dt><dd>{dollars(product.retail)}</dd></div>}
+            <div><dt><T k="shop.pdp.shop">Bought from</T></dt><dd><a href={shop.site} target="_blank" rel="noopener noreferrer">{shop.name} <ArrowUpRight size={13} aria-hidden="true" /></a></dd></div>
+            <div><dt><T k="shop.pdp.photo">Photo</T></dt><dd>{product.photoPage ? <a href={product.photoPage} target="_blank" rel="noopener noreferrer">{product.credit}</a> : product.credit}</dd></div>
+          </dl>
+        </section>
 
         {(drop || story) && (
           <div className="px-links">

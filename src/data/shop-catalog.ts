@@ -1,11 +1,14 @@
 import type { ShopBrand, ShopProduct, ShopTag } from "./shop";
+import { FACTS, MORE } from "./shop-more";
 
 // The shop's live catalogue (owner, 14 Oct 2026): sneakers and jeans picked
 // on GOAT, watches picked on Watchfinder & Co., and the hoodies and tees from
-// the owner's "pictures for the shop section" file. Every piece has two
-// photos: the first on the card, the second under the pointer. Names,
-// colourways, references and years are as the shop lists them, and each
-// piece links to its own page there. No prices: each shop sets its own.
+// the owner's "pictures for the shop section" file, then the rest of the
+// catalogue from the same shops (src/data/shop-more.ts). Every piece has two
+// photos where the shop has them: the first on the card, the second under
+// the pointer. Names, colourways, references, sizes and years are as the
+// shop lists them, and each piece links to its own page there. Prices are
+// the shop's, in US dollars, as it showed them on 14 Oct 2026.
 // Photos: GOAT and Watchfinder & Co. product photos, resized.
 
 const goat = (path: string) => `https://www.goat.com/${path}`;
@@ -27,7 +30,6 @@ export const CATALOG_BRANDS: ShopBrand[] = [
   { slug: "hellstar", name: "Hellstar", blurb: "Los Angeles streetwear with the star logo.", site: "https://hellstar.com" },
   { slug: "butter-goods", name: "Butter Goods", blurb: "The skate label from Australia.", site: "https://buttergoods.com" },
   { slug: "acne-studios", name: "Acne Studios", blurb: "The Stockholm fashion house that began with denim.", site: "https://www.acnestudios.com" },
-  { slug: "unravel-project", name: "Unravel Project", blurb: "Ben Taverniti’s label, known for reworked denim.", site: "https://www.goat.com/search?query=Unravel%20Project" },
   { slug: "magliano", name: "Magliano", blurb: "Luca Magliano’s label from Bologna.", site: "https://www.goat.com/search?query=Magliano" },
   { slug: "cactus-jack", name: "Cactus Jack", blurb: "Travis Scott’s label and record imprint.", site: "https://shop.travisscott.com" },
   { slug: "nocta", name: "NOCTA", blurb: "Drake’s label, made with Nike.", site: "https://nocta.com" },
@@ -40,7 +42,6 @@ export const CATALOG_BRANDS: ShopBrand[] = [
   { slug: "jaeger-lecoultre", name: "Jaeger-LeCoultre", blurb: "The Vallée de Joux house behind the Reverso.", site: "https://www.jaeger-lecoultre.com" },
   { slug: "hublot", name: "Hublot", blurb: "The Big Bang, and gold paired with rubber.", site: "https://www.hublot.com" },
   { slug: "breitling", name: "Breitling", blurb: "Pilot’s chronographs, and the Navitimer.", site: "https://www.breitling.com" },
-  { slug: "nomos", name: "Nomos Glashütte", blurb: "Clean, Bauhaus-style dials from Glashütte.", site: "https://nomos-glashuette.com" },
   { slug: "bell-ross", name: "Bell & Ross", blurb: "Square cases taken from aircraft instruments.", site: "https://www.bellross.com" },
 ];
 
@@ -53,7 +54,7 @@ const watch = (id: string, brand: string, name: string, colour: string, note: st
   ({ id, brand, name, colour, category: "Accessories", kind: "Watches", note, ...photos(id), credit: "Photo: Watchfinder & Co.", photoPage: wf(path), retailer: "watchfinder", url: wf(path), tags });
 const pick = (row: Row & { image: string; back: string }): ShopProduct => ({ credit: "Photo: the owner’s pick", retailer: "goat", stage: "white", ...row });
 
-export const CATALOG: ShopProduct[] = [
+const FIRST: ShopProduct[] = [
   // ---------- Sneakers (GOAT) ----------
   sneaker("aj1-royal-2026", "jordan", "Air Jordan 1 Retro High OG ‘Royal’ 2026", "Black / Varsity Royal / Black", "Basketball", "sneakers/air-jordan-1-retro-high-og-royal-2026-iq5495-005", ["new", "trending", "drops"], "2026-10-10"),
   sneaker("aj4-black-cat-2025", "jordan", "Air Jordan 4 Retro ‘Black Cat’ 2025", "Black / Black / Light Graphite", "Basketball", "sneakers/air-jordan-4-retro-black-cat-2025-fv5029-010", ["trending"], "2025-11-28"),
@@ -94,7 +95,6 @@ export const CATALOG: ShopProduct[] = [
   jeans("butter-goods-relaxed-sunfade", "butter-goods", "Butter Goods Relaxed Denim Jeans", "Sunfade Blue", "butter-goods-relaxed-denim-jeans-sunfade-blue-bgq22616101", ["new"]),
   jeans("butter-goods-solar-fade-grey", "butter-goods", "Butter Goods Solar Fade Denim Jeans", "Grey Wash", "butter-goods-solar-fade-denim-jeans-grey-wash-bgq3267102", ["new"]),
   jeans("acne-studios-printed-jeans-blue", "acne-studios", "Acne Studios Denim Printed Jeans", "Blue", "acne-studios-denim-printed-jeans-blue-b00374-goat-blue"),
-  jeans("unravel-moonwash-multi-zip", "unravel-project", "Unravel Project Denim Moonwash Multi-Zip Jeans", "Blue", "amiri-denim-moonwash-multi-zip-jeans-blue-uwyb018e193230047100-blue"),
   jeans("supreme-dickies-cordura-cargo-denim", "supreme", "Supreme x Dickies Cordura Cargo Pant", "Denim", "supreme-x-dickies-cordura-cargo-pant-denim-fw25p18-denim", ["limited"]),
   jeans("magliano-flattone-filthy-white", "magliano", "Magliano Flattone Denim Pants", "Filthy White", "magliano-flattone-denim-pants-filthy-white-mgss26dp01012-6119", ["new"]),
 
@@ -117,29 +117,38 @@ export const CATALOG: ShopProduct[] = [
   watch("hublot-f1", "hublot", "F1", "Black and red dial, fabric strap", "Vintage, 2001 · 703.CI.1123.NR.FMO10", "hublot/f1/703-ci-1123-nr-fmo10/449615", ["limited"]),
   watch("rolex-datejust-16233", "rolex", "Datejust", "Ivory pyramid Roman numeral dial, steel and gold", "Vintage, 1993 · 16233", "rolex/datejust/16233/440825", ["trending"]),
   watch("breitling-navitimer-b01-46", "breitling", "Navitimer B01 Chronograph 46", "Black baton dial", "Pre-owned, 2021 · AB0127", "breitling/navitimer-b01-chronograph-46/ab0127/442308"),
-  watch("nomos-zurich-807", "nomos", "Zürich", "Blue dial, leather strap", "Pre-owned, 2023 · 807", "nomos-glashutte/zurich/807/447121", ["new"]),
   watch("bell-ross-br05-blue", "bell-ross", "BR 05", "Blue dial, steel bracelet", "Pre-owned, 2024 · BR05G-PB-ST/SST", "bell-and-ross/br-05/br05g-pb-st-sst/433812"),
 
   // ---------- Hoodies and tees: the owner's pictures (two links per piece) ----------
-  pick({ id: "sp5der-pnk-hoodie", brand: "sp5der", name: "Sp5der P*nk Web Hoodie", colour: "Pink", category: "Clothing", kind: "Hoodies", tags: ["trending"], ...picks("sp5der-pnk-hoodie-front", "sp5der-pnk-hoodie-back") }),
-  pick({ id: "sp5der-og-web-hoodie", brand: "sp5der", name: "Sp5der OG Web Hoodie", colour: "Black", category: "Clothing", kind: "Hoodies", tags: ["trending"], ...picks("sp5der-og-web-hoodie-front", "sp5der-og-web-hoodie-back") }),
-  pick({ id: "sp5der-splat-punk-hoodie", brand: "sp5der", name: "Sp5der Splat Punk Hoodie", colour: "Slate grey", category: "Clothing", kind: "Hoodies", tags: ["new"], ...picks("sp5der-splat-punk-hoodie-front", "sp5der-splat-punk-hoodie-back") }),
-  pick({ id: "sp5der-beluga-hoodie", brand: "sp5der", name: "Sp5der Beluga Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies", tags: ["new"], ...picks("sp5der-beluga-hoodie-front", "sp5der-beluga-hoodie-back") }),
-  pick({ id: "days-before-rodeo-hoodie", brand: "cactus-jack", name: "Cactus Jack x Sp5der Days Before Rodeo Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies", tags: ["limited", "trending"], ...picks("days-before-rodeo-hoodie-front", "days-before-rodeo-hoodie-back") }),
-  pick({ id: "circus-maximus-hoodie", brand: "cactus-jack", name: "Travis Scott Circus Maximus Tour ’23 Hoodie", colour: "White", category: "Clothing", kind: "Hoodies", tags: ["limited"], ...picks("circus-maximus-hoodie-front", "circus-maximus-hoodie-back") }),
-  pick({ id: "utopia-hoodie", brand: "cactus-jack", name: "Travis Scott Utopia Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies", ...picks("utopia-hoodie-front", "utopia-hoodie-back") }),
-  pick({ id: "apple-pie-hoodie", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Apple Pie Hoodie", colour: "Black", category: "Clothing", kind: "Hoodies", tags: ["limited"], ...picks("apple-pie-hoodie-front", "apple-pie-hoodie-back") }),
-  pick({ id: "cactus-jack-barcelona-hoodie", brand: "cactus-jack", name: "Cactus Jack x Nike x FC Barcelona Hoodie", colour: "Washed black", category: "Clothing", kind: "Hoodies", tags: ["limited", "trending"], ...picks("cactus-jack-barcelona-hoodie-front", "cactus-jack-barcelona-hoodie-back") }),
-  pick({ id: "nocta-nike-canada-hoodie", brand: "nocta", name: "NOCTA x Nike Canada Hoodie", colour: "Yellow and navy", category: "Clothing", kind: "Hoodies", tags: ["limited"], ...picks("nocta-nike-canada-hoodie-front", "nocta-nike-canada-hoodie-back") }),
+  pick({ id: "sp5der-pnk-hoodie", brand: "sp5der", name: "Sp5der P*nk Web Hoodie", colour: "Pink", category: "Clothing", kind: "Hoodies & sweats", tags: ["trending"], ...picks("sp5der-pnk-hoodie-front", "sp5der-pnk-hoodie-back") }),
+  pick({ id: "sp5der-og-web-hoodie", brand: "sp5der", name: "Sp5der OG Web Hoodie", colour: "Black", category: "Clothing", kind: "Hoodies & sweats", tags: ["trending"], ...picks("sp5der-og-web-hoodie-front", "sp5der-og-web-hoodie-back") }),
+  pick({ id: "sp5der-splat-punk-hoodie", brand: "sp5der", name: "Sp5der Splat Punk Hoodie", colour: "Slate grey", category: "Clothing", kind: "Hoodies & sweats", tags: ["new"], ...picks("sp5der-splat-punk-hoodie-front", "sp5der-splat-punk-hoodie-back") }),
+  pick({ id: "sp5der-beluga-hoodie", brand: "sp5der", name: "Sp5der Beluga Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies & sweats", tags: ["new"], ...picks("sp5der-beluga-hoodie-front", "sp5der-beluga-hoodie-back") }),
+  pick({ id: "days-before-rodeo-hoodie", brand: "cactus-jack", name: "Cactus Jack x Sp5der Days Before Rodeo Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies & sweats", tags: ["limited", "trending"], ...picks("days-before-rodeo-hoodie-front", "days-before-rodeo-hoodie-back") }),
+  pick({ id: "circus-maximus-hoodie", brand: "cactus-jack", name: "Travis Scott Circus Maximus Tour ’23 Hoodie", colour: "White", category: "Clothing", kind: "Hoodies & sweats", tags: ["limited"], ...picks("circus-maximus-hoodie-front", "circus-maximus-hoodie-back") }),
+  pick({ id: "utopia-hoodie", brand: "cactus-jack", name: "Travis Scott Utopia Hoodie", colour: "Brown", category: "Clothing", kind: "Hoodies & sweats", ...picks("utopia-hoodie-front", "utopia-hoodie-back") }),
+  pick({ id: "apple-pie-hoodie", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Apple Pie Hoodie", colour: "Black", category: "Clothing", kind: "Hoodies & sweats", tags: ["limited"], ...picks("apple-pie-hoodie-front", "apple-pie-hoodie-back") }),
+  pick({ id: "cactus-jack-barcelona-hoodie", brand: "cactus-jack", name: "Cactus Jack x Nike x FC Barcelona Hoodie", colour: "Washed black", category: "Clothing", kind: "Hoodies & sweats", tags: ["limited", "trending"], ...picks("cactus-jack-barcelona-hoodie-front", "cactus-jack-barcelona-hoodie-back") }),
+  pick({ id: "nocta-nike-canada-hoodie", brand: "nocta", name: "NOCTA x Nike Canada Hoodie", colour: "Yellow and navy", category: "Clothing", kind: "Hoodies & sweats", tags: ["limited"], ...picks("nocta-nike-canada-hoodie-front", "nocta-nike-canada-hoodie-back") }),
   // The owner's two links for this one are two colours of the same hoodie, not a front and a back
-  pick({ id: "nike-centre-swoosh-hoodie", brand: "nike", name: "Nike Centre Swoosh Hoodie", colour: "Teal, or brown", category: "Clothing", kind: "Hoodies", ...picks("nike-centre-swoosh-hoodie-teal", "nike-centre-swoosh-hoodie-brown") }),
+  pick({ id: "nike-centre-swoosh-hoodie", brand: "nike", name: "Nike Centre Swoosh Hoodie", colour: "Teal, or brown", category: "Clothing", kind: "Hoodies & sweats", ...picks("nike-centre-swoosh-hoodie-teal", "nike-centre-swoosh-hoodie-brown") }),
   // Official name not confirmed, so the name only describes it (and it's listed under the shop)
-  pick({ id: "tiger-totem-hoodie", brand: "goat", name: "Washed Black Tiger and Totem Hoodie", colour: "Washed black", category: "Clothing", kind: "Hoodies", ...picks("tiger-totem-hoodie-front", "tiger-totem-hoodie-back") }),
-  pick({ id: "kaws-fragment-tee", brand: "cactus-jack", name: "Cactus Jack x KAWS for Fragment Tee", colour: "Vintage wash", category: "Clothing", kind: "T-shirts", tags: ["limited"], ...picks("kaws-fragment-tee-front", "kaws-fragment-tee-back") }),
-  pick({ id: "mcdonalds-smile-tee", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Smile Tee", colour: "Black", category: "Clothing", kind: "T-shirts", ...picks("mcdonalds-smile-tee-front", "mcdonalds-smile-tee-back") }),
-  pick({ id: "fragment-tee", brand: "cactus-jack", name: "Cactus Jack for Fragment Tee", colour: "White", category: "Clothing", kind: "T-shirts", tags: ["limited"], ...picks("fragment-tee-front", "fragment-tee-back") }),
-  pick({ id: "cactus-jack-script-tee", brand: "cactus-jack", name: "Cactus Jack Back-Script Tee", colour: "Cream", category: "Clothing", kind: "T-shirts", ...picks("cactus-jack-script-tee-front", "cactus-jack-script-tee-back") }),
-  pick({ id: "cactus-mac-tee", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Cactus Mac Tee", colour: "Black", category: "Clothing", kind: "T-shirts", tags: ["trending"], ...picks("cactus-mac-tee-front", "cactus-mac-tee-back") }),
+  pick({ id: "tiger-totem-hoodie", brand: "goat", name: "Washed Black Tiger and Totem Hoodie", colour: "Washed black", category: "Clothing", kind: "Hoodies & sweats", ...picks("tiger-totem-hoodie-front", "tiger-totem-hoodie-back") }),
+  pick({ id: "kaws-fragment-tee", brand: "cactus-jack", name: "Cactus Jack x KAWS for Fragment Tee", colour: "Vintage wash", category: "Clothing", kind: "T-shirts & shirts", tags: ["limited"], ...picks("kaws-fragment-tee-front", "kaws-fragment-tee-back") }),
+  pick({ id: "mcdonalds-smile-tee", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Smile Tee", colour: "Black", category: "Clothing", kind: "T-shirts & shirts", ...picks("mcdonalds-smile-tee-front", "mcdonalds-smile-tee-back") }),
+  pick({ id: "fragment-tee", brand: "cactus-jack", name: "Cactus Jack for Fragment Tee", colour: "White", category: "Clothing", kind: "T-shirts & shirts", tags: ["limited"], ...picks("fragment-tee-front", "fragment-tee-back") }),
+  pick({ id: "cactus-jack-script-tee", brand: "cactus-jack", name: "Cactus Jack Back-Script Tee", colour: "Cream", category: "Clothing", kind: "T-shirts & shirts", ...picks("cactus-jack-script-tee-front", "cactus-jack-script-tee-back") }),
+  pick({ id: "cactus-mac-tee", brand: "cactus-jack", name: "Cactus Jack x McDonald’s Cactus Mac Tee", colour: "Black", category: "Clothing", kind: "T-shirts & shirts", tags: ["trending"], ...picks("cactus-mac-tee-front", "cactus-mac-tee-back") }),
+];
+
+// The owner's pieces we couldn't match to one GOAT page: no price, and the
+// sizes these labels make their hoodies and tees in
+const OWN_SIZES: Partial<ShopProduct> = { sizeLabel: "Size", sizes: ["S", "M", "L", "XL", "XXL"] };
+const UNMATCHED = new Set(["utopia-hoodie", "cactus-jack-barcelona-hoodie", "nike-centre-swoosh-hoodie", "tiger-totem-hoodie", "mcdonalds-smile-tee", "cactus-jack-script-tee"]);
+
+export const CATALOG: ShopProduct[] = [
+  ...FIRST.map((product) => ({ ...product, ...(UNMATCHED.has(product.id) ? OWN_SIZES : {}), ...FACTS[product.id] })),
+  ...MORE,
 ];
 
 export const CATALOG_IDS = new Set(CATALOG.map((product) => product.id));

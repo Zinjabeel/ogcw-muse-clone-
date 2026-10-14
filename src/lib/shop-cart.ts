@@ -8,7 +8,9 @@ import { storePreference } from "./consent";
 // Kept in this browser only if the reader allows preferences (like the
 // saved list); otherwise just for this visit.
 
-export type CartLine = { id: string; qty: number };
+/** A line: the product, how many, and the size picked on its page (if any) */
+export type CartLine = { id: string; qty: number; size?: string };
+const same = (line: CartLine, id: string, size?: string) => line.id === id && (line.size ?? "") === (size ?? "");
 type CartState = { lines: CartLine[]; code: string; open: boolean };
 
 const KEY = "ogcw-shop-cart";
@@ -23,7 +25,7 @@ function read(): CartState {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? "null") as { lines?: unknown; code?: unknown } | null;
     if (Array.isArray(raw?.lines)) {
-      lines = (raw.lines as CartLine[]).filter((line) => typeof line?.id === "string" && getProduct(line.id) && Number.isInteger(line.qty) && line.qty > 0).map((line) => ({ id: line.id, qty: Math.min(line.qty, 9) }));
+      lines = (raw.lines as CartLine[]).filter((line) => typeof line?.id === "string" && getProduct(line.id) && Number.isInteger(line.qty) && line.qty > 0).map((line) => ({ id: line.id, qty: Math.min(line.qty, 9), ...(typeof line.size === "string" ? { size: line.size.slice(0, 20) } : {}) }));
     }
     if (typeof raw?.code === "string") code = raw.code.slice(0, 40);
   } catch {
@@ -46,17 +48,17 @@ const subscribe = (listener: () => void) => {
 };
 
 export const cart = {
-  add(id: string, qty = 1) {
+  add(id: string, qty = 1, size?: string) {
     const lines = read().lines;
-    const found = lines.find((line) => line.id === id);
-    write({ lines: found ? lines.map((line) => (line.id === id ? { ...line, qty: Math.min(9, line.qty + qty) } : line)) : [...lines, { id, qty }], open: true });
+    const found = lines.find((line) => same(line, id, size));
+    write({ lines: found ? lines.map((line) => (same(line, id, size) ? { ...line, qty: Math.min(9, line.qty + qty) } : line)) : [...lines, { id, qty, ...(size ? { size } : {}) }], open: true });
   },
-  set(id: string, qty: number) {
+  set(id: string, qty: number, size?: string) {
     const lines = read().lines;
-    write({ lines: qty <= 0 ? lines.filter((line) => line.id !== id) : lines.map((line) => (line.id === id ? { ...line, qty: Math.min(9, qty) } : line)) });
+    write({ lines: qty <= 0 ? lines.filter((line) => !same(line, id, size)) : lines.map((line) => (same(line, id, size) ? { ...line, qty: Math.min(9, qty) } : line)) });
   },
-  remove(id: string) {
-    write({ lines: read().lines.filter((line) => line.id !== id) });
+  remove(id: string, size?: string) {
+    write({ lines: read().lines.filter((line) => !same(line, id, size)) });
   },
   clear() {
     write({ lines: [] });
@@ -83,7 +85,7 @@ export function useCart() {
     return product && isLive(product) ? [{ ...line, product }] : [];
   });
   const count = items.reduce((sum, item) => sum + item.qty, 0);
-  // Only products with a guide price count towards the subtotal
+  // Only products with a price count towards the subtotal
   const subtotal = items.reduce((sum, item) => sum + (item.product.price ?? 0) * item.qty, 0);
   const unpriced = items.filter((item) => item.product.price === undefined).length;
   return { items, count, subtotal, unpriced, code: current.code, open: current.open };

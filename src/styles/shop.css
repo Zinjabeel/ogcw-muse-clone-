@@ -270,9 +270,34 @@
 .px-name { margin: 0; font: 600 clamp(32px, 3.4vw, 58px)/1.02 var(--sx-display); letter-spacing: -.015em; overflow-wrap: anywhere; }
 .px-colour { margin: 0; color: var(--sx-dim); font-size: clamp(14px, 1.1vw, 17px); }
 .px-rule { width: 100%; height: 1px; margin-block: 4px; background: var(--sx-line); }
-.px-price { display: flex; align-items: baseline; gap: 10px; margin: 0; }
-.px-price .sx-price { margin: 0; font-size: 26px; }
-.px-price small { color: var(--sx-dim); font-size: 12px; font-weight: 600; }
+/* The price: the shop's, big, with where it's from and when */
+.px-price { display: grid; gap: 4px; margin: 4px 0 0; }
+.px-price strong { font: 700 clamp(26px, 2.2vw, 34px)/1 var(--ogcw-ui); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.px-price span { color: var(--sx-dim); font-size: 12.5px; font-weight: 500; }
+.px-price.is-open strong { font-size: 18px; }
+/* Sizes: a grid of pills, one picked */
+.px-sizes { width: 100%; margin: 0; padding: 0; border: 0; }
+.px-sizes legend { display: flex; justify-content: space-between; width: 100%; margin-bottom: 10px; padding: 0; font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.px-sizes-hint { color: var(--sx-dim); font-weight: 600; letter-spacing: .06em; text-transform: none; }
+.px-sizes[data-ask] .px-sizes-hint { color: var(--sx-gold); }
+.px-size-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; }
+.px-size { height: 42px; padding: 0 6px; border: 0; border-radius: 12px; background: var(--sx-raise); color: var(--sx-text); box-shadow: inset 0 0 0 1px var(--sx-line); font: 600 13px/1 var(--ogcw-ui); font-variant-numeric: tabular-nums; cursor: pointer; transition: box-shadow .18s ease, background-color .18s ease, color .18s ease, transform .15s ease; }
+.px-size:hover { box-shadow: inset 0 0 0 1.5px var(--sx-text); }
+.px-size:active { transform: scale(.96); }
+.px-size[aria-checked="true"] { background: var(--sx-text); color: var(--sx-ink); box-shadow: none; }
+.px-sizes[data-ask] .px-size-grid { animation: px-nudge .4s ease; }
+@keyframes px-nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.px-sizes-note { margin: 10px 0 0; color: var(--sx-dim); font-size: 12px; }
+.px-one-size { display: flex; gap: 10px; margin: 0; font-size: 14px; font-weight: 600; }
+.px-one-size span { color: var(--sx-dim); font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; line-height: 1.7; }
+/* The details, under the stage */
+.px-details { margin-top: 30px; }
+.px-details-title { margin: 0 0 4px; font: 600 clamp(22px, 1.8vw, 28px)/1.1 var(--sx-display); }
+/* Prices on list cards and in the cart */
+.sx-tile-price { margin-top: 2px; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sx-tile-price.is-open { color: var(--sx-dim); font-size: 12.5px; font-weight: 600; }
+.sx-cart-price { font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sx-cart-img[data-stage="white"] { background: #fff; }
 .px-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .px-kind { margin: 4px 0 0; color: var(--sx-dim); font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .px-about { max-width: 52ch; margin: 0; color: var(--sx-dim); font-size: 15px; line-height: 1.6; }
@@ -294,7 +319,7 @@
 .px-arrow { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: var(--sx-text); box-shadow: inset 0 0 0 1.5px var(--sx-line); transition: box-shadow .2s ease, color .2s ease, background-color .2s ease; }
 .px-arrow:hover { color: var(--sx-on-gold); background: var(--sx-gold); box-shadow: none; }
 .px-arrows-rule { width: 1px; height: 28px; background: var(--sx-line); }
-.px-facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px 24px; margin: 26px 0 0; padding: 22px 0; border-block: 1px solid var(--sx-line); }
+.px-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px 24px; margin: 14px 0 0; padding: 22px 0; border-block: 1px solid var(--sx-line); }
 .px-facts dt { color: var(--sx-dim); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .px-facts dd { margin: 6px 0 0; font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; }
 .px-facts a { display: inline-flex; align-items: center; gap: 4px; text-decoration: underline; text-underline-offset: 3px; }

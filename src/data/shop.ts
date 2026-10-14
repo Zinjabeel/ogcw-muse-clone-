@@ -101,8 +101,19 @@ export type ShopProduct = {
   category: ShopCategory;
   /** A finer type: Running, Watches, Football shirts, Music… */
   kind: string;
-  /** Guide retail price in euros; none when we couldn't confirm it */
+  /** The live catalogue: the shop's price in US dollars on 14 Oct 2026 (GOAT's
+   *  lowest price for a new one; Watchfinder & Co.'s price). None when it's
+   *  sold out. (The older placeholders below carry euro guide prices.) */
   price?: number;
+  /** The brand's retail price in US dollars, as the shop lists it */
+  retail?: number;
+  /** Who it's cut for, as the shop lists it */
+  gender?: "men" | "women" | "unisex";
+  /** The sizes it's made in, and what they are ("US men’s", "Waist", "Case") */
+  sizes?: string[];
+  sizeLabel?: string;
+  /** The shop's details: colourway, SKU, case, movement… */
+  specs?: [string, string][];
   image: string;
   credit: string;
   photoPage?: string;
@@ -293,10 +304,10 @@ export const productsOf = (brand: string) => PRODUCTS.filter((product) => produc
 export const productsIn = (category: ShopCategory) => PRODUCTS.filter((product) => product.category === category);
 export const SNEAKER_DROPS = DROPS.filter((drop) => drop.kind === "Sneakers");
 
-// The gift guide: price bands
+// Price bands, in US dollars like the shops' prices
 export const GIFT_BANDS = [
-  { id: "under-50", label: "Under €50", test: (price?: number) => price !== undefined && price < 50 },
-  { id: "under-100", label: "Under €100", test: (price?: number) => price !== undefined && price >= 50 && price < 100 },
-  { id: "under-200", label: "Under €200", test: (price?: number) => price !== undefined && price >= 100 && price < 200 },
-  { id: "big", label: "The big gift", test: (price?: number) => price !== undefined && price >= 200 },
+  { id: "under-100", label: "Under $100", test: (price?: number) => price !== undefined && price < 100 },
+  { id: "under-250", label: "Under $250", test: (price?: number) => price !== undefined && price >= 100 && price < 250 },
+  { id: "under-500", label: "Under $500", test: (price?: number) => price !== undefined && price >= 250 && price < 500 },
+  { id: "big", label: "The big gift", test: (price?: number) => price !== undefined && price >= 500 },
 ] as const;

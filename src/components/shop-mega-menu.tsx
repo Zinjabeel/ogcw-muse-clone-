@@ -34,7 +34,7 @@ export const PANELS: Record<string, Panel> = {
   shop: {
     columns: [
       { title: "Sneakers", links: [all("All sneakers", { cat: "sneakers" }), all("Jordan", { cat: "sneakers", brand: "jordan" }), all("Nike", { cat: "sneakers", brand: "nike" }), all("adidas", { cat: "sneakers", brand: "adidas" }), all("New Balance", { cat: "sneakers", brand: "new-balance" }), all("ASICS", { cat: "sneakers", brand: "asics" })] },
-      { title: "Clothing", links: [all("All clothing", { cat: "clothing" }), all("Hoodies", { cat: "clothing", kind: "Hoodies" }), all("T-shirts", { cat: "clothing", kind: "T-shirts" }), all("Jeans", { cat: "clothing", kind: "Jeans" })] },
+      { title: "Clothing", links: [all("All clothing", { cat: "clothing" }), all("Hoodies", { cat: "clothing", kind: "Hoodies & sweats" }), all("T-shirts", { cat: "clothing", kind: "T-shirts & shirts" }), all("Jeans", { cat: "clothing", kind: "Jeans" })] },
       { title: "Collections", links: [all("All watches", { cat: "accessories" }), all("Rolex", { cat: "accessories", brand: "rolex" }), all("Omega", { cat: "accessories", brand: "omega" }), all("Tudor", { cat: "accessories", brand: "tudor" }), all("Cartier", { cat: "accessories", brand: "cartier" })] },
       { title: "Highlights", links: [all("New in", { tag: "new" }), all("Trendiest", { tag: "trending" }), all("Limited editions", { tag: "limited" }), { label: "Brands A to Z", to: "/shop/brands" }, { label: "Upcoming", to: "/shop/drops" }] },
     ],

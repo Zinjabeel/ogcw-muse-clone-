@@ -44,4 +44,7 @@ export const UPCOMING: UpcomingPair[] = [
   { id: "aj4-pink-thunder", date: "2026-12-19", name: "Air Jordan 4 “Pink Thunder”", colour: "Black / White / Rust Pink", photo: photo("wmns-aj4-rust-pink-thunder"), goat: goat("wmns-air-jordan-4-retro-rust-pink-thunder-hv0823-001") },
   { id: "aj8-knicks", date: "2026-12-24", name: "Air Jordan 8 “Knicks”", colour: "Black / Safety Orange / Racer Blue", photo: photo("aj8-knicks"), goat: goat("air-jordan-8-retro-knicks-ix8479-010") },
   { id: "aj4-bin-23", date: "2026-12-26", name: "Air Jordan 4 “BIN 23”", colour: "Fauna Brown / Baroque Brown / Muslin / Gym Red", photo: photo("aj4-bin-23"), goat: goat("air-jordan-4-retro-4-bin-23-ja3588-200") },
+  // Further out: 2027, with the date GOAT lists (Just Fresh Kicks' page stops at December)
+  { id: "aj12-obsidian-2027", date: "2027-01-23", name: "Air Jordan 12 “Obsidian”", colour: "Obsidian / White / University Blue", photo: "https://image.goat.com/750/attachments/product_template_pictures/images/117/790/760/original/CT8013_20401.png.png", goat: goat("air-jordan-12-retro-obsidian-2027-ct8013-401"), note: "Date as GOAT lists it" },
+  { id: "aj3-white-cement-2027", date: "2027-05-22", name: "Air Jordan 3 “White Cement”", colour: "Summit White / Fire Red / Cement Grey / Black", photo: "https://image.goat.com/750/attachments/product_template_pictures/images/117/874/675/original/JJ1473_20100.png.png", goat: goat("air-jordan-3-retro-og-white-cement-jj1473-100"), note: "Date as GOAT lists it" },
 ];
