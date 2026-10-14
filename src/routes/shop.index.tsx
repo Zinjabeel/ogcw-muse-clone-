@@ -38,12 +38,11 @@ const pieces = (...ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
 
 // What's new: the newest pairs (each section holds one kind of product: owner, 14 Oct)
 const RAIL = pieces("aj1-royal-2026", "awake-ny-aj6-blueberry", "aj4-rare-air-tour-yellow", "nike-air-bakin-varsity-red", "aj13-flint-2026", "travis-scott-af1-ice-blue", "aj3-true-blue-2026", "aj5-black-carolina-2026");
-// The aisle photos: the owner's pictures for Sneakers and Collections ("sneakers,
-// clothing and collections"; the clothing one was a Gemini blob link that only
-// opens in the owner's browser, so it stays), clothing from Unsplash (Nathaniel Cherian)
+// The aisle photos: the owner's pictures ("sneakers, clothing and collections";
+// the clothing one sent in the chat, 14 Oct)
 const LOOKS = [
   { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers-aisle.jpg", alt: "A hand holding out a white and sage green sneaker towards the camera" },
-  { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
+  { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing-aisle.webp", alt: "Seen from behind, a person pulling up the hood of a washed black hoodie printed with carved figures" },
   { key: "collections", label: "Collections", search: { cat: "accessories" }, image: "/shop/looks/collections-aisle.jpg", alt: "A hand in a black sleeve wearing a steel chronograph, on grey" },
 ];
 // The collection rows, black and white in turn, one kind of product each and
