@@ -6,6 +6,7 @@ import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
 import { SiteShell } from "./ogcw-layout";
+import { MegaPanel } from "./shop-mega-menu";
 import { EditSection, T } from "./site-text";
 
 // The OGCW Shop's own pieces: its header (menu, A to Z, the name, the
@@ -347,12 +348,24 @@ function ShopHeader() {
     return () => window.removeEventListener("scroll", update);
   }, [overlay]);
   useEffect(() => setMenu(false), [location.pathname, location.searchStr]);
+  // The menu panel under the sections: opens while you point at (or focus) one
+  const [panel, setPanel] = useState<string | null>(null);
+  const closing = useRef(0);
+  const openPanel = (key: string) => { window.clearTimeout(closing.current); setPanel(key); };
+  const closeSoon = () => { window.clearTimeout(closing.current); closing.current = window.setTimeout(() => setPanel(null), 140); };
+  useEffect(() => { setPanel(null); }, [location.pathname, location.searchStr]);
+  useEffect(() => {
+    if (!panel) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setPanel(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [panel]);
   const tag = (location.search as Record<string, unknown>)["tag"];
   const here = (section: (typeof SECTIONS)[number]) =>
     section.to === "/shop" ? home : location.pathname === section.to && (section.tag ? tag === section.tag : true);
   return (
     <EditSection name="Shop pages">
-      <header className="sx-top" data-over={over || undefined}>
+      <header className="sx-top" data-over={(over && !panel) || undefined} data-menu={panel || undefined} onMouseLeave={closeSoon}>
         <div className="sx-top-row">
           <div className="sx-top-left">
             <button type="button" className="sx-burger" aria-label="Open the shop menu" aria-expanded={menu} onClick={() => setMenu(true)}><Menu size={20} strokeWidth={1.8} aria-hidden="true" /></button>
@@ -373,12 +386,14 @@ function ShopHeader() {
         </div>
         <nav className="sx-nav" aria-label="Shop sections">
           {SECTIONS.map((section) => (
-            <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} aria-current={here(section) ? "page" : undefined}>
+            <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} data-open={panel === section.key || undefined} aria-current={here(section) ? "page" : undefined} aria-expanded={panel === section.key} onMouseEnter={() => openPanel(section.key)} onFocus={() => openPanel(section.key)}>
               <T k={`shop.nav.${section.key}`}>{section.label}</T>
             </Link>
           ))}
         </nav>
+        {panel && <div onMouseEnter={() => window.clearTimeout(closing.current)}><MegaPanel section={panel} onClose={() => setPanel(null)} /></div>}
       </header>
+      {panel && <div className="mm-dim" aria-hidden="true" onMouseEnter={closeSoon} onClick={() => setPanel(null)} />}
       <ShopMenu open={menu} onClose={() => setMenu(false)} />
     </EditSection>
   );
