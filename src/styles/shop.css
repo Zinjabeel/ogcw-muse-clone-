@@ -595,6 +595,76 @@
 .sx-brand-hero-art .sx-blank-photo { display: block; aspect-ratio: 3 / 4; border-radius: var(--sx-r-card); background: color-mix(in srgb, var(--ogcw-text) 7%, var(--ogcw-bg)); }
 
 /* ==================================================================
+   Upcoming (src/routes/shop.drops.tsx): the calendar as a news front
+   ================================================================== */
+.up-mast, .up-front, .up-months, .up-also, .up-cta { width: min(calc(100% - 2 * clamp(16px, 4vw, 64px)), 1440px); margin-inline: auto; }
+.up-mast { display: grid; gap: 10px; padding: clamp(24px, 3.4vw, 56px) 0 clamp(20px, 2.4vw, 32px); border-bottom: 3px double var(--sx-line); }
+.up-kicker { margin: 0; color: var(--sx-gold); font: 700 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; }
+.up-title { margin: 0; font: 400 clamp(52px, 8.6vw, 140px)/.92 var(--sx-display); letter-spacing: -.035em; }
+.up-dateline { margin: 6px 0 0; color: var(--sx-dim); font-size: 13.5px; }
+.up-dateline a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.up-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: var(--sx-dim); font: 600 12px var(--ogcw-ui); letter-spacing: .08em; text-transform: uppercase; }
+.up-tag { padding: 4px 8px; border-radius: 999px; background: var(--sx-text); color: var(--sx-ink); font-size: 10.5px; letter-spacing: .12em; }
+.up-count { position: absolute; top: 14px; left: 14px; padding: 6px 11px; border-radius: 999px; background: #0d0d0d; color: #fff; font: 700 11px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; }
+/* The lead story and the four after it */
+.up-front { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(24px, 3vw, 56px); padding-block: clamp(28px, 3.4vw, 56px); border-bottom: 1px solid var(--sx-line); }
+.up-lead { display: grid; gap: 22px; }
+.up-lead-photo { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: var(--sx-r-card); background: #fff; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.up-lead-photo img { width: 100%; height: 100%; padding: 6% 10%; object-fit: contain; transition: transform 1.2s var(--sx-ease); }
+.up-lead-photo:hover img { transform: scale(1.04) rotate(-1.5deg); }
+.up-lead-text { display: grid; gap: 14px; }
+.up-lead-title { margin: 0; font: 400 clamp(36px, 4.4vw, 72px)/1 var(--sx-display); letter-spacing: -.025em; text-wrap: balance; }
+.up-deck { max-width: 52ch; margin: 0; color: var(--sx-dim); font-size: clamp(16px, 1.25vw, 19px); line-height: 1.5; }
+.up-links { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 6px; }
+.up-textlink { display: inline-flex; align-items: center; gap: 6px; color: var(--sx-text); font: 700 13px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 6px; }
+.up-side { display: grid; align-content: start; gap: 4px; padding-left: clamp(0px, 2vw, 32px); border-left: 1px solid var(--sx-line); }
+.up-side-head { margin: 0 0 8px; font: 700 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; }
+.up-side-list { display: grid; margin: 0; padding: 0; list-style: none; counter-reset: up; }
+.up-side-list li { border-top: 1px solid var(--sx-line); }
+.up-side-item { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 16px; align-items: center; padding-block: 16px; color: inherit; }
+.up-side-photo { display: grid; place-items: center; aspect-ratio: 1; overflow: hidden; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.up-side-photo img { width: 100%; height: 100%; padding: 8%; object-fit: contain; transition: transform .8s var(--sx-ease); }
+.up-side-item:hover .up-side-photo img { transform: scale(1.08); }
+.up-side-text { display: grid; gap: 6px; }
+.up-side-name { font: 400 clamp(18px, 1.5vw, 23px)/1.15 var(--sx-display); }
+.up-side-item:hover .up-side-name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.up-dateblock { display: grid; justify-items: center; gap: 2px; color: var(--sx-text); font: 400 clamp(26px, 2.4vw, 40px)/1 var(--sx-display); }
+.up-dateblock span + span { font: 700 11px var(--ogcw-ui); letter-spacing: .14em; text-transform: uppercase; }
+/* The rest, month by month */
+.up-month, .up-also { display: grid; grid-template-columns: clamp(140px, 16vw, 260px) minmax(0, 1fr); gap: clamp(16px, 2.4vw, 40px); padding-block: clamp(28px, 3.4vw, 56px); border-bottom: 1px solid var(--sx-line); }
+.up-month-name { position: sticky; top: calc(var(--sx-bar-h) + 24px); align-self: start; margin: 0; font: 400 clamp(28px, 2.6vw, 44px)/1 var(--sx-display); letter-spacing: -.02em; }
+.up-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 2vw, 32px) clamp(14px, 1.4vw, 24px); margin: 0; padding: 0; list-style: none; }
+.up-card { display: grid; gap: 10px; }
+.up-card-photo { position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--sx-r-card); background: #fff; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.up-card-photo img { width: 100%; height: 100%; padding: 8%; object-fit: contain; transition: transform 1s var(--sx-ease); }
+.up-card:hover .up-card-photo img { transform: scale(1.06) rotate(-1.5deg); }
+.up-card-title { margin: 2px 0 0; font: 400 clamp(20px, 1.6vw, 26px)/1.12 var(--sx-display); letter-spacing: -.01em; }
+.up-card-title a { color: inherit; }
+.up-card:hover .up-card-title a { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.up-card-deck { margin: 0; color: var(--sx-dim); font-size: 14px; line-height: 1.5; }
+/* Also on the calendar: headlines only */
+.up-also-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(16px, 2vw, 32px); margin: 0; padding: 0; list-style: none; }
+.up-also-list li { border-top: 1px solid var(--sx-line); }
+.up-also-item { display: grid; gap: 6px; padding-block: 16px 18px; color: inherit; }
+.up-also-name { font: 400 clamp(19px, 1.5vw, 24px)/1.15 var(--sx-display); }
+.up-also-detail { color: var(--sx-dim); font-size: 14px; }
+.up-also-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font: 700 12px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; }
+a.up-also-item:hover .up-also-name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.up-cta { display: grid; justify-items: center; gap: 12px; padding-block: clamp(56px, 7vw, 120px); text-align: center; }
+.up-cta-title { margin: 0 0 10px; font: 400 clamp(32px, 4vw, 64px)/1.02 var(--sx-display); letter-spacing: -.02em; }
+@media (max-width: 1000px) {
+  .up-front { grid-template-columns: minmax(0, 1fr); }
+  .up-side { padding-left: 0; border-left: 0; }
+  .up-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .up-month, .up-also { grid-template-columns: minmax(0, 1fr); }
+  .up-month-name { position: static; }
+  .up-also-list { grid-template-columns: minmax(0, 1fr); }
+  .up-side-item { grid-template-columns: 84px minmax(0, 1fr); }
+}
+
+/* ==================================================================
    Brands A to Z (src/routes/shop.brands.tsx), after Complex Shop
    ================================================================== */
 .az-head { display: grid; justify-items: center; gap: 14px; padding: clamp(28px, 4vw, 64px) 20px clamp(20px, 2.4vw, 36px); text-align: center; }
