@@ -10,10 +10,11 @@ import { T } from "@/components/site-text";
 //   what's new    square cards that keep gliding by, even under the pointer
 //   new season    a still photo the size of the section, with a link; it slides
 //                 up over What's new, and a short scroll glides the rest of the way
-//   the edit      eight cards, four over four
 //   the aisles    three tall photo cards side by side: sneakers, clothing, collections
 //   the rows      sneakers, Cactus Jack, ComplexCon picks, graphic tees, denim and
-//                 watches, black and white in turn, four cards to a line
+//                 watches, black and white in turn: one kind of product each, four
+//                 cards and a button to the aisle; bands with one line and a button
+//                 (release dates, limited editions, brands) between them
 //   explore       featured drops, release dates, limited editions, brands, the gift guide
 // The cards are the live catalogue (src/data/shop-catalog.ts): each has two
 // photos, the second under the pointer. No prices or counts anywhere. Words
@@ -35,8 +36,8 @@ const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefe
 /** The products with these ids, in this order (the live catalogue: src/data/shop-catalog.ts) */
 const pieces = (...ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
 
-// What's new: the latest pieces across the aisles
-const RAIL = pieces("aj1-royal-2026", "rolex-land-dweller-36", "denim-tears-patchwork-pant-blue", "sp5der-splat-punk-hoodie", "awake-ny-aj6-blueberry", "panerai-radiomir-manual-white", "ksubi-maxx-astral-kraftwerk", "aj4-rare-air-tour-yellow", "grand-seiko-sbgj273-red", "nike-air-bakin-varsity-red");
+// What's new: the newest pairs (each section holds one kind of product: owner, 14 Oct)
+const RAIL = pieces("aj1-royal-2026", "awake-ny-aj6-blueberry", "aj4-rare-air-tour-yellow", "nike-air-bakin-varsity-red", "aj13-flint-2026", "travis-scott-af1-ice-blue", "aj3-true-blue-2026", "aj5-black-carolina-2026");
 // The aisle photos: the owner's pictures for Sneakers and Collections ("sneakers,
 // clothing and collections"; the clothing one was a Gemini blob link that only
 // opens in the owner's browser, so it stays), clothing from Unsplash (Nathaniel Cherian)
@@ -45,18 +46,25 @@ const LOOKS = [
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
   { key: "collections", label: "Collections", search: { cat: "accessories" }, image: "/shop/looks/collections-aisle.jpg", alt: "A hand in a black sleeve wearing a steel chronograph, on grey" },
 ];
-// The edit: one of each, across the shop
-const EDIT = pieces("fragment-travis-aj1-low-military-blue", "cartier-tank-basculante", "denim-tears-baggy-pant-selvedge", "nike-centre-swoosh-hoodie", "omega-speedmaster-145-022", "tiger-totem-hoodie", "cactus-jack-script-tee", "nb-9060-black-cat");
-// The collection rows, black and white in turn: names the owner can change with the site editor
-type RowSearch = { cat?: string; q?: string; tag?: string };
-const ROWS: { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch }[] = [
-  { key: "sneakers", title: "Sneakers right now", tone: "dark", search: { cat: "sneakers" }, items: pieces("aj4-black-cat-2025", "travis-scott-af1-ice-blue", "nigel-sylvester-aj4-brick-after-brick", "aj11-gamma-blue-2025", "samba-og-cheetah-preloved-red", "aj13-flint-2026", "huf-air-max-1-orange", "nb-1906r-silver-metallic-black") },
-  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", search: { q: "Cactus Jack" }, items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
-  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", search: { q: "Sp5der" }, items: pieces("sp5der-pnk-hoodie", "sp5der-og-web-hoodie", "sp5der-splat-punk-hoodie", "sp5der-beluga-hoodie", "cactus-jack-barcelona-hoodie", "nocta-nike-canada-hoodie", "sp5der-denim-v3-indigo", "yeezy-350-v2-onyx") },
-  { key: "tees", title: "Graphic tees", tone: "light", search: { q: "Tee" }, items: pieces("kaws-fragment-tee", "mcdonalds-smile-tee", "fragment-tee", "cactus-mac-tee") },
-  { key: "denim", title: "Denim", tone: "dark", search: { q: "Jeans" }, items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "hellstar-denim-blue", "butter-goods-solar-fade-grey", "ksubi-chitch-chronicle-trashed", "purple-brand-baggy-black", "acne-studios-printed-jeans-blue", "supreme-dickies-cordura-cargo-denim") },
-  { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "tudor-black-bay-58-black", "cartier-roadster-silver", "vacheron-patrimony-rose-gold", "breitling-navitimer-b01-46", "nomos-zurich-807", "bell-ross-br05-blue") },
-];
+// The collection rows, black and white in turn, one kind of product each and
+// four cards to a row, with a button to the whole aisle under it. Names (and
+// the buttons) the owner can change with the site editor
+type RowSearch = { cat?: string; q?: string; tag?: string; kind?: string };
+type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string };
+const ROWS: Record<string, Row> = {
+  sneakers: { key: "sneakers", title: "Sneakers right now", tone: "dark", search: { cat: "sneakers" }, cta: "Shop all sneakers", items: pieces("aj4-black-cat-2025", "nigel-sylvester-aj4-brick-after-brick", "samba-og-cheetah-preloved-red", "nb-1906r-silver-metallic-black") },
+  travis: { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", search: { q: "Cactus Jack" }, cta: "Shop Cactus Jack", items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
+  complexcon: { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", search: { q: "Sp5der" }, cta: "Shop Sp5der", items: pieces("sp5der-pnk-hoodie", "sp5der-og-web-hoodie", "sp5der-splat-punk-hoodie", "sp5der-beluga-hoodie") },
+  tees: { key: "tees", title: "Graphic tees", tone: "light", search: { cat: "clothing", kind: "T-shirts" }, cta: "Shop all tees", items: pieces("kaws-fragment-tee", "mcdonalds-smile-tee", "fragment-tee", "cactus-mac-tee") },
+  denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim") },
+  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all watches", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold") },
+};
+// The bands between the rows: one line and a button each
+const BANDS = {
+  calendar: { key: "calendar", kicker: "Release calendar", title: "The next pairs to drop", cta: "See the dates", to: "/shop/drops" as const, search: {} },
+  limited: { key: "limited", kicker: "Collabs and grails", title: "Limited editions, while they last", cta: "Shop limited", to: "/shop/all" as const, search: { tag: "limited" } },
+  brands: { key: "brands", kicker: "Brands A to Z", title: "From Amiri to Vacheron Constantin", cta: "Browse the brands", to: "/shop/brands" as const, search: {} },
+};
 
 /** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
 function glideTo(top: number, ms: number, done: () => void) {
@@ -137,9 +145,16 @@ function ShopHome() {
           <WhatsNew />
           <NewSeason />
         </div>
-        <TheEdit />
         <Looks />
-        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} items={row.items} search={row.search} />)}
+        <CollectionRow row={ROWS["sneakers"]!} />
+        <Band band={BANDS.calendar} />
+        <CollectionRow row={ROWS["travis"]!} />
+        <CollectionRow row={ROWS["complexcon"]!} />
+        <Band band={BANDS.limited} />
+        <CollectionRow row={ROWS["tees"]!} />
+        <CollectionRow row={ROWS["denim"]!} />
+        <Band band={BANDS.brands} />
+        <CollectionRow row={ROWS["collections"]!} />
         <Explore />
       </div>
     </ShopShell>
@@ -216,24 +231,6 @@ function NewSeason() {
   );
 }
 
-/* ---------- The edit: eight cards, four over four ---------- */
-
-function TheEdit() {
-  return (
-    <section className="sh-sec sh-grid8" aria-labelledby="sh-edit-title">
-      <div className="sh-panel">
-        <header className="sh-head">
-          <h2 id="sh-edit-title" className="sh-h2"><T k="shop.edit.title">The edit</T></h2>
-          <Link to="/shop/all" className="sh-textlink"><T k="shop.edit.all">Shop everything</T> <ArrowRight size={15} aria-hidden="true" /></Link>
-        </header>
-        <ul className="sh-cards sh-cards-4">
-          {EDIT.map((product) => <li key={product.id}><ShopCard product={product} /></li>)}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 /* ---------- The aisles: three tall photo cards side by side ---------- */
 
 function Looks() {
@@ -262,16 +259,31 @@ function Looks() {
 
 /* ---------- The collection rows: four cards each, black and white in turn ---------- */
 
-function CollectionRow({ slug, title, tone, items, search }: { slug: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch }) {
+function CollectionRow({ row }: { row: Row }) {
   return (
-    <section className="sh-row" data-tone={tone} aria-label={title}>
+    <section className="sh-row" data-tone={row.tone} aria-label={row.title}>
       <header className="sh-head">
-        <h2 className="sh-h2"><T k={`shop.row.${slug}`}>{title}</T></h2>
-        <Link to="/shop/all" search={search} className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+        <h2 className="sh-h2"><T k={`shop.row.${row.key}`}>{row.title}</T></h2>
+        <Link to="/shop/all" search={row.search} className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
       <ul className="sh-cards sh-cards-4">
-        {items.map((product) => <li key={product.id}><ShopCard product={product} tone={tone} /></li>)}
+        {row.items.map((product) => <li key={product.id}><ShopCard product={product} tone={row.tone} /></li>)}
       </ul>
+      <div className="sh-row-cta">
+        <Link to="/shop/all" search={row.search} className="sh-cta"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- A band between the rows: one line and a button ---------- */
+
+function Band({ band }: { band: (typeof BANDS)[keyof typeof BANDS] }) {
+  return (
+    <section className="sh-band" aria-labelledby={`sh-band-${band.key}`}>
+      <p className="sh-band-kicker"><T k={`shop.band.${band.key}.kicker`}>{band.kicker}</T></p>
+      <h2 id={`sh-band-${band.key}`} className="sh-band-title"><T k={`shop.band.${band.key}.title`}>{band.title}</T></h2>
+      <Link to={band.to} search={band.search} className="sh-cta sh-cta-gold"><T k={`shop.band.${band.key}.cta`}>{band.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
     </section>
   );
 }
