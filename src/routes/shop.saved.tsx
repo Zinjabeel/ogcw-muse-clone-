@@ -22,7 +22,7 @@ function Saved() {
         <p className="sx-page-blurb"><T k="shop.saved.text">Tap the heart on anything in the shop to keep it here. Your list stays in this browser; no account needed.</T></p>
       </div>
       <div className="sx-wrap sx-section">
-        {products.length ? <ProductGrid products={products} cols={4} /> : (
+        {products.length ? <ProductGrid products={products} cols={4} priced /> : (
           <div className="sx-empty">
             <Heart size={28} aria-hidden="true" />
             <p><T k="shop.saved.empty">Nothing saved yet.</T></p>

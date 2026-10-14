@@ -62,7 +62,7 @@ function BrandPage() {
             </select>
           </label>
         </div>
-        <ProductGrid products={products} cols={4} />
+        <ProductGrid products={products} cols={4} priced />
       </section>
 
       <section className="sx-wrap sx-section" aria-labelledby="other-brands">

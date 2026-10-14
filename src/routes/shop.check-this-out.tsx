@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
-import { ShopShell, firstTapShowsBack, ProductPhoto } from "../components/shop-kit";
-import { brandOf, buyUrl, fullName, getProduct, retailerOf, type ShopProduct } from "../data/shop";
+import { ShopShell, dollars, firstTapShowsBack, ProductPhoto } from "../components/shop-kit";
+import { LIVE_PRODUCTS, brandOf, buyUrl, fullName, getProduct, retailerOf, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // "Check this out": the collabs and grails, one at a time. A full-screen
 // opener, then one piece per full-screen panel; each panel slides up over
 // the last as you scroll (the words stay still in their panel; only the
 // photo eases in), with the second photo under the pointer, its name, and
-// two buttons: the piece, and the shop that sells it. Then every limited
-// piece. No prices.
+// two buttons: the piece, and the shop that sells it. Then two strips of
+// small pictures, the limited pieces for women and then for men, and every
+// limited piece.
 export const Route = createFileRoute("/shop/check-this-out")({
   head: () => ({ meta: [{ title: "Check this out: collabs and grails, OGCW Shop" }, { name: "description", content: "Collabs and grails from the OGCW Shop, one at a time: Fragment x Travis Scott, Denim Tears, a Rolex Land-Dweller and more." }] }),
   component: CheckThisOut,
@@ -46,6 +47,11 @@ function CheckThisOut() {
           {pieces.map(({ product, line, tone }) => <Panel key={product.id} product={product} line={line} tone={tone} />)}
         </div>
 
+        <section className="co-strips" aria-label="Limited editions for women and for men">
+          <Strip gender="women" kicker="For women" title="Limited, for her" />
+          <Strip gender="men" kicker="For men" title="Limited, for him" />
+        </section>
+
         <section className="co-end" aria-labelledby="co-end-title">
           <p className="co-kicker"><T k="shop.co.end.kicker">There’s more</T></p>
           <h2 id="co-end-title" className="co-end-title"><T k="shop.co.end.title">Every limited piece in the shop</T></h2>
@@ -53,6 +59,38 @@ function CheckThisOut() {
         </section>
       </div>
     </ShopShell>
+  );
+}
+
+/** A row of small pictures side by side: the limited pieces for women, or for
+ *  men (clothes first), topped up with their collabs when there are few */
+function Strip({ gender, kicker, title }: { gender: "men" | "women"; kicker: string; title: string }) {
+  const theirs = LIVE_PRODUCTS.filter((product) => product.gender === gender && !PIECES.some((piece) => piece.id === product.id));
+  const limited = theirs.filter((product) => product.tags?.includes("limited")).sort((a, b) => Number(b.category === "Clothing") - Number(a.category === "Clothing"));
+  const collabs = theirs.filter((product) => !limited.includes(product) && / x /i.test(product.name));
+  const items = [...limited, ...collabs].slice(0, 10);
+  if (!items.length) return null;
+  return (
+    <div className="co-strip">
+      <header className="co-strip-head">
+        <div>
+          <p className="co-kicker"><T k={`shop.co.strip.${gender}.kicker`}>{kicker}</T></p>
+          <h2 className="co-strip-title"><T k={`shop.co.strip.${gender}.title`}>{title}</T></h2>
+        </div>
+        <Link to={gender === "men" ? "/shop/men" : "/shop/women"} className="co-textlink"><T k={`shop.co.strip.${gender}.all`}>{gender === "men" ? "The men’s shop" : "The women’s shop"}</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+      </header>
+      <ul className="co-strip-row">
+        {items.map((product) => (
+          <li key={product.id}>
+            <Link to="/shop/p/$id" params={{ id: product.id }} className="co-strip-item" onClick={firstTapShowsBack}>
+              <ProductPhoto product={product} className="co-strip-photo" />
+              <span className="co-strip-name">{product.name}</span>
+              <span className="co-strip-price">{product.price ? dollars(product.price) : "At the shop"}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

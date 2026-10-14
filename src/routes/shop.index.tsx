@@ -64,7 +64,7 @@ const ROWS: Record<string, Row> = {
   denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim"),
     spot: { image: "/shop/looks/spot-denim.webp", alt: "A young man in a black beanie and very wide washed jeans leaning on the bonnet of a white car", line: "Wide, washed and worn in: Denim Tears, Amiri, Ksubi and more." } },
   collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all collections", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
-    spot: { image: "/shop/looks/spot-watch.webp", alt: "A hand fastening a gold skeleton watch on a brown leather strap, under a pale blue shirt cuff", line: "Watches, caps and bags, the watches pre-owned and checked by Watchfinder & Co." } },
+    spot: { image: "/shop/looks/spot-watch.webp", alt: "A hand fastening a gold skeleton watch on a brown leather strap, under a pale blue shirt cuff", line: "Watches, caps and bags. The watches are pre-owned." } },
 };
 // The bands between the rows: a line, a button and a row of pictures each
 const LIMITED = pieces("fragment-travis-aj1-low-military-blue", "rolex-land-dweller-36", "days-before-rodeo-hoodie", "levis-denim-tears-logo-japan-jeans", "awake-ny-aj6-blueberry");
