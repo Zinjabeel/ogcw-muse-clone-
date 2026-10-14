@@ -1,18 +1,18 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowDownAZ, ArrowRight, ArrowUpRight, Heart, Menu, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
-import { BRANDS, LIVE_PRODUCTS, brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ArrowUpRight, Heart, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
 import { SiteShell } from "./ogcw-layout";
-import { MegaPanel } from "./shop-mega-menu";
+import { ShopHeader } from "./shop-header";
 import { EditSection, T } from "./site-text";
 
-// The OGCW Shop's own pieces: its header (menu, A to Z, the name, the
-// sections, the orb search, saved and the cart), the product card on its
-// black stage, the heart that saves a product, the add-to-cart button, the
-// cart drawer and the price line. Every shop page is wrapped in <ShopShell>.
+// The OGCW Shop's own pieces: the product card on its stage, the heart that
+// saves a product, the add-to-cart button, the cart drawer and the price
+// lines. Every shop page is wrapped in <ShopShell>, which brings the shop's
+// header (src/components/shop-header.tsx) and the site's own footer.
 
 const SAVED_KEY = "ogcw-shop-saved";
 let memory: string[] | null = null; // this visit's list, when the browser can't keep it
@@ -194,238 +194,6 @@ export function BuyButton({ product }: { product: ShopProduct }) {
   );
 }
 
-/** The shop's search, after the 21st.dev orb input: a black pill with the
- *  moving orb, a divider and a placeholder that types itself */
-const HINTS = ["Search Jordan 4s…", "Find a Rolex…", "Retro football shirts…", "Netflix, Spotify, DAZN…", "Something for the weekend?"];
-
-function useTypedHint(hints: string[], paused: boolean) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState(hints[0] ?? "");
-  const [typing, setTyping] = useState(false);
-  useEffect(() => {
-    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setText(hints[index] ?? ""); setTyping(false); return; }
-    const chars = Array.from(hints[index] ?? "");
-    let at = 0;
-    let timeout = 0;
-    setText("");
-    setTyping(true);
-    const interval = window.setInterval(() => {
-      if (at < chars.length) { at += 1; setText(chars.slice(0, at).join("")); return; }
-      window.clearInterval(interval);
-      setTyping(false);
-      timeout = window.setTimeout(() => setIndex((value) => (value + 1) % hints.length), 2200);
-    }, 75);
-    return () => { window.clearInterval(interval); window.clearTimeout(timeout); };
-  }, [index, hints, paused]);
-  return `${text}${typing ? "|" : ""}`;
-}
-
-export function ShopSearch({ initial = "" }: { initial?: string }) {
-  const navigate = useNavigate();
-  const id = useId();
-  const [query, setQuery] = useState(initial);
-  const [focused, setFocused] = useState(false);
-  useEffect(() => setQuery(initial), [initial]);
-  const hint = useTypedHint(HINTS, focused || query.length > 0);
-  const onSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    navigate({ to: "/shop/all", search: query.trim() ? { q: query.trim() } : {} });
-  };
-  return (
-    <form className="sx-orb" data-focus={focused || undefined} role="search" onSubmit={onSubmit}>
-      <span className="sx-orb-ball" aria-hidden="true"><img src="/shop/orb.webp" alt="" /></span>
-      <span className="sx-orb-line" aria-hidden="true" />
-      <label htmlFor={id} className="sr-only">Search the shop</label>
-      <input id={id} type="search" placeholder={hint} value={query} onChange={(event) => setQuery(event.target.value)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} autoComplete="off" />
-      <button type="submit" className="sx-orb-go" aria-label="Search"><Search size={16} strokeWidth={2} aria-hidden="true" /></button>
-    </form>
-  );
-}
-
-/** "A to Z": point at it, pick a letter, pick a brand */
-function BrandIndex() {
-  // Every product under the first letter of its name; a letter with none
-  // takes the products with any word starting with it, so every letter is full
-  const groups = useMemo(() => {
-    const all = LIVE_PRODUCTS.map((product) => ({ product, name: fullName(product).replace(/[“”‘’"']/g, "") })).sort((a, b) => a.name.localeCompare(b.name));
-    const map = new Map<string, typeof all>();
-    for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
-      let list = all.filter((item) => item.name[0]!.toUpperCase() === letter);
-      if (!list.length) list = all.filter((item) => item.name.split(/[\s/-]+/).some((word) => word[0]?.toUpperCase() === letter));
-      if (!list.length) list = all.filter((item) => `${item.name} ${item.product.colour}`.split(/[\s/-]+/).some((word) => word[0]?.toUpperCase() === letter));
-      if (list.length) map.set(letter, list);
-    }
-    return map;
-  }, []);
-  const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
-  const [open, setOpen] = useState(false);
-  const [letter, setLetter] = useState(() => letters.find((item) => groups.has(item)) ?? "A");
-  const root = useRef<HTMLDivElement>(null);
-  const pointer = useRef("");
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  useEffect(() => setOpen(false), [pathname]);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
-    const onPointer = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
-  }, [open]);
-  const entries = groups.get(letter) ?? [];
-  return (
-    <div className="sx-az" ref={root} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      {/* A mouse opens it by pointing, so a click keeps it open; touch and keys toggle it */}
-      <button type="button" className="sx-az-btn" aria-label="Brands A to Z" title="A to Z" aria-expanded={open} aria-controls="shop-az" onPointerDown={(event) => { pointer.current = event.pointerType; }} onClick={() => { const mouse = pointer.current === "mouse"; pointer.current = ""; setOpen((value) => (mouse ? true : !value)); }}>
-        <ArrowDownAZ size={20} strokeWidth={1.8} aria-hidden="true" />
-      </button>
-      {open && (
-        <div id="shop-az" className="sx-az-panel">
-          <div className="sx-az-letters" role="group" aria-label="Brands by letter">
-            {letters.map((item) => (
-              <button key={item} type="button" disabled={!groups.has(item)} aria-pressed={item === letter} onMouseEnter={() => groups.has(item) && setLetter(item)} onFocus={() => setLetter(item)} onClick={() => setLetter(item)}>{item}</button>
-            ))}
-          </div>
-          <ul className="sx-az-brands">
-            {entries.map(({ product, name }) => (
-              <li key={product.id}>
-                {isLive(product)
-                  ? <Link to="/shop/p/$id" params={{ id: product.id }}>{name}</Link>
-                  : <Link to="/shop/all" search={{ q: name }}>{name}</Link>}
-              </li>
-            ))}
-          </ul>
-          <Link to="/shop/brands" className="sx-az-all"><T k="shop.az.all.brands">Brands A to Z</T> <ArrowRight size={14} aria-hidden="true" /></Link>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** The shop's sections: in the header on wide screens, always in the menu */
-const SECTIONS = [
-  { key: "shop", label: "Shop", to: "/shop", tag: "" },
-  { key: "trendiest", label: "Trendiest", to: "/shop/all", tag: "trending" },
-  { key: "featured-drops", label: "Featured drops", to: "/shop/all", tag: "drops" },
-  { key: "latest", label: "Latest", to: "/shop/all", tag: "new" },
-  { key: "upcoming", label: "Upcoming", to: "/shop/drops", tag: "" },
-  { key: "check-this-out", label: "Check this out", to: "/shop/check-this-out", tag: "" },
-] as const;
-const AISLE_LINKS = [
-  { key: "sneakers", label: "Sneakers", cat: "sneakers" },
-  { key: "clothing", label: "Clothing", cat: "clothing" },
-  { key: "watches", label: "Watches & chains", cat: "accessories" },
-  { key: "streaming", label: "Streaming", cat: "streaming" },
-] as const;
-
-/** The menu behind the hamburger: the sections, the aisles and the rest */
-function ShopMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const go = () => onClose();
-  return (
-    <Drawer direction="left" open={open} onOpenChange={(value) => { if (!value) onClose(); }}>
-      <DrawerContent className="sx-drawer sx-menu">
-        <DrawerHeader className="sx-drawer-head">
-          <DrawerTitle className="sx-drawer-title"><T k="shop.brand.name">One Great Culture World</T></DrawerTitle>
-          <DrawerDescription className="sx-drawer-desc"><T k="shop.menu.desc">The OGCW Shop</T></DrawerDescription>
-          <DrawerClose className="sx-drawer-x" aria-label="Close the menu"><X size={18} aria-hidden="true" /></DrawerClose>
-        </DrawerHeader>
-        <DrawerBody className="sx-drawer-body">
-          <ul className="sx-menu-big">
-            {SECTIONS.map((section) => (
-              <li key={section.key}><Link to={section.to} search={section.tag ? { tag: section.tag } : {}} onClick={go}><T k={`shop.nav.${section.key}`}>{section.label}</T></Link></li>
-            ))}
-          </ul>
-          <p className="sx-menu-label"><T k="shop.menu.aisles">Aisles</T></p>
-          <ul className="sx-menu-small">
-            {AISLE_LINKS.map((aisle) => (
-              <li key={aisle.key}><Link to="/shop/all" search={{ cat: aisle.cat }} onClick={go}><T k={`shop.menu.${aisle.key}`}>{aisle.label}</T></Link></li>
-            ))}
-          </ul>
-          <p className="sx-menu-label"><T k="shop.menu.more">More</T></p>
-          <ul className="sx-menu-small">
-            <li><Link to="/shop/brands" onClick={go}><T k="shop.bar.brands-a-to-z">Brands A to Z</T></Link></li>
-            <li><Link to="/shop/gifts" onClick={go}><T k="shop.bar.gift-guide">Gift guide</T></Link></li>
-            <li><Link to="/shop/saved" onClick={go}><T k="shop.menu.saved">Saved</T></Link></li>
-            <li><Link to="/" onClick={go}><T k="shop.menu.site">OGCW news and stories</T> <ArrowUpRight size={14} aria-hidden="true" /></Link></li>
-          </ul>
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
-  );
-}
-
-/** The shop's own header: the menu and A to Z on the left, OGCW in the
- *  middle, search, saved and the cart on the right, and the sections on a
- *  row of their own under the name. On the shop home it lies over the hero
- *  photo until you scroll. */
-function ShopHeader() {
-  const { saved } = useSaved();
-  const { count } = useCart();
-  const [menu, setMenu] = useState(false);
-  const location = useRouterState({ select: (state) => state.location });
-  const home = location.pathname === "/shop" || location.pathname === "/shop/";
-  // Pages that open on a full-bleed picture or panel: the header lies over it until you scroll
-  const overlay = home || location.pathname === "/shop/check-this-out";
-  const [over, setOver] = useState(overlay);
-  useEffect(() => {
-    if (!overlay) { setOver(false); return; }
-    const update = () => setOver(window.scrollY < 24);
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [overlay]);
-  useEffect(() => setMenu(false), [location.pathname, location.searchStr]);
-  // The menu panel under the sections: opens while you point at (or focus) one
-  const [panel, setPanel] = useState<string | null>(null);
-  const closing = useRef(0);
-  const openPanel = (key: string) => { window.clearTimeout(closing.current); setPanel(key); };
-  const closeSoon = () => { window.clearTimeout(closing.current); closing.current = window.setTimeout(() => setPanel(null), 140); };
-  useEffect(() => { setPanel(null); }, [location.pathname, location.searchStr]);
-  useEffect(() => {
-    if (!panel) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setPanel(null); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [panel]);
-  const tag = (location.search as Record<string, unknown>)["tag"];
-  const here = (section: (typeof SECTIONS)[number]) =>
-    section.to === "/shop" ? home : location.pathname === section.to && (section.tag ? tag === section.tag : true);
-  return (
-    <EditSection name="Shop pages">
-      <header className="sx-top" data-over={(over && !panel) || undefined} data-menu={panel || undefined} onMouseLeave={closeSoon}>
-        <div className="sx-top-row">
-          <div className="sx-top-left">
-            <button type="button" className="sx-burger" aria-label="Open the shop menu" aria-expanded={menu} onClick={() => setMenu(true)}><Menu size={20} strokeWidth={1.8} aria-hidden="true" /></button>
-            <BrandIndex />
-          </div>
-          <Link to="/shop" className="sx-brand" data-site-logo="" aria-label="OGCW Shop home">OGCW</Link>
-          <div className="sx-top-tools">
-            <ShopSearch />
-            <Link to="/shop/saved" className="sx-icon" aria-label={`Saved, ${saved.length} items`}>
-              <Heart size={19} strokeWidth={1.8} aria-hidden="true" />
-              {saved.length > 0 && <span className="sx-count">{saved.length}</span>}
-            </Link>
-            <button type="button" className="sx-icon" onClick={() => cart.setOpen(true)} aria-label={`Shopping cart, ${count} items`}>
-              <ShoppingCart size={19} strokeWidth={1.8} aria-hidden="true" />
-              {count > 0 && <span className="sx-count">{count}</span>}
-            </button>
-          </div>
-        </div>
-        <nav className="sx-nav" aria-label="Shop sections">
-          {SECTIONS.map((section) => (
-            <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} data-open={panel === section.key || undefined} aria-current={here(section) ? "page" : undefined} aria-expanded={panel === section.key} onMouseEnter={() => openPanel(section.key)} onFocus={() => openPanel(section.key)}>
-              <T k={`shop.nav.${section.key}`}>{section.label}</T>
-            </Link>
-          ))}
-        </nav>
-        {panel && <div onMouseEnter={() => window.clearTimeout(closing.current)}><MegaPanel section={panel} onClose={() => setPanel(null)} /></div>}
-      </header>
-      {panel && <div className="mm-dim" aria-hidden="true" onMouseEnter={closeSoon} onClick={() => setPanel(null)} />}
-      <ShopMenu open={menu} onClose={() => setMenu(false)} />
-    </EditSection>
-  );
-}
-
 /** The cart: the efferd drawer from the right, with the items, quantities, the guide total and a promo code */
 function CartDrawer() {
   const { items, count, code, open, subtotal, unpriced } = useCart();
@@ -509,23 +277,13 @@ function CartDrawer() {
 }
 
 /** Every shop page: the shop's own header (no site header: the shop opens
- *  in its own tab), the page, the shop's promise, the site footer and the cart */
-export function ShopShell({ children, promise = true }: { children: ReactNode; promise?: boolean }) {
+ *  in its own tab), the page, the site's own footer and the cart */
+export function ShopShell({ children }: { children: ReactNode }) {
   return (
     <SiteShell header={<ShopHeader />}>
       <EditSection name="Shop pages">
         <div className="sx">
           <main className="sx-main">{children}</main>
-          {promise && (
-            <section className="sx-promise" aria-label="How the shop works">
-              <div className="sx-wrap sx-promise-row">
-                <p><strong><T k="shop.promise.1">Picked by OGCW</T></strong> <T k="shop.promise.1.copy">From the brands in our stories.</T></p>
-                <p><strong><T k="shop.promise.2b">Bought at the source</T></strong> <T k="shop.promise.2b.copy">Each shop handles stock, sizes, payment and delivery.</T></p>
-                <p><strong><T k="shop.promise.3c">Prices at the shop</T></strong> <T k="shop.promise.3c.copy">Each shop sets its own price and currency.</T></p>
-                <Link to="/info/$slug" params={{ slug: "faq" }} className="sx-link"><T k="shop.promise.faq">Questions?</T> <ArrowRight size={14} aria-hidden="true" /></Link>
-              </div>
-            </section>
-          )}
           <CartDrawer />
         </div>
       </EditSection>

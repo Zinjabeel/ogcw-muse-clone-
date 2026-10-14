@@ -33,7 +33,7 @@ function CheckThisOut() {
     return product ? [{ ...item, product }] : [];
   });
   return (
-    <ShopShell promise={false}>
+    <ShopShell>
       <div className="co">
         <section className="co-open" aria-labelledby="co-title">
           <p className="co-kicker"><T k="shop.co.kicker">Collabs and grails</T></p>

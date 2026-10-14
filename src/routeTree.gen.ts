@@ -38,8 +38,13 @@ import { Route as ShopBrandsRouteImport } from './routes/shop.brands'
 import { Route as ShopCheckThisOutRouteImport } from './routes/shop.check-this-out'
 import { Route as ShopCheckoutRouteImport } from './routes/shop.checkout'
 import { Route as ShopDropsRouteImport } from './routes/shop.drops'
+import { Route as ShopFeaturedDropsRouteImport } from './routes/shop.featured-drops'
 import { Route as ShopGiftsRouteImport } from './routes/shop.gifts'
+import { Route as ShopLatestRouteImport } from './routes/shop.latest'
+import { Route as ShopMenRouteImport } from './routes/shop.men'
 import { Route as ShopSavedRouteImport } from './routes/shop.saved'
+import { Route as ShopTrendiestRouteImport } from './routes/shop.trendiest'
+import { Route as ShopWomenRouteImport } from './routes/shop.women'
 import { Route as TourBtsArirangRouteImport } from './routes/tour.bts-arirang'
 import { Route as ForumTIdRouteImport } from './routes/forum.t.$id'
 import { Route as ShopPIdRouteImport } from './routes/shop.p.$id'
@@ -189,14 +194,39 @@ const ShopDropsRoute = ShopDropsRouteImport.update({
   path: '/shop/drops',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopFeaturedDropsRoute = ShopFeaturedDropsRouteImport.update({
+  id: '/shop/featured-drops',
+  path: '/shop/featured-drops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopGiftsRoute = ShopGiftsRouteImport.update({
   id: '/shop/gifts',
   path: '/shop/gifts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopLatestRoute = ShopLatestRouteImport.update({
+  id: '/shop/latest',
+  path: '/shop/latest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopMenRoute = ShopMenRouteImport.update({
+  id: '/shop/men',
+  path: '/shop/men',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopSavedRoute = ShopSavedRouteImport.update({
   id: '/shop/saved',
   path: '/shop/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopTrendiestRoute = ShopTrendiestRouteImport.update({
+  id: '/shop/trendiest',
+  path: '/shop/trendiest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopWomenRoute = ShopWomenRouteImport.update({
+  id: '/shop/women',
+  path: '/shop/women',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TourBtsArirangRoute = TourBtsArirangRouteImport.update({
@@ -241,8 +271,13 @@ export interface FileRoutesByFullPath {
   '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
   '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
@@ -277,8 +312,13 @@ export interface FileRoutesByTo {
   '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
   '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/forum': typeof ForumIndexRoute
   '/news': typeof NewsIndexRoute
@@ -314,8 +354,13 @@ export interface FileRoutesById {
   '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
   '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
   '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
@@ -352,8 +397,13 @@ export interface FileRouteTypes {
     | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
+    | '/shop/featured-drops'
     | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
     | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
     | '/forum/'
     | '/news/'
@@ -388,8 +438,13 @@ export interface FileRouteTypes {
     | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
+    | '/shop/featured-drops'
     | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
     | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
     | '/forum'
     | '/news'
@@ -424,8 +479,13 @@ export interface FileRouteTypes {
     | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
+    | '/shop/featured-drops'
     | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
     | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
     | '/forum/'
     | '/news/'
@@ -461,8 +521,13 @@ export interface RootRouteChildren {
   ShopCheckThisOutRoute: typeof ShopCheckThisOutRoute
   ShopCheckoutRoute: typeof ShopCheckoutRoute
   ShopDropsRoute: typeof ShopDropsRoute
+  ShopFeaturedDropsRoute: typeof ShopFeaturedDropsRoute
   ShopGiftsRoute: typeof ShopGiftsRoute
+  ShopLatestRoute: typeof ShopLatestRoute
+  ShopMenRoute: typeof ShopMenRoute
   ShopSavedRoute: typeof ShopSavedRoute
+  ShopTrendiestRoute: typeof ShopTrendiestRoute
+  ShopWomenRoute: typeof ShopWomenRoute
   TourBtsArirangRoute: typeof TourBtsArirangRoute
   ForumIndexRoute: typeof ForumIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
@@ -677,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopDropsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/featured-drops': {
+      id: '/shop/featured-drops'
+      path: '/shop/featured-drops'
+      fullPath: '/shop/featured-drops'
+      preLoaderRoute: typeof ShopFeaturedDropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop/gifts': {
       id: '/shop/gifts'
       path: '/shop/gifts'
@@ -684,11 +756,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopGiftsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/latest': {
+      id: '/shop/latest'
+      path: '/shop/latest'
+      fullPath: '/shop/latest'
+      preLoaderRoute: typeof ShopLatestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/men': {
+      id: '/shop/men'
+      path: '/shop/men'
+      fullPath: '/shop/men'
+      preLoaderRoute: typeof ShopMenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop/saved': {
       id: '/shop/saved'
       path: '/shop/saved'
       fullPath: '/shop/saved'
       preLoaderRoute: typeof ShopSavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/trendiest': {
+      id: '/shop/trendiest'
+      path: '/shop/trendiest'
+      fullPath: '/shop/trendiest'
+      preLoaderRoute: typeof ShopTrendiestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/women': {
+      id: '/shop/women'
+      path: '/shop/women'
+      fullPath: '/shop/women'
+      preLoaderRoute: typeof ShopWomenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tour/bts-arirang': {
@@ -741,8 +841,13 @@ const rootRouteChildren: RootRouteChildren = {
   ShopCheckThisOutRoute: ShopCheckThisOutRoute,
   ShopCheckoutRoute: ShopCheckoutRoute,
   ShopDropsRoute: ShopDropsRoute,
+  ShopFeaturedDropsRoute: ShopFeaturedDropsRoute,
   ShopGiftsRoute: ShopGiftsRoute,
+  ShopLatestRoute: ShopLatestRoute,
+  ShopMenRoute: ShopMenRoute,
   ShopSavedRoute: ShopSavedRoute,
+  ShopTrendiestRoute: ShopTrendiestRoute,
+  ShopWomenRoute: ShopWomenRoute,
   TourBtsArirangRoute: TourBtsArirangRoute,
   ForumIndexRoute: ForumIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
