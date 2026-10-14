@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, ChevronDown, Heart, Menu, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
+import { ArrowDownAZ, ArrowRight, ArrowUpRight, Heart, Menu, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { BRANDS, PRODUCTS, brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
@@ -227,8 +227,8 @@ function BrandIndex() {
   return (
     <div className="sx-az" ref={root} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       {/* A mouse opens it by pointing, so a click keeps it open; touch and keys toggle it */}
-      <button type="button" className="sx-az-btn" aria-expanded={open} aria-controls="shop-az" onPointerDown={(event) => { pointer.current = event.pointerType; }} onClick={() => { const mouse = pointer.current === "mouse"; pointer.current = ""; setOpen((value) => (mouse ? true : !value)); }}>
-        <T k="shop.az">A to Z</T> <ChevronDown size={14} aria-hidden="true" />
+      <button type="button" className="sx-az-btn" aria-label="Brands A to Z" title="A to Z" aria-expanded={open} aria-controls="shop-az" onPointerDown={(event) => { pointer.current = event.pointerType; }} onClick={() => { const mouse = pointer.current === "mouse"; pointer.current = ""; setOpen((value) => (mouse ? true : !value)); }}>
+        <ArrowDownAZ size={20} strokeWidth={1.8} aria-hidden="true" />
       </button>
       {open && (
         <div id="shop-az" className="sx-az-panel">
@@ -305,9 +305,10 @@ function ShopMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-/** The shop's own header, one slim row: the menu, A to Z and the name on
- *  the left, the sections in the middle, search, saved and the cart on the
- *  right. On the shop home it lies over the hero photo until you scroll. */
+/** The shop's own header: the menu and A to Z on the left, OGCW in the
+ *  middle, search, saved and the cart on the right, and the sections on a
+ *  row of their own under the name. On the shop home it lies over the hero
+ *  photo until you scroll. */
 function ShopHeader() {
   const { saved } = useSaved();
   const { count } = useCart();
@@ -333,15 +334,8 @@ function ShopHeader() {
           <div className="sx-top-left">
             <button type="button" className="sx-burger" aria-label="Open the shop menu" aria-expanded={menu} onClick={() => setMenu(true)}><Menu size={20} strokeWidth={1.8} aria-hidden="true" /></button>
             <BrandIndex />
-            <Link to="/shop" className="sx-brand" data-site-logo="" aria-label="OGCW Shop home">OGCW</Link>
           </div>
-          <nav className="sx-nav" aria-label="Shop sections">
-            {SECTIONS.map((section) => (
-              <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} aria-current={here(section) ? "page" : undefined}>
-                <T k={`shop.nav.${section.key}`}>{section.label}</T>
-              </Link>
-            ))}
-          </nav>
+          <Link to="/shop" className="sx-brand" data-site-logo="" aria-label="OGCW Shop home">OGCW</Link>
           <div className="sx-top-tools">
             <ShopSearch />
             <Link to="/shop/saved" className="sx-icon" aria-label={`Saved, ${saved.length} items`}>
@@ -354,6 +348,13 @@ function ShopHeader() {
             </button>
           </div>
         </div>
+        <nav className="sx-nav" aria-label="Shop sections">
+          {SECTIONS.map((section) => (
+            <Link key={section.key} to={section.to} search={section.tag ? { tag: section.tag } : {}} className="sx-nav-link" data-on={here(section) || undefined} aria-current={here(section) ? "page" : undefined}>
+              <T k={`shop.nav.${section.key}`}>{section.label}</T>
+            </Link>
+          ))}
+        </nav>
       </header>
       <ShopMenu open={menu} onClose={() => setMenu(false)} />
     </EditSection>

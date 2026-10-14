@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from "react";
 // Capital's loader: on a full-screen layer in the page colour "One Great
 // Culture World" rises in, the letters after each initial fold away until
 // only "OGCW" is left, and that mark glides up into the shop header's logo
-// while the layer clears. Once per tab, never with reduced motion; a click
-// or a key skips it.
+// while the layer clears. Once per tab, never with reduced motion, and not
+// on phones (narrower than 768px go straight into the shop; tablets and
+// computers keep it); a click or a key skips it.
 
 const KEY = "ogcw-shop-intro-seen";
 
 /** Runs before the page paints: marks <html data-entry> when the intro should play */
-export const introInitScript = `(function(){try{if(!/^\\/shop(\\/|$)/.test(location.pathname)||sessionStorage.getItem("${KEY}")||matchMedia("(prefers-reduced-motion: reduce)").matches)return;document.documentElement.setAttribute("data-entry","")}catch(e){}})();`;
+export const introInitScript = `(function(){try{if(!/^\\/shop(\\/|$)/.test(location.pathname)||sessionStorage.getItem("${KEY}")||matchMedia("(prefers-reduced-motion: reduce)").matches||matchMedia("(max-width: 767px)").matches)return;document.documentElement.setAttribute("data-entry","")}catch(e){}})();`;
 
 const WORDS = ["One", "Great", "Culture", "World"];
 const REVEAL = 1500; // rise in, then hold

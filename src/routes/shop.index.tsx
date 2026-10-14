@@ -171,10 +171,11 @@ function ShopHome() {
 
 /* ---------- The hero: one photo, the headline and a link ---------- */
 
+// One sneaker on a deep blue wall: Karsten Winegeart on Unsplash (Unsplash License)
 function Hero() {
   return (
     <section className="sh-hero" aria-labelledby="sh-hero-title">
-      <img className="sh-hero-img" src="/shop/looks/hero.webp" alt="Four friends in long coats and trainers standing in a city street at night" />
+      <img className="sh-hero-img" src="/shop/looks/hero-sneaker.webp" alt="A single white, black and blue sneaker floating against a deep blue wall" />
       <div className="sh-hero-copy">
         <h1 id="sh-hero-title" className="sh-hero-title"><T k="shop.hero.title">Wear the culture</T></h1>
         <Link to="/shop/all" search={{ tag: "new" }} className="sh-hero-cta"><T k="shop.hero.cta">Shop the latest</T></Link>
