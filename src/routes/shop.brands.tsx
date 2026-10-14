@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState, type PointerEvent } from "react";
 import { ShopShell } from "../components/shop-kit";
 import { BRANDS, isLive, productsOf, type ShopBrand } from "../data/shop";
+import { logoOf } from "../data/shop-logos";
 import { T } from "@/components/site-text";
 
 // Brands A to Z, after Complex Shop's brand directory: an A to Z bar in the
@@ -18,12 +19,6 @@ export const Route = createFileRoute("/shop/brands")({
   component: Brands,
 });
 
-const LOGOS: Record<string, string> = {
-  "acne-studios": "svg", adidas: "svg", amiri: "svg", asics: "svg", "bell-ross": "svg", blancpain: "svg", "cactus-jack": "svg", "grand-seiko": "png",
-  hublot: "svg", jordan: "svg", levis: "svg", "new-balance": "svg", nike: "svg", nomos: "png", omega: "svg", panerai: "svg", rolex: "svg",
-  supreme: "svg", "tag-heuer": "svg", tudor: "png", "vacheron-constantin": "png",
-};
-const logoOf = (slug: string) => (LOGOS[slug] ? `/shop/logos/${slug}.${LOGOS[slug]}` : undefined);
 const ALPHABET = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 const letterOf = (brand: ShopBrand) => brand.name[0]!.toUpperCase();
 

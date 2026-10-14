@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, firstTapShowsBack } from "../components/shop-kit";
-import { SNEAKER_DROPS, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
+import { BRANDS, SNEAKER_DROPS, brandOf, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
+import { LOGO_SLUGS, logoOf } from "../data/shop-logos";
+import { UPCOMING } from "../data/shop-upcoming";
 import { T } from "@/components/site-text";
 
 // The shop home, top to bottom (after Killstar's store):
@@ -49,21 +51,29 @@ const LOOKS = [
 // four cards to a row, with a button to the whole aisle under it. Names (and
 // the buttons) the owner can change with the site editor
 type RowSearch = { cat?: string; q?: string; tag?: string; kind?: string };
-type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string };
+/** A spotlight row: one big photo with a line and a button beside four cards, two over two */
+type Spot = { image: string; alt: string; line: string };
+type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string; spot?: Spot };
 const ROWS: Record<string, Row> = {
   sneakers: { key: "sneakers", title: "Sneakers right now", tone: "dark", search: { cat: "sneakers" }, cta: "Shop all sneakers", items: pieces("aj4-black-cat-2025", "nigel-sylvester-aj4-brick-after-brick", "samba-og-cheetah-preloved-red", "nb-1906r-silver-metallic-black") },
   travis: { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", search: { q: "Cactus Jack" }, cta: "Shop Cactus Jack", items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
   complexcon: { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", search: { q: "Sp5der" }, cta: "Shop Sp5der", items: pieces("sp5der-pnk-hoodie", "sp5der-og-web-hoodie", "sp5der-splat-punk-hoodie", "sp5der-beluga-hoodie") },
   tees: { key: "tees", title: "Graphic tees", tone: "light", search: { cat: "clothing", kind: "T-shirts" }, cta: "Shop all tees", items: pieces("kaws-fragment-tee", "mcdonalds-smile-tee", "fragment-tee", "cactus-mac-tee") },
-  denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim") },
-  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all watches", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold") },
+  // Spotlight photos: Christian Agbede and Gilles De Muynck on Unsplash (Unsplash License)
+  denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim"),
+    spot: { image: "/shop/looks/spot-denim.webp", alt: "A young man in a black beanie and very wide washed jeans leaning on the bonnet of a white car", line: "Wide, washed and worn in: Denim Tears, Amiri, Ksubi and more." } },
+  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all watches", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
+    spot: { image: "/shop/looks/spot-watch.webp", alt: "A hand fastening a gold skeleton watch on a brown leather strap, under a pale blue shirt cuff", line: "Rolex to Nomos, pre-owned and checked by Watchfinder & Co." } },
 };
-// The bands between the rows: one line and a button each
+// The bands between the rows: a line, a button and a picture each
+const LIMITED_FAN = pieces("fragment-travis-aj1-low-military-blue", "rolex-land-dweller-36", "days-before-rodeo-hoodie");
 const BANDS = {
   calendar: { key: "calendar", kicker: "Release calendar", title: "The next pairs to drop", cta: "See the dates", to: "/shop/drops" as const, search: {} },
   limited: { key: "limited", kicker: "Collabs and grails", title: "Limited editions, while they last", cta: "Shop limited", to: "/shop/all" as const, search: { tag: "limited" } },
   brands: { key: "brands", kicker: "Brands A to Z", title: "From Amiri to Vacheron Constantin", cta: "Browse the brands", to: "/shop/brands" as const, search: {} },
 };
+// The logos that glide under the hero (never stopping, as the owner asked of every carousel)
+const STRIP = LOGO_SLUGS.flatMap((slug) => { const logo = logoOf(slug); return logo ? [{ slug, logo }] : []; });
 
 /** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
 function glideTo(top: number, ms: number, done: () => void) {
@@ -140,6 +150,7 @@ function ShopHome() {
     <ShopShell>
       <div className="sh">
         <Hero />
+        <LogoStrip />
         <div className="sh-stack" ref={stack}>
           <WhatsNew />
           <NewSeason />
@@ -175,14 +186,38 @@ function Hero() {
   );
 }
 
+/* ---------- The brands, gliding by under the hero ---------- */
+
+function LogoStrip() {
+  const name = (slug: string) => BRANDS.find((brand) => brand.slug === slug)?.name ?? slug;
+  return (
+    <section className="sh-logos" aria-label="Brands in the shop">
+      <Link to="/shop/brands" className="sh-logos-link" aria-label="Brands A to Z">
+        <span className="sh-logos-track" style={{ "--n": STRIP.length } as CSSProperties}>
+          {[0, 1].flatMap((copy) => STRIP.map((item) => (
+            <img key={`${copy}-${item.slug}`} src={item.logo} alt={copy === 0 ? name(item.slug) : ""} loading="lazy" />
+          )))}
+        </span>
+      </Link>
+    </section>
+  );
+}
+
 /* ---------- A square card: a product, or a blank one still to come ---------- */
+
+const chipOf = (product: ShopProduct) => (product.tags?.includes("limited") ? "Limited" : product.tags?.includes("new") ? "New in" : undefined);
 
 function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | null; hidden?: boolean; tone?: "dark" | "light" | undefined }) {
   if (!product || !isLive(product)) return <BlankCard tone={tone} />;
+  const brand = brandOf(product);
+  const chip = chipOf(product);
   return (
     <article className="sh-square" aria-hidden={hidden || undefined}>
       <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-square-link" tabIndex={hidden ? -1 : undefined} onClick={firstTapShowsBack}>
-        <ProductPhoto product={product} hidden={hidden} className="sh-square-photo" />
+        <ProductPhoto product={product} hidden={hidden} className="sh-square-photo">
+          {chip && <span className="sh-chip">{chip}</span>}
+        </ProductPhoto>
+        <span className="sh-square-brand">{brand.store ? product.kind : brand.name}</span>
         <span className="sh-square-name">{fullName(product)}</span>
       </Link>
       {!hidden && <SaveButton product={product} />}
@@ -265,9 +300,24 @@ function CollectionRow({ row }: { row: Row }) {
         <h2 className="sh-h2"><T k={`shop.row.${row.key}`}>{row.title}</T></h2>
         <Link to="/shop/all" search={row.search} className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
-      <ul className="sh-cards sh-cards-4">
-        {row.items.map((product) => <li key={product.id}><ShopCard product={product} tone={row.tone} /></li>)}
-      </ul>
+      {row.spot ? (
+        <div className="sh-spot">
+          <Link to="/shop/all" search={row.search} className="sh-spot-photo">
+            <img src={row.spot.image} alt={row.spot.alt} loading="lazy" />
+            <span className="sh-spot-text">
+              <span className="sh-spot-line"><T k={`shop.row.${row.key}.line`}>{row.spot.line}</T></span>
+              <span className="sh-spot-go"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={15} aria-hidden="true" /></span>
+            </span>
+          </Link>
+          <ul className="sh-cards sh-spot-cards">
+            {row.items.map((product) => <li key={product.id}><ShopCard product={product} tone={row.tone} /></li>)}
+          </ul>
+        </div>
+      ) : (
+        <ul className="sh-cards sh-cards-4">
+          {row.items.map((product) => <li key={product.id}><ShopCard product={product} tone={row.tone} /></li>)}
+        </ul>
+      )}
       <div className="sh-row-cta">
         <Link to="/shop/all" search={row.search} className="sh-cta"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
       </div>
@@ -279,11 +329,39 @@ function CollectionRow({ row }: { row: Row }) {
 
 function Band({ band }: { band: (typeof BANDS)[keyof typeof BANDS] }) {
   return (
-    <section className="sh-band" aria-labelledby={`sh-band-${band.key}`}>
-      <p className="sh-band-kicker"><T k={`shop.band.${band.key}.kicker`}>{band.kicker}</T></p>
-      <h2 id={`sh-band-${band.key}`} className="sh-band-title"><T k={`shop.band.${band.key}.title`}>{band.title}</T></h2>
-      <Link to={band.to} search={band.search} className="sh-cta sh-cta-gold"><T k={`shop.band.${band.key}.cta`}>{band.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+    <section className="sh-band" data-band={band.key} aria-labelledby={`sh-band-${band.key}`}>
+      <div className="sh-band-copy">
+        <p className="sh-band-kicker"><T k={`shop.band.${band.key}.kicker`}>{band.kicker}</T></p>
+        <h2 id={`sh-band-${band.key}`} className="sh-band-title"><T k={`shop.band.${band.key}.title`}>{band.title}</T></h2>
+        <Link to={band.to} search={band.search} className="sh-cta sh-cta-gold"><T k={`shop.band.${band.key}.cta`}>{band.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+      </div>
+      <div className="sh-band-art" aria-hidden="true">
+        {band.key === "calendar" && <NextPair />}
+        {band.key === "limited" && (
+          <span className="sh-fan">{LIMITED_FAN.map((product) => <img key={product.id} src={product.image} alt="" loading="lazy" />)}</span>
+        )}
+        {band.key === "brands" && (
+          <span className="sh-band-logos">{STRIP.slice(0, 9).map((item) => <img key={item.slug} src={item.logo} alt="" loading="lazy" />)}</span>
+        )}
+      </div>
     </section>
+  );
+}
+
+/** The next pair on the calendar, with its date and how long to wait (read in the browser) */
+function NextPair() {
+  const [today, setToday] = useState("2026-10-14");
+  useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
+  const next = UPCOMING.find((pair) => pair.date >= today && pair.photo);
+  if (!next?.photo) return null;
+  const days = Math.round((Date.parse(next.date) - Date.parse(today)) / 86_400_000);
+  return (
+    <span className="sh-next">
+      <img src={next.photo} alt="" loading="lazy" />
+      <span className="sh-next-when">{days <= 0 ? "Out today" : days === 1 ? "Tomorrow" : `In ${days} days`}</span>
+      <span className="sh-next-name">{next.name}</span>
+      <span className="sh-next-date">{new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(next.date))}</span>
+    </span>
   );
 }
 

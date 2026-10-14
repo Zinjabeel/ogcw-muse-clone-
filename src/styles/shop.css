@@ -572,9 +572,61 @@
 .sh-row[data-tone="dark"] .sh-cta:hover { background: #fff; }
 .sh-row[data-tone="light"] .sh-cta { background: #0d0d0d; color: #fff; }
 .sh-row[data-tone="light"] .sh-cta:hover { background: #2a2a2a; }
-.sh-band { display: grid; justify-items: center; gap: 14px; margin: 0 calc(-1 * var(--gutter)); padding: clamp(56px, 7vw, 120px) 20px; background: var(--ogcw-surface); color: var(--ogcw-text); text-align: center; box-shadow: inset 0 1px 0 var(--ogcw-border), inset 0 -1px 0 var(--ogcw-border); }
+/* A band: the line and its button on the left, a picture on the right */
+.sh-band { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: clamp(28px, 4vw, 80px); margin: 0 calc(-1 * var(--gutter)); padding: clamp(56px, 6vw, 110px) clamp(18px, 6vw, 120px); background: var(--ogcw-surface); color: var(--ogcw-text); box-shadow: inset 0 1px 0 var(--ogcw-border), inset 0 -1px 0 var(--ogcw-border); overflow: hidden; }
+.sh-band-copy { display: grid; justify-items: start; gap: 14px; }
 .sh-band-kicker { margin: 0; color: var(--ogcw-accent); font: 700 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; }
-.sh-band-title { max-width: 18ch; margin: 0 0 10px; font: 400 clamp(34px, 4.4vw, 72px)/1.02 var(--sx-display); letter-spacing: -.02em; text-wrap: balance; }
+.sh-band-title { max-width: 14ch; margin: 0 0 10px; font: 400 clamp(36px, 4.6vw, 76px)/1.02 var(--sx-display); letter-spacing: -.02em; text-wrap: balance; }
+.sh-band-art { display: grid; place-items: center; min-height: clamp(240px, 24vw, 380px); }
+/* The next pair, as a small poster */
+.sh-next { position: relative; display: grid; justify-items: center; gap: 6px; width: min(100%, 420px); padding: 26px 26px 30px; border-radius: var(--sx-r-panel); background: #fff; color: #0d0d0d; box-shadow: 0 30px 60px -36px rgb(0 0 0 / .45); text-align: center; }
+.sh-next img { width: 88%; aspect-ratio: 1; object-fit: contain; transition: transform 1s var(--sx-ease); }
+.sh-band:hover .sh-next img { transform: rotate(-6deg) scale(1.04); }
+.sh-next-when { position: absolute; top: 16px; left: 16px; padding: 6px 11px; border-radius: 999px; background: #0d0d0d; color: #fff; font: 700 11px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; }
+.sh-next-name { font: 400 clamp(20px, 1.7vw, 26px)/1.15 var(--sx-display); }
+.sh-next-date { color: #6b6b6b; font: 600 12px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; }
+/* Three pieces fanned out, spreading under the pointer */
+.sh-fan { position: relative; display: block; width: min(100%, 480px); aspect-ratio: 3 / 2; }
+.sh-fan img { position: absolute; top: 8%; left: 50%; width: 52%; aspect-ratio: 1; padding: 6%; border-radius: var(--sx-r-card); background: #fff; object-fit: contain; box-shadow: 0 24px 50px -30px rgb(0 0 0 / .5); transform-origin: 50% 110%; transition: transform .8s var(--sx-ease); }
+.sh-fan img:nth-child(1) { transform: translateX(-92%) rotate(-11deg); }
+.sh-fan img:nth-child(2) { z-index: 2; transform: translateX(-50%) translateY(-4%); }
+.sh-fan img:nth-child(3) { transform: translateX(-8%) rotate(11deg); }
+.sh-band:hover .sh-fan img:nth-child(1) { transform: translateX(-112%) rotate(-16deg); }
+.sh-band:hover .sh-fan img:nth-child(3) { transform: translateX(12%) rotate(16deg); }
+/* Logos on white tiles */
+.sh-band-logos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(100%, 460px); }
+.sh-band-logos img { width: 100%; aspect-ratio: 3 / 2; padding: 18% 16%; border-radius: 16px; background: #fff; object-fit: contain; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); transition: transform .4s var(--sx-ease); }
+.sh-band:hover .sh-band-logos img:nth-child(odd) { transform: translateY(-4px); }
+/* The logos gliding under the hero: they never stop */
+.sh-logos { margin: 0 calc(-1 * var(--gutter)); overflow: hidden; background: #fff; box-shadow: inset 0 -1px 0 rgb(0 0 0 / .07); }
+.sh-logos-link { display: block; padding-block: clamp(20px, 2vw, 30px); }
+.sh-logos-track { display: flex; align-items: center; width: max-content; }
+.sh-logos-track img { flex: none; width: auto; height: clamp(22px, 2vw, 32px); max-width: 150px; margin-right: clamp(44px, 5vw, 88px); object-fit: contain; filter: grayscale(1) contrast(1.15); opacity: .72; mix-blend-mode: multiply; transition: filter .3s ease, opacity .3s ease; }
+.sh-logos-track img:hover { filter: none; opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .sh-logos-track { animation: sh-logos calc(var(--n) * 2.4s) linear infinite; }
+}
+@keyframes sh-logos { to { transform: translateX(-50%); } }
+/* Cards: a small brand line, and a chip on the photo */
+.sh-square-brand { margin-bottom: -6px; color: var(--sx-dim); font: 700 11px var(--ogcw-ui); letter-spacing: .12em; text-transform: uppercase; }
+.sh-row[data-tone="dark"] .sh-square-brand { color: rgb(242 240 234 / .6); }
+.sh-row[data-tone="light"] .sh-square-brand { color: #6b6b6b; }
+.sh-chip { position: absolute; bottom: 12px; left: 12px; z-index: 2; padding: 5px 10px; border-radius: 999px; background: #0d0d0d; color: #fff; font: 700 10.5px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; }
+/* A spotlight row: one big photo beside four cards, two over two */
+.sh-spot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(10px, 1.4vw, 22px); }
+.sh-spot-photo { position: relative; display: block; min-height: 100%; overflow: hidden; border-radius: var(--sx-r-panel); background: #0a0a0a; color: #fff; isolation: isolate; }
+.sh-spot-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--sx-ease); }
+.sh-spot-photo:hover img { transform: scale(1.04); }
+.sh-spot-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .72), rgb(0 0 0 / 0) 55%); }
+.sh-spot-text { position: absolute; right: clamp(20px, 2.4vw, 36px); bottom: clamp(20px, 2.4vw, 36px); left: clamp(20px, 2.4vw, 36px); z-index: 1; display: grid; gap: 14px; }
+.sh-spot-line { max-width: 22ch; font: 400 clamp(24px, 2.4vw, 40px)/1.08 var(--sx-display); letter-spacing: -.01em; }
+.sh-spot-go { display: inline-flex; align-items: center; gap: 8px; font: 700 12.5px var(--ogcw-ui); letter-spacing: .12em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 6px; }
+.sh-spot-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.4vw, 22px); }
+@media (max-width: 900px) {
+  .sh-band { grid-template-columns: minmax(0, 1fr); }
+  .sh-spot { grid-template-columns: minmax(0, 1fr); }
+  .sh-spot-photo { min-height: 0; aspect-ratio: 4 / 5; }
+}
 .sh-cta-gold { background: var(--ogcw-accent); color: var(--ogcw-bg); }
 .sh-cta-gold:hover { filter: brightness(1.08); }
 
