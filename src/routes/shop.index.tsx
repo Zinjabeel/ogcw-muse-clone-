@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { AddToCart, BlankCard, SaveButton, ShopShell } from "../components/shop-kit";
+import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, firstTapShowsBack } from "../components/shop-kit";
 import { SNEAKER_DROPS, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
@@ -11,12 +11,13 @@ import { T } from "@/components/site-text";
 //   new season    a still photo the size of the section, with a link; it slides
 //                 up over What's new, and a short scroll glides the rest of the way
 //   the edit      eight cards, four over four
-//   the aisles    three tall photo cards side by side
-//   collections   four rows of four cards, black, white, black, white
+//   the aisles    three tall photo cards side by side: sneakers, clothing, collections
+//   the rows      sneakers, Cactus Jack, ComplexCon picks, graphic tees, denim and
+//                 watches, black and white in turn, four cards to a line
 //   explore       featured drops, release dates, limited editions, brands, the gift guide
-// For now only the One Piece Air Max Plus pairs show; every other product is
-// a blank card (owner, 10 Oct 2026). No prices or counts anywhere. Words never
-// move on scroll; with reduced motion nothing moves at all.
+// The cards are the live catalogue (src/data/shop-catalog.ts): each has two
+// photos, the second under the pointer. No prices or counts anywhere. Words
+// never move on scroll; with reduced motion nothing moves at all.
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
@@ -31,54 +32,30 @@ export const Route = createFileRoute("/shop/")({
 });
 
 const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const ONE_PIECE = ["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera"].flatMap((id) => getProduct(id) ?? []);
-/** A row of `size` slots: the given products first, blank cards after */
-const slots = (products: ShopProduct[], size: number): (ShopProduct | null)[] => Array.from({ length: size }, (_, i) => products[i] ?? null);
+/** The products with these ids, in this order (the live catalogue: src/data/shop-catalog.ts) */
+const pieces = (...ids: string[]) => ids.flatMap((id) => getProduct(id) ?? []);
 
-const RAIL = slots(ONE_PIECE, 10);
-// Photos from Unsplash (Justus Menke, Nathaniel Cherian, Alberto Rodríguez Santana,
-// Nicolas Ladino Silva, Danist Soh)
+// What's new: the latest pieces across the aisles
+const RAIL = pieces("aj1-royal-2026", "rolex-land-dweller-36", "denim-tears-patchwork-pant-blue", "sp5der-splat-punk-hoodie", "awake-ny-aj6-blueberry", "panerai-radiomir-manual-white", "ksubi-maxx-astral-kraftwerk", "aj4-rare-air-tour-yellow", "grand-seiko-sbgj273-red", "nike-air-bakin-varsity-red");
+// The aisle photos: the owner's pictures for Sneakers and Collections ("sneakers,
+// clothing and collections"; the clothing one was a Gemini blob link that only
+// opens in the owner's browser, so it stays), clothing from Unsplash (Nathaniel Cherian)
 const LOOKS = [
-  { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers.webp", alt: "White Nike sneakers on dark asphalt beside a painted white line" },
+  { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers-aisle.jpg", alt: "A hand holding out a white and sage green sneaker towards the camera" },
   { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing.webp", alt: "A red and white football shirt hanging on a wall in warm light" },
-  { key: "watches", label: "Watches & chains", search: { cat: "accessories" }, image: "/shop/looks/watches.webp", alt: "A man in a black coat wearing a gold chain" },
+  { key: "collections", label: "Collections", search: { cat: "accessories" }, image: "/shop/looks/collections-aisle.jpg", alt: "A hand in a black sleeve wearing a steel chronograph, on grey" },
 ];
-/** A piece shown with two photos from the owner's "pictures for the shop
- *  section" file (lines 1 and 2 are one piece, 3 and 4 the next...): the
- *  second shows under the pointer, or after a tap on a touch screen. Names
- *  are what the photos and their files show; where the official name
- *  couldn't be confirmed, the name only describes the piece. */
-type Pick = { key: string; name: string; colour: string; front: string; back: string; /** what the second photo is, if not the back */ second?: string };
-const pick = (key: string, name: string, colour: string, front = `${key}-front`, back = `${key}-back`, second?: string): Pick =>
-  ({ key, name, colour, front: `/shop/picks/${front}.jpg`, back: `/shop/picks/${back}.jpg`, ...(second ? { second } : {}) });
-const SP5DER_PICKS = [
-  pick("sp5der-pnk-hoodie", "Sp5der P*nk Web Hoodie", "Pink"),
-  pick("sp5der-og-web-hoodie", "Sp5der OG Web Hoodie", "Black"),
-  pick("sp5der-splat-punk-hoodie", "Sp5der Splat Punk Hoodie", "Slate grey"),
-  pick("sp5der-beluga-hoodie", "Sp5der Beluga Hoodie", "Brown"),
-];
-const CACTUS_JACK_PICKS = [
-  pick("days-before-rodeo-hoodie", "Cactus Jack x Sp5der Days Before Rodeo Hoodie", "Brown"),
-  pick("circus-maximus-hoodie", "Travis Scott Circus Maximus Tour ’23 Hoodie", "White"),
-  pick("utopia-hoodie", "Travis Scott Utopia Hoodie", "Brown"),
-  pick("apple-pie-hoodie", "Cactus Jack x McDonald’s Apple Pie Hoodie", "Black"),
-];
-const FOOTBALL_PICKS = [
-  pick("cactus-jack-barcelona-hoodie", "Cactus Jack x Nike x FC Barcelona Hoodie", "Washed black"),
-  pick("nocta-nike-canada-hoodie", "NOCTA x Nike Canada Hoodie", "Yellow and navy"),
-];
-// The owner's two links for this one are two colours of the same hoodie, not a front and a back
-const EDIT_PICKS = [
-  pick("nike-centre-swoosh-hoodie", "Nike Centre Swoosh Hoodie", "Teal or brown", "nike-centre-swoosh-hoodie-teal", "nike-centre-swoosh-hoodie-brown", "brown one"),
-  pick("tiger-totem-hoodie", "Washed Black Tiger and Totem Hoodie", "Washed black"),
-];
-const EDIT = slots(ONE_PIECE, 8 - EDIT_PICKS.length);
-// The collection rows: names the owner can change with the site editor
-const ROWS: { key: string; title: string; tone: "dark" | "light"; picks: Pick[]; items: (ShopProduct | null)[] }[] = [
-  { key: "nike", title: "Nike x One Piece", tone: "dark", picks: [], items: slots(ONE_PIECE, 4) },
-  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", picks: CACTUS_JACK_PICKS, items: slots([], 4 - CACTUS_JACK_PICKS.length) },
-  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", picks: SP5DER_PICKS, items: slots([], 4 - SP5DER_PICKS.length) },
-  { key: "worldcup", title: "Retro shirts for the World Cup", tone: "light", picks: FOOTBALL_PICKS, items: slots([], 4 - FOOTBALL_PICKS.length) },
+// The edit: one of each, across the shop
+const EDIT = pieces("fragment-travis-aj1-low-military-blue", "cartier-tank-basculante", "denim-tears-baggy-pant-selvedge", "nike-centre-swoosh-hoodie", "omega-speedmaster-145-022", "tiger-totem-hoodie", "cactus-jack-script-tee", "nb-9060-black-cat");
+// The collection rows, black and white in turn: names the owner can change with the site editor
+type RowSearch = { cat?: string; q?: string; tag?: string };
+const ROWS: { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch }[] = [
+  { key: "sneakers", title: "Sneakers right now", tone: "dark", search: { cat: "sneakers" }, items: pieces("aj4-black-cat-2025", "travis-scott-af1-ice-blue", "nigel-sylvester-aj4-brick-after-brick", "aj11-gamma-blue-2025", "samba-og-cheetah-preloved-red", "aj13-flint-2026", "huf-air-max-1-orange", "nb-1906r-silver-metallic-black") },
+  { key: "travis", title: "Travis Scott x Cactus Jack", tone: "light", search: { q: "Cactus Jack" }, items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
+  { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", search: { q: "Sp5der" }, items: pieces("sp5der-pnk-hoodie", "sp5der-og-web-hoodie", "sp5der-splat-punk-hoodie", "sp5der-beluga-hoodie", "cactus-jack-barcelona-hoodie", "nocta-nike-canada-hoodie", "sp5der-denim-v3-indigo", "yeezy-350-v2-onyx") },
+  { key: "tees", title: "Graphic tees", tone: "light", search: { q: "Tee" }, items: pieces("kaws-fragment-tee", "mcdonalds-smile-tee", "fragment-tee", "cactus-mac-tee") },
+  { key: "denim", title: "Denim", tone: "dark", search: { q: "Jeans" }, items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "hellstar-denim-blue", "butter-goods-solar-fade-grey", "ksubi-chitch-chronicle-trashed", "purple-brand-baggy-black", "acne-studios-printed-jeans-blue", "supreme-dickies-cordura-cargo-denim") },
+  { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "tudor-black-bay-58-black", "cartier-roadster-silver", "vacheron-patrimony-rose-gold", "breitling-navitimer-b01-46", "nomos-zurich-807", "bell-ross-br05-blue") },
 ];
 
 /** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
@@ -162,7 +139,7 @@ function ShopHome() {
         </div>
         <TheEdit />
         <Looks />
-        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} picks={row.picks} items={row.items} />)}
+        {ROWS.map((row) => <CollectionRow key={row.key} slug={row.key} title={row.title} tone={row.tone} items={row.items} search={row.search} />)}
         <Explore />
       </div>
     </ShopShell>
@@ -190,8 +167,8 @@ function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | nu
   if (!product || !isLive(product)) return <BlankCard tone={tone} />;
   return (
     <article className="sh-square" aria-hidden={hidden || undefined}>
-      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-square-link" tabIndex={hidden ? -1 : undefined}>
-        <span className="sh-square-photo"><img src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" /></span>
+      <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-square-link" tabIndex={hidden ? -1 : undefined} onClick={firstTapShowsBack}>
+        <ProductPhoto product={product} hidden={hidden} className="sh-square-photo" />
         <span className="sh-square-name">{fullName(product)}</span>
       </Link>
       {!hidden && <SaveButton product={product} />}
@@ -250,9 +227,7 @@ function TheEdit() {
           <Link to="/shop/all" className="sh-textlink"><T k="shop.edit.all">Shop everything</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </header>
         <ul className="sh-cards sh-cards-4">
-          {EDIT.filter((product) => product).map((product, i) => <li key={i}><ShopCard product={product} /></li>)}
-          {EDIT_PICKS.map((item) => <li key={item.key}><PickCard pick={item} /></li>)}
-          {EDIT.filter((product) => !product).map((_, i) => <li key={`blank-${i}`}><ShopCard product={null} /></li>)}
+          {EDIT.map((product) => <li key={product.id}><ShopCard product={product} /></li>)}
         </ul>
       </div>
     </section>
@@ -287,40 +262,17 @@ function Looks() {
 
 /* ---------- The collection rows: four cards each, black and white in turn ---------- */
 
-function CollectionRow({ slug, title, tone, picks, items }: { slug: string; title: string; tone: "dark" | "light"; picks: Pick[]; items: (ShopProduct | null)[] }) {
+function CollectionRow({ slug, title, tone, items, search }: { slug: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch }) {
   return (
     <section className="sh-row" data-tone={tone} aria-label={title}>
       <header className="sh-head">
         <h2 className="sh-h2"><T k={`shop.row.${slug}`}>{title}</T></h2>
-        <Link to="/shop/all" className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
+        <Link to="/shop/all" search={search} className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
       <ul className="sh-cards sh-cards-4">
-        {picks.map((pick) => <li key={pick.key}><PickCard pick={pick} /></li>)}
-        {items.map((product, i) => <li key={i}><ShopCard product={product} tone={tone} /></li>)}
+        {items.map((product) => <li key={product.id}><ShopCard product={product} tone={tone} /></li>)}
       </ul>
     </section>
-  );
-}
-
-/** Front photo, and the back under the pointer (a tap or a key flips it on a touch screen) */
-function PickCard({ pick }: { pick: Pick }) {
-  const [back, setBack] = useState(false);
-  const pointer = useRef("");
-  return (
-    <article className="sh-square sh-pick" data-back={back || undefined}>
-      <button
-        type="button"
-        className="sh-pick-photo"
-        onPointerDown={(event) => { pointer.current = event.pointerType; }}
-        onClick={() => { if (pointer.current !== "mouse") setBack((value) => !value); pointer.current = ""; }}
-        aria-pressed={back}
-        aria-label={`${pick.name}, ${pick.colour}: show the ${back ? "front" : pick.second ?? "back"}`}
-      >
-        <img className="is-front" src={pick.front} alt="" loading="lazy" />
-        <img className="is-back" src={pick.back} alt="" loading="lazy" />
-      </button>
-      <span className="sh-square-name">{pick.name}</span>
-    </article>
   );
 }
 
@@ -343,7 +295,7 @@ function Explore() {
             <img src="/shop/one-piece-air-max-plus-pack.webp" alt="" loading="lazy" />
             <span className="sh-tile-text">
               <span className="sh-tile-name"><T k="shop.explore.drops">Featured drops</T></span>
-              <span className="sh-tile-note"><T k="shop.explore.drops.note">The One Piece pack, the Jordans on the calendar and the retro shirts.</T></span>
+              <span className="sh-tile-note"><T k="shop.explore.drops.note">The Jordans on the calendar, the collabs and the One Piece pack.</T></span>
             </span>
           </Link>
         </li>

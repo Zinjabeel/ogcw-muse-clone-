@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { ProductGrid, ShopSearch, ShopShell } from "../components/shop-kit";
-import { BRANDS, GIFT_BANDS, PRODUCTS, SHOP_CATEGORIES, brandOf, retailerOf } from "../data/shop";
+import { BRANDS, GIFT_BANDS, LIVE_PRODUCTS, PRODUCTS, SHOP_CATEGORIES, brandOf, retailerOf } from "../data/shop";
 import { T } from "@/components/site-text";
 
 // An aisle, or the whole shop: every product, filtered by aisle, type,
@@ -62,7 +62,7 @@ function ShopAll() {
   const band = GIFT_BANDS.find((item) => item.id === search.price);
   const tag = TAGS.find((item) => item.id === search.tag);
   const words = (search.q ?? "").toLowerCase().split(/\s+/).filter(Boolean);
-  const inAisle = PRODUCTS.filter((product) => !category || product.category === category.id);
+  const inAisle = LIVE_PRODUCTS.filter((product) => !category || product.category === category.id);
   const matches = (product: (typeof PRODUCTS)[number], skip?: "kind" | "brand") =>
     (skip === "kind" || !search.kind || product.kind === search.kind) &&
     (skip === "brand" || !search.brand || product.brand === search.brand || product.retailer === search.brand) &&

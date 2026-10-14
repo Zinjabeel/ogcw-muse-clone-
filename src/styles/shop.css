@@ -156,6 +156,22 @@
 .sx-tile-photo { position: relative; display: block; aspect-ratio: 1; margin-bottom: 12px; overflow: hidden; border-radius: var(--sx-r-card); background: var(--sx-stage); }
 .sx-tile-photo img { width: 100%; height: 100%; object-fit: contain; transition: transform .9s var(--sx-ease); }
 .sx-tile-link:hover .sx-tile-photo img { transform: scale(1.06); }
+/* Product photos (ProductPhoto): the second one fades in under the pointer,
+   or after the first tap on a touch screen */
+.sx-photo { position: relative; }
+.sx-photo img { transition: opacity .45s ease, transform .9s var(--sx-ease); }
+.sx-photo .sx-photo-2 { position: absolute; inset: 0; opacity: 0; }
+:is(.sx-tile-link, .sh-square-link)[data-flipped] .sx-photo-1 { opacity: 0; }
+:is(.sx-tile-link, .sh-square-link)[data-flipped] .sx-photo-2 { opacity: 1; }
+@media (hover: hover) {
+  :is(.sx-tile-link, .sh-square-link):hover .sx-photo[data-two] .sx-photo-1 { opacity: 0; }
+  :is(.sx-tile-link, .sh-square-link):hover .sx-photo[data-two] .sx-photo-2 { opacity: 1; }
+  :is(.sx-tile-link, .sh-square-link):hover .sx-photo[data-two] img { transform: scale(1.03); }
+}
+/* Photos shot on white (the catalogue) sit on a white card with a hairline; on white rows, light grey */
+.sx-photo[data-stage="white"] { background: #fff; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.sx-photo[data-stage="white"] img { padding: 7%; mix-blend-mode: multiply; }
+.sh-row[data-tone="light"] .sx-photo[data-stage="white"] { background: #f1f1ef; box-shadow: none; }
 .sx-badge { position: absolute; top: 12px; left: 12px; z-index: 2; display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; background: var(--sx-gold); color: var(--sx-on-gold); font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .sx-tile-brand { color: var(--sx-gold); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .sx-tile-name { font-size: 15.5px; font-weight: 600; line-height: 1.3; }
@@ -165,6 +181,10 @@
 .sx-save { position: absolute; top: 12px; right: 12px; z-index: 3; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; background: rgb(255 255 255 / .1); color: var(--sx-on-stage); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .14); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; transition: transform .15s ease, color .2s ease, background-color .2s ease; }
 .sx-save:hover { background: rgb(255 255 255 / .18); }
 .sx-save[aria-pressed="true"] { color: #ffe600; }
+/* On a white photo card the heart turns dark */
+:is(.sh-square, .sx-tile):has(.sx-photo[data-stage="white"]) .sx-save:not(.sx-save-big) { background: rgb(0 0 0 / .05); color: #1a1a1a; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .1); }
+:is(.sh-square, .sx-tile):has(.sx-photo[data-stage="white"]) .sx-save:not(.sx-save-big):hover { background: rgb(0 0 0 / .1); }
+:is(.sh-square, .sx-tile):has(.sx-photo[data-stage="white"]) .sx-save[aria-pressed="true"]:not(.sx-save-big) { color: #b8892a; }
 .sx-save-big { position: static; width: 48px; height: 48px; background: transparent; color: var(--sx-text); box-shadow: inset 0 0 0 1.5px var(--sx-line); }
 .sx-save-big[aria-pressed="true"] { color: var(--sx-gold); }
 .sx-add { position: absolute; z-index: 3; display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: #ffe600; color: #0d0d0d; cursor: pointer; box-shadow: 0 8px 22px -10px rgb(0 0 0 / .8); transition: transform .15s ease, filter .2s ease; }
@@ -210,6 +230,15 @@
 .px-main { position: relative; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: clamp(20px, 4vw, 72px); padding: clamp(24px, 3vw, 48px) clamp(24px, 4vw, 64px) 0; }
 .px-photo { margin: 0; overflow: hidden; border-radius: var(--sx-r-card); background: var(--sx-stage); }
 .px-photo img { display: block; width: 100%; max-height: calc(66 * var(--sx-vh)); aspect-ratio: 1; object-fit: contain; }
+.px-photo { position: relative; }
+.px-photo[data-stage="white"] { background: #fff; }
+.px-photo[data-stage="white"] > img { padding: 6%; }
+/* Two photos: small thumbnails in the corner switch between them */
+.px-views { position: absolute; bottom: 14px; left: 14px; display: flex; gap: 8px; }
+.px-view { width: 58px; height: 58px; padding: 4px; overflow: hidden; border: 0; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px rgb(0 0 0 / .12); cursor: pointer; transition: box-shadow .2s ease; }
+.px-view img { width: 100%; height: 100%; max-height: none; object-fit: contain; animation: none !important; }
+.px-view[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--sx-gold); }
+.px-note { margin: 6px 0 0; color: var(--sx-dim); font-size: 13.5px; letter-spacing: .02em; }
 .px-info { display: grid; justify-items: start; gap: 14px; max-width: 540px; }
 .px-brand { color: var(--sx-gold); font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .px-name { margin: 0; font: 600 clamp(32px, 3.4vw, 58px)/1.02 var(--sx-display); letter-spacing: -.015em; overflow-wrap: anywhere; }
@@ -458,20 +487,6 @@
 .sh-square-photo img { width: 100%; height: 100%; object-fit: contain; }
 .sh-square-name { min-height: 2.6em; font-size: 15px; font-weight: 600; line-height: 1.3; }
 .sh-square .sx-add { top: calc(100cqw - 52px); right: 12px; }
-/* A pick with a front and a back photo (on their own white): the back fades in under the pointer */
-.sh-pick { display: grid; gap: 12px; }
-.sh-pick-photo { position: relative; display: block; width: 100%; aspect-ratio: 1; padding: 0; overflow: hidden; border: 0; border-radius: var(--sx-r-card); background: #fff; cursor: pointer; }
-.sh-pick-photo img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 6%; object-fit: contain; mix-blend-mode: multiply; transition: opacity .45s ease, transform .9s var(--sx-ease); }
-/* On a white row the card takes the blank cards' light grey, and the photos' white melts into it */
-.sh-row[data-tone="light"] .sh-pick-photo { background: #f1f1ef; }
-.sh-pick-photo .is-back { opacity: 0; }
-.sh-pick[data-back] .is-front { opacity: 0; }
-.sh-pick[data-back] .is-back { opacity: 1; }
-@media (hover: hover) {
-  .sh-pick:hover .is-front { opacity: 0; }
-  .sh-pick:hover .is-back { opacity: 1; }
-  .sh-pick:hover .sh-pick-photo img { transform: scale(1.03); }
-}
 .sx-blank { --blank: color-mix(in srgb, var(--ogcw-text) 7%, var(--ogcw-bg)); --blank-line: color-mix(in srgb, var(--ogcw-text) 12%, var(--ogcw-bg)); display: grid; gap: 10px; }
 .sx-blank[data-tone="dark"] { --blank: #161616; --blank-line: #232323; }
 .sx-blank[data-tone="light"] { --blank: #f1f1ef; --blank-line: #e3e3e0; }

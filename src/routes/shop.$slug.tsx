@@ -27,7 +27,7 @@ function BrandPage() {
   const [dept, setDept] = useState<"All" | ShopCategory>("All");
   const [sort, setSort] = useState<Sort>("featured");
   if (!brand) return null;
-  const all = productsOf(brand.slug);
+  const all = productsOf(brand.slug).filter(isLive);
   const depts = ["All", ...new Set(all.map((product) => product.category))] as ("All" | ShopCategory)[];
   let products = dept === "All" ? all : all.filter((product) => product.category === dept);
   if (sort !== "featured") products = [...products].sort((a, b) => ((a.price ?? 1e9) - (b.price ?? 1e9)) * (sort === "low" ? 1 : -1));

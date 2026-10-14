@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowDownAZ, ArrowRight, ArrowUpRight, Heart, Menu, Minus, Plus, Search, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { BRANDS, PRODUCTS, brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
+import { BRANDS, LIVE_PRODUCTS, brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
@@ -106,17 +106,38 @@ export function AddToCart({ product, full = false }: { product: ShopProduct; ful
   );
 }
 
+/** A product's photos: the first, and the second (the other side, the back
+ *  or another colour) fading in under the pointer. On a touch screen the
+ *  first tap shows the second photo and the next one opens the product */
+export function ProductPhoto({ product, hidden = false, className = "sx-tile-photo", children }: { product: ShopProduct; hidden?: boolean; className?: string; children?: ReactNode }) {
+  return (
+    <span className={`${className} sx-photo`} data-stage={product.stage} data-two={product.back ? "" : undefined}>
+      <img className="sx-photo-1" src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" />
+      {product.back && <img className="sx-photo-2" src={product.back} alt="" loading="lazy" />}
+      {children}
+    </span>
+  );
+}
+/** On touch screens, the first tap on a two-photo card shows the second photo */
+export const firstTapShowsBack = (event: MouseEvent<HTMLElement>) => {
+  const card = event.currentTarget;
+  if (!card.querySelector(".sx-photo[data-two]") || window.matchMedia("(hover: hover)").matches) return;
+  if (card.dataset["flipped"] !== undefined) return;
+  event.preventDefault();
+  card.dataset["flipped"] = "";
+  window.setTimeout(() => { delete card.dataset["flipped"]; }, 4000);
+};
+
 export function ProductTile({ product, size = "md" }: { product: ShopProduct; size?: "md" | "lg" }) {
   if (!isLive(product)) return <BlankCard />;
   const tags = product.tags ?? [];
   const badge = tags.includes("limited") ? "Limited" : tags.includes("new") ? "New in" : tags.includes("drops") ? "Featured drop" : undefined;
   return (
     <article className={`sx-tile sx-tile-${size}`}>
-      <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-tile-link">
-        <span className="sx-tile-photo">
-          <img src={product.image} alt={`${fullName(product)}, ${product.colour}`} loading="lazy" />
+      <Link to="/shop/p/$id" params={{ id: product.id }} className="sx-tile-link" onClick={firstTapShowsBack}>
+        <ProductPhoto product={product}>
           {badge && <span className="sx-badge"><T k={`shop.badge.${badge.toLowerCase().replace(/\s+/g, "-")}`}>{badge}</T></span>}
-        </span>
+        </ProductPhoto>
         <span className="sx-tile-brand">{brandLine(product)}</span>
         <span className="sx-tile-name">{product.name}</span>
         <span className="sx-tile-colour">{product.colour}</span>
@@ -198,7 +219,7 @@ function BrandIndex() {
   // Every product under the first letter of its name; a letter with none
   // takes the products with any word starting with it, so every letter is full
   const groups = useMemo(() => {
-    const all = PRODUCTS.map((product) => ({ product, name: fullName(product).replace(/[“”’"]/g, "") })).sort((a, b) => a.name.localeCompare(b.name));
+    const all = LIVE_PRODUCTS.map((product) => ({ product, name: fullName(product).replace(/[“”‘’"']/g, "") })).sort((a, b) => a.name.localeCompare(b.name));
     const map = new Map<string, typeof all>();
     for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
       let list = all.filter((item) => item.name[0]!.toUpperCase() === letter);

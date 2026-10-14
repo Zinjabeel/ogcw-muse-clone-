@@ -31,6 +31,7 @@ function ProductPage() {
   const stories = useStories();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [view, setView] = useState(0);
   const aisle = product ? productsIn(product.category).filter(isLive) : [];
   const at = aisle.findIndex((item) => item.id === id);
   const prev = aisle[(at - 1 + aisle.length) % aisle.length];
@@ -47,7 +48,7 @@ function ProductPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [navigate, prev, next]);
-  useEffect(() => setCopied(false), [id]);
+  useEffect(() => { setCopied(false); setView(0); }, [id]);
 
   if (!product || !prev || !next) return null;
   const brand = brandOf(product);
@@ -55,7 +56,7 @@ function ProductPage() {
   const category = SHOP_CATEGORIES.find((item) => item.id === product.category)!;
   const story = product.story ? stories.get(product.story) : undefined;
   const fromBrand = productsOf(brand.slug).filter((item) => item.id !== product.id && isLive(item)).slice(0, 4);
-  const alike = PRODUCTS.filter((item) => item.id !== product.id && item.brand !== brand.slug && (item.kind === product.kind || item.category === product.category)).slice(0, 4);
+  const alike = PRODUCTS.filter((item) => item.id !== product.id && isLive(item) && item.brand !== brand.slug && (item.kind === product.kind || item.category === product.category)).slice(0, 4);
   // A pair on the release calendar
   const drop = product.tags?.includes("drops") ? DROPS.find((item) => item.kind === "Sneakers" && item.name.includes(product.name.replace("Retro ", "").split(" ").slice(0, 4).join(" "))) : undefined;
   // Seven dots around this piece, so a long aisle still fits
@@ -85,13 +86,25 @@ function ProductPage() {
             {copied ? <Check size={16} aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
           </button>
           {copied && <span className="px-copied" role="status">Link copied</span>}
-          <figure className="px-photo">
-            <img src={product.image} alt={`${fullName(product)}, ${product.colour}`} />
+          <figure className="px-photo" data-stage={product.stage}>
+            <img src={view === 1 && product.back ? product.back : product.image} alt={`${fullName(product)}, ${product.colour}${view === 1 ? ", second view" : ""}`} />
+            {product.back && (
+              <span className="px-views" role="group" aria-label="Photos">
+                {[product.image, product.back].map((src, i) => (
+                  <button key={src} type="button" className="px-view" aria-pressed={view === i} aria-label={i === 0 ? "First photo" : "Second photo"} onClick={() => setView(i)} onMouseEnter={() => setView(i)}>
+                    <img src={src} alt="" />
+                  </button>
+                ))}
+              </span>
+            )}
           </figure>
           <div className="px-info">
             <Link to="/shop/$slug" params={{ slug: brand.slug }} className="px-brand">{brandLine(product)}</Link>
             <h1 id="px-name" className="px-name">{product.name}</h1>
             <p className="px-colour">{product.colour}</p>
+            {(product.note || product.released) && (
+              <p className="px-note">{product.note ?? `${new Date(product.released!) > new Date() ? "Comes out" : "Came out"} ${new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(product.released!))}`}</p>
+            )}
             <div className="px-rule" />
             <div className="px-actions">
               <AddToCart product={product} full />

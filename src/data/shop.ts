@@ -1,4 +1,5 @@
 import { DROPS } from "./drops";
+import { CATALOG, CATALOG_BRANDS, CATALOG_IDS } from "./shop-catalog";
 
 // The OGCW Shop ("Brand deals"): brands and products, every one bought
 // straight from the shop that sells it ("Shop at …" links out; OGCW takes no
@@ -14,7 +15,7 @@ export type ShopCategory = "Sneakers" | "Clothing" | "Accessories" | "Streaming"
 export const SHOP_CATEGORIES: { id: ShopCategory; slug: string; label: string; blurb: string }[] = [
   { id: "Sneakers", slug: "sneakers", label: "Sneakers", blurb: "Jordans, terrace classics, runners and the pairs on the release calendar." },
   { id: "Clothing", slug: "clothing", label: "Clothing", blurb: "Football shirts, basketball jerseys, merch and limited editions." },
-  { id: "Accessories", slug: "accessories", label: "Watches & chains", blurb: "Rolex to Casio, gold chains, caps and shades." },
+  { id: "Accessories", slug: "accessories", label: "Collections", blurb: "Watches from Rolex to Nomos, gold chains, caps and shades." },
   { id: "Streaming", slug: "streaming", label: "Streaming", blurb: "The subscriptions for films, music, sport and games." },
 ];
 export const categoryOf = (slug: string) => SHOP_CATEGORIES.find((category) => category.slug === slug);
@@ -86,6 +87,8 @@ export const BRANDS: ShopBrand[] = [
   { slug: "xbox", name: "Xbox", blurb: "Xbox Game Pass.", site: "https://www.xbox.com/xbox-game-pass" },
   { slug: "nintendo", name: "Nintendo", blurb: "Nintendo Switch Online.", site: "https://www.nintendo.com/switch/online/" },
   { slug: "ea", name: "EA", blurb: "EA Play.", site: "https://www.ea.com/ea-play" },
+  // The catalogue's brands and shops (src/data/shop-catalog.ts)
+  ...CATALOG_BRANDS,
 ];
 export const getBrand = (slug: string) => BRANDS.find((brand) => brand.slug === slug);
 
@@ -110,9 +113,19 @@ export type ShopProduct = {
   retailer?: string;
   /** The shop's own page for it */
   url?: string;
+  /** A second photo (the other side, the back, or another colour): shown under the pointer */
+  back?: string;
+  /** The photos are on white, not on the black stage */
+  stage?: "white";
+  /** A line the shop lists with it, such as "Pre-owned, 2019 · M79030N-0002" */
+  note?: string;
+  /** The day it came out, or comes out (ISO) */
+  released?: string;
 };
 
 export const PRODUCTS: ShopProduct[] = [
+  // The live catalogue first: GOAT, Watchfinder & Co. and the owner's picks
+  ...CATALOG,
   { id: "one-piece-air-max-plus-ope-ope", brand: "nike", name: "One Piece x Air Max Plus “Ope Ope”", colour: "Very Berry / Green Quartz", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-ope-ope.webp", credit: "OGCW", tags: ["new","drops","limited"] },
   { id: "one-piece-air-max-plus-gomu-gomu", brand: "nike", name: "One Piece x Air Max Plus “Gomu Gomu”", colour: "Space Purple / Atomic Green", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-gomu-gomu.webp", credit: "OGCW", tags: ["new","drops","limited"] },
   { id: "one-piece-air-max-plus-mera-mera", brand: "nike", name: "One Piece x Air Max Plus “Mera Mera”", colour: "Brilliant Orange / Healing Jade", category: "Sneakers", kind: "Running", image: "/shop/one-piece-air-max-plus-mera-mera.webp", credit: "OGCW", tags: ["new","drops","limited"] },
@@ -258,10 +271,11 @@ export const PRODUCTS: ShopProduct[] = [
 ];
 
 export const getProduct = (id: string) => PRODUCTS.find((product) => product.id === id);
-/** For now only these show: every other product is a blank card until the
- *  owner fills the shop (owner's call, 10 Oct 2026) */
-export const LIVE_IDS = new Set(["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera"]);
+/** What shows: the One Piece pairs and the live catalogue. The older
+ *  placeholder products stay blank (owner's call, 10 Oct 2026) */
+export const LIVE_IDS = new Set(["one-piece-air-max-plus-ope-ope", "one-piece-air-max-plus-gomu-gomu", "one-piece-air-max-plus-mera-mera", ...CATALOG_IDS]);
 export const isLive = (product: ShopProduct) => LIVE_IDS.has(product.id);
+export const LIVE_PRODUCTS = PRODUCTS.filter(isLive);
 export const brandOf = (product: ShopProduct) => getBrand(product.brand)!;
 /** The shop it's bought from: the brand itself, or a resale / vintage shop */
 export const retailerOf = (product: ShopProduct) => getBrand(product.retailer ?? product.brand) ?? brandOf(product);
