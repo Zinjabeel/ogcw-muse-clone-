@@ -595,6 +595,49 @@
 .sx-brand-hero-art .sx-blank-photo { display: block; aspect-ratio: 3 / 4; border-radius: var(--sx-r-card); background: color-mix(in srgb, var(--ogcw-text) 7%, var(--ogcw-bg)); }
 
 /* ==================================================================
+   Check this out (src/routes/shop.check-this-out.tsx): one piece at a time
+   ================================================================== */
+.co { margin-top: calc(-1 * var(--sx-bar-h)); }
+.co-open { display: grid; place-content: center; justify-items: center; gap: 18px; min-height: calc(100 * var(--sx-vh)); padding: calc(var(--sx-bar-h) + 40px) 20px 60px; background: #0a0a0a; color: #f2f0ea; text-align: center; }
+.co-kicker { margin: 0; color: #c9a14a; font: 700 12px var(--ogcw-ui); letter-spacing: .2em; text-transform: uppercase; }
+.co-title { margin: 0; font: 400 clamp(64px, 12vw, 220px)/.88 var(--sx-display); letter-spacing: -.04em; }
+.co-sub { max-width: 34ch; margin: 0; color: rgb(242 240 234 / .7); font-size: clamp(16px, 1.4vw, 20px); line-height: 1.5; }
+.co-down { display: grid; place-items: center; width: 52px; height: 52px; margin-top: 24px; border-radius: 50%; color: inherit; box-shadow: inset 0 0 0 1px rgb(242 240 234 / .35); transition: background-color .2s ease; }
+.co-down:hover { background: rgb(242 240 234 / .1); }
+/* The panels: each one full screen, sticking under the header so the next slides over it */
+.co-panel { --co-bg: #0a0a0a; --co-fg: #f2f0ea; --co-dim: rgb(242 240 234 / .66); position: sticky; top: var(--sx-bar-h); display: flex; height: calc(100 * var(--sx-vh) - var(--sx-bar-h)); min-height: 560px; overflow: hidden; background: var(--co-bg); color: var(--co-fg); box-shadow: 0 -40px 80px -40px rgb(0 0 0 / .55); scroll-margin-top: var(--sx-bar-h); }
+.co-panel[data-tone="paper"] { --co-bg: #f2f0ea; --co-fg: #0d0d0d; --co-dim: rgb(13 13 13 / .62); }
+.co-panel[data-tone="stone"] { --co-bg: #1d1c1a; }
+.co-panel-inner { display: grid; flex: 1; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: clamp(28px, 5vw, 96px); width: min(calc(100% - 2 * clamp(16px, 4vw, 64px)), 1440px); margin: 0 auto; }
+.co-photo { display: block; justify-self: center; width: min(100%, calc(100 * var(--sx-vh) - var(--sx-bar-h) - 120px)); }
+.co-photo-frame { display: block; aspect-ratio: 1; overflow: hidden; border-radius: var(--sx-r-panel); }
+.co-photo-frame img { width: 100%; height: 100%; object-fit: contain; }
+.co-text { display: grid; gap: 16px; max-width: 560px; }
+.co-brand { margin: 0; color: var(--co-dim); font: 700 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; }
+.co-name { margin: 0; font: 400 clamp(36px, 4.2vw, 72px)/1 var(--sx-display); letter-spacing: -.025em; text-wrap: balance; }
+.co-line { margin: 0; font-size: clamp(16px, 1.3vw, 20px); line-height: 1.5; }
+.co-colour { margin: 0; color: var(--co-dim); font-size: 14px; }
+.co-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 10px; }
+.co-cta { background: var(--co-fg); color: var(--co-bg); }
+.co-cta:hover { filter: brightness(.92); }
+.co-textlink { display: inline-flex; align-items: center; gap: 6px; color: var(--co-fg); font: 700 12.5px var(--ogcw-ui); letter-spacing: .1em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 6px; }
+/* Only the photo eases in as its panel arrives, where the browser can tie it to the scroll */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .co-photo { animation: co-photo-in linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  }
+}
+/* The frame only grows and straightens: the photos inside keep their own fade (the second under the pointer) */
+@keyframes co-photo-in { from { transform: scale(.86) rotate(-4deg); } to { transform: none; } }
+.co-end { position: relative; z-index: 1; display: grid; justify-items: center; gap: 14px; padding: clamp(72px, 9vw, 160px) 20px; background: var(--ogcw-bg); text-align: center; }
+.co-end-title { max-width: 16ch; margin: 0 0 10px; font: 400 clamp(36px, 5vw, 84px)/1 var(--sx-display); letter-spacing: -.025em; }
+@media (max-width: 860px) {
+  .co-panel { position: relative; top: auto; height: auto; min-height: 0; padding-block: 48px; }
+  .co-panel-inner { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .co-photo { width: min(100%, 520px); }
+}
+
+/* ==================================================================
    Upcoming (src/routes/shop.drops.tsx): the calendar as a news front
    ================================================================== */
 .up-mast, .up-front, .up-months, .up-also, .up-cta { width: min(calc(100% - 2 * clamp(16px, 4vw, 64px)), 1440px); margin-inline: auto; }

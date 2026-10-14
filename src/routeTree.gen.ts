@@ -35,6 +35,7 @@ import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as ShopAllRouteImport } from './routes/shop.all'
 import { Route as ShopBrandsRouteImport } from './routes/shop.brands'
+import { Route as ShopCheckThisOutRouteImport } from './routes/shop.check-this-out'
 import { Route as ShopCheckoutRouteImport } from './routes/shop.checkout'
 import { Route as ShopDropsRouteImport } from './routes/shop.drops'
 import { Route as ShopGiftsRouteImport } from './routes/shop.gifts'
@@ -173,6 +174,11 @@ const ShopBrandsRoute = ShopBrandsRouteImport.update({
   path: '/shop/brands',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopCheckThisOutRoute = ShopCheckThisOutRouteImport.update({
+  id: '/shop/check-this-out',
+  path: '/shop/check-this-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopCheckoutRoute = ShopCheckoutRouteImport.update({
   id: '/shop/checkout',
   path: '/shop/checkout',
@@ -232,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/all': typeof ShopAllRoute
   '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/all': typeof ShopAllRoute
   '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/shop/$slug': typeof ShopSlugRoute
   '/shop/all': typeof ShopAllRoute
   '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
   '/shop/checkout': typeof ShopCheckoutRoute
   '/shop/drops': typeof ShopDropsRoute
   '/shop/gifts': typeof ShopGiftsRoute
@@ -340,6 +349,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/shop/all'
     | '/shop/brands'
+    | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
     | '/shop/gifts'
@@ -375,6 +385,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/shop/all'
     | '/shop/brands'
+    | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
     | '/shop/gifts'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/shop/$slug'
     | '/shop/all'
     | '/shop/brands'
+    | '/shop/check-this-out'
     | '/shop/checkout'
     | '/shop/drops'
     | '/shop/gifts'
@@ -446,6 +458,7 @@ export interface RootRouteChildren {
   ShopSlugRoute: typeof ShopSlugRoute
   ShopAllRoute: typeof ShopAllRoute
   ShopBrandsRoute: typeof ShopBrandsRoute
+  ShopCheckThisOutRoute: typeof ShopCheckThisOutRoute
   ShopCheckoutRoute: typeof ShopCheckoutRoute
   ShopDropsRoute: typeof ShopDropsRoute
   ShopGiftsRoute: typeof ShopGiftsRoute
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopBrandsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/check-this-out': {
+      id: '/shop/check-this-out'
+      path: '/shop/check-this-out'
+      fullPath: '/shop/check-this-out'
+      preLoaderRoute: typeof ShopCheckThisOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop/checkout': {
       id: '/shop/checkout'
       path: '/shop/checkout'
@@ -718,6 +738,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopSlugRoute: ShopSlugRoute,
   ShopAllRoute: ShopAllRoute,
   ShopBrandsRoute: ShopBrandsRoute,
+  ShopCheckThisOutRoute: ShopCheckThisOutRoute,
   ShopCheckoutRoute: ShopCheckoutRoute,
   ShopDropsRoute: ShopDropsRoute,
   ShopGiftsRoute: ShopGiftsRoute,

@@ -281,7 +281,7 @@ const SECTIONS = [
   { key: "featured-drops", label: "Featured drops", to: "/shop/all", tag: "drops" },
   { key: "latest", label: "Latest", to: "/shop/all", tag: "new" },
   { key: "upcoming", label: "Upcoming", to: "/shop/drops", tag: "" },
-  { key: "check-this-out", label: "Check this out", to: "/shop/all", tag: "limited" },
+  { key: "check-this-out", label: "Check this out", to: "/shop/check-this-out", tag: "" },
 ] as const;
 const AISLE_LINKS = [
   { key: "sneakers", label: "Sneakers", cat: "sneakers" },
@@ -336,14 +336,16 @@ function ShopHeader() {
   const [menu, setMenu] = useState(false);
   const location = useRouterState({ select: (state) => state.location });
   const home = location.pathname === "/shop" || location.pathname === "/shop/";
-  const [over, setOver] = useState(home);
+  // Pages that open on a full-bleed picture or panel: the header lies over it until you scroll
+  const overlay = home || location.pathname === "/shop/check-this-out";
+  const [over, setOver] = useState(overlay);
   useEffect(() => {
-    if (!home) { setOver(false); return; }
+    if (!overlay) { setOver(false); return; }
     const update = () => setOver(window.scrollY < 24);
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, [home]);
+  }, [overlay]);
   useEffect(() => setMenu(false), [location.pathname, location.searchStr]);
   const tag = (location.search as Record<string, unknown>)["tag"];
   const here = (section: (typeof SECTIONS)[number]) =>
