@@ -1,24 +1,18 @@
-import { ChevronLeft, Gamepad2, Play, RotateCcw } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { breakout, dino, GOLD, H, skyhop, snake, W, type Game } from "./arcade-games";
+import { ChevronLeft, ChevronRight, Play, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
+import { GAMES, H, W, YELLOW, type Game } from "./arcade-games";
 import { T } from "./site-text";
 
-// The arcade in the middle of the 404 page (owner, 15 Oct 2026: "instead of
-// the fox ... a multiple choice between 3 games, snake, dinosaur jump and a
-// few other games you choose"). A black card: first the four games to pick
-// from, each showing its own opening frame; then the game itself, with the
-// score, the best score (kept in this browser), restart and back to the games.
+// The arcade in the middle of the 404 page (owner, 15 Oct 2026). One game at
+// a time in a see-through glass card; the others wait on either side, turned
+// away in 3D, and come round with the arrows, a scroll, a swipe, the left and
+// right keys, the dots or a click. The games themselves are in
+// src/components/arcade-games.ts. Best scores are kept in this browser.
 
-const GAMES = [
-  { id: "snake", name: "Snake", hint: "Arrow keys or swipe", make: snake },
-  { id: "dino", name: "Dino Jump", hint: "Space or tap to jump", make: dino },
-  { id: "breakout", name: "Brick Breaker", hint: "Arrow keys or drag", make: breakout },
-  { id: "skyhop", name: "Sky Hop", hint: "Space or tap to fly", make: skyhop },
-] as const;
-type GameDef = (typeof GAMES)[number];
 type Phase = "ready" | "playing" | "over";
+const N = GAMES.length;
+const wrap = (i: number) => ((i % N) + N) % N;
 
-const START_KEYS = new Set(["Space", "Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyW", "KeyA", "KeyS", "KeyD"]);
 const bestKey = (id: string) => `ogcw-404-best-${id}`;
 const readBest = (id: string) => {
   try { return Number(localStorage.getItem(bestKey(id))) || 0; } catch { return 0; }
@@ -37,16 +31,28 @@ function setup(canvas: HTMLCanvasElement) {
   return ctx;
 }
 
-function Preview({ make }: { make: () => Game }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    if (ref.current) make().draw(setup(ref.current));
-  }, [make]);
-  return <canvas ref={ref} className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-500 group-hover:scale-105 group-hover:opacity-100" aria-hidden="true" />;
+// Gold letters with a stack of darker golds under them, so they stand out in 3D
+const EXTRUDE = "0 1px 0 #E6CF00, 0 2px 0 #CCB400, 0 3px 0 #B39A00, 0 4px 0 #9C7F02, 0 5px 0 #846603, 0 12px 22px rgba(0,0,0,0.65)";
+// The card: a sheet of dark glass with a lit top edge
+const GLASS = "0 50px 100px -30px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 0 0 1px rgba(255,255,255,0.05)";
+// Card height = its header (52px) + a 3:2 screen + its padding; it never
+// runs taller than the room between the nav and the way home
+const SIZE = "min(100%, 600px, calc((100dvh - 372px) * 1.5))";
+
+function screenStyle(tilt: number) {
+  return { transform: tilt ? `rotateX(${tilt}deg) scale(0.9)` : undefined, transformOrigin: "50% 58%" };
 }
 
-export function Arcade() {
-  const [def, setDef] = useState<GameDef | null>(null);
+function Preview({ index }: { index: number }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (ref.current) GAMES[index]!.make().draw(setup(ref.current), 0);
+  }, [index]);
+  return <canvas ref={ref} className="block h-full w-full" style={screenStyle(GAMES[index]!.tilt)} aria-hidden="true" />;
+}
+
+export function Arcade({ paused = false }: { paused?: boolean }) {
+  const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("ready");
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
@@ -54,40 +60,55 @@ export function Arcade() {
   const canvas = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game | null>(null);
   const phaseRef = useRef<Phase>("ready");
+  const indexRef = useRef(0);
   const scoreRef = useRef(0);
   const bestRef = useRef(0);
   const overAt = useRef(0);
+  const switchedAt = useRef(0);
+  const wheel = useRef({ sum: 0, at: 0 });
+  const press = useRef<{ x: number; y: number } | null>(null);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+  const def = GAMES[index]!;
 
   const toPhase = (next: Phase) => { phaseRef.current = next; setPhase(next); };
-  const fresh = (pick: GameDef) => {
-    game.current = pick.make();
+  const fresh = () => {
+    game.current = GAMES[indexRef.current]!.make();
     scoreRef.current = 0;
     setScore(0);
     setNewBest(false);
     toPhase("ready");
   };
-  const choose = (pick: GameDef) => {
-    setDef(pick);
-    bestRef.current = readBest(pick.id);
-    setBest(bestRef.current);
-    fresh(pick);
-  };
-  /** Starts (or restarts after a game over); false while a lost game is still settling */
+  /** Starts, or plays again once a lost game has settled; false while it settles */
   const start = () => {
-    if (!def) return false;
+    if (phaseRef.current === "playing") return true;
     if (phaseRef.current === "over") {
       if (performance.now() - overAt.current < 400) return false;
-      fresh(def);
+      fresh();
     }
     toPhase("playing");
     return true;
   };
+  const go = (step: number) => {
+    if (phaseRef.current === "playing" || !step) return;
+    const now = performance.now();
+    if (now - switchedAt.current < 380) return;
+    switchedAt.current = now;
+    setIndex((i) => wrap(i + step));
+  };
 
-  // The loop: move the game on while playing, paint it every frame
+  // A fresh game whenever another one comes round
   useEffect(() => {
-    if (!def || !canvas.current) return;
+    indexRef.current = index;
+    bestRef.current = readBest(GAMES[index]!.id);
+    setBest(bestRef.current);
+    fresh();
+  }, [index]);
+
+  // The loop: move the game on while it's played, run its effects and paint it
+  useEffect(() => {
+    if (!canvas.current) return;
     const ctx = setup(canvas.current);
-    canvas.current.focus({ preventScroll: true });
     let raf = 0;
     let last = performance.now();
     const frame = (now: number) => {
@@ -95,7 +116,7 @@ export function Arcade() {
       last = now;
       const current = game.current;
       if (current) {
-        if (phaseRef.current === "playing" && !current.over) {
+        if (phaseRef.current === "playing" && !current.over && !pausedRef.current) {
           current.update(dt);
           if (current.score !== scoreRef.current) {
             scoreRef.current = current.score;
@@ -108,124 +129,216 @@ export function Arcade() {
               bestRef.current = current.score;
               setBest(current.score);
               setNewBest(true);
-              saveBest(def.id, current.score);
+              saveBest(GAMES[indexRef.current]!.id, current.score);
             }
           }
         }
-        current.draw(ctx);
+        current.ambient(dt);
+        current.shake = Math.max(0, current.shake - dt * 1.6);
+        ctx.save();
+        if (current.shake > 0) {
+          const amount = current.shake * 12;
+          ctx.translate((Math.random() - 0.5) * amount, (Math.random() - 0.5) * amount);
+        }
+        current.draw(ctx, now / 1000);
+        ctx.restore();
       }
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [def]);
+  }, [index]);
 
-  const onKey = (event: ReactKeyboardEvent, down: boolean) => {
-    if (event.code === "Escape" && down) { setDef(null); return; }
-    const current = game.current;
-    if (!current) return;
-    if (down && phaseRef.current !== "playing") {
-      if (!START_KEYS.has(event.code)) return;
-      event.preventDefault();
-      if (!start()) return;
+  // Keys: left and right change the game until it starts; then they're the game's
+  useEffect(() => {
+    const handle = (event: KeyboardEvent, down: boolean) => {
+      if (pausedRef.current) return;
+      const target = event.target;
+      if ((event.code === "Space" || event.code === "Enter") && target instanceof Element && target.closest("a, button, input, textarea, select")) return;
+      if (phaseRef.current !== "playing") {
+        if (!down) { game.current?.key?.(event.code, false); return; }
+        if (event.code === "ArrowLeft" || event.code === "ArrowRight") {
+          event.preventDefault();
+          go(event.code === "ArrowLeft" ? -1 : 1);
+        } else if (["Space", "Enter", "ArrowUp", "KeyW"].includes(event.code)) {
+          event.preventDefault();
+          if (start()) game.current?.key?.(event.code, true);
+        }
+        return;
+      }
+      if (event.code === "Escape" && down) { fresh(); return; }
+      if (game.current?.key?.(event.code, down)) event.preventDefault();
+    };
+    const keydown = (event: KeyboardEvent) => handle(event, true);
+    const keyup = (event: KeyboardEvent) => handle(event, false);
+    window.addEventListener("keydown", keydown);
+    window.addEventListener("keyup", keyup);
+    return () => {
+      window.removeEventListener("keydown", keydown);
+      window.removeEventListener("keyup", keyup);
+    };
+  }, []);
+
+  const onWheel = (event: ReactWheelEvent) => {
+    if (phaseRef.current === "playing") return;
+    const now = performance.now();
+    if (now - wheel.current.at > 220) wheel.current.sum = 0;
+    wheel.current.at = now;
+    wheel.current.sum += Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (Math.abs(wheel.current.sum) > 40) {
+      go(Math.sign(wheel.current.sum));
+      wheel.current.sum = 0;
     }
-    if (game.current?.key?.(event.code, down)) event.preventDefault();
   };
   const at = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     return [((event.clientX - rect.left) / rect.width) * W, ((event.clientY - rect.top) / rect.height) * H] as const;
   };
   const onDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    event.currentTarget.focus({ preventScroll: true });
     event.currentTarget.setPointerCapture(event.pointerId);
-    if (phaseRef.current !== "playing" && !start()) return;
-    game.current?.down?.(...at(event));
+    press.current = { x: event.clientX, y: event.clientY };
+    if (phaseRef.current === "playing") game.current?.down?.(...at(event));
+  };
+  // Before a game: a sideways swipe changes the game, a tap starts it
+  const onUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const from = press.current;
+    press.current = null;
+    if (phaseRef.current === "playing") { game.current?.up?.(...at(event)); return; }
+    if (!from) return;
+    const dx = event.clientX - from.x;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(event.clientY - from.y)) go(dx < 0 ? 1 : -1);
+    else if (start()) game.current?.down?.(...at(event));
+  };
+  const play = () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+    start();
   };
 
-  return (
-    <section aria-label="Play a game" className="rounded-[28px] bg-[#0d0d0d] p-2.5 text-white shadow-[0_30px_80px_-24px_rgba(0,0,0,0.6)]" style={{ width: "min(100%, 660px, calc((100dvh - 340px) * 1.5))" }}>
-      <header className="flex h-10 items-center justify-between gap-3 px-2 pb-2.5">
-        {def ? (
-          <>
-            <button type="button" onClick={() => setDef(null)} className="inline-flex items-center gap-1 rounded-full bg-white/10 py-1.5 pl-2 pr-3.5 text-xs font-extrabold uppercase tracking-[0.1em] transition-colors hover:bg-white hover:text-black">
-              <ChevronLeft className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" /> <T k="404.games.back">Games</T>
-            </button>
-            <p className="truncate text-sm font-black uppercase tracking-[0.08em] sm:text-base">{def.name}</p>
-            <div className="flex items-center gap-2">
-              <p className="text-xs font-bold uppercase tracking-[0.08em] text-white/60 tabular-nums" aria-live="polite">
-                <span className="text-white">{score}</span><span className="hidden sm:inline"> · <T k="404.games.best">Best</T> <span style={{ color: GOLD }}>{best}</span></span>
-              </p>
-              <button type="button" onClick={() => { fresh(def); canvas.current?.focus({ preventScroll: true }); }} className="grid h-8 w-8 place-items-center rounded-full bg-white/10 transition-colors hover:bg-white hover:text-black" aria-label="Restart">
-                <RotateCcw className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] sm:text-sm">
-              <span style={{ color: GOLD }}><T k="404.games.lost">Lost?</T></span> <T k="404.games.pick">Pick a game</T>
-            </p>
-            <Gamepad2 className="h-5 w-5" style={{ color: GOLD }} strokeWidth={2.25} aria-hidden="true" />
-          </>
-        )}
-      </header>
+  const playing = phase === "playing";
+  const arrow = "absolute top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/10 text-white shadow-[0_10px_30px_-8px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-md transition hover:scale-110 hover:border-transparent hover:bg-[#FFE600] hover:text-black disabled:pointer-events-none disabled:opacity-25 sm:h-14 sm:w-14";
 
-      <div className="relative aspect-[3/2] overflow-hidden rounded-[20px] bg-[#141414]">
-        {def ? (
-          <>
-            <canvas
-              ref={canvas}
-              tabIndex={0}
-              aria-label={`${def.name}. ${def.hint}. Escape goes back to the games.`}
-              className="block h-full w-full touch-none outline-none"
-              onKeyDown={(event) => onKey(event, true)}
-              onKeyUp={(event) => onKey(event, false)}
-              onPointerDown={onDown}
-              onPointerMove={(event) => game.current?.move?.(...at(event))}
-              onPointerUp={(event) => game.current?.up?.(...at(event))}
-            />
-            {phase !== "playing" && (
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60 px-4 text-center">
-                {phase === "ready" ? (
-                  <>
-                    <p className="text-2xl font-black uppercase tracking-tight sm:text-4xl">{def.name}</p>
-                    <p className="text-xs font-semibold text-white/70 sm:text-sm">{def.hint}</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-2xl font-black uppercase tracking-tight sm:text-4xl" style={{ color: GOLD }}><T k="404.games.over">Game over</T></p>
-                    <p className="text-sm font-bold text-white/80 sm:text-base">{newBest ? <T k="404.games.newbest">New best:</T> : <T k="404.games.score">Score:</T>} {score}</p>
-                  </>
-                )}
-                <p className="mt-2 rounded-full px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-black sm:text-xs" style={{ background: GOLD }}>
-                  {phase === "ready" ? <T k="404.games.start">Press space or tap to start</T> : <T k="404.games.again">Space or tap to play again</T>}
-                </p>
+  return (
+    <section aria-label="Play a game" aria-roledescription="carousel" className="flex w-full flex-col items-center">
+      <div className="relative" style={{ width: SIZE, perspective: "1600px" }} onWheel={onWheel}>
+        {/* Sizes the stage like one card: its header and its 3:2 screen */}
+        <div className="invisible p-2.5 pt-0" aria-hidden="true">
+          <div className="h-[52px]" />
+          <div className="aspect-[3/2]" />
+        </div>
+
+        {GAMES.map((item, i) => {
+          const off = ((i - index + N + 1) % N) - 1; // -1 left, 0 in front, 1 right, 2 behind
+          const front = off === 0;
+          const transform = front
+            ? "translate3d(0, 0, 0) rotateY(0deg)"
+            : off === 2
+              ? "translate3d(0, 0, -420px) scale(0.7)"
+              : `translate3d(${off * 76}%, 0, -220px) rotateY(${off * -44}deg)`;
+          return (
+            <article
+              key={item.id}
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${N}: ${item.name}`}
+              aria-hidden={!front}
+              className="absolute inset-0 transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              style={{ transform, opacity: front ? 1 : off === 2 ? 0 : 0.45, zIndex: front ? 3 : off === 2 ? 0 : 1, pointerEvents: off === 2 ? "none" : undefined }}
+            >
+              <div className="flex h-full flex-col rounded-[26px] border border-white/15 bg-white/[0.05] p-2.5 pt-0 backdrop-blur-xl" style={{ boxShadow: GLASS }}>
+                <header className="flex h-[52px] items-center gap-3 px-2">
+                  <span className="text-xs font-black tabular-nums" style={{ color: YELLOW }}>
+                    {String(i + 1).padStart(2, "0")}<span className="text-white/35"> / {String(N).padStart(2, "0")}</span>
+                  </span>
+                  <p className="min-w-0 flex-1 truncate text-sm font-black uppercase tracking-[0.12em] text-white sm:text-base">{item.name}</p>
+                  {front && (
+                    <>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/50 tabular-nums" aria-live="polite">
+                        <span className="text-sm font-black text-white">{score}</span>
+                        <span className="hidden sm:inline"> · <T k="404.games.best">Best</T> <span style={{ color: YELLOW }}>{best}</span></span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => { (document.activeElement as HTMLElement | null)?.blur(); fresh(); }}
+                        className="grid h-8 w-8 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition hover:bg-white hover:text-black"
+                        aria-label="Restart"
+                      >
+                        <RotateCcw className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" />
+                      </button>
+                    </>
+                  )}
+                </header>
+                <div className="relative min-h-0 flex-1 overflow-hidden rounded-[18px] bg-black/10 ring-1 ring-white/10" style={{ perspective: "760px" }}>
+                  {front ? (
+                    <canvas
+                      ref={canvas}
+                      aria-label={`${item.name}: ${item.hint}`}
+                      className="block h-full w-full touch-none select-none"
+                      style={screenStyle(item.tilt)}
+                      onPointerDown={onDown}
+                      onPointerMove={(event) => { if (phaseRef.current === "playing") game.current?.move?.(...at(event)); }}
+                      onPointerUp={onUp}
+                      onPointerCancel={() => { press.current = null; }}
+                    />
+                  ) : (
+                    <Preview index={i} />
+                  )}
+                  {front && !playing && (
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30 px-5 text-center">
+                      {phase === "ready" ? (
+                        <>
+                          <p className="text-3xl font-black uppercase leading-none tracking-tight sm:text-5xl" style={{ color: YELLOW, textShadow: EXTRUDE }}>{def.name}</p>
+                          <p className="mt-1 hidden max-w-[36ch] text-sm font-semibold text-white/80 sm:block">{def.tagline}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-3xl font-black uppercase leading-none tracking-tight sm:text-5xl" style={{ color: YELLOW, textShadow: EXTRUDE }}><T k="404.games.over">Game over</T></p>
+                          <p className="mt-1 text-sm font-bold text-white sm:text-base">{newBest ? <T k="404.games.newbest">New best:</T> : <T k="404.games.score">Score:</T>} {score}</p>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={play}
+                        className="pointer-events-auto mt-2 inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-black shadow-[0_6px_0_#9C7F02,0_16px_26px_-6px_rgba(0,0,0,0.75)] transition hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-[0_2px_0_#9C7F02] sm:text-sm"
+                        style={{ background: YELLOW }}
+                      >
+                        <Play className="h-4 w-4" fill="currentColor" strokeWidth={0} aria-hidden="true" />
+                        {phase === "ready" ? <T k="404.games.play">Play</T> : <T k="404.games.again">Play again</T>}
+                      </button>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/55 sm:text-[11px]">{def.hint}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </>
-        ) : (
-          <ul className="grid h-full grid-cols-2 grid-rows-2 gap-2 p-2">
-            {GAMES.map((pick) => (
-              <li key={pick.id} className="min-h-0">
-                <button
-                  type="button"
-                  onClick={() => choose(pick)}
-                  className="group relative block h-full w-full overflow-hidden rounded-2xl bg-[#0d0d0d] text-left ring-1 ring-white/10 transition hover:ring-2 hover:ring-[#F4B921] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4B921]"
-                >
-                  <Preview make={pick.make} />
-                  <span className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" aria-hidden="true" />
-                  <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full text-black transition-transform group-hover:scale-110 sm:h-8 sm:w-8" style={{ background: GOLD }} aria-hidden="true">
-                    <Play className="h-3.5 w-3.5 translate-x-px" fill="currentColor" strokeWidth={0} />
-                  </span>
-                  <span className="absolute bottom-2 left-2.5 right-2.5 sm:bottom-3 sm:left-3.5">
-                    <span className="block text-sm font-black uppercase leading-tight tracking-tight sm:text-xl">{pick.name}</span>
-                    <span className="hidden text-[11px] font-semibold text-white/60 sm:block">{pick.hint}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+              {!front && off !== 2 && (
+                <button type="button" onClick={() => go(off)} className="absolute inset-0 rounded-[26px]" aria-label={`Show ${item.name}`} tabIndex={-1} />
+              )}
+            </article>
+          );
+        })}
+
+        <button type="button" onClick={() => go(-1)} disabled={playing} className={`${arrow} left-1 sm:-left-7`} aria-label="Previous game">
+          <ChevronLeft className="h-6 w-6" strokeWidth={2.75} aria-hidden="true" />
+        </button>
+        <button type="button" onClick={() => go(1)} disabled={playing} className={`${arrow} right-1 sm:-right-7`} aria-label="Next game">
+          <ChevronRight className="h-6 w-6" strokeWidth={2.75} aria-hidden="true" />
+        </button>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {GAMES.map((item, i) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => go(i - index)}
+              disabled={playing}
+              aria-label={`Show ${item.name}`}
+              aria-current={i === index ? "true" : undefined}
+              className={`h-2 rounded-full transition-all duration-500 disabled:cursor-default ${i === index ? "w-8" : "w-2 bg-white/30 hover:bg-white/60"}`}
+              style={i === index ? { background: YELLOW } : undefined}
+            />
+          ))}
+        </div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45 sm:text-[11px]"><T k="404.games.more">Scroll, swipe or use the arrows</T></p>
       </div>
     </section>
   );

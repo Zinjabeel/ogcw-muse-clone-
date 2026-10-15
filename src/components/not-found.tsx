@@ -4,12 +4,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Arcade } from "./not-found-arcade";
 import { EditSection, T } from "./site-text";
 
-// 404 (owner, 15 Oct 2026, from a pasted spec): one full-screen gold page
-// with its own bold nav, a giant white "404" stretched to the screen height
-// behind a white oval, the arcade in the middle (pick a game: Snake, Dino Jump,
-// Brick Breaker or Sky Hop; src/components/not-found-arcade.tsx) and "Back to
-// Home" at the foot. Gold, white and black: the owner swapped the spec's
-// orange, and its fox video for the games. The spec's brand ("TinyTrails") is
+// 404 (owner, 15 Oct 2026, from a pasted spec): one full-screen black page
+// with its own bold gold-and-white nav, a giant "404" (white 4s, a yellow 0)
+// stretched to the screen height with a black oval in the 0, the arcade in the
+// middle (one game at a time in a glass card: Snake, Dino Jump, Brick Breaker,
+// Sky Hop; src/components/not-found-arcade.tsx) and "Back to Home" at the foot.
+// The owner swapped the spec's orange for this, and its fox video for the games. The spec's brand ("TinyTrails") is
 // OGCW here, and its nav links go to the site's own sections. The shop shows
 // this page to everyone but the admin.
 
@@ -22,19 +22,19 @@ const LINKS = [
 ] as const;
 const MENU = [...LINKS, { label: "Streaming", to: "/streaming" }, { label: "About", to: "/about" }] as const;
 
-const INK = "#0d0d0d";
 const GOLD = "#F4B921";
+const YELLOW = "#FFE600";
 
 // useLayoutEffect warns on the server; the scale is only measured in the browser
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-function Logo({ light = false }: { light?: boolean }) {
+function Logo() {
   return (
     <span className="flex items-center gap-1.5">
       <span className="grid grid-cols-2 gap-0.5" aria-hidden="true">
-        {[0, 1, 2, 3].map((dot) => <span key={dot} className="h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3" style={{ background: light ? GOLD : INK }} />)}
+        {[0, 1, 2, 3].map((dot) => <span key={dot} className="h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3" style={{ background: GOLD }} />)}
       </span>
-      <span className="ml-1 text-xl font-black tracking-tight sm:text-2xl" style={{ color: light ? "#FFFFFF" : INK }}>OGCW</span>
+      <span className="ml-1 text-xl font-black tracking-tight sm:text-2xl" style={{ color: "#FFFFFF" }}>OGCW</span>
     </span>
   );
 }
@@ -77,12 +77,12 @@ export function NotFoundPage() {
 
   return (
     <EditSection name="Error page">
-      <div className="relative flex h-screen w-full flex-col overflow-hidden font-[Inter,sans-serif] antialiased" style={{ background: "linear-gradient(to bottom, #F7CB45, #E3A51C)" }}>
+      <div className="relative flex h-screen w-full flex-col overflow-hidden font-[Inter,sans-serif] antialiased" style={{ background: "radial-gradient(ellipse 80% 70% at 50% 42%, #1b1b1b 0%, #070707 70%)" }}>
         {/* The giant 404 and the oval over it, fading out towards the foot */}
         <div
           className="pointer-events-none absolute inset-0"
           aria-hidden="true"
-          style={{ opacity: 0.8, maskImage: "linear-gradient(to bottom, black 40%, transparent 95%)", WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent 95%)" }}
+          style={{ opacity: 0.6, maskImage: "linear-gradient(to bottom, black 40%, transparent 95%)", WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent 95%)" }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <span
@@ -90,11 +90,11 @@ export function NotFoundPage() {
               className="whitespace-nowrap font-black leading-none tracking-tighter"
               style={{ color: "#FFFFFF", fontSize: "clamp(200px, 48vw, 800px)", transform: `scale(1.15, ${scaleY * 1.4})` }}
             >
-              404
+              4<span style={{ color: YELLOW }}>0</span>4
             </span>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-[22vh] rounded-full sm:h-[26vh] md:h-[50vh]" style={{ background: "#FFFFFF", width: "clamp(120px, 20vw, 400px)", transform: `scaleY(${scaleY})`, transformOrigin: "center" }} />
+            <div className="h-[22vh] rounded-full sm:h-[26vh] md:h-[50vh]" style={{ background: "#070707", width: "clamp(120px, 20vw, 400px)", transform: `scaleY(${scaleY})`, transformOrigin: "center" }} />
           </div>
         </div>
 
@@ -102,7 +102,7 @@ export function NotFoundPage() {
           <Link to="/" aria-label="OGCW, back to the front page"><Logo /></Link>
           <div className="hidden gap-1 md:flex">
             {LINKS.map((link) => (
-              <Link key={link.to} to={link.to} className="rounded-full px-5 py-2.5 text-[13px] font-extrabold uppercase tracking-[0.08em] text-white transition-colors hover:bg-white hover:text-black" style={{ background: INK }}>
+              <Link key={link.to} to={link.to} className="rounded-full px-5 py-2.5 text-[13px] font-black uppercase tracking-[0.08em] text-black shadow-[0_4px_0_#9C7F02] transition hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_5px_0_#9a9a9a]" style={{ background: GOLD }}>
                 {link.label}
               </Link>
             ))}
@@ -112,24 +112,24 @@ export function NotFoundPage() {
             onClick={() => setOpen(true)}
             aria-expanded={open}
             aria-controls="nf-menu"
-            className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-black transition-colors hover:bg-black hover:text-white sm:px-5"
+            className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-black shadow-[0_4px_0_#9a9a9a] transition hover:-translate-y-0.5 hover:bg-[#F4B921] hover:shadow-[0_5px_0_#9C7F02] sm:px-5"
           >
             <Menu className="h-4 w-4" strokeWidth={2.75} aria-hidden="true" />
-            <span className="hidden text-[13px] font-extrabold uppercase tracking-[0.08em] sm:inline">Menu</span>
+            <span className="hidden text-[13px] font-black uppercase tracking-[0.08em] sm:inline">Menu</span>
           </button>
         </nav>
 
         {/* The arcade, between the nav and the way home */}
         <div className="relative z-20 flex min-h-0 flex-1 items-center justify-center px-4 py-3">
-          <Arcade />
+          <Arcade paused={open} />
         </div>
 
         <main className="relative z-30 flex flex-col items-center px-4 pb-6 text-center sm:pb-10">
-          <h1 className="mb-3 text-lg font-bold sm:mb-4 sm:text-xl md:text-2xl" style={{ color: INK }}><T k="404.oops">Oops, something went wrong!</T></h1>
+          <h1 className="mb-3 text-lg font-bold text-white sm:mb-4 sm:text-xl md:text-2xl"><T k="404.oops">Oops, something went wrong!</T></h1>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-extrabold uppercase tracking-[0.06em] text-white transition-all hover:scale-105 hover:shadow-lg sm:px-8 sm:py-4"
-            style={{ background: INK }}
+            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-black uppercase tracking-[0.06em] text-black shadow-[0_5px_0_#9C7F02] transition-all hover:scale-105 hover:bg-white hover:shadow-[0_5px_0_#9a9a9a] sm:px-8 sm:py-4"
+            style={{ background: GOLD }}
           >
             <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
             <T k="404.home">Back to Home</T>
@@ -152,7 +152,7 @@ export function NotFoundPage() {
             style={{ background: "linear-gradient(135deg, #0d0d0d 0%, #1f1f1f 100%)" }}
           >
             <div className="flex items-center justify-between px-6 py-5">
-              <Logo light />
+              <Logo />
               <button type="button" onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Close the menu">
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
