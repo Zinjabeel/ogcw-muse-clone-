@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ProductGrid, ShopShell, dollars } from "../components/shop-kit";
 import { BRANDS, LIVE_PRODUCTS, SHOP_CATEGORIES, type ShopProduct } from "../data/shop";
@@ -9,16 +9,23 @@ import { T } from "@/components/site-text";
 
 // An aisle, or the whole shop: every piece, filtered and sorted, and the
 // shop's search (src/lib/shop-search.ts: typos and intent, and the closest
-// pieces when nothing fits). The filters: the type (point at one and its
-// brands open beside it), men or women, a price slider, sizes, colours, what's
-// new or limited, and the brand. They live in the web address
-// (/shop/all?kind=Jeans&g=women&max=400), so a list can be shared.
+// pieces when nothing fits). The filters: the type (pointing at one, or
+// clicking it, opens its brands in a pop-up beside it), men or women, the
+// price (a slider, or typed in), sizes, colours by name, what's new or
+// limited, and the brand. Every filter takes more than one choice (owner,
+// 15 Oct): within a filter any of them fits, across filters all must. They
+// live in the web address (/shop/all?kind=Jeans,Jackets&brand=amiri,ksubi),
+// so a list can be shared.
 
 type Sort = "featured" | "low" | "high" | "new" | "az";
 export type ShopSearch = { q?: string; cat?: string; kind?: string; brand?: string; tag?: string; g?: string; size?: string; colour?: string; min?: number; max?: number; sort?: Sort };
 type Patch = { [K in keyof ShopSearch]?: ShopSearch[K] | undefined };
+type ListKey = "kind" | "brand" | "tag" | "g" | "size" | "colour";
 const str = (value: unknown) => (typeof value === "string" && value ? value : undefined);
 const num = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : typeof value === "string" && /^\d+$/.test(value) ? Number(value) : undefined);
+/** A filter's choices, from the web address ("Jeans,Jackets") */
+const listOf = (value: string | undefined) => (value ? value.split(",").filter(Boolean) : []);
+const joined = (list: string[]) => (list.length ? list.join(",") : undefined);
 const SORTS: { id: Sort; label: string }[] = [
   { id: "featured", label: "Featured" },
   { id: "low", label: "Price: low to high" },
@@ -32,20 +39,20 @@ const TAGS = [
   { id: "limited", label: "Limited editions", blurb: "Collabs, grails and one-off pieces." },
   { id: "drops", label: "Coming soon", blurb: "The pairs on the release calendar." },
 ];
-const COLOURS: { id: string; label: string; swatch: string; words: string[] }[] = [
-  { id: "black", label: "Black", swatch: "#111", words: ["black", "onyx", "noir", "obsidian"] },
-  { id: "white", label: "White", swatch: "#f5f5f2", words: ["white", "sail", "ivory", "summit"] },
-  { id: "grey", label: "Grey", swatch: "#9a9a9a", words: ["grey", "gray", "graphite", "slate", "cement", "charcoal"] },
-  { id: "brown", label: "Brown", swatch: "#7a5233", words: ["brown", "chocolate", "mocha", "tan", "coffee", "baroque"] },
-  { id: "cream", label: "Cream", swatch: "#e9dfc8", words: ["cream", "beige", "sand", "bone", "muslin", "oatmeal"] },
-  { id: "blue", label: "Blue", swatch: "#2f5fb3", words: ["blue", "navy", "royal", "indigo", "cobalt", "denim"] },
-  { id: "green", label: "Green", swatch: "#2f7a4b", words: ["green", "olive", "khaki", "army", "mint"] },
-  { id: "red", label: "Red", swatch: "#c0302b", words: ["red", "crimson", "burgundy", "cinnabar", "infrared"] },
-  { id: "pink", label: "Pink", swatch: "#e98bb0", words: ["pink", "rose", "punch"] },
-  { id: "yellow", label: "Yellow", swatch: "#f2c230", words: ["yellow", "maize", "canary", "gold"] },
-  { id: "orange", label: "Orange", swatch: "#e9752c", words: ["orange", "mango"] },
-  { id: "purple", label: "Purple", swatch: "#6c4a9e", words: ["purple", "violet", "grape", "concord"] },
-  { id: "silver", label: "Silver", swatch: "linear-gradient(135deg,#eee,#9aa0a6)", words: ["silver", "metallic", "chrome", "steel"] },
+const COLOURS: { id: string; label: string; words: string[] }[] = [
+  { id: "black", label: "Black", words: ["black", "onyx", "noir", "obsidian"] },
+  { id: "white", label: "White", words: ["white", "sail", "ivory", "summit"] },
+  { id: "grey", label: "Grey", words: ["grey", "gray", "graphite", "slate", "cement", "charcoal"] },
+  { id: "brown", label: "Brown", words: ["brown", "chocolate", "mocha", "tan", "coffee", "baroque"] },
+  { id: "cream", label: "Cream", words: ["cream", "beige", "sand", "bone", "muslin", "oatmeal"] },
+  { id: "blue", label: "Blue", words: ["blue", "navy", "royal", "indigo", "cobalt", "denim"] },
+  { id: "green", label: "Green", words: ["green", "olive", "khaki", "army", "mint"] },
+  { id: "red", label: "Red", words: ["red", "crimson", "burgundy", "cinnabar", "infrared"] },
+  { id: "pink", label: "Pink", words: ["pink", "rose", "punch"] },
+  { id: "yellow", label: "Yellow", words: ["yellow", "maize", "canary", "gold"] },
+  { id: "orange", label: "Orange", words: ["orange", "mango"] },
+  { id: "purple", label: "Purple", words: ["purple", "violet", "grape", "concord"] },
+  { id: "silver", label: "Silver", words: ["silver", "metallic", "chrome", "steel"] },
 ];
 const colourOf = (product: ShopProduct, id: string) => {
   const text = ` ${`${product.colour} ${product.name}`.toLowerCase().replace(/[^a-z]+/g, " ")} `;
@@ -90,18 +97,25 @@ function ShopAll() {
     return next as ShopSearch;
   }, resetScroll: false });
 
+  const picked = {
+    kind: listOf(search.kind), brand: listOf(search.brand), tag: listOf(search.tag),
+    g: listOf(search.g), size: listOf(search.size), colour: listOf(search.colour),
+  };
+  /** Add a choice to a filter, or take it off again */
+  const toggle = (key: ListKey, value: string) => set({ [key]: joined(picked[key].includes(value) ? picked[key].filter((item) => item !== value) : [...picked[key], value]) });
+
   const category = SHOP_CATEGORIES.find((item) => item.slug === search.cat);
-  const tag = TAGS.find((item) => item.id === search.tag);
+  const tags = TAGS.filter((item) => picked.tag.includes(item.id));
   const inAisle = useMemo(() => LIVE_PRODUCTS.filter((product) => !category || product.category === category.id), [category]);
   type Skip = "kind" | "brand" | "price" | "size" | "colour" | "g";
   const fits = (product: ShopProduct, skip?: Skip) =>
-    (skip === "kind" || !search.kind || product.kind === search.kind) &&
-    (skip === "brand" || !search.brand || product.brand === search.brand || product.retailer === search.brand) &&
-    (skip === "g" || !search.g || product.gender === search.g || product.gender === "unisex") &&
-    (!tag || product.tags?.includes(tag.id as never)) &&
+    (skip === "kind" || !picked.kind.length || picked.kind.includes(product.kind)) &&
+    (skip === "brand" || !picked.brand.length || picked.brand.includes(product.brand) || picked.brand.includes(product.retailer ?? "")) &&
+    (skip === "g" || !picked.g.length || picked.g.includes(product.gender ?? "") || product.gender === "unisex") &&
+    (!picked.tag.length || picked.tag.some((tag) => product.tags?.includes(tag as never))) &&
     (skip === "price" || ((search.min === undefined || (product.price ?? 0) >= search.min) && (search.max === undefined || (product.price !== undefined && product.price <= search.max)))) &&
-    (skip === "size" || !search.size || (product.sizes ?? []).includes(search.size)) &&
-    (skip === "colour" || !search.colour || colourOf(product, search.colour));
+    (skip === "size" || !picked.size.length || picked.size.some((size) => (product.sizes ?? []).includes(size))) &&
+    (skip === "colour" || !picked.colour.length || picked.colour.some((colour) => colourOf(product, colour)));
   const pool = inAisle.filter((product) => fits(product));
   const found = useMemo(() => (search.q ? searchShop(search.q, { pool }) : null), [search.q, pool.map((product) => product.id).join()]);
   let products = found ? found.results : pool;
@@ -118,8 +132,8 @@ function ShopAll() {
     const list = [...new Set(inAisle.map((product) => product.kind))];
     return SHOP_CATEGORIES.map((cat) => ({ cat, kinds: list.filter((kind) => inAisle.some((product) => product.kind === kind && product.category === cat.id)) })).filter((group) => group.kinds.length);
   }, [inAisle]);
-  const brandsFor = (kind?: string) => BRANDS.filter((brand) => !brand.store && inAisle.some((product) => (!kind || product.kind === kind) && (product.brand === brand.slug)));
-  const brands = brandsFor(search.kind).filter((brand) => inAisle.some((product) => product.brand === brand.slug && fits(product, "brand")) || brand.slug === search.brand);
+  const brandsFor = (kinds: string[]) => BRANDS.filter((brand) => !brand.store && inAisle.some((product) => (!kinds.length || kinds.includes(product.kind)) && product.brand === brand.slug));
+  const brands = brandsFor(picked.kind).filter((brand) => inAisle.some((product) => product.brand === brand.slug && fits(product, "brand")) || picked.brand.includes(brand.slug));
   const sizeGroups = useMemo(() => {
     const groups = new Map<string, Set<string>>();
     for (const product of inAisle.filter((item) => fits(item, "size"))) {
@@ -130,21 +144,22 @@ function ShopAll() {
     }
     return [...groups].map(([label, sizes]) => ({ label, sizes: [...sizes].sort((a, b) => sizeRank(a) - sizeRank(b)) }));
   }, [inAisle, search.kind, search.brand, search.g, search.tag, search.colour, search.min, search.max]);
-  const colours = COLOURS.filter((colour) => inAisle.some((product) => fits(product, "colour") && colourOf(product, colour.id)));
+  const colours = COLOURS.filter((colour) => picked.colour.includes(colour.id) || inAisle.some((product) => fits(product, "colour") && colourOf(product, colour.id)));
 
+  const without = (key: ListKey, value: string): Patch => ({ [key]: joined(picked[key].filter((item) => item !== value)) });
   const chips = [
     category && { label: category.label, clear: { cat: undefined, kind: undefined, brand: undefined } },
-    search.kind && { label: search.kind, clear: { kind: undefined } },
-    search.brand && { label: BRANDS.find((brand) => brand.slug === search.brand)?.name ?? search.brand, clear: { brand: undefined } },
-    search.g && { label: search.g === "men" ? "Men" : "Women", clear: { g: undefined } },
+    ...picked.kind.map((kind) => ({ label: kind, clear: without("kind", kind) })),
+    ...picked.brand.map((slug) => ({ label: BRANDS.find((brand) => brand.slug === slug)?.name ?? slug, clear: without("brand", slug) })),
+    ...picked.g.map((g) => ({ label: g === "men" ? "Men" : "Women", clear: without("g", g) })),
     (search.min !== undefined || search.max !== undefined) && { label: `${dollars(search.min ?? LOW)} to ${dollars(search.max ?? HIGH)}`, clear: { min: undefined, max: undefined } },
-    search.size && { label: `Size ${search.size}`, clear: { size: undefined } },
-    search.colour && { label: COLOURS.find((colour) => colour.id === search.colour)?.label ?? search.colour, clear: { colour: undefined } },
-    tag && { label: tag.label, clear: { tag: undefined } },
+    ...picked.size.map((size) => ({ label: `Size ${size}`, clear: without("size", size) })),
+    ...picked.colour.map((id) => ({ label: COLOURS.find((colour) => colour.id === id)?.label ?? id, clear: without("colour", id) })),
+    ...tags.map((tag) => ({ label: tag.label, clear: without("tag", tag.id) })),
     search.q && { label: `“${search.q}”`, clear: { q: undefined } },
-  ].filter(Boolean) as unknown as { label: string; clear: Patch }[];
-  const title = found ? found.intent.label || `“${search.q}”` : search.kind ?? category?.label ?? tag?.label ?? "Everything";
-  const blurb = found ? undefined : category?.blurb ?? tag?.blurb ?? "Every piece in the OGCW Shop, from the sneaker giants to the Geneva watchmakers.";
+  ].filter(Boolean) as { label: string; clear: Patch }[];
+  const title = found ? found.intent.label || `“${search.q}”` : picked.kind.length === 1 ? picked.kind[0]! : category?.label ?? (tags.length === 1 ? tags[0]!.label : undefined) ?? "Everything";
+  const blurb = found ? undefined : category?.blurb ?? (tags.length === 1 ? tags[0]!.blurb : undefined) ?? "Every piece in the OGCW Shop, from the sneaker giants to the Geneva watchmakers.";
 
   return (
     <ShopShell>
@@ -176,14 +191,16 @@ function ShopAll() {
             <button type="button" className="sx-filters-close" onClick={() => setOpen(false)} aria-label="Close filters"><X size={18} aria-hidden="true" /></button>
           </div>
 
-          <TypeFilter groups={kinds} current={search.kind} brand={search.brand} brandsFor={brandsFor} onPick={(kind, brand) => set({ kind, brand })} />
+          <TypeFilter groups={kinds} kinds={picked.kind} brands={picked.brand} brandsFor={(kind) => brandsFor([kind])}
+            onAll={() => set({ kind: undefined, brand: undefined })}
+            onKind={(kind) => toggle("kind", kind)}
+            onBrand={(kind, brand) => set({ kind: joined(picked.kind.includes(kind) ? picked.kind : [...picked.kind, kind]), brand: joined(picked.brand.includes(brand) ? picked.brand.filter((item) => item !== brand) : [...picked.brand, brand]) })}
+            onKindOnly={(kind) => set({ kind: joined(picked.kind.includes(kind) ? picked.kind : [...picked.kind, kind]) })} />
 
           <fieldset className="fx-group">
             <legend>For</legend>
-            <div className="fx-seg" role="radiogroup" aria-label="Who it’s for">
-              {([undefined, "men", "women"] as const).map((g) => (
-                <button key={g ?? "all"} type="button" role="radio" aria-checked={search.g === g} onClick={() => set({ g })}>{g === "men" ? "Men" : g === "women" ? "Women" : "Everyone"}</button>
-              ))}
+            <div className="fx-checks">
+              {(["men", "women"] as const).map((g) => <CheckRow key={g} label={g === "men" ? "Men" : "Women"} on={picked.g.includes(g)} onClick={() => toggle("g", g)} />)}
             </div>
           </fieldset>
 
@@ -197,7 +214,7 @@ function ShopAll() {
                   <p className="fx-sub">{group.label}</p>
                   <div className="fx-size-grid">
                     {group.sizes.map((size) => (
-                      <button key={size} type="button" className="fx-size" aria-pressed={search.size === size} onClick={() => set({ size: search.size === size ? undefined : size })}>{size}</button>
+                      <button key={size} type="button" className="fx-size" aria-pressed={picked.size.includes(size)} onClick={() => toggle("size", size)}>{size}</button>
                     ))}
                   </div>
                 </div>
@@ -208,26 +225,20 @@ function ShopAll() {
           {colours.length > 1 && (
             <fieldset className="fx-group">
               <legend>Colour</legend>
-              <div className="fx-swatches">
-                {colours.map((colour) => (
-                  <button key={colour.id} type="button" className="fx-swatch" aria-pressed={search.colour === colour.id} aria-label={colour.label} title={colour.label} onClick={() => set({ colour: search.colour === colour.id ? undefined : colour.id })}>
-                    <span style={{ background: colour.swatch }} />
-                  </button>
-                ))}
+              <div className="fx-checks">
+                {colours.map((colour) => <CheckRow key={colour.id} label={colour.label} on={picked.colour.includes(colour.id)} onClick={() => toggle("colour", colour.id)} />)}
               </div>
             </fieldset>
           )}
 
           <fieldset className="fx-group">
             <legend>Show</legend>
-            <div className="fx-tags">
-              {TAGS.map((item) => (
-                <button key={item.id} type="button" className="sx-opt" aria-pressed={search.tag === item.id} onClick={() => set({ tag: search.tag === item.id ? undefined : item.id })}>{item.label}</button>
-              ))}
+            <div className="fx-checks">
+              {TAGS.map((item) => <CheckRow key={item.id} label={item.label} on={picked.tag.includes(item.id)} onClick={() => toggle("tag", item.id)} />)}
             </div>
           </fieldset>
 
-          <BrandFilter brands={brands} current={search.brand} onPick={(brand) => set({ brand })} />
+          <BrandFilter brands={brands} picked={picked.brand} onPick={(brand) => toggle("brand", brand)} />
         </aside>
 
         <div className="sx-results">
@@ -268,6 +279,15 @@ function ShopAll() {
   );
 }
 
+/** A choice you can tick, one of several */
+function CheckRow({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className="fx-check" role="checkbox" aria-checked={on} onClick={onClick}>
+      <span className="fx-box" aria-hidden="true">{on && <Check size={12} strokeWidth={3} />}</span>{label}
+    </button>
+  );
+}
+
 /** The search on the page: one line, Moncler-style */
 function QueryLine({ initial, onSearch }: { initial: string; onSearch: (q: string) => void }) {
   const [value, setValue] = useState(initial);
@@ -283,47 +303,61 @@ function QueryLine({ initial, onSearch }: { initial: string; onSearch: (q: strin
   );
 }
 
-/** The types, by aisle. Pointing at one opens its brands beside it; on a touch
- *  screen, picking a type shows its brands under it */
-function TypeFilter({ groups, current, brand, brandsFor, onPick }: { groups: { cat: (typeof SHOP_CATEGORIES)[number]; kinds: string[] }[]; current?: string | undefined; brand?: string | undefined; brandsFor: (kind?: string) => typeof BRANDS; onPick: (kind?: string, brand?: string) => void }) {
-  const [hover, setHover] = useState<string | null>(null);
+/** The types, by aisle. Ticking one adds it; pointing at one, or clicking
+ *  it, opens its brands in a pop-up beside it, where any number can be ticked */
+function TypeFilter({ groups, kinds, brands, brandsFor, onAll, onKind, onBrand, onKindOnly }: {
+  groups: { cat: (typeof SHOP_CATEGORIES)[number]; kinds: string[] }[]; kinds: string[]; brands: string[]; brandsFor: (kind: string) => typeof BRANDS;
+  onAll: () => void; onKind: (kind: string) => void; onBrand: (kind: string, brand: string) => void; onKindOnly: (kind: string) => void;
+}) {
+  const [shown, setShown] = useState<string | null>(null);
   const timer = useRef(0);
-  const show = (kind: string | null) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setHover(kind), kind ? 60 : 160); };
+  const show = (kind: string | null) => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setShown(kind), kind ? 60 : 220); };
+  const root = useRef<HTMLFieldSetElement>(null);
+  // A click outside the pop-up closes it
+  useEffect(() => {
+    if (!shown) return;
+    const onPointer = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setShown(null); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setShown(null); };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("pointerdown", onPointer); document.removeEventListener("keydown", onKey); };
+  }, [shown]);
   return (
-    <fieldset className="fx-group fx-types" onMouseLeave={() => show(null)}>
+    <fieldset className="fx-group fx-types" ref={root} onMouseLeave={() => show(null)}>
       <legend>Type</legend>
-      <button type="button" className="fx-type" aria-pressed={!current} onClick={() => onPick(undefined, undefined)} onMouseEnter={() => show(null)}>Everything</button>
-      {groups.map(({ cat, kinds }) => (
+      <button type="button" className="fx-type" aria-pressed={!kinds.length} onClick={() => { onAll(); setShown(null); }} onMouseEnter={() => show(null)}>Everything</button>
+      {groups.map(({ cat, kinds: list }) => (
         <div key={cat.slug} className="fx-type-group">
           <p className="fx-sub">{cat.label}</p>
-          {kinds.map((kind) => {
-            const list = brandsFor(kind);
+          {list.map((kind) => {
+            const its = brandsFor(kind);
+            const on = kinds.includes(kind);
             return (
               <div key={kind} className="fx-type-row" onMouseEnter={() => show(kind)}>
-                <button type="button" className="fx-type" aria-pressed={current === kind} aria-expanded={hover === kind} onClick={() => onPick(current === kind ? undefined : kind, undefined)} onFocus={() => setHover(kind)}>
-                  {kind} <ChevronRight size={14} aria-hidden="true" />
+                <button type="button" className="fx-type" aria-pressed={on} aria-expanded={shown === kind} onClick={() => { onKind(kind); window.clearTimeout(timer.current); setShown(kind); }}>
+                  <span className="fx-box" aria-hidden="true">{on && <Check size={12} strokeWidth={3} />}</span>
+                  <span className="fx-type-name">{kind}</span>
+                  <ChevronRight size={14} aria-hidden="true" />
                 </button>
-                {hover === kind && list.length > 0 && (
+                {shown === kind && its.length > 0 && (
                   <div className="fx-fly" role="group" aria-label={`${kind} by brand`} onMouseEnter={() => show(kind)}>
                     <p className="fx-fly-title">{kind}</p>
-                    <button type="button" className="fx-fly-all" onClick={() => { onPick(kind, undefined); setHover(null); }}>All {kind.toLowerCase()} <ArrowRight size={13} aria-hidden="true" /></button>
+                    <button type="button" className="fx-fly-all" onClick={() => onKindOnly(kind)}>All {kind.toLowerCase()} <ArrowRight size={13} aria-hidden="true" /></button>
                     <ul>
-                      {list.map((item) => {
+                      {its.map((item) => {
                         const logo = logoOf(item.slug);
+                        const ticked = on && brands.includes(item.slug);
                         return (
                           <li key={item.slug}>
-                            <button type="button" aria-pressed={current === kind && brand === item.slug} onClick={() => { onPick(kind, item.slug); setHover(null); }}>
-                              <span className="fx-fly-mark" aria-hidden="true">{logo ? <img src={logo} alt="" /> : item.name[0]}</span>{item.name}
+                            <button type="button" role="checkbox" aria-checked={ticked} onClick={() => onBrand(kind, item.slug)}>
+                              <span className="fx-fly-mark" aria-hidden="true">{logo ? <img src={logo} alt="" /> : item.name[0]}</span>
+                              <span className="fx-fly-name">{item.name}</span>
+                              <span className="fx-box" aria-hidden="true">{ticked && <Check size={12} strokeWidth={3} />}</span>
                             </button>
                           </li>
                         );
                       })}
                     </ul>
-                  </div>
-                )}
-                {current === kind && (
-                  <div className="fx-type-brands">
-                    {list.map((item) => <button key={item.slug} type="button" className="sx-opt sx-opt-sm" aria-pressed={brand === item.slug} onClick={() => onPick(kind, brand === item.slug ? undefined : item.slug)}>{item.name}</button>)}
                   </div>
                 )}
               </div>
@@ -335,11 +369,14 @@ function TypeFilter({ groups, current, brand, brandsFor, onPick }: { groups: { c
   );
 }
 
-/** Price: two handles on one track, over a little chart of where the prices fall */
+/** Price: two handles on one track over a little chart of where the prices
+ *  fall, and two boxes to type the lowest and highest price in */
 function PriceFilter({ products, min, max, onChange }: { products: ShopProduct[]; min?: number | undefined; max?: number | undefined; onChange: (min?: number, max?: number) => void }) {
   const [lo, setLo] = useState(toStep(min ?? LOW));
   const [hi, setHi] = useState(toStep(max ?? HIGH));
-  useEffect(() => { setLo(toStep(min ?? LOW)); setHi(toStep(max ?? HIGH)); }, [min, max]);
+  const [typedLo, setTypedLo] = useState(min === undefined ? "" : String(min));
+  const [typedHi, setTypedHi] = useState(max === undefined ? "" : String(max));
+  useEffect(() => { setLo(toStep(min ?? LOW)); setHi(toStep(max ?? HIGH)); setTypedLo(min === undefined ? "" : String(min)); setTypedHi(max === undefined ? "" : String(max)); }, [min, max]);
   const bars = useMemo(() => {
     const counts = Array.from({ length: 28 }, () => 0);
     for (const product of products) if (product.price) counts[Math.min(27, Math.floor((toStep(product.price) / STEPS) * 28))]! += 1;
@@ -347,20 +384,35 @@ function PriceFilter({ products, min, max, onChange }: { products: ShopProduct[]
     return counts.map((n) => n / top);
   }, [products]);
   const commit = () => onChange(lo <= 0 ? undefined : toPrice(lo), hi >= STEPS ? undefined : toPrice(hi));
+  const typed = (event: FormEvent) => {
+    event.preventDefault();
+    const a = typedLo.trim() ? Math.max(0, Math.round(Number(typedLo.replace(/[^\d.]/g, "")))) : undefined;
+    const b = typedHi.trim() ? Math.max(0, Math.round(Number(typedHi.replace(/[^\d.]/g, "")))) : undefined;
+    const [from, to] = a !== undefined && b !== undefined && a > b ? [b, a] : [a, b];
+    onChange(Number.isFinite(from) ? from : undefined, Number.isFinite(to) ? to : undefined);
+  };
   return (
     <fieldset className="fx-group fx-price">
       <legend>Price</legend>
       <div className="fx-bars" aria-hidden="true">
-        {bars.map((height, i) => <span key={i} style={{ height: `${8 + height * 92}%` }} data-in={(i + 0.5) / 28 * STEPS >= lo && (i + 0.5) / 28 * STEPS <= hi || undefined} />)}
+        {bars.map((height, i) => <span key={i} style={{ height: `${8 + height * 92}%` }} data-in={((i + 0.5) / 28) * STEPS >= lo && ((i + 0.5) / 28) * STEPS <= hi || undefined} />)}
       </div>
       <div className="fx-range" style={{ ["--lo" as string]: `${(lo / STEPS) * 100}%`, ["--hi" as string]: `${(hi / STEPS) * 100}%` }}>
         <input type="range" min={0} max={STEPS} value={lo} aria-label="Lowest price" aria-valuetext={dollars(toPrice(lo))} onChange={(event) => setLo(Math.min(Number(event.target.value), hi - 4))} onPointerUp={commit} onKeyUp={commit} onBlur={commit} />
         <input type="range" min={0} max={STEPS} value={hi} aria-label="Highest price" aria-valuetext={dollars(toPrice(hi))} onChange={(event) => setHi(Math.max(Number(event.target.value), lo + 4))} onPointerUp={commit} onKeyUp={commit} onBlur={commit} />
       </div>
-      <div className="fx-price-row">
-        <span>{dollars(toPrice(lo))}</span>
-        <span>{hi >= STEPS ? `${dollars(HIGH)}+` : dollars(toPrice(hi))}</span>
-      </div>
+      <form className="fx-price-typed" onSubmit={typed}>
+        <label>
+          <span>Min</span>
+          <span className="fx-money"><span aria-hidden="true">$</span><input inputMode="numeric" value={typedLo} placeholder={String(LOW)} onChange={(event) => setTypedLo(event.target.value)} onBlur={typed} aria-label="Lowest price in dollars" /></span>
+        </label>
+        <span className="fx-price-dash" aria-hidden="true">–</span>
+        <label>
+          <span>Max</span>
+          <span className="fx-money"><span aria-hidden="true">$</span><input inputMode="numeric" value={typedHi} placeholder={HIGH.toLocaleString("en-US")} onChange={(event) => setTypedHi(event.target.value)} onBlur={typed} aria-label="Highest price in dollars" /></span>
+        </label>
+        <button type="submit" className="sr-only">Set the price</button>
+      </form>
       <div className="fx-price-quick">
         {[[undefined, 150], [150, 400], [400, 1500], [1500, undefined]].map(([a, b]) => (
           <button key={`${a}-${b}`} type="button" className="sx-opt sx-opt-sm" aria-pressed={min === a && max === b} onClick={() => onChange(a, b)}>{a === undefined ? `Under ${dollars(b!)}` : b === undefined ? `${dollars(a)}+` : `${dollars(a)}–${dollars(b)}`}</button>
@@ -370,18 +422,16 @@ function PriceFilter({ products, min, max, onChange }: { products: ShopProduct[]
   );
 }
 
-/** Brands: the list, with a line to narrow it */
-function BrandFilter({ brands, current, onPick }: { brands: typeof BRANDS; current?: string | undefined; onPick: (brand?: string) => void }) {
+/** Brands: the list, with a line to narrow it; tick as many as you like */
+function BrandFilter({ brands, picked, onPick }: { brands: typeof BRANDS; picked: string[]; onPick: (brand: string) => void }) {
   const [find, setFind] = useState("");
   const list = brands.filter((brand) => !find || brand.name.toLowerCase().includes(find.toLowerCase()));
   return (
     <fieldset className="fx-group">
       <legend>Brand</legend>
       {brands.length > 8 && <input className="fx-find" type="search" placeholder="Find a brand" value={find} onChange={(event) => setFind(event.target.value)} aria-label="Find a brand" />}
-      <div className="sx-brand-opts">
-        {list.map((brand) => (
-          <button key={brand.slug} type="button" className="sx-opt sx-opt-sm" aria-pressed={current === brand.slug} onClick={() => onPick(current === brand.slug ? undefined : brand.slug)}>{brand.name}</button>
-        ))}
+      <div className="fx-checks fx-brand-checks">
+        {list.map((brand) => <CheckRow key={brand.slug} label={brand.name} on={picked.includes(brand.slug)} onClick={() => onPick(brand.slug)} />)}
       </div>
     </fieldset>
   );

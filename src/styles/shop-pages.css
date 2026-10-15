@@ -615,3 +615,36 @@ html[data-search-open] body { overflow: hidden; }
 }
 /* The same room above the footer as on the news pages (owner, 15 Oct) */
 .sh-explore { padding-bottom: clamp(56px, 6vw, 96px); }
+
+/* ---------- Filters, round two (owner, 15 Oct): tick boxes everywhere, any number of choices ---------- */
+.fx-checks { display: grid; gap: 2px; }
+.fx-brand-checks { max-height: 320px; overflow-y: auto; scrollbar-width: thin; }
+.fx-check { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border: 0; border-radius: 10px; background: transparent; color: var(--sx-text); font: 500 14px var(--ogcw-ui); text-align: left; cursor: pointer; transition: background-color .15s ease; }
+.fx-check:hover { background: color-mix(in srgb, var(--sx-text) 7%, transparent); }
+.fx-check[aria-checked="true"] { font-weight: 600; }
+.fx-box { display: grid; flex: none; place-items: center; width: 18px; height: 18px; border-radius: 5px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--sx-text) 35%, transparent); color: var(--sx-on-gold); transition: background-color .15s ease, box-shadow .15s ease; }
+[aria-checked="true"] > .fx-box, .fx-type[aria-pressed="true"] > .fx-box { background: var(--sx-gold); box-shadow: none; }
+/* The types: a tick box, the name, and the arrow to its brands */
+.fx-type { gap: 10px; justify-content: flex-start; }
+.fx-type-name { flex: 1; }
+.fx-type[aria-pressed="true"] { background: transparent; color: var(--sx-text); font-weight: 600; }
+.fx-type[aria-pressed="true"]:hover, .fx-type[aria-expanded="true"] { background: color-mix(in srgb, var(--sx-text) 8%, transparent); }
+.fx-types > .fx-type[aria-pressed="true"] { background: var(--sx-gold); color: var(--sx-on-gold); }
+.fx-types > .fx-type { padding-left: 10px; }
+.fx-fly li button { justify-content: flex-start; }
+.fx-fly-name { flex: 1; }
+.fx-fly li button[aria-checked="true"] { font-weight: 600; }
+/* Price typed in */
+.fx-price-typed { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; margin-top: 10px; }
+.fx-price-typed label { display: grid; gap: 4px; color: var(--sx-dim); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.fx-money { display: flex; align-items: center; gap: 4px; height: 38px; padding: 0 12px; border-radius: 10px; background: var(--sx-raise); box-shadow: inset 0 0 0 1px var(--sx-line); color: var(--sx-dim); font-size: 13px; letter-spacing: 0; text-transform: none; }
+.fx-money:focus-within { box-shadow: inset 0 0 0 1.5px var(--sx-gold); }
+.fx-money input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--sx-text); font: 600 14px var(--ogcw-ui); font-variant-numeric: tabular-nums; outline: none; box-shadow: none; }
+.fx-price-dash { padding-bottom: 10px; color: var(--sx-dim); }
+@media (max-width: 900px) {
+  .fx-fly { position: static; display: block; width: auto; margin: 4px 0 8px; box-shadow: inset 0 0 0 1px var(--sx-line); animation: none; }
+  .fx-fly::before { display: none; }
+}.fx-price-typed label { min-width: 0; }
+.fx-money { min-width: 0; }
+.fx-money input { width: 100%; }
+.sx .fx-money input:focus-visible { outline: none; }
