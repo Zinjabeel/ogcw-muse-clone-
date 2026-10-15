@@ -133,8 +133,9 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
   return (
     <SiteMenuContext.Provider value={{ menuOpen, openMenu, openSearch }}>
       <div className={`site-root min-h-screen bg-background text-foreground${header ? " site-root-shop" : ""}`}>
-        {header ?? (<>
+        {/* The site's background glow, on every page (the shop's too, so its footer looks the same) */}
         <BackgroundGradientGlow />
+        {header ?? (<>
         <EditSection name="Navigation bar">
         {/* Holds the header's place: the header itself is fixed and shrinks on scroll */}
         <div className="site-header-space" aria-hidden="true" />

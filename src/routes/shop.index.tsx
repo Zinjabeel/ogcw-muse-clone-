@@ -169,11 +169,9 @@ function ShopHome() {
         </div>
         <Looks />
         <CollectionRow row={ROWS["travis"]!} />
-        <CalendarBand />
         <CollectionRow row={ROWS["sneakers"]!} />
         <CollectionRow row={ROWS["complexcon"]!} />
         <CollectionRow row={ROWS["tees"]!} />
-        <LimitedBand />
         <CollectionRow row={ROWS["denim"]!} />
         <WatchHouses />
         <CollectionRow row={ROWS["collections"]!} />

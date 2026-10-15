@@ -614,3 +614,5 @@ html[data-search-open] body { overflow: hidden; }
   .ck-steps li { font-size: 0; } .ck-steps li .ck-dot { font-size: 12px; }
   .ck-suggest { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+/* The same room above the footer as on the news pages (owner, 15 Oct) */
+.sh-explore { padding-bottom: clamp(56px, 6vw, 96px); }
