@@ -3,8 +3,10 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Heart, Minus, Plus, ShoppingBag, S
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
+import { useWorkAccess } from "@/lib/work";
 import { cart, useCart } from "@/lib/shop-cart";
 import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
+import { NotFoundPage } from "./not-found";
 import { SiteShell } from "./ogcw-layout";
 import { ShopHeader } from "./shop-header";
 import { EditSection, T } from "./site-text";
@@ -348,8 +350,14 @@ function CartDrawer() {
 }
 
 /** Every shop page: the shop's own header (no site header: the shop opens
- *  in its own tab), the page, the site's own footer and the cart */
+ *  in its own tab), the page, the site's own footer and the cart.
+ *  Admin-only for now (owner, 15 Oct 2026: the shop is "coming soon"):
+ *  anyone who isn't logged in as an admin gets the site's 404, and nothing
+ *  of the shop is drawn (not even by the server) until the check is done. */
 export function ShopShell({ children }: { children: ReactNode }) {
+  const access = useWorkAccess();
+  if (access === "checking") return <div className="sx-gate" aria-busy="true" />;
+  if (access !== "admin") return <NotFoundPage />;
   return (
     <SiteShell header={<ShopHeader />}>
       <EditSection name="Shop pages">

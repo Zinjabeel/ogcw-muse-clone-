@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, ty
 import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, VIDEOS } from "@/data/drops";
 import { useStories } from "@/lib/stories";
+import { useWorkAccess } from "@/lib/work";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
 import { NewsWeek } from "./news-week";
@@ -15,7 +16,7 @@ import { EditSection, S, T } from "./site-text";
 
 // The front page under the hero. Black and white, in turns, like a
 // magazine: the masthead and This week (white), More news drifting by
-// (black), a few picks from the shop (smoky grey), Explore with a little of
+// (black), The rundown of six stories (smoky grey), Explore with a little of
 // everything and the music card (white), official videos (black) and
 // Culture & fashion (white). The About/newsletter band and the footer follow
 // (src/routes/index.tsx). Which story goes where is chosen in the studio
@@ -87,6 +88,8 @@ const NEWS_BAR = [
 
 function NewsTop() {
   const { openSearch } = useSiteMenu();
+  // The shop is admin-only until it opens (everyone else gets a 404 there)
+  const showShop = useWorkAccess() === "admin";
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   return (
     <EditSection name="OGCW News">
@@ -105,7 +108,7 @@ function NewsTop() {
             </header>
             <nav className="bs-nav fx-newsbar" aria-label="News sections">
               <ul>
-                {NEWS_BAR.map((item) => (
+                {NEWS_BAR.filter((item) => item.key !== "shop" || showShop).map((item) => (
                   <li key={item.label}>
                     <Link to={item.to} {...("hash" in item ? { hash: item.hash } : {})}><T k={`home.news.nav.${item.key}`}>{item.label}</T></Link>
                   </li>
@@ -285,39 +288,65 @@ function MoreNews() {
   );
 }
 
-// ------------------------------------------------------------ Shop strip
+// ------------------------------------------------------------ The rundown
 
-// The way into the shop (owner, 15 Oct 2026): three big photo cards edge to
-// edge, the same as Crowd favourites on the shop's home: sneakers, clothing
-// and collections, each to its aisle. (It was six products and Drop news.)
-const AISLES = [
-  { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers-aisle.jpg", alt: "A hand holding out a white and sage green sneaker towards the camera" },
-  { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing-aisle.webp", alt: "Seen from behind, a person pulling up the hood of a washed black hoodie printed with carved figures" },
-  { key: "collections", label: "Collections", search: { cat: "accessories" }, image: "/shop/looks/collections-aisle.jpg", alt: "A hand in a black sleeve wearing a steel chronograph, on grey" },
-];
-
-function ShopStrip() {
+// Where the shop band was (owner, 15 Oct 2026: "remove the whole shop thing
+// and have instead a news section"). Six stories as a numbered list of big
+// headlines; pointing at one, or tabbing to it, brings its photo, summary and
+// source up in the panel beside the list. Phones show each photo in its row.
+// The stories are the "The rundown" spot in the studio (newest first when
+// nothing is placed there), so none of them repeats in More news.
+function Rundown() {
+  const stories = useStories();
+  const items = stories.slot("rundown");
+  const [active, setActive] = useState(0);
+  if (!items.length) return null;
+  const on = Math.min(active, items.length - 1);
+  const story = items[on]!;
   return (
-    <EditSection name="Shop window">
-      <section className="fx-band fx-shop fx-aisles" data-band="grey" aria-labelledby="shop-strip-title" id="shop-strip">
-        <div className="fx-wrap">
-          <h2 id="shop-strip-title" className="fx-shop-title"><T k="front.shop.title3">Shop the culture</T></h2>
-        </div>
-        <ul className="fx-aisles-grid">
-          {AISLES.map((aisle) => (
-            <li key={aisle.key}>
-              <Link to="/shop/all" search={aisle.search} className="fx-aisle">
-                <img src={aisle.image} alt={aisle.alt} loading="lazy" />
-                <span className="fx-aisle-text">
-                  <span className="fx-aisle-name"><T k={`front.shop.aisle.${aisle.key}`}>{aisle.label}</T></span>
-                  <span className="fx-aisle-more"><T k="front.shop.more">Discover more</T></span>
+    <Band tone="grey" name="The rundown" id="rundown" className="fx-rundown">
+      <Head id="rundown" k="front.rundown" kicker="In focus" title="The rundown">
+        <Link to="/news" className="fx-more"><T k="front.rundown.all">All news</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+      </Head>
+      <div className="fx-rd">
+        <ol className="fx-rd-list">
+          {items.map((item, index) => (
+            <li key={item.slug}>
+              <Link
+                to="/news/$slug"
+                params={{ slug: item.slug }}
+                className="fx-rd-item"
+                data-on={index === on || undefined}
+                onPointerEnter={(event) => { if (event.pointerType === "mouse") setActive(index); }}
+                onFocus={() => setActive(index)}
+              >
+                <span className="fx-rd-num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <span className="fx-rd-text">
+                  <span className="fx-label">{SECTIONS[item.section].label}</span>
+                  <span className="fx-rd-title"><S story={item} f="title" /></span>
+                  <StoryMeta story={item} className="fx-meta" />
                 </span>
+                <BsPhoto photo={item.photo} className="fx-photo fx-rd-thumb" />
               </Link>
             </li>
           ))}
-        </ul>
-      </section>
-    </EditSection>
+        </ol>
+        <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-rd-panel" tabIndex={-1} aria-hidden="true">
+          {items.map((item, index) => (
+            <span key={item.slug} className="fx-rd-shot" data-on={index === on || undefined}>
+              <BsPhoto photo={item.photo} className="fx-photo" />
+            </span>
+          ))}
+          <span className="fx-rd-caption" key={story.slug}>
+            <span className="fx-rd-deck"><S story={story} f="deck" /></span>
+            <span className="fx-rd-foot">
+              <span className="fx-rd-source"><T k="front.rundown.via">Via</T> {story.credit}</span>
+              <span className="fx-rd-read"><T k="front.rundown.read">Read the story</T> <ArrowRight size={14} aria-hidden="true" /></span>
+            </span>
+          </span>
+        </Link>
+      </div>
+    </Band>
   );
 }
 // ------------------------------------------------------------ Explore
@@ -541,7 +570,7 @@ export function FrontPage() {
     <div className="front">
       <NewsTop />
       <MoreNews />
-      <ShopStrip />
+      <Rundown />
       <Explore />
       <Watch />
       <CultureFashion />

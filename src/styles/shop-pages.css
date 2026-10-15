@@ -925,3 +925,5 @@ a.dp-also-item:hover .dp-also-name { text-decoration: underline; text-underline-
   .dp-also-item { grid-template-columns: 70px minmax(0, 1fr) auto; }
   .dp-also-kind { display: none; }
 }
+/* While the shop checks whether this is an admin: a plain page, nothing of the shop */
+.sx-gate { min-height: 100vh; background: var(--ogcw-bg); }

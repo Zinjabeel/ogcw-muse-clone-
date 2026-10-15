@@ -113,29 +113,51 @@
 .fx-more-news .bs-carousel-arrow { background: #fff; border-color: #fff; color: #000; }
 .fx-more-news .bs-carousel-arrow:hover, .fx-more-news .bs-carousel-arrow:focus-visible { background: var(--fx-gold); border-color: var(--fx-gold); color: #000; }
 
-/* ---------------- The way into the shop: three big photo cards edge to
-   edge, a hairline between, the name and "Discover more" at the foot, the
-   same as Crowd favourites on the shop's home (src/styles/shop.css .sh-look) */
-.fx-shop { padding-block: clamp(44px, calc(4.2 * var(--vw, 1vw)), 64px) 0; }
-:root[data-theme="gold"] .fx-shop[data-band="grey"].fx-band { background: #e7e7e5; }
-.fx-shop-title {
-  width: fit-content; margin: 0 auto clamp(24px, calc(2.6 * var(--vw, 1vw)), 36px);
-  font-family: var(--ogcw-display); font-size: clamp(30px, calc(3.2 * var(--vw, 1vw)), 46px); font-weight: 600; line-height: 1.05; letter-spacing: -.02em;
-  background: linear-gradient(100deg, #7a560c 0%, #b8892f 30%, #e2b84f 48%, #c99a35 62%, #8a6410 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+/* ---------------- The rundown (smoky grey): six numbered headlines on the
+   left, the pointed-at story's photo, summary and source on the right. The
+   photos cross-fade; nothing moves on scroll. Phones: a photo in each row. */
+.fx-rd { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(24px, calc(3.4 * var(--vw, 1vw)), 56px); align-items: stretch; }
+.fx-rd-list { margin: 0; padding: 0; list-style: none; counter-reset: rd; }
+.fx-rd-list li + li { border-top: 1px solid color-mix(in srgb, var(--ogcw-text) 16%, transparent); }
+.fx-rd-item { display: grid; grid-template-columns: clamp(52px, calc(5 * var(--vw, 1vw)), 84px) minmax(0, 1fr); align-items: center; gap: 18px; padding-block: clamp(14px, calc(1.4 * var(--vw, 1vw)), 22px); color: var(--ogcw-text); }
+.fx-rd-num {
+  font-family: var(--ogcw-display); font-size: clamp(36px, calc(3.8 * var(--vw, 1vw)), 60px); font-weight: 700; line-height: 1; letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+  color: transparent; -webkit-text-stroke: 1px color-mix(in srgb, var(--ogcw-text) 45%, transparent); transition: color .25s ease, -webkit-text-stroke-color .25s ease;
 }
-@media (forced-colors: active) { .fx-shop-title { background: none; color: CanvasText; } }
-.fx-aisles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; margin: 0; padding: 0; list-style: none; }
-.fx-aisle { position: relative; display: block; aspect-ratio: 3 / 4.3; overflow: hidden; background: #0a0a0a; color: #fff; }
-.fx-aisle img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s ease-in-out; }
-.fx-aisle:hover img { transform: scale(1.04); }
-.fx-aisle::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .6) 0%, rgb(0 0 0 / 0) 42%); pointer-events: none; }
-.fx-aisle-text { position: absolute; right: 0; bottom: 7%; left: 0; z-index: 2; display: grid; justify-items: center; gap: 14px; padding-inline: 16px; text-align: center; }
-.fx-aisle-name { font: 400 clamp(26px, calc(2.4 * var(--vw, 1vw)), 42px)/1.05 var(--ogcw-display); letter-spacing: .02em; text-transform: uppercase; }
-.fx-aisle-more { font: 600 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 6px; }
-.fx-aisle:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: -4px; }
-@media (max-width: 767px) {
-  .fx-aisles-grid { grid-template-columns: minmax(0, 1fr); }
-  .fx-aisle { aspect-ratio: 4 / 4.4; }
+.fx-rd-item[data-on] .fx-rd-num { color: var(--ogcw-text); -webkit-text-stroke-color: var(--ogcw-text); }
+.fx-rd-text { display: grid; gap: 6px; }
+.fx-rd-title { font-family: var(--ogcw-display); font-size: clamp(19px, calc(1.55 * var(--vw, 1vw)), 25px); font-weight: 600; line-height: 1.18; letter-spacing: -.01em; text-wrap: balance; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 5px; transition: text-decoration-color .25s ease; }
+.fx-rd-item[data-on] .fx-rd-title { text-decoration-color: currentColor; }
+.fx-rd-item:focus-visible { outline: 2px solid var(--ogcw-text); outline-offset: 4px; }
+.fx-rd-thumb { display: none; }
+
+.fx-rd-panel { position: relative; display: block; min-height: 420px; overflow: hidden; background: #0a0a0a; color: #fff; }
+.fx-rd-shot { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
+.fx-rd-shot[data-on] { opacity: 1; }
+.fx-rd-shot .fx-photo { width: 100%; height: 100%; background: none; }
+.fx-rd-shot img { transition: transform 1.2s ease; }
+.fx-rd-panel:hover .fx-rd-shot[data-on] img { transform: scale(calc(var(--zoom, 1) * 1.03)); }
+.fx-rd-panel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .82) 0%, rgb(0 0 0 / .35) 38%, rgb(0 0 0 / 0) 62%); pointer-events: none; }
+.fx-rd-caption { position: absolute; right: 0; bottom: 0; left: 0; z-index: 1; display: grid; gap: 16px; padding: clamp(20px, calc(2.2 * var(--vw, 1vw)), 34px); animation: fx-rd-in .45s ease both; }
+@keyframes fx-rd-in { from { opacity: 0; } to { opacity: 1; } }
+.fx-rd-deck { max-width: 52ch; font-family: var(--ogcw-serif); font-size: clamp(16px, calc(1.15 * var(--vw, 1vw)), 19px); line-height: 1.5; color: rgb(255 255 255 / .9); }
+.fx-rd-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding-top: 14px; border-top: 1px solid rgb(255 255 255 / .22); font-family: var(--ogcw-ui); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.fx-rd-source { color: rgb(255 255 255 / .66); }
+.fx-rd-read { display: inline-flex; align-items: center; gap: 8px; color: #ffe600; transition: gap .2s ease; }
+.fx-rd-panel:hover .fx-rd-read { gap: 12px; }
+
+@media (max-width: 899px) {
+  .fx-rd { grid-template-columns: minmax(0, 1fr); }
+  .fx-rd-panel { display: none; }
+  .fx-rd-item { grid-template-columns: 44px minmax(0, 1fr) 96px; gap: 14px; }
+  .fx-rd-num { font-size: 32px; }
+  .fx-rd-thumb { display: block; aspect-ratio: 1; }
+  .fx-rd-item .fx-rd-num { color: var(--ogcw-text); -webkit-text-stroke-color: var(--ogcw-text); }
+  .fx-rd-title { text-decoration: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-rd-shot, .fx-rd-shot img { transition: none; }
+  .fx-rd-caption { animation: none; }
 }
 /* ---------------- Explore (white): lead + just in, four desks, the music card, the ranking and dates */
 .fx-ex-top { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: clamp(24px, calc(3 * var(--vw, 1vw)), 52px); align-items: start; padding-bottom: clamp(32px, calc(3.4 * var(--vw, 1vw)), 48px); border-bottom: 1px solid var(--ogcw-border); }
@@ -268,9 +290,5 @@
   .fx-music .poll-list .poll-name { font-size: 16px; }
   .fx-culture-grid .fx-tile-title, .fx-desks .fx-tile-title { font-size: 16px; }
   .fx-clip { grid-template-columns: 96px minmax(0, 1fr); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .fx-aisle img { transition: none; }
-  .fx-aisle:hover img { transform: none; }
 }
 

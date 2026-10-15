@@ -15,7 +15,7 @@ export const SITE_SECTIONS = [
   "The Wire",
   "More news",
   "Drops",
-  "Shop window",
+  "The rundown",
   "The OGCW 10",
   "Sports desk",
   "Games & streaming",
