@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProductGrid, ProductPhoto, ShopShell, brandLine, dollars } from "../components/shop-kit";
+import { ProductGrid, ProductPhoto, ShopShell, brandLine, dollars, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, getProduct } from "../data/shop";
 import { UPCOMING } from "../data/shop-upcoming";
 import { T } from "@/components/site-text";
@@ -59,7 +59,7 @@ function FeaturedDrops() {
                 <ProductPhoto product={product} className="fd-card-photo" />
                 <span className="fd-card-meta">{product.released ? longDate(product.released) : ""}</span>
                 <span className="fd-card-name">{product.name}</span>
-                <span className="fd-card-price">{brandLine(product)} · {product.price ? dollars(product.price) : "At the shop"}</span>
+                <span className="fd-card-price">{brandLine(product)} · {product.price ? <>{dollars(product.price)}<Was product={product} /></> : "At the shop"}</span>
               </Link>
             </li>
           ))}

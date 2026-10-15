@@ -6,9 +6,8 @@ import { UPCOMING } from "@/data/shop-upcoming";
 import { dollars } from "./shop-kit";
 
 // The shop's menu panels, after Moncler's: point at a section in the header
-// and a panel drops under it, full width. A tall picture on the left, the
-// columns of links in the middle, two picture cards on the right, and under
-// it all a strip of pieces from that section. The page behind dims. Keys
+// and a panel drops under it, full width: the columns of links, and two
+// picture cards on the right (fewer pictures, owner 15 Oct). The page behind dims. Keys
 // open it too; Escape closes it.
 
 type Search = { cat?: string; kind?: string; brand?: string; tag?: string; g?: string };
@@ -112,18 +111,9 @@ export function MegaPanel({ section, onClose }: { section: string; onClose: () =
   const go = (link: MenuLink | Card, children: ReactNode, className?: string) => (
     <Link to={link.to as any} search={link.search as any} params={link.params as any} className={className} onClick={onClose}>{children}</Link>
   );
-  const upcomingStrip = section === "upcoming" ? UPCOMING.filter((pair) => pair.date >= today && pair.photo).slice(2, 9) : [];
   return (
     <div className="mm-panel" role="region" aria-label="Menu">
       <div className="mm-inner">
-        <figure className="mm-side">
-          {go(panel.side, (
-            <>
-              <span className="mm-side-photo"><img src={panel.side.image} alt="" loading="lazy" /></span>
-              <figcaption>{panel.side.caption} <ArrowRight size={13} aria-hidden="true" /></figcaption>
-            </>
-          ), "mm-side-link")}
-        </figure>
         <div className="mm-cols" style={{ gridTemplateColumns: `repeat(${panel.columns.length}, minmax(0, 1fr))` }}>
           {panel.columns.map((column) => (
             <div key={column.title} className="mm-col">
@@ -149,31 +139,6 @@ export function MegaPanel({ section, onClose }: { section: string; onClose: () =
           </div>
         )}
       </div>
-      {(panel.strip.length > 0 || upcomingStrip.length > 0) && (
-        <div className="mm-strip">
-          <ul className="mm-strip-list">
-            {panel.strip.map((product) => (
-              <li key={product.id}>
-                <Link to="/shop/p/$id" params={{ id: product.id }} className="mm-strip-item" onClick={onClose}>
-                  <span className="mm-strip-photo" data-white={product.stage === "white" || undefined}><img src={product.image} alt="" loading="lazy" /></span>
-                  <span className="mm-strip-name">{product.name}</span>
-                  {product.price && <span className="mm-strip-price">{dollars(product.price)}</span>}
-                </Link>
-              </li>
-            ))}
-            {upcomingStrip.map((pair) => (
-              <li key={pair.id}>
-                <Link to="/shop/drops" className="mm-strip-item" onClick={onClose}>
-                  <span className="mm-strip-photo" data-white=""><img src={pair.photo} alt="" loading="lazy" /></span>
-                  <span className="mm-strip-name">{pair.name}</span>
-                  <span className="mm-strip-price">{short(pair.date)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {go(panel.stripLink, <>{panel.stripLink.label} <ArrowRight size={13} aria-hidden="true" /></>, "mm-strip-all")}
-        </div>
-      )}
     </div>
   );
 }

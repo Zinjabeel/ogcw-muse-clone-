@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react";
-import { ShopShell, dollars, firstTapShowsBack, ProductPhoto } from "../components/shop-kit";
+import { ShopShell, dollars, firstTapShowsBack, ProductPhoto, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, brandOf, buyUrl, fullName, getProduct, retailerOf, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
@@ -85,7 +85,7 @@ function Strip({ gender, kicker, title }: { gender: "men" | "women"; kicker: str
             <Link to="/shop/p/$id" params={{ id: product.id }} className="co-strip-item" onClick={firstTapShowsBack}>
               <ProductPhoto product={product} className="co-strip-photo" />
               <span className="co-strip-name">{product.name}</span>
-              <span className="co-strip-price">{product.price ? dollars(product.price) : "At the shop"}</span>
+              <span className="co-strip-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : "At the shop"}</span>
             </Link>
           </li>
         ))}

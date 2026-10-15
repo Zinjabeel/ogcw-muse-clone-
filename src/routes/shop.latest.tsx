@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { ProductPhoto, ShopShell, brandLine, dollars, firstTapShowsBack } from "../components/shop-kit";
+import { ProductPhoto, ShopShell, brandLine, dollars, firstTapShowsBack, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
@@ -67,7 +67,7 @@ function DayCard({ product }: { product: ShopProduct }) {
       </ProductPhoto>
       <span className="lt-card-brand">{brandLine(product)}</span>
       <span className="lt-card-name">{product.name}</span>
-      <span className="lt-card-price">{product.price ? dollars(product.price) : "At the shop"}</span>
+      <span className="lt-card-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : "At the shop"}</span>
     </Link>
   );
 }

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BadgeCheck, Check, Copy, Minus, Plus, ShieldCheck, ShoppingBag, Trash2, Truck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProductPhoto, ShopShell, dollars, guideTotal, PRICES_ON } from "../components/shop-kit";
+import { ProductPhoto, ShopShell, dollars, guideTotal, PRICES_ON, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, buyUrl, fullName, retailerOf } from "../data/shop";
 import { logoOf } from "../data/shop-logos";
 import { cart, useCart, type CartLine } from "@/lib/shop-cart";
@@ -151,7 +151,7 @@ function Checkout() {
                               </div>
                             </div>
                             <div className="ck-item-end">
-                              <span className="ck-item-price">{product.price ? dollars(product.price * qty) : product.url ? "Sold out" : "At the shop"}</span>
+                              <span className="ck-item-price">{product.price ? <>{dollars(product.price * qty)}<Was product={product} qty={qty} /></> : product.url ? "Sold out" : "At the shop"}</span>
                               <a className={isOpen ? "sx-ghost ck-buy" : "sx-gold ck-buy"} href={buyUrl(product)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => setOpened((list) => (list.includes(key(line)) ? list : [...list, key(line)]))}>
                                 {isOpen ? <><Check size={15} aria-hidden="true" /> <T k="shop.co.opened">Opened</T></> : <><T k="shop.co.buy">Buy at</T> {group.shop.name} <ArrowUpRight size={15} aria-hidden="true" /></>}
                               </a>

@@ -53,9 +53,27 @@ export const dollars = (value: number) =>
 /** The day the prices were read from the shops */
 export const PRICES_ON = "14 Oct 2026";
 
+/** How far under its retail price a piece sells at the shop, in whole per cent
+ *  (0 under 5%). Only real prices: the shop's own price against the brand's
+ *  retail price, both as listed on 14 Oct 2026; no made-up "was" prices. */
+export const offRetail = (product: ShopProduct) =>
+  product.price && product.retail && product.price <= product.retail * 0.95 ? Math.round((1 - product.price / product.retail) * 100) : 0;
+
+/** The retail price struck through, after the shop's price, when it's under retail */
+export function Was({ product, qty = 1 }: { product: ShopProduct; qty?: number }) {
+  if (!offRetail(product) || !product.retail) return null;
+  return <s className="sx-was" aria-label={`Retail ${dollars(product.retail * qty)}`}>{dollars(product.retail * qty)}</s>;
+}
+
+/** The "-18%" tag on a photo, when the piece is under retail */
+export function OffTag({ product }: { product: ShopProduct }) {
+  const off = offRetail(product);
+  return off ? <span className="sx-off">−{off}%</span> : null;
+}
+
 /** A card's price: small, under the name (only where a list can be sorted or filtered by price) */
 export function Price({ product }: { product: ShopProduct }) {
-  return product.price ? <span className="sx-tile-price">{dollars(product.price)}</span> : <span className="sx-tile-price is-open">{product.url ? "Sold out" : "Price at the shop"}</span>;
+  return product.price ? <span className="sx-tile-price" data-off={offRetail(product) ? "" : undefined}>{dollars(product.price)}<Was product={product} /></span> : <span className="sx-tile-price is-open">{product.url ? "Sold out" : "Price at the shop"}</span>;
 }
 
 /** The price on a product's page: the shop's price, where it's from and when, and the retail price */
@@ -70,8 +88,8 @@ export function PriceLine({ product }: { product: ShopProduct }) {
     );
   }
   return (
-    <p className="px-price">
-      <strong>{dollars(product.price)}</strong>
+    <p className="px-price" data-off={offRetail(product) ? "" : undefined}>
+      <strong>{dollars(product.price)}<Was product={product} />{offRetail(product) > 0 && <span className="sx-off is-inline">−{offRetail(product)}% under retail</span>}</strong>
       <span>{shop.slug === "goat" ? "Lowest new price on GOAT" : `${shop.name}’s price`}, {PRICES_ON}{product.retail ? <> · retail {dollars(product.retail)}</> : null}</span>
     </p>
   );
@@ -142,6 +160,7 @@ export function ProductPhoto({ product, hidden = false, className = "sx-tile-pho
     <span className={`${className} sx-photo`} data-stage={product.stage} data-two={product.back ? "" : undefined}>
       <img className="sx-photo-1" src={product.image} alt={hidden ? "" : `${fullName(product)}, ${product.colour}`} loading="lazy" />
       {product.back && <img className="sx-photo-2" src={product.back} alt="" loading="lazy" />}
+      <OffTag product={product} />
       {children}
     </span>
   );
@@ -240,7 +259,7 @@ function CartDrawer() {
                       </div>
                     </div>
                     <div className="sx-cart-end">
-                      <span className="sx-cart-price">{product.price ? dollars(product.price * qty) : "At the shop"}</span>
+                      <span className="sx-cart-price">{product.price ? <>{dollars(product.price * qty)}<Was product={product} qty={qty} /></> : "At the shop"}</span>
                       <button type="button" className="sx-cart-remove" onClick={() => cart.remove(product.id, size)} aria-label={`Remove ${fullName(product)}`}><Trash2 size={14} aria-hidden="true" /></button>
                     </div>
                   </li>

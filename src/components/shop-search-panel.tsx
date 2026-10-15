@@ -3,7 +3,7 @@ import { ArrowRight, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { LIVE_PRODUCTS, fullName, getProduct, type ShopProduct } from "@/data/shop";
 import { moreLike, searchShop } from "@/lib/shop-search";
-import { ProductPhoto, brandLine, dollars, firstTapShowsBack } from "./shop-kit";
+import { ProductPhoto, brandLine, dollars, firstTapShowsBack, Was } from "./shop-kit";
 import { T } from "./site-text";
 
 // The shop's search, after Moncler's: the search icon drops a panel under
@@ -143,7 +143,7 @@ function ResultCard({ product, onPick }: { product: ShopProduct; onPick: () => v
       <ProductPhoto product={product} className="ss-card-photo" />
       <span className="ss-card-brand">{brandLine(product)}</span>
       <span className="ss-card-name">{product.name}</span>
-      <span className="ss-card-price">{product.price ? dollars(product.price) : product.url ? "Sold out" : "Price at the shop"}</span>
+      <span className="ss-card-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : product.url ? "Sold out" : "Price at the shop"}</span>
     </Link>
   );
 }

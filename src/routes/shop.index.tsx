@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, dollars, firstTapShowsBack } from "../components/shop-kit";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, Was, dollars, firstTapShowsBack, offRetail } from "../components/shop-kit";
 import { BRANDS, LIVE_PRODUCTS, SNEAKER_DROPS, brandOf, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
 import { LOGO_SLUGS, logoOf } from "../data/shop-logos";
 import { UPCOMING } from "../data/shop-upcoming";
@@ -10,17 +10,17 @@ import { T } from "@/components/site-text";
 // The shop home, top to bottom (after Killstar's store):
 //   hero          an open sneaker shop at night, edge to edge, the headline and a link
 //   brands        a still row of logos, each to its brand
-//   what's new    square cards that keep gliding by, even under the pointer
-//   new season    two halves, men and women: a photo, three pieces to point at
-//                 (the photo turns into that piece), a link; it slides up over
-//                 What's new, and a short scroll glides the rest of the way
+//   new season    two big photo cards, men and women, like Crowd favourites
+//   what's new    a row of square cards that moves on by itself (even under the
+//                 pointer), with an arrow each side
 //   favourites    three tall photo cards side by side: sneakers, clothing, collections
 //   the rows      Travis Scott, the next pairs to drop, sneakers, ComplexCon, graphic
 //                 tees, limited editions, denim, the watch houses (three brand
 //                 cards), collections: black and white in turn, narrower than the page
 //   explore       featured drops, release dates, limited editions, brands, saved
 // The cards are the live catalogue (src/data/shop-catalog.ts): each has two
-// photos, the second under the pointer. No prices or counts on the cards. Words
+// photos, the second under the pointer. No prices or counts on the cards, but a piece
+// under its retail price shows both, the retail one struck through. Words
 // never move on scroll; with reduced motion nothing moves at all.
 
 export const Route = createFileRoute("/shop/")({
@@ -75,10 +75,11 @@ const BANDS = {
 // The brands under the hero, still, in one row
 const LIVE_BRANDS = new Set(LIVE_PRODUCTS.map((product) => product.brand));
 const STRIP = LOGO_SLUGS.flatMap((slug) => { const logo = logoOf(slug); return logo && LIVE_BRANDS.has(slug) ? [{ slug, logo }] : []; }).slice(0, 12);
-// The new season, for men and for women (photos: Vladyslav Lytvyshchenko and Teslariu Mihai, Unsplash)
+// The new season, two big cards: men and women (photos: behrouz sasani and Howen, Unsplash;
+// the owner's own two pictures go here when they come)
 const HALVES = [
-  { key: "men", kicker: "The new season · Men", title: "Layer up for the cold", to: "/shop/men" as const, cta: "Shop men", image: "/shop/looks/season-men.webp", alt: "A young man in a beanie, grey hoodie and tan puffer jacket on a snowy hillside", picks: pieces("denim-tears-cotton-wreath-puffer-jacket-black-fw25odp11842113", "nike-x-nocta-tech-fleece-full-zip-hoodie-cobalt-tint-fd8453-428", "magliano-souvenir-varsity-jacket-green-mgfw25ja01197") },
-  { key: "women", kicker: "The new season · Women", title: "Soft knits, warm down", to: "/shop/women" as const, cta: "Shop women", image: "/shop/looks/season-women.webp", alt: "A young woman in a sand-coloured puffer jacket and a leather cap by a railway line", picks: pieces("acne-studios-fleece-logo-hoodie-tango-pink-ci0136-tang", "nike-women-s-x-sacai-double-zip-jacket-obsidian-court-purple-cd6297-451", "amiri-love-tie-dye-cropped-knit-sweater-multicolor-y0w05307cc-mult") },
+  { key: "men", to: "/shop/men" as const, image: "/shop/looks/fw-men.webp", alt: "A man in a black puffer jacket over a white tee and a chain, by a window" },
+  { key: "women", to: "/shop/women" as const, image: "/shop/looks/fw-women.webp", alt: "A woman in a navy puffer jacket leaning on a green Land Rover" },
 ];
 // The watch houses: three brands, each with a campaign photo (brand photos, via Pinterest)
 const HOUSES = [
@@ -87,86 +88,14 @@ const HOUSES = [
   { slug: "audemars-piguet", name: "Audemars Piguet", line: "The Royal Oak, the Offshore and the CODE 11.59", image: "/shop/looks/watch-ap.jpg", alt: "A model in a cobalt blue jacket stretching an arm out to show an Audemars Piguet watch" },
 ];
 
-/** Scroll the page to `top` with a soft ease in and out; any wheel, touch or key takes over */
-function glideTo(top: number, ms: number, done: () => void) {
-  if (reduced()) { window.scrollTo(0, top); done(); return; }
-  const from = window.scrollY;
-  const distance = top - from;
-  const start = performance.now();
-  const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-  let frame = 0;
-  const stop = () => { cancelAnimationFrame(frame); off(); done(); };
-  const off = () => { window.removeEventListener("wheel", stop); window.removeEventListener("touchstart", stop); window.removeEventListener("keydown", stop); };
-  window.addEventListener("wheel", stop, { passive: true });
-  window.addEventListener("touchstart", stop, { passive: true });
-  window.addEventListener("keydown", stop);
-  const step = (now: number) => {
-    const p = Math.min(1, (now - start) / ms);
-    window.scrollTo(0, from + distance * ease(p));
-    if (p < 1) frame = requestAnimationFrame(step);
-    else { off(); done(); }
-  };
-  frame = requestAnimationFrame(step);
-}
-
-/** What's new and the new-season photo stick in turn. The photo's progress
- *  over What's new is --p (0 to 1), and a scroll that stops part way glides
- *  on to the end, in the direction it was going */
-function useStack(stack: RefObject<HTMLDivElement | null>) {
-  useEffect(() => {
-    const el = stack.current;
-    if (!el) return;
-    let last = window.scrollY;
-    let dir = 1;
-    let timer = 0;
-    let gliding = false;
-    let frame = 0;
-    const zone = () => {
-      const header = document.querySelector<HTMLElement>(".sx-top")?.getBoundingClientRect().height ?? 0;
-      const first = el.children[0] as HTMLElement | undefined;
-      const start = el.getBoundingClientRect().top + window.scrollY - header;
-      return { start, end: start + (first?.getBoundingClientRect().height ?? 0) };
-    };
-    const paint = () => {
-      const { start, end } = zone();
-      const p = Math.min(1, Math.max(0, (window.scrollY - start) / Math.max(1, end - start)));
-      el.style.setProperty("--p", p.toFixed(4));
-    };
-    const settle = () => {
-      if (gliding) return;
-      const { start, end } = zone();
-      const y = window.scrollY;
-      if (y <= start + 2 || y >= end - 2) return;
-      gliding = true;
-      glideTo(dir > 0 ? end : start, 1100, () => { gliding = false; });
-    };
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y !== last && !gliding) dir = y > last ? 1 : -1;
-      last = y;
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(paint);
-      window.clearTimeout(timer);
-      timer = window.setTimeout(settle, 90);
-    };
-    paint();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); window.clearTimeout(timer); cancelAnimationFrame(frame); };
-  }, [stack]);
-}
-
 function ShopHome() {
-  const stack = useRef<HTMLDivElement>(null);
-  useStack(stack);
   return (
     <ShopShell>
       <div className="sh">
         <Hero />
         <LogoStrip />
-        <div className="sh-stack" ref={stack}>
-          <WhatsNew />
-          <NewSeason />
-        </div>
+        <NewSeason />
+        <WhatsNew />
         <Looks />
         <CollectionRow row={ROWS["travis"]!} />
         <CollectionRow row={ROWS["sneakers"]!} />
@@ -234,6 +163,7 @@ function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | nu
         </ProductPhoto>
         <span className="sh-square-brand">{brand.store ? product.kind : brand.name}</span>
         <span className="sh-square-name">{fullName(product)}</span>
+        {product.price && offRetail(product) > 0 && <span className="sh-square-price">{dollars(product.price)}<Was product={product} /></span>}
       </Link>
       {!hidden && <SaveButton product={product} />}
       {!hidden && <AddToCart product={product} />}
@@ -241,9 +171,54 @@ function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | nu
   );
 }
 
-/* ---------- What's new: square cards gliding by without a stop ---------- */
+/* ---------- The new season: men and women, two big cards like Crowd favourites ---------- */
+
+function NewSeason() {
+  return (
+    <section className="sh-sec sh-looks sh-season2" aria-labelledby="sh-season-title">
+      <header className="sh-looks-head">
+        <h2 id="sh-season-title" className="sh-h2"><T k="shop.season.title">The new season</T></h2>
+      </header>
+      <ul className="sh-looks-grid sh-looks-two">
+        {HALVES.map((half) => (
+          <li key={half.key}>
+            <Link to={half.to} className="sh-look">
+              <img src={half.image} alt={half.alt} loading="lazy" />
+              <span className="sh-look-text">
+                <span className="sh-look-name"><T k={`shop.season.${half.key}.name`}>{half.key === "men" ? "Men" : "Women"}</T></span>
+                <span className="sh-look-more"><T k="shop.looks.more">Discover more</T></span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/* ---------- What's new: a row of square cards that moves on by itself, with an arrow each side ---------- */
 
 function WhatsNew() {
+  const track = useRef<HTMLUListElement>(null);
+  /** One card on (or back), round to the start after the last */
+  const step = (dir: 1 | -1) => {
+    const el = track.current;
+    const card = el?.querySelector<HTMLElement>("li");
+    if (!el || !card) return;
+    const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
+    const by = card.offsetWidth + gap;
+    const end = el.scrollWidth - el.clientWidth - 4;
+    const smooth = reduced() ? "auto" : "smooth";
+    if (dir > 0 && el.scrollLeft >= end) el.scrollTo({ left: 0, behavior: smooth });
+    else if (dir < 0 && el.scrollLeft <= 4) el.scrollTo({ left: el.scrollWidth, behavior: smooth });
+    else el.scrollBy({ left: dir * by, behavior: smooth });
+  };
+  // It moves on by itself every few seconds (the pointer doesn't stop it: owner's rule); not with reduced motion
+  useEffect(() => {
+    if (reduced()) return;
+    const timer = window.setInterval(() => { if (!document.hidden) step(1); }, 3800);
+    return () => window.clearInterval(timer);
+  }, []);
   return (
     <section className="sh-sec sh-new" aria-labelledby="sh-new-title">
       <div className="sh-panel">
@@ -251,63 +226,17 @@ function WhatsNew() {
           <h2 id="sh-new-title" className="sh-h2"><T k="shop.story.new">See what’s new</T></h2>
           <Link to="/shop/all" search={{ tag: "new" }} className="sh-textlink"><T k="shop.story.new.all">Shop all new in</T> <ArrowRight size={15} aria-hidden="true" /></Link>
         </header>
-        <div className="sh-marquee">
-          {/* Two copies one after the other, so the row can glide on forever */}
-          <ul className="sh-marquee-track" style={{ "--n": RAIL.length } as CSSProperties}>
-            {[0, 1].flatMap((copy) => RAIL.map((product, i) => (
-              <li key={`${copy}-${i}`} className="sh-marquee-item"><ShopCard product={product} hidden={copy === 1} /></li>
-            )))}
+        <div className="sh-rail">
+          <button type="button" className="sh-rail-arrow is-prev" onClick={() => step(-1)} aria-label="Back"><ArrowLeft size={18} aria-hidden="true" /></button>
+          <ul className="sh-rail-track" ref={track}>
+            {RAIL.map((product) => <li key={product.id} className="sh-rail-item"><ShopCard product={product} /></li>)}
           </ul>
+          <button type="button" className="sh-rail-arrow is-next" onClick={() => step(1)} aria-label="Next"><ArrowRight size={18} aria-hidden="true" /></button>
         </div>
       </div>
     </section>
   );
 }
-
-/* ---------- The new season: two halves, men and women ---------- */
-
-/** One half: a photo, three pieces to point at (the photo turns into the piece
- *  you're on, with its name and price under it) and a link to that shop */
-function SeasonHalf({ half }: { half: (typeof HALVES)[number] }) {
-  const [on, setOn] = useState<number | null>(null);
-  const piece = on === null ? null : half.picks[on] ?? null;
-  return (
-    <div className="sh-half" data-half={half.key} onMouseLeave={() => setOn(null)}>
-      <Link to={half.to} className="sh-half-photo" aria-label={half.cta}>
-        <img src={half.image} alt={half.alt} loading="lazy" />
-        {half.picks.map((product, i) => <img key={product.id} className="sh-half-piece" data-on={on === i || undefined} src={product.image} alt="" loading="lazy" />)}
-        <span className="sh-half-tag">Fall/Winter 2026</span>
-      </Link>
-      <div className="sh-half-body">
-        <p className="sh-half-kicker"><T k={`shop.season.${half.key}.kicker`}>{half.kicker}</T></p>
-        <h3 className="sh-half-title"><T k={`shop.season.${half.key}.title`}>{half.title}</T></h3>
-        <ul className="sh-half-picks" aria-label="Three from the season">
-          {half.picks.map((product, i) => (
-            <li key={product.id}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-half-pick" data-on={on === i || undefined} onMouseEnter={() => setOn(i)} onFocus={() => setOn(i)} aria-label={fullName(product)}>
-                <img src={product.image} alt="" loading="lazy" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <p className="sh-half-now" aria-live="polite">{piece ? <>{fullName(piece)}{piece.price ? <span> · {dollars(piece.price)}</span> : null}</> : <span className="sh-half-hint">Point at a piece to see it</span>}</p>
-        <Link to={half.to} className="sh-half-cta"><T k={`shop.season.${half.key}.cta`}>{half.cta}</T> <ArrowRight size={15} aria-hidden="true" /></Link>
-      </div>
-    </div>
-  );
-}
-
-function NewSeason() {
-  return (
-    <section className="sh-sec sh-season" aria-labelledby="sh-season-title">
-      <h2 id="sh-season-title" className="sr-only"><T k="shop.season.title">The new season</T></h2>
-      <div className="sh-season-split">
-        {HALVES.map((half) => <SeasonHalf key={half.key} half={half} />)}
-      </div>
-    </section>
-  );
-}
-
 /* ---------- Crowd favourites: three tall photo cards side by side ---------- */
 
 function Looks() {

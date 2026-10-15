@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import { LIVE_PRODUCTS, type ShopProduct } from "@/data/shop";
-import { AddToCart, ProductPhoto, SaveButton, ShopShell, brandLine, dollars, firstTapShowsBack } from "./shop-kit";
+import { AddToCart, ProductPhoto, SaveButton, ShopShell, brandLine, dollars, firstTapShowsBack, Was } from "./shop-kit";
 import { T } from "./site-text";
 
 // The men's and women's shops, after Moncler's: a fall/winter picture over
@@ -114,7 +114,7 @@ function GenderCard({ product }: { product: ShopProduct }) {
         <ProductPhoto product={product} className="gx-card-photo" />
         <span className="gx-card-brand">{brandLine(product)}</span>
         <span className="gx-card-name">{product.name}</span>
-        <span className="gx-card-price">{product.price ? dollars(product.price) : product.url ? "Sold out" : "Price at the shop"}</span>
+        <span className="gx-card-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : product.url ? "Sold out" : "Price at the shop"}</span>
         {product.sizes && product.sizes.length > 1 && <span className="gx-card-sizes">{product.sizes.length} sizes</span>}
       </Link>
       <SaveButton product={product} />

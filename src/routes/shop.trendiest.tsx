@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { ProductPhoto, ShopShell, brandLine, dollars, firstTapShowsBack } from "../components/shop-kit";
+import { ProductPhoto, ShopShell, brandLine, dollars, firstTapShowsBack, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, SHOP_CATEGORIES, type ShopProduct } from "../data/shop";
 import { T } from "@/components/site-text";
 
@@ -47,7 +47,7 @@ function Trendiest() {
             <ProductPhoto product={product} className="hx-pod-photo" />
             <span className="hx-pod-brand">{brandLine(product)}</span>
             <span className="hx-pod-name">{product.name}</span>
-            <span className="hx-pod-price">{product.price ? dollars(product.price) : "Price at the shop"}</span>
+            <span className="hx-pod-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : "Price at the shop"}</span>
           </Link>
         ))}
       </section>
@@ -65,7 +65,7 @@ function Trendiest() {
                   <span className="hx-row-name">{product.name}</span>
                 </span>
                 <span className="hx-row-kind">{product.kind}</span>
-                <span className="hx-row-price">{product.price ? dollars(product.price) : "At the shop"}</span>
+                <span className="hx-row-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : "At the shop"}</span>
                 <ArrowUpRight size={16} className="hx-row-go" aria-hidden="true" />
               </Link>
             </li>
@@ -86,7 +86,7 @@ function Trendiest() {
                   <Link to="/shop/p/$id" params={{ id: product.id }} className="hx-mini-card" onClick={firstTapShowsBack}>
                     <ProductPhoto product={product} className="hx-mini-photo" />
                     <span className="hx-mini-name">{product.name}</span>
-                    <span className="hx-mini-price">{product.price ? dollars(product.price) : "At the shop"}</span>
+                    <span className="hx-mini-price">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : "At the shop"}</span>
                   </Link>
                 </li>
               ))}
