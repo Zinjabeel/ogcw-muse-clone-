@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, Was, dollars, firstTapShowsBack, offRetail } from "../components/shop-kit";
-import { BRANDS, LIVE_PRODUCTS, SNEAKER_DROPS, brandOf, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
+import { AddToCart, BlankCard, ProductPhoto, SaveButton, ShopShell, Was, dollars, firstTapShowsBack } from "../components/shop-kit";
+import { BRANDS, LIVE_PRODUCTS, brandOf, fullName, getProduct, isLive, type ShopProduct } from "../data/shop";
 import { LOGO_SLUGS, logoOf } from "../data/shop-logos";
 import { UPCOMING } from "../data/shop-upcoming";
 import { T } from "@/components/site-text";
@@ -104,7 +104,6 @@ function ShopHome() {
         <CollectionRow row={ROWS["denim"]!} />
         <WatchHouses />
         <CollectionRow row={ROWS["collections"]!} />
-        <Explore />
       </div>
     </ShopShell>
   );
@@ -149,7 +148,7 @@ function LogoStrip() {
 
 /* ---------- A square card: a product, or a blank one still to come ---------- */
 
-const chipOf = (product: ShopProduct) => (product.tags?.includes("limited") ? "Limited" : product.tags?.includes("new") ? "New in" : undefined);
+const chipOf = (product: ShopProduct) => (product.tags?.includes("limited") ? "Limited" : product.tags?.includes("new") ? "New in" : product.tags?.includes("trending") ? "Trendiest" : undefined);
 
 function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | null; hidden?: boolean; tone?: "dark" | "light" | undefined }) {
   if (!product || !isLive(product)) return <BlankCard tone={tone} />;
@@ -159,11 +158,14 @@ function ShopCard({ product, hidden = false, tone }: { product: ShopProduct | nu
     <article className="sh-square" aria-hidden={hidden || undefined}>
       <Link to="/shop/p/$id" params={{ id: product.id }} className="sh-square-link" tabIndex={hidden ? -1 : undefined} onClick={firstTapShowsBack}>
         <ProductPhoto product={product} hidden={hidden} className="sh-square-photo">
-          {chip && <span className="sh-chip">{chip}</span>}
+          {/* The tag and the price side by side, at the foot of the photo */}
+          <span className="sh-tags">
+            {chip && <span className="sh-chip">{chip}</span>}
+            <span className="sh-price-pill">{product.price ? <>{dollars(product.price)}<Was product={product} /></> : product.url ? "Sold out" : "At the shop"}</span>
+          </span>
         </ProductPhoto>
         <span className="sh-square-brand">{brand.store ? product.kind : brand.name}</span>
         <span className="sh-square-name">{fullName(product)}</span>
-        {product.price && offRetail(product) > 0 && <span className="sh-square-price">{dollars(product.price)}<Was product={product} /></span>}
       </Link>
       {!hidden && <SaveButton product={product} />}
       {!hidden && <AddToCart product={product} />}
@@ -378,64 +380,6 @@ function WatchHouses() {
         ))}
       </ul>
       <p className="sh-houses-credit">Campaign photos: Rolex, Vacheron Constantin and Audemars Piguet, via Pinterest. The watches are pre-owned, checked by Watchfinder & Co.</p>
-    </section>
-  );
-}
-
-/* ---------- Explore ---------- */
-
-const dayMonth = (iso: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
-
-function Explore() {
-  const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10));
-  useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
-  const next = SNEAKER_DROPS.find((drop) => drop.date >= today);
-  return (
-    <section className="sh-sec sh-explore" aria-labelledby="sh-explore-title">
-      <header className="sh-head">
-        <h2 id="sh-explore-title" className="sh-h2"><T k="shop.explore.title">Explore</T></h2>
-      </header>
-      <ul className="sh-explore-grid">
-        <li className="is-drops">
-          <Link to="/shop/featured-drops" className="sh-tile sh-tile-photo">
-            <img src="/shop/upcoming/aj11-space-jam-2026.png" alt="" loading="lazy" />
-            <span className="sh-tile-text">
-              <span className="sh-tile-name"><T k="shop.explore.drops">Featured drops</T></span>
-              <span className="sh-tile-note"><T k="shop.explore.drops.note">The Jordans on the calendar and the collabs worth the wait.</T></span>
-            </span>
-          </Link>
-        </li>
-        <li>
-          <Link to="/shop/drops" className="sh-tile sh-tile-date">
-            <span className="sh-tile-kicker"><T k="shop.explore.dates.kicker">Next on the calendar</T></span>
-            {next ? (
-              <>
-                <span className="sh-tile-big">{dayMonth(next.date)}</span>
-                <span className="sh-tile-note">{next.name}</span>
-              </>
-            ) : <span className="sh-tile-note"><T k="shop.explore.dates.none">New dates soon.</T></span>}
-            <span className="sh-tile-name"><T k="shop.explore.dates">Release dates</T> <ArrowRight size={15} aria-hidden="true" /></span>
-          </Link>
-        </li>
-        <li>
-          <Link to="/shop/all" search={{ tag: "limited" }} className="sh-tile sh-tile-plain">
-            <span className="sh-tile-kicker"><T k="shop.explore.limited.kicker">Collabs and grails</T></span>
-            <span className="sh-tile-name"><T k="shop.explore.limited">Limited editions</T> <ArrowRight size={15} aria-hidden="true" /></span>
-          </Link>
-        </li>
-        <li>
-          <Link to="/shop/brands" className="sh-tile sh-tile-az">
-            <span className="sh-tile-letters" aria-hidden="true">A&nbsp;B&nbsp;C<br />X&nbsp;Y&nbsp;Z</span>
-            <span className="sh-tile-name"><T k="shop.explore.brands">Brands A to Z</T> <ArrowRight size={15} aria-hidden="true" /></span>
-          </Link>
-        </li>
-        <li>
-          <Link to="/shop/saved" className="sh-tile sh-tile-gift">
-            <span className="sh-tile-kicker"><T k="shop.explore.saved.kicker">Your list</T></span>
-            <span className="sh-tile-name"><T k="shop.explore.saved">Saved pieces</T> <ArrowRight size={15} aria-hidden="true" /></span>
-          </Link>
-        </li>
-      </ul>
     </section>
   );
 }

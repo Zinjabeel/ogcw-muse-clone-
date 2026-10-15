@@ -33,6 +33,7 @@ function Trendiest() {
             <p className="hx-kicker"><T k="shop.tr.kicker">Trendiest · the week of 14 October</T></p>
             <h1 id="hx-title" className="hx-title"><T k="shop.tr.title">The Heat Index</T></h1>
             <p className="hx-blurb"><T k="shop.tr.blurb">What’s moving at GOAT and Watchfinder this week, with our own picks, in our order. Top three up front, the chart under it.</T></p>
+            <Link to="/shop/all" search={{ tag: "trending" }} className="hx-all"><T k="shop.tr.all">All trendy products</T> <span className="hx-all-n">{HOT.length}</span> <ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
           <div className="hx-stack" aria-hidden="true">
             {podium.map((product) => <span key={product.id} className="hx-stack-card" data-stage={product.stage}><img src={product.image} alt="" /></span>)}
@@ -71,6 +72,11 @@ function Trendiest() {
             </li>
           ))}
         </ol>
+        <Link to="/shop/all" search={{ tag: "trending" }} className="hx-all-bar">
+          <span><T k="shop.tr.all.kicker">Everything trending this week</T></span>
+          <strong><T k="shop.tr.all">All trendy products</T> ({HOT.length})</strong>
+          <ArrowRight size={22} aria-hidden="true" />
+        </Link>
       </section>
 
       <section className="sx-wrap hx-aisles" aria-label="The heat by aisle">
@@ -78,7 +84,7 @@ function Trendiest() {
           <div key={cat.slug} className="hx-aisle">
             <header>
               <h2 className="hx-h">{cat.label}</h2>
-              <Link to="/shop/all" search={{ cat: cat.slug, tag: "trending" }} className="sx-link">All trending {cat.label.toLowerCase()} <ArrowRight size={14} aria-hidden="true" /></Link>
+              <Link to="/shop/all" search={{ cat: cat.slug, tag: "trending" }} className="hx-aisle-all">All trending {cat.label.toLowerCase()} <ArrowRight size={14} aria-hidden="true" /></Link>
             </header>
             <ul className="hx-mini">
               {HOT.filter((product) => product.category === cat.id).slice(0, 4).map((product) => (

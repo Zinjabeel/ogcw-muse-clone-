@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowUpRight, Heart, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
-import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Heart, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { brandOf, buyUrl, fullName, isLive, retailerOf, type ShopProduct } from "@/data/shop";
 import { storePreference } from "@/lib/consent";
 import { cart, useCart } from "@/lib/shop-cart";
@@ -187,8 +187,8 @@ export function ProductTile({ product, size = "md", priced = false }: { product:
         </ProductPhoto>
         <span className="sx-tile-brand">{brandLine(product)}</span>
         <span className="sx-tile-name">{product.name}</span>
-        <span className="sx-tile-colour">{product.colour}</span>
         {priced && <Price product={product} />}
+        <span className="sx-tile-colour">{product.colour}</span>
       </Link>
       <SaveButton product={product} />
       <AddToCart product={product} />
@@ -196,11 +196,63 @@ export function ProductTile({ product, size = "md", priced = false }: { product:
   );
 }
 
-export function ProductGrid({ products, cols = 4, priced = false }: { products: ShopProduct[]; cols?: 3 | 4 | 5; priced?: boolean }) {
+/** How many products a list shows before "Load more" (owner, 15 Oct 2026:
+ *  every long list stops after 12 and loads the next 12 on demand) */
+export const LOAD_STEP = 12;
+
+/** Show `step` items, then `step` more each time; starts again when the list changes */
+export function useLoadMore(ids: string, step = LOAD_STEP) {
+  const [shown, setShown] = useState(step);
+  useEffect(() => setShown(step), [ids, step]);
+  return { shown, more: () => setShown((value) => value + step) };
+}
+
+/** The "Load more" button under a list, with how many are showing */
+export function LoadMore({ shown, total, onMore }: { shown: number; total: number; onMore: () => void }) {
+  if (shown >= total) return null;
   return (
-    <ul className={`sx-grid sx-grid-${cols}`}>
-      {products.map((product) => <li key={product.id}><ProductTile product={product} priced={priced} /></li>)}
-    </ul>
+    <div className="sx-loadmore">
+      <p className="sx-loadmore-count">{Math.min(shown, total)} of {total}</p>
+      <span className="sx-loadmore-bar" aria-hidden="true"><span style={{ width: `${(Math.min(shown, total) / total) * 100}%` }} /></span>
+      <button type="button" className="sx-loadmore-btn" onClick={onMore}><T k="shop.loadmore">Load more</T></button>
+    </div>
+  );
+}
+
+export function ProductGrid({ products, cols = 4, priced = true }: { products: ShopProduct[]; cols?: 3 | 4 | 5; priced?: boolean }) {
+  const { shown, more } = useLoadMore(products.map((product) => product.id).join());
+  return (
+    <>
+      <ul className={`sx-grid sx-grid-${cols}`}>
+        {products.slice(0, shown).map((product) => <li key={product.id}><ProductTile product={product} priced={priced} /></li>)}
+      </ul>
+      <LoadMore shown={shown} total={products.length} onMore={more} />
+    </>
+  );
+}
+
+/** A row that scrolls sideways, with an arrow on each side: one item back or
+ *  on per click, round to the other end from the last (owner, 15 Oct 2026).
+ *  `per` is how many items fit across; `children` are the <li> items. */
+export function Carousel({ children, per = 4, label, className = "", tone }: { children: ReactNode; per?: number; label: string; className?: string; tone?: "dark" }) {
+  const track = useRef<HTMLUListElement>(null);
+  const step = (dir: 1 | -1) => {
+    const el = track.current;
+    const item = el?.querySelector<HTMLElement>(":scope > li");
+    if (!el || !item) return;
+    const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
+    const end = el.scrollWidth - el.clientWidth - 4;
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    if (dir > 0 && el.scrollLeft >= end) el.scrollTo({ left: 0, behavior });
+    else if (dir < 0 && el.scrollLeft <= 4) el.scrollTo({ left: el.scrollWidth, behavior });
+    else el.scrollBy({ left: dir * (item.offsetWidth + gap), behavior });
+  };
+  return (
+    <div className={`sx-car ${className}`} data-tone={tone} style={{ "--per": per } as CSSProperties} role="group" aria-label={label}>
+      <button type="button" className="sx-car-arrow is-prev" onClick={() => step(-1)} aria-label={`Back: ${label}`}><ArrowLeft size={18} aria-hidden="true" /></button>
+      <ul className="sx-car-track" ref={track}>{children}</ul>
+      <button type="button" className="sx-car-arrow is-next" onClick={() => step(1)} aria-label={`Next: ${label}`}><ArrowRight size={18} aria-hidden="true" /></button>
+    </div>
   );
 }
 

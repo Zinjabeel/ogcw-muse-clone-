@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProductGrid, ProductPhoto, ShopShell, brandLine, dollars, Was } from "../components/shop-kit";
+import { Carousel, ProductPhoto, ProductTile, ShopShell, brandLine, dollars, Was } from "../components/shop-kit";
 import { LIVE_PRODUCTS, getProduct } from "../data/shop";
 import { UPCOMING } from "../data/shop-upcoming";
 import { T } from "@/components/site-text";
 
 // Featured drops: the collabs, as an edit. The lead drop on a split with a
 // countdown (worked out after the page loads), then the collab pairs already
-// out, the next dates on the calendar, collab clothing, and the grails.
+// out, the next dates on the calendar, collab clothing, and the grails, each
+// a row that scrolls with an arrow on each side.
 export const Route = createFileRoute("/shop/featured-drops")({
   head: () => ({ meta: [{ title: "Featured drops: OGCW Shop" }, { name: "description", content: "The collabs that matter: Travis Scott, Fragment, Awake NY, Denim Tears and more, with the next dates on the calendar." }] }),
   component: FeaturedDrops,
@@ -16,9 +17,9 @@ export const Route = createFileRoute("/shop/featured-drops")({
 
 const LEAD = getProduct("travis-scott-af1-ice-blue");
 const TODAY = "2026-10-14";
-const OUT = LIVE_PRODUCTS.filter((product) => product.category === "Sneakers" && product.tags?.includes("limited") && product.id !== LEAD?.id).sort((a, b) => (b.released ?? "").localeCompare(a.released ?? "")).slice(0, 6);
-const CLOTHES = LIVE_PRODUCTS.filter((product) => product.category === "Clothing" && product.tags?.includes("limited")).slice(0, 8);
-const GRAILS = LIVE_PRODUCTS.filter((product) => product.kind === "Watches" && product.tags?.includes("limited")).slice(0, 4);
+const OUT = LIVE_PRODUCTS.filter((product) => product.category === "Sneakers" && product.tags?.includes("limited") && product.id !== LEAD?.id).sort((a, b) => (b.released ?? "").localeCompare(a.released ?? "")).slice(0, 12);
+const CLOTHES = LIVE_PRODUCTS.filter((product) => product.category === "Clothing" && product.tags?.includes("limited")).slice(0, 16);
+const GRAILS = LIVE_PRODUCTS.filter((product) => product.kind === "Watches" && product.tags?.includes("limited")).slice(0, 12);
 const longDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(iso));
 
 function FeaturedDrops() {
@@ -30,7 +31,7 @@ function FeaturedDrops() {
     const days = Math.ceil((Date.parse(`${LEAD.released}T15:00:00Z`) - Date.now()) / 86_400_000);
     setLeft(days > 1 ? `${days} days to go` : days === 1 ? "Tomorrow" : days === 0 ? "Today" : "Out now");
   }, []);
-  const next = UPCOMING.filter((pair) => pair.date >= today && pair.photo).slice(0, 6);
+  const next = UPCOMING.filter((pair) => pair.date >= today && pair.photo);
   return (
     <ShopShell>
       {LEAD && (
@@ -52,7 +53,7 @@ function FeaturedDrops() {
 
       <section className="sx-wrap fd-out" aria-labelledby="fd-out">
         <header className="fd-head"><p className="fd-num">01</p><h2 id="fd-out" className="fd-h">Out now: the collabs</h2></header>
-        <ul className="fd-big">
+        <Carousel per={3} label="Out now: the collabs">
           {OUT.map((product) => (
             <li key={product.id}>
               <Link to="/shop/p/$id" params={{ id: product.id }} className="fd-card">
@@ -63,14 +64,14 @@ function FeaturedDrops() {
               </Link>
             </li>
           ))}
-        </ul>
+        </Carousel>
       </section>
 
       {next.length > 0 && (
         <section className="fd-cal" aria-labelledby="fd-cal">
           <div className="sx-wrap">
             <header className="fd-head"><p className="fd-num">02</p><h2 id="fd-cal" className="fd-h">On the calendar</h2><Link to="/shop/drops" className="sx-link">Every date <ArrowRight size={14} aria-hidden="true" /></Link></header>
-            <ul className="fd-dates">
+            <Carousel per={6} label="On the calendar" tone="dark">
               {next.map((pair) => (
                 <li key={pair.id}>
                   <a href={pair.goat ?? "/shop/drops"} target={pair.goat ? "_blank" : undefined} rel="noopener noreferrer" className="fd-date">
@@ -81,20 +82,20 @@ function FeaturedDrops() {
                   </a>
                 </li>
               ))}
-            </ul>
+            </Carousel>
           </div>
         </section>
       )}
 
       <section className="sx-wrap fd-out" aria-labelledby="fd-clothes">
         <header className="fd-head"><p className="fd-num">03</p><h2 id="fd-clothes" className="fd-h">Collab clothing</h2><Link to="/shop/all" search={{ cat: "clothing", tag: "limited" }} className="sx-link">All of it <ArrowRight size={14} aria-hidden="true" /></Link></header>
-        <ProductGrid products={CLOTHES} cols={4} priced />
+        <Carousel per={4} label="Collab clothing">{CLOTHES.map((product) => <li key={product.id}><ProductTile product={product} priced /></li>)}</Carousel>
       </section>
 
       {GRAILS.length > 0 && (
         <section className="sx-wrap fd-out" aria-labelledby="fd-grails">
           <header className="fd-head"><p className="fd-num">04</p><h2 id="fd-grails" className="fd-h">Grails on the wrist</h2><Link to="/shop/all" search={{ kind: "Watches", tag: "limited" }} className="sx-link">More grails <ArrowRight size={14} aria-hidden="true" /></Link></header>
-          <ProductGrid products={GRAILS} cols={4} priced />
+          <Carousel per={4} label="Grails on the wrist">{GRAILS.map((product) => <li key={product.id}><ProductTile product={product} priced /></li>)}</Carousel>
         </section>
       )}
     </ShopShell>
