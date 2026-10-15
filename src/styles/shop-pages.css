@@ -485,9 +485,8 @@ html[data-search-open] body { overflow: hidden; }
 .sh-row { padding-block: clamp(44px, 4.6vw, 84px); }
 .sh-row > .sh-head, .sh-row > .sh-cards, .sh-row > .sh-spot, .sh-row > .sh-row-cta { max-width: 1680px; margin-inline: auto; }
 /* Denim and collections: the big photo beside the cards two over two, as
-   before, a little smaller (owner, 15 Oct): denim a touch, collections more */
-.sh-row > .sh-spot[data-size="denim"], .sh-row > .sh-head:has(+ .sh-spot[data-size="denim"]) { max-width: 1440px; }
-.sh-row > .sh-spot[data-size="collections"], .sh-row > .sh-head:has(+ .sh-spot[data-size="collections"]) { max-width: 1240px; }
+   before, a little smaller (owner, 15 Oct); collections the same size as denim */
+.sh-row > .sh-spot[data-size], .sh-row > .sh-head:has(+ .sh-spot[data-size]) { max-width: 1440px; }
 /* The bands: a line and a button beside a row of five pictures */
 .sh-band2 { margin: 0 calc(-1 * var(--gutter)); padding: clamp(30px, 3.2vw, 52px) clamp(18px, 4vw, 72px); background: var(--ogcw-surface); color: var(--ogcw-text); box-shadow: inset 0 1px 0 var(--ogcw-border), inset 0 -1px 0 var(--ogcw-border); }
 .sh-band2-in { display: grid; grid-template-columns: minmax(220px, .8fr) minmax(0, 2.4fr); align-items: center; gap: clamp(20px, 3vw, 56px); max-width: 1640px; margin: 0 auto; }
