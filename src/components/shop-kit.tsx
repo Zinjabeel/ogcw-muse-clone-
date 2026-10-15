@@ -90,7 +90,7 @@ export function PriceLine({ product }: { product: ShopProduct }) {
   return (
     <p className="px-price" data-off={offRetail(product) ? "" : undefined}>
       <strong>{dollars(product.price)}<Was product={product} />{offRetail(product) > 0 && <span className="sx-off is-inline">−{offRetail(product)}% under retail</span>}</strong>
-      <span>{shop.slug === "goat" ? "Lowest new price on GOAT" : `${shop.name}’s price`}, {PRICES_ON}{product.retail ? <> · retail {dollars(product.retail)}</> : null}</span>
+      <span>{shop.slug === "goat" ? "Lowest new price on GOAT" : shop.slug === "stadium-goods" ? "Lowest price in stock at Stadium Goods" : `${shop.name}’s price`}, {shop.slug === "stadium-goods" ? "15 Oct 2026" : PRICES_ON}{product.retail ? <> · retail {dollars(product.retail)}</> : null}</span>
     </p>
   );
 }

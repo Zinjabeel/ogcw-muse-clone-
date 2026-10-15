@@ -170,7 +170,7 @@ function ProductPage() {
             {product.gender && <div><dt><T k="shop.pdp.for">Cut for</T></dt><dd>{product.gender === "men" ? "Men" : product.gender === "women" ? "Women" : "Anyone"}</dd></div>}
             {(product.specs ?? [["Colour", product.colour]]).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
             {product.released && <div><dt><T k="shop.pdp.release">Release</T></dt><dd>{longDate(product.released)}</dd></div>}
-            {product.price && <div><dt><T k="shop.pdp.price">Price</T></dt><dd>{dollars(product.price)} at {shop.name}, {PRICES_ON}</dd></div>}
+            {product.price && <div><dt><T k="shop.pdp.price">Price</T></dt><dd>{dollars(product.price)} at {shop.name}, {shop.slug === "stadium-goods" ? "15 Oct 2026" : PRICES_ON}</dd></div>}
             {product.retail && <div><dt><T k="shop.pdp.retail">Retail</T></dt><dd>{dollars(product.retail)}</dd></div>}
             <div><dt><T k="shop.pdp.shop">Bought from</T></dt><dd><a href={shop.site} target="_blank" rel="noopener noreferrer">{shop.name} <ArrowUpRight size={13} aria-hidden="true" /></a></dd></div>
             <div><dt><T k="shop.pdp.photo">Photo</T></dt><dd>{product.photoPage ? <a href={product.photoPage} target="_blank" rel="noopener noreferrer">{product.credit}</a> : product.credit}</dd></div>

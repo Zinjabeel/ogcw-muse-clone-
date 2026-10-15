@@ -23,6 +23,7 @@ const key = (line: { id: string; size?: string | undefined }) => `${line.id}|${l
 const PROMISE: Record<string, { icon: "check" | "shield"; line: string }> = {
   goat: { icon: "check", line: "GOAT checks every pair and piece before it ships." },
   watchfinder: { icon: "shield", line: "Watchfinder & Co. services each watch and gives a 24-month warranty." },
+  "stadium-goods": { icon: "check", line: "Stadium Goods checks every piece before it ships." },
 };
 
 function Checkout() {

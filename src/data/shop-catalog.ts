@@ -1,4 +1,5 @@
 import type { ShopBrand, ShopProduct, ShopTag } from "./shop";
+import { EXTRA, EXTRA_BRANDS } from "./shop-extra";
 import { FACTS, MORE } from "./shop-more";
 
 // The shop's live catalogue (owner, 14 Oct 2026): sneakers and jeans picked
@@ -43,6 +44,8 @@ export const CATALOG_BRANDS: ShopBrand[] = [
   { slug: "hublot", name: "Hublot", blurb: "The Big Bang, and gold paired with rubber.", site: "https://www.hublot.com" },
   { slug: "breitling", name: "Breitling", blurb: "Pilot’s chronographs, and the Navitimer.", site: "https://www.breitling.com" },
   { slug: "bell-ross", name: "Bell & Ross", blurb: "Square cases taken from aircraft instruments.", site: "https://www.bellross.com" },
+  // Stadium Goods, and the labels it brought in (src/data/shop-extra.ts)
+  ...EXTRA_BRANDS,
 ];
 
 type Row = Omit<ShopProduct, "image" | "credit"> & { image?: string };
@@ -149,6 +152,7 @@ const UNMATCHED = new Set(["utopia-hoodie", "cactus-jack-barcelona-hoodie", "nik
 export const CATALOG: ShopProduct[] = [
   ...FIRST.map((product) => ({ ...product, ...(UNMATCHED.has(product.id) ? OWN_SIZES : {}), ...FACTS[product.id] })),
   ...MORE,
+  ...EXTRA,
 ];
 
 export const CATALOG_IDS = new Set(CATALOG.map((product) => product.id));
