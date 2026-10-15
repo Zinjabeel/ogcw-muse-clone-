@@ -3,7 +3,6 @@ import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronDown, ChevronLeft, Chevron
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { DROPS, VIDEOS } from "@/data/drops";
-import { brandOf, getProduct, isLive } from "@/data/shop";
 import { useStories } from "@/lib/stories";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
@@ -288,84 +287,39 @@ function MoreNews() {
 
 // ------------------------------------------------------------ Shop strip
 
-// Six picks in two rows of three, tops on top and sneakers below, set like a
-// shop window: each product alone on its own white stage (the second photo
-// under the pointer), leaning towards the pointer with a sheen that follows
-// it (src/components/card-hover.tsx), then its name and a Shop now button.
-// Under the cards, "Drop news": three stories about what's on show, shown
-// with product art where they have one (chosen in the studio).
-// The full shop is on /shop.
-const SHOWCASE = [
-  "sp5der-pnk-hoodie", "kaws-fragment-tee", "days-before-rodeo-hoodie",
-  "aj1-royal-2026", "travis-scott-af1-ice-blue", "fragment-travis-aj1-low-military-blue",
-].flatMap((id) => getProduct(id) ?? []);
-
-/** Drop news art: the products on show that each story is about ("wide":
- * a picture already cut to the card's shape, shown whole) */
-const DROP_ART: Record<string, { src: string; alt: string; wide?: boolean }> = {
-  "retro-football-shirts-world-cup-2026": { src: "/shop/retro-shirts-trio.webp", alt: "Argentina’s 1998 home and 2006 away shirts and a France home shirt on a black background", wide: true },
-  "air-jordan-release-dates-october-december-2026": { src: "/shop/jordan-4-retro-grey.webp", alt: "An Air Jordan 4 in white, grey and black on a black background" },
-};
+// The way into the shop (owner, 15 Oct 2026): three big photo cards edge to
+// edge, the same as Crowd favourites on the shop's home: sneakers, clothing
+// and collections, each to its aisle. (It was six products and Drop news.)
+const AISLES = [
+  { key: "sneakers", label: "Sneakers", search: { cat: "sneakers" }, image: "/shop/looks/sneakers-aisle.jpg", alt: "A hand holding out a white and sage green sneaker towards the camera" },
+  { key: "clothing", label: "Clothing", search: { cat: "clothing" }, image: "/shop/looks/clothing-aisle.webp", alt: "Seen from behind, a person pulling up the hood of a washed black hoodie printed with carved figures" },
+  { key: "collections", label: "Collections", search: { cat: "accessories" }, image: "/shop/looks/collections-aisle.jpg", alt: "A hand in a black sleeve wearing a steel chronograph, on grey" },
+];
 
 function ShopStrip() {
-  const news = useStories().slot("shop-news");
   return (
-    <Band tone="grey" name="Shop window" id="shop-strip" className="fx-shop">
-      <h2 id="shop-strip-title" className="fx-shop-title"><T k="front.shop.title2">Featured drops</T></h2>
-      <ul className="fx-shop-row">
-        {SHOWCASE.map((product) => {
-          const brand = brandOf(product);
-          // Only the live products show; the rest are blank until the shop is filled
-          if (!isLive(product)) return (
-            <li key={product.id} aria-hidden="true">
-              <span className="fx-shopcard fx-shopcard-blank" />
-              <span className="fx-blank-line" />
-              <span className="fx-blank-line is-short" />
-            </li>
-          );
-          return (
-            <li key={product.id}>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard" data-stage={product.stage} data-two={product.back ? "" : undefined} tabIndex={-1} aria-hidden="true">
-                <img src={product.image} alt="" loading="lazy" />
-                {product.back && <img className="fx-shopcard-back" src={product.back} alt="" loading="lazy" />}
-              </Link>
-              <p className="fx-shopcard-title">{product.name.toLowerCase().includes(brand.name.toLowerCase()) ? product.name : `${brand.name} ${product.name}`}</p>
-              <p className="fx-shopcard-sub">{product.colour}</p>
-              <Link to="/shop/p/$id" params={{ id: product.id }} className="fx-shopcard-cta" aria-label={`Shop ${brand.name} ${product.name}, ${product.colour}`}>
-                <T k="front.shop.cta">Shop now</T>
+    <EditSection name="Shop window">
+      <section className="fx-band fx-shop fx-aisles" data-band="grey" aria-labelledby="shop-strip-title" id="shop-strip">
+        <div className="fx-wrap">
+          <h2 id="shop-strip-title" className="fx-shop-title"><T k="front.shop.title3">Shop the culture</T></h2>
+        </div>
+        <ul className="fx-aisles-grid">
+          {AISLES.map((aisle) => (
+            <li key={aisle.key}>
+              <Link to="/shop/all" search={aisle.search} className="fx-aisle">
+                <img src={aisle.image} alt={aisle.alt} loading="lazy" />
+                <span className="fx-aisle-text">
+                  <span className="fx-aisle-name"><T k={`front.shop.aisle.${aisle.key}`}>{aisle.label}</T></span>
+                  <span className="fx-aisle-more"><T k="front.shop.more">Discover more</T></span>
+                </span>
               </Link>
             </li>
-          );
-        })}
-      </ul>
-      {news.length > 0 && (
-        <section className="fx-shop-news" aria-labelledby="shop-news-title">
-          <p id="shop-news-title" className="fx-shop-news-head"><T k="front.shop.news">Drop news</T></p>
-          <ul>
-            {news.map((story) => {
-              const art = DROP_ART[story.slug];
-              return (
-                <li key={story.slug}>
-                  <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-shop-news-item">
-                    {art ? (
-                      <span className={`fx-shop-news-art fx-shop-news-art-cut${art.wide ? " is-wide" : ""}`}><img src={art.src} alt={art.alt} loading="lazy" /></span>
-                    ) : (
-                      <BsPhoto photo={story.photo} className="fx-photo fx-shop-news-art" />
-                    )}
-                    <span className="fx-label"><S story={story} f="kicker" /></span>
-                    <span className="fx-shop-news-title"><S story={story} f="title" /></span>
-                    <span className="fx-shop-news-deck"><S story={story} f="deck" /></span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-    </Band>
+          ))}
+        </ul>
+      </section>
+    </EditSection>
   );
 }
-
 // ------------------------------------------------------------ Explore
 
 // The music card: the song of the week, and the No. 1 rapper vote, which
