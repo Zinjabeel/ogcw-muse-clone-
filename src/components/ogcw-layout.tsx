@@ -10,6 +10,7 @@ import { HeroSwitcher } from "./hero-switcher";
 import { CookieConsent } from "./cookie-consent";
 import { AccountButton } from "./account-button";
 import { EditSection, T } from "./site-text";
+import { SiteMegaPanel, type SiteMenuKey } from "./site-mega-menu";
 import { pageSection } from "@/lib/site-sections";
 
 // Header navigation. The sections always show; Originals and Shop join them
@@ -30,67 +31,26 @@ const nav: { label: string; to: "/news" | "/music" | "/games" | "/streaming" | "
   { label: "About", to: "/about", tier: "wide" },
 ];
 
-const more = [
-  { label: "Explore", note: "Search, trending and reading lists", to: "/explore" },
-  { label: "Press", note: "News and assets for journalists", info: "press" },
-  { label: "Brand", note: "Logo, colours and type", info: "brand" },
-  { label: "FAQ", note: "Common questions", info: "faq" },
-  { label: "Help", note: "Newsletter, submissions and contact", info: "help" },
-] as const;
-
 const isCurrent = (pathname: string, to: string) => pathname === to || pathname.startsWith(`${to}/`);
 
-function MoreMenu({ pathname }: { pathname: string }) {
-  const [open, setOpen] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
-
-  // Close on navigation, outside click and Esc
-  useEffect(() => setOpen(false), [pathname]);
+/** The menu panels under the sections (src/components/site-mega-menu.tsx), as
+ *  in the shop: pointing at (or focusing) a section opens its panel, leaving
+ *  the header closes it after a beat, Esc and any page change close it too */
+function useMenuPanel(pathname: string) {
+  const [panel, setPanel] = useState<SiteMenuKey | null>(null);
+  const closing = useRef(0);
+  const openPanel = useCallback((key: SiteMenuKey) => { window.clearTimeout(closing.current); setPanel(key); }, []);
+  const closeSoon = useCallback(() => { window.clearTimeout(closing.current); closing.current = window.setTimeout(() => setPanel(null), 140); }, []);
+  const keepOpen = useCallback(() => window.clearTimeout(closing.current), []);
+  const close = useCallback(() => { window.clearTimeout(closing.current); setPanel(null); }, []);
+  useEffect(() => close(), [pathname, close]);
   useEffect(() => {
-    if (!open) return;
-    const onPointer = (event: PointerEvent) => { if (!root.current?.contains(event.target as Node)) setOpen(false); };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      root.current?.querySelector<HTMLButtonElement>(".nav-more-button")?.focus();
-    };
-    document.addEventListener("pointerdown", onPointer);
+    if (!panel) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(); };
     document.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onPointer); document.removeEventListener("keydown", onKey); };
-  }, [open]);
-
-  // Explore and the info pages always live in More; the mid and wide links
-  // only on narrower screens, so they light More up only there
-  const active = isCurrent(pathname, "/explore") || pathname.startsWith("/info/");
-  const currentTier = nav.find((item) => isCurrent(pathname, item.to))?.tier;
-
-  return (
-    <div ref={root} className="nav-more">
-      <button type="button" className={`nav-link nav-more-button ${active ? "nav-link-active" : ""} ${currentTier && currentTier !== "all" ? `nav-more-${currentTier}-active` : ""}`} aria-expanded={open} aria-controls="nav-more-menu" onClick={() => setOpen((value) => !value)}>
-        <T k="nav.more">More</T> <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
-      </button>
-      {open && (
-        <div id="nav-more-menu" className="nav-more-menu">
-          <ul className="nav-more-wide">
-            {nav.filter((item) => item.tier !== "all").map((item) => (
-              <li key={item.to} className={`nav-more-tier-${item.tier}`}><Link to={item.to} {...(item.to === "/shop" ? { target: "_blank" } : {})} className="nav-more-link"><T k={`nav.${item.to.slice(1)}`}>{item.label}</T></Link></li>
-            ))}
-          </ul>
-          <ul>
-            {more.map((item) => (
-              <li key={item.label}>
-                {"to" in item ? (
-                  <Link to={item.to} className="nav-more-link"><T k={`more.${item.label.toLowerCase()}`}>{item.label}</T><span><T k={`more.${item.label.toLowerCase()}.note`}>{item.note}</T></span></Link>
-                ) : (
-                  <Link to="/info/$slug" params={{ slug: item.info }} className="nav-more-link"><T k={`more.${item.info}`}>{item.label}</T><span><T k={`more.${item.info}.note`}>{item.note}</T></span></Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
+    return () => document.removeEventListener("keydown", onKey);
+  }, [panel, close]);
+  return { panel, openPanel, closeSoon, keepOpen, close };
 }
 
 // One menu and one search for the whole site, opened from the header’s
@@ -136,6 +96,11 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
   const closeSearch = useCallback(() => setSearchOpen(false), []);
   const siteHeader = useRef<HTMLElement>(null);
   useShopInNewTab(!header);
+  const { panel, openPanel, closeSoon, keepOpen, close: closePanel } = useMenuPanel(pathname);
+  // Explore and the info pages always live in More; the mid and wide links
+  // only on narrower screens, so they light More up only there
+  const moreActive = isCurrent(pathname, "/explore") || pathname.startsWith("/info/");
+  const currentTier = nav.find((item) => isCurrent(pathname, item.to))?.tier;
 
   // The header starts tall (the logo big in the middle, the sections in a row
   // under it) and shrinks as the page scrolls, until it is the usual slim bar
@@ -173,7 +138,7 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
         <EditSection name="Navigation bar">
         {/* Holds the header's place: the header itself is fixed and shrinks on scroll */}
         <div className="site-header-space" aria-hidden="true" />
-        <header ref={siteHeader} className="site-header fixed inset-x-0 top-0 z-50">
+        <header ref={siteHeader} className="site-header fixed inset-x-0 top-0 z-50" data-menu={panel ?? undefined} onMouseLeave={closeSoon}>
           <div className="site-header-row mx-auto grid max-w-none grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 lg:px-[4vw]">
             {/* The menu button on the left; the logo starts big in the middle and moves beside it as the header shrinks */}
             <div className="flex items-center gap-3 justify-self-start">
@@ -183,18 +148,35 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
             </div>
             <Link to="/" className="site-logo" aria-label="OGCW home" data-site-logo="">OGCW</Link>
             <nav className="site-nav hidden items-center lg:flex" aria-label="Main navigation">
-              {nav.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  {...(item.to === "/shop" ? { target: "_blank" } : {})}
-                  className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
-                  aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
-                >
-                  <T k={`nav.${item.to.slice(1)}`}>{item.label}</T>
-                </Link>
-              ))}
-              <MoreMenu pathname={pathname} />
+              {nav.map((item) => {
+                const key = item.to.slice(1) as SiteMenuKey;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    {...(item.to === "/shop" ? { target: "_blank" } : {})}
+                    className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
+                    aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
+                    aria-expanded={panel === key}
+                    data-open={panel === key || undefined}
+                    onMouseEnter={() => openPanel(key)}
+                    onFocus={() => openPanel(key)}
+                  >
+                    <T k={`nav.${item.to.slice(1)}`}>{item.label}</T>
+                  </Link>
+                );
+              })}
+              <button
+                type="button"
+                className={`nav-link nav-more-button ${moreActive ? "nav-link-active" : ""} ${currentTier && currentTier !== "all" ? `nav-more-${currentTier}-active` : ""}`}
+                aria-expanded={panel === "more"}
+                data-open={panel === "more" || undefined}
+                onMouseEnter={() => openPanel("more")}
+                onFocus={() => openPanel("more")}
+                onClick={() => (panel === "more" ? closePanel() : openPanel("more"))}
+              >
+                <T k="nav.more">More</T> <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+              </button>
             </nav>
             <div className="col-start-3 flex items-center gap-2 justify-self-end">
               {pathname === "/" && <HeroSwitcher />}
@@ -203,7 +185,9 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
               <AccountButton />
             </div>
           </div>
+          {panel && <div className="smm-wrap" onMouseEnter={keepOpen}><SiteMegaPanel section={panel} onClose={closePanel} /></div>}
         </header>
+        {panel && <div className="mm-dim smm-dim" aria-hidden="true" onMouseEnter={closeSoon} onClick={closePanel} />}
         </EditSection>
         </>)}
         {/* Texts on the page itself are filed under the page, unless a part says otherwise */}

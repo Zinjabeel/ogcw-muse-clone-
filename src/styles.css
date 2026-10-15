@@ -3139,23 +3139,34 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 }
 .site-header.is-slim { box-shadow: 0 1px 0 var(--ogcw-border); }
 
-/* The sections: a little bolder and brighter, with a pressed-in pill under the pointer */
+/* The sections, as in the shop (owner, 15 Oct): a line is drawn under a
+   section while you point at it (or focus it, or its panel is open); the
+   page you're on is marked by its colour alone */
+.site-header { --sx-ease: cubic-bezier(.2, .8, .2, 1); }
 .site-header .site-nav { gap: 2px; }
 .site-header .nav-link {
-  display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 999px; white-space: nowrap;
-  font-size: .84rem; font-weight: 600; letter-spacing: .06em; color: var(--ogcw-text);
-  transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .15s ease;
+  position: relative; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 0; background: none; white-space: nowrap;
+  font-size: .84rem; font-weight: 600; letter-spacing: .06em; color: var(--ogcw-text); cursor: pointer;
+  transition: color .2s ease;
 }
-.site-header .nav-link:hover, .site-header .nav-link:focus-visible {
-  background: color-mix(in srgb, var(--ogcw-text) 9%, transparent);
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / .22), inset 0 0 0 1px color-mix(in srgb, var(--ogcw-text) 8%, transparent);
-  transform: translateY(1px); color: var(--ogcw-text); outline: none;
-}
-.site-header .nav-link:active { transform: translateY(1px) scale(.95); }
-.site-header .nav-link:focus-visible { box-shadow: inset 0 0 0 2px var(--ogcw-accent); }
-.site-header .nav-link-active, .site-header .nav-link-active:hover { color: var(--ogcw-accent); background: color-mix(in srgb, var(--ogcw-accent) 12%, transparent); }
+.site-header .nav-link::after { content: ""; position: absolute; right: 12px; bottom: 3px; left: 12px; height: 2px; border-radius: 2px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .35s var(--sx-ease); }
+.site-header .nav-link:hover::after, .site-header .nav-link:focus-visible::after, .site-header .nav-link[data-open]::after { transform: scaleX(1); }
+.site-header .nav-link:hover, .site-header .nav-link:focus-visible { color: var(--ogcw-text); outline: none; }
+.site-header .nav-link:focus-visible { box-shadow: 0 0 0 2px var(--ogcw-accent); border-radius: 6px; }
+.site-header .nav-link-active, .site-header .nav-link-active:hover { color: var(--ogcw-accent); }
 .site-header .nav-more-button { height: 32px; }
-@media (prefers-reduced-motion: reduce) { .site-header .nav-link, .site-header .nav-link:hover, .site-header .nav-link:active { transform: none; } }
+.site-header .nav-more-button::after { right: 30px; }
+@media (prefers-reduced-motion: reduce) { .site-header .nav-link::after { transition: none; } }
+/* The menu panel under the sections (src/components/site-mega-menu.tsx; the panel's look is the shop's .mm-*) */
+.site-header[data-menu] { background: var(--ogcw-bg); box-shadow: 0 1px 0 var(--ogcw-border); }
+.smm { z-index: 1; font-family: var(--ogcw-ui); }
+.smm .mm-strip-photo.is-cover img { padding: 0; object-fit: cover; mix-blend-mode: normal; }
+.smm .mm-card-photo { aspect-ratio: 4 / 5; }
+.smm .mm-card figcaption { justify-content: flex-start; text-align: left; }
+.smm-clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.smm .mm-link { display: block; }
+.smm-dim { z-index: 49; }
+@media (max-width: 1023.98px) { .smm, .smm-dim { display: none; } }
 
 /* ------------------------------------------------------------------
    Gold theme: the hero stays black (its own dark colours, gold kept warm),
