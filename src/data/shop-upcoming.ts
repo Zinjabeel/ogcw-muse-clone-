@@ -1,6 +1,7 @@
 // The shop's "Upcoming" page: the pairs on the calendar, as news. Dates are
 // Just Fresh Kicks' Air Jordan release dates (page updated 14 Oct 2026);
-// photos and the "See it on GOAT" links are GOAT's listing for each pair.
+// photos and the "See it on GOAT" links are GOAT's listing for each pair
+// (Stadium Goods' where GOAT has no photo yet).
 // No prices: each shop sets its own.
 
 export const UPCOMING_SOURCE = { name: "Just Fresh Kicks: Air Jordan release dates", updated: "2026-10-14", url: "https://justfreshkicks.com/air-jordan-release-dates/" };
@@ -13,6 +14,8 @@ export type UpcomingPair = {
   colour?: string;
   photo?: string;
   goat?: string;
+  /** Another shop's page for it, when GOAT has none (and where the photo is from) */
+  shop?: { name: string; url: string };
   /** A note under the name */
   note?: string;
   /** In the shop already: its product page */
@@ -30,12 +33,12 @@ export const UPCOMING: UpcomingPair[] = [
   { id: "travis-scott-af1-ice-blue", date: "2026-10-30", name: "Travis Scott x Nike Air Force 1 Low ’07 “Ice Blue”", colour: "Ice Blue / Celestine Blue", photo: "/shop/products/travis-scott-af1-ice-blue-1.jpg", goat: goat("travis-scott-x-nike-air-force-1-low-07-ice-blue-jf7727-400"), note: "Date as GOAT lists it", product: "travis-scott-af1-ice-blue" },
   { id: "aj14-forest-green", date: "2026-10-31", name: "Air Jordan 14 “Forest Green”", colour: "White / Black / Dark Forest / Light Graphite", photo: photo("aj14-forest-green"), goat: goat("air-jordan-14-retro-forest-green-487471-300") },
   { id: "aj4-light-army", date: "2026-10-31", name: "Air Jordan 4 “Light Army”", colour: "Light Army / Light Silver / Cargo Khaki / Phantom", photo: photo("aj4-light-army"), goat: goat("air-jordan-4-retro-light-army-ja5911-320") },
-  { id: "aj41-space-jam", date: "2026-11-05", name: "Air Jordan 41 “Space Jam”", colour: "Black / Concord", goat: goat("air-jordan-41-space-jam-hv6474-002") },
+  { id: "aj41-space-jam", date: "2026-11-05", name: "Air Jordan 41 “Space Jam”", colour: "Light Base Grey / Aluminum", photo: photo("aj41-space-jam"), shop: { name: "Stadium Goods", url: "https://www.stadiumgoods.com/products/air-jordan-41-space-jam-250935" }, note: "Style HV6474-003; Sneaker News reports 5 November" },
   { id: "black-pack", date: "2026-11-07", name: "Air Jordan 15 and 17 Low “Black Pack”", goat: goat("air-jordan-15-black-pack-iz2585-001") },
   { id: "aj6-white-infrared", date: "2026-11-07", name: "Air Jordan 6 “White Infrared”", colour: "White / Infrared / Black", photo: photo("aj6-white-infrared"), goat: goat("air-jordan-6-retro-og-white-infrared-ct8529-105") },
   { id: "wmns-aj11-magic-ball", date: "2026-11-11", name: "Air Jordan 11 “Magic Ball” and “Lapis” (women’s)", colour: "Magic Ball: Light British Tan / Off Noir / Metallic Silver", photo: photo("wmns-aj11-magic-ball"), goat: goat("air-jordan-11-retro-wmns-magic-ball-iz1800-200") },
   { id: "aj11-green-screen", date: "2026-11-14", name: "Air Jordan 11 “Green Screen”", colour: "Multi-Color / Gym Green / Lucky Green / Orange", photo: photo("aj11-green-screen"), goat: goat("air-jordan-11-retro-space-jam-galaxy-iq5700-900") },
-  { id: "aj3-not-nice", date: "2026-11-21", name: "Air Jordan 3 “Not Nice”", colour: "Black / Challenge Red / Off Noir / Elemental Gold", goat: goat("air-jordan-3-retro-not-nice-if4396-001"), note: "Plus the “Lola Bunny” for kids the same day" },
+  { id: "aj3-not-nice", date: "2026-11-21", name: "Air Jordan 3 “Not Nice”", colour: "Black / Challenge Red / Off Noir / Elemental Gold", photo: photo("aj3-not-nice"), goat: goat("air-jordan-3-retro-not-nice-if4396-001"), shop: { name: "Stadium Goods", url: "https://www.stadiumgoods.com/products/air-jordan-3-retro-og-not-nice-233447" }, note: "Plus the “Lola Bunny” for kids the same day" },
   { id: "aj4-bred-2026", date: "2026-11-27", name: "Air Jordan 4 “Bred”", colour: "Black / Cement Grey / Summit White / Fire Red", photo: photo("aj4-bred-2026"), goat: goat("air-jordan-4-retro-og-bred-2026-ix8180-001") },
   { id: "free-the-youth-aj3", date: "2026-12-04", name: "Free The Youth x Air Jordan 3" },
   { id: "aj10-sacramento", date: "2026-12-05", name: "Air Jordan 10 “Sacramento”", colour: "Black / Metallic Silver / Dark Concord", photo: photo("aj10-sacramento"), goat: goat("air-jordan-10-retro-og-sacramento-hj6779-002") },
