@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { ArrowRight } from "lucide-react";
-import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { Img, SectionHead } from "../components/cards";
+import { SiteShell } from "../components/ogcw-layout";
+import { Button } from "@/components/ui/button";
+import { SectionHead } from "../components/cards";
 import { EPISODES, SHOPS, type Article, type SectionId } from "../data/content";
 import { useStories } from "../lib/stories";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
@@ -16,14 +18,7 @@ const SOCIAL_NOTES: Record<(typeof SOCIALS)[number]["name"], string> = {
   X: "Breaking news as it happens",
 };
 
-// What OGCW covers, in four photos: live music, the news, games and style
-const shot = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&h=800&q=80`;
-const COLLAGE = [
-  { src: shot("photo-1501386761578-eac5c94b800a"), alt: "Fans singing along at the front of a concert" },
-  { src: shot("photo-1495020689067-958852a7765e"), alt: "A man reading a newspaper on a bench" },
-  { src: shot("photo-1542751371-adc38448a05e"), alt: "A gamer in headphones in front of glowing screens" },
-  { src: shot("photo-1552346154-21d32810aba3"), alt: "A pair of Air Jordan 1 sneakers on a running track" },
-];
+const AboutWorld = lazy(() => import("@/components/about-world"));
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -68,12 +63,22 @@ function About() {
   const SOURCES = sourceList(live.all);
   return (
     <SiteShell>
-      <PageIntro kicker="About OGCW" title="We report from inside culture." copy="OGCW is an independent editorial platform following the people, places and ideas shaping what comes next." />
+      <section className="culture-about" aria-labelledby="culture-about-title">
+        <div className="culture-about-top"><span>OGCW / ABOUT US</span><span>Independent. Worldwide.</span></div>
+        <div className="culture-about-world">
+          <ClientOnly fallback={<div className="culture-about-fallback">OGCW</div>}>
+            <Suspense fallback={<div className="culture-about-fallback">OGCW</div>}><AboutWorld /></Suspense>
+          </ClientOnly>
+        </div>
+        <div className="culture-about-bottom">
+          <div><p className="culture-about-eyebrow">ONE GREAT CULTURE WORLD</p><h1 id="culture-about-title">We report from<br />inside culture.</h1></div>
+          <div className="culture-about-intro"><p>OGCW is an independent editorial platform following the people, places and ideas shaping what comes next.</p><Button asChild className="culture-about-link"><Link to="/news">Explore the stories <ArrowRight aria-hidden="true" /></Link></Button></div>
+        </div>
+        <div className="culture-about-index"><span>Music</span><span>Fashion</span><span>Film & TV</span><span>Sport</span><span>Pop culture</span></div>
+      </section>
       <main className="page-wrap pb-24">
         <section className="about-lead" aria-labelledby="our-position">
-          <div className="about-collage">
-            {COLLAGE.map((photo) => <Img key={photo.src} photo={photo} className="about-collage-photo" eager />)}
-          </div>
+          <div className="culture-manifesto-label"><span>01 / OUR POSITION</span><p>Culture first.<br />Always.</p></div>
           <div className="about-position">
             <p id="our-position" className="og-kicker"><T k="about.position">Our position</T></p>
             <p className="about-statement"><T k="about.statement">We pay attention before everyone else does.</T></p>
