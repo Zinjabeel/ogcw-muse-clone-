@@ -54,20 +54,20 @@ const LOOKS = [
 type RowSearch = { cat?: string; q?: string; tag?: string; kind?: string };
 /** A spotlight row: one big photo with a line and a button beside four cards, two over two */
 type Spot = { image: string; alt: string; line: string };
-type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string; spot?: Spot };
+type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string; spot?: Spot; size?: "denim" | "collections" };
 const ROWS: Record<string, Row> = {
   sneakers: { key: "sneakers", title: "Sneakers right now", tone: "light", search: { cat: "sneakers" }, cta: "Shop all sneakers", items: pieces("aj4-black-cat-2025", "nigel-sylvester-aj4-brick-after-brick", "samba-og-cheetah-preloved-red", "nb-1906r-silver-metallic-black") },
   travis: { key: "travis", title: "Travis Scott x Cactus Jack", tone: "dark", search: { q: "Cactus Jack" }, cta: "Shop Cactus Jack", items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
   complexcon: { key: "complexcon", title: "ComplexCon top picks for 2026", tone: "dark", search: { q: "Sp5der" }, cta: "Shop Sp5der", items: pieces("sp5der-pnk-hoodie", "sp5der-og-web-hoodie", "sp5der-splat-punk-hoodie", "sp5der-beluga-hoodie") },
   tees: { key: "tees", title: "Graphic tees", tone: "light", search: { cat: "clothing", kind: "T-shirts & shirts" }, cta: "Shop all tees", items: pieces("kaws-fragment-tee", "mcdonalds-smile-tee", "fragment-tee", "cactus-mac-tee") },
   // Spotlight photos: Christian Agbede and Gilles De Muynck on Unsplash (Unsplash License)
-  denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim"),
+  denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", size: "denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim"),
     spot: { image: "/shop/looks/spot-denim.webp", alt: "A young man in a black beanie and very wide washed jeans leaning on the bonnet of a white car", line: "Wide, washed and worn in: Denim Tears, Amiri, Ksubi and more." } },
-  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all collections", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
+  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all collections", size: "collections", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
     spot: { image: "/shop/looks/spot-watch.webp", alt: "A hand fastening a gold skeleton watch on a brown leather strap, under a pale blue shirt cuff", line: "Watches, caps and bags. The watches are pre-owned." } },
 };
 // The bands between the rows: a line, a button and a row of pictures each
-const LIMITED = pieces("fragment-travis-aj1-low-military-blue", "rolex-land-dweller-36", "days-before-rodeo-hoodie", "levis-denim-tears-logo-japan-jeans", "awake-ny-aj6-blueberry");
+const LIMITED = pieces("fragment-travis-aj1-low-military-blue", "levis-denim-tears-logo-japan-jeans", "awake-ny-aj6-blueberry");
 const BANDS = {
   calendar: { key: "calendar", kicker: "Release calendar", title: "The next pairs to drop", cta: "See the dates", to: "/shop/drops" as const, search: {} },
   limited: { key: "limited", kicker: "Collabs and grails", title: "Limited editions, while they last", cta: "Shop limited", to: "/shop/all" as const, search: { tag: "limited" } },
@@ -345,7 +345,7 @@ function CollectionRow({ row }: { row: Row }) {
         <Link to="/shop/all" search={row.search} className="sh-textlink"><T k="shop.row.all">Shop the collection</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
       {row.spot ? (
-        <div className="sh-spot is-compact">
+        <div className="sh-spot" data-size={row.size}>
           <Link to="/shop/all" search={row.search} className="sh-spot-photo">
             <img src={row.spot.image} alt={row.spot.alt} loading="lazy" />
             <span className="sh-spot-text">
@@ -405,15 +405,14 @@ function BandCardBody({ card }: { card: BandCard }) {
   );
 }
 
-/** The next pairs to drop: the next three, then one from December and one from 2027 (dates read in the browser) */
+/** The next pairs to drop, further out (owner, 15 Oct): three from December on, then 2027 (dates read in the browser) */
 function CalendarBand() {
   const [today, setToday] = useState("2026-10-14");
   useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
   const ahead = UPCOMING.filter((pair) => pair.date >= today && pair.photo);
-  const picked = [...ahead.slice(0, 3)];
-  const later = [ahead.find((pair) => pair.date >= "2026-12-01" && !picked.includes(pair)), ahead.find((pair) => pair.date >= "2027-01-01" && !picked.includes(pair))];
-  for (const pair of later) if (pair && !picked.includes(pair)) picked.push(pair);
-  for (const pair of ahead) if (picked.length < 5 && !picked.includes(pair)) picked.push(pair);
+  const far = ahead.filter((pair) => pair.date >= "2026-12-01");
+  const picked = [...far.filter((pair) => pair.date < "2027-01-01").slice(0, 3), ...far.filter((pair) => pair.date >= "2027-01-01").slice(0, 2)];
+  for (const pair of far) if (picked.length < 5 && !picked.includes(pair)) picked.push(pair);
   const days = (iso: string) => Math.round((Date.parse(iso) - Date.parse(today)) / 86_400_000);
   const cards: BandCard[] = picked.slice(0, 5).map((pair) => {
     const n = days(pair.date);
@@ -422,7 +421,7 @@ function CalendarBand() {
   return <BandRow band={BANDS.calendar} cards={cards} narrow />;
 }
 
-/** Limited editions: five collabs and grails, the same way, full width */
+/** Limited editions: the collabs, the same way, full width */
 function LimitedBand() {
   const cards: BandCard[] = LIMITED.map((product) => ({ key: product.id, image: product.image, chip: product.kind === "Watches" ? "Grail" : "Collab", name: product.name, to: { pathname: "/shop/p/$id", id: product.id } }));
   return <BandRow band={BANDS.limited} cards={cards} />;
@@ -432,20 +431,20 @@ function LimitedBand() {
 
 function WatchHouses() {
   return (
-    <section className="sh-houses" aria-labelledby="sh-houses-title">
-      <header className="sh-head sh-houses-head">
+    <section className="sh-sec sh-looks sh-houses" aria-labelledby="sh-houses-title">
+      <header className="sh-looks-head">
         <h2 id="sh-houses-title" className="sh-h2"><T k="shop.houses.title">The watch houses</T></h2>
         <Link to="/shop/all" search={{ kind: "Watches" }} className="sh-textlink"><T k="shop.houses.all">Every watch</T> <ArrowRight size={15} aria-hidden="true" /></Link>
       </header>
-      <ul className="sh-houses-grid">
+      {/* Three tall cards side by side, exactly like Crowd favourites (owner, 15 Oct) */}
+      <ul className="sh-looks-grid">
         {HOUSES.map((house) => (
           <li key={house.slug}>
-            <Link to="/shop/all" search={{ kind: "Watches", brand: house.slug }} className="sh-house">
+            <Link to="/shop/all" search={{ kind: "Watches", brand: house.slug }} className="sh-look">
               <img src={house.image} alt={house.alt} loading="lazy" />
-              <span className="sh-house-text">
-                <span className="sh-house-name">{house.name}</span>
-                <span className="sh-house-line"><T k={`shop.houses.${house.slug}`}>{house.line}</T></span>
-                <span className="sh-house-go"><T k="shop.houses.go">Shop the house</T> <ArrowRight size={14} aria-hidden="true" /></span>
+              <span className="sh-look-text">
+                <span className="sh-look-name">{house.name}</span>
+                <span className="sh-look-more"><T k="shop.looks.more">Discover more</T></span>
               </span>
             </Link>
           </li>
