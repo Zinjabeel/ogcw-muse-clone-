@@ -81,30 +81,17 @@ function ShopMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
           <ul className="acc">
             {GROUPS.map((group, i) => {
               const on = openKey === group.key;
-              const peek = pieces(group.peek);
               return (
                 <li key={group.key} className="acc-item" data-open={on || undefined}>
                   <button type="button" className="acc-head" aria-expanded={on} aria-controls={`acc-${group.key}`} onClick={() => setOpenKey(on ? null : group.key)}>
                     <span className="acc-no" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                     <span className="acc-name">{group.name}</span>
-                    <span className="acc-peek" aria-hidden="true">
-                      {peek.map((product) => <span key={product.id} data-stage={product.stage}><img src={product.image} alt="" loading="lazy" /></span>)}
-                    </span>
                     <span className="acc-plus" aria-hidden="true"><Plus size={16} strokeWidth={1.8} /></span>
                   </button>
                   <div className="acc-panel" id={`acc-${group.key}`} role="region" aria-label={group.name}>
                     <div className="acc-inner">
                       <ul className="acc-links">
                         {group.links.map((link) => <li key={link.label}>{go(link, link.label, "acc-link", onClose)}</li>)}
-                      </ul>
-                      <ul className="acc-shelf" aria-label={`From ${group.name}`}>
-                        {peek.map((product) => (
-                          <li key={product.id}>
-                            <Link to="/shop/p/$id" params={{ id: product.id }} onClick={onClose} className="acc-shelf-item" data-stage={product.stage} aria-label={product.name}>
-                              <img src={product.image} alt="" loading="lazy" />
-                            </Link>
-                          </li>
-                        ))}
                       </ul>
                       {go(group.all, <>{group.all.label} <ArrowRight size={14} aria-hidden="true" /></>, "acc-all", onClose)}
                     </div>

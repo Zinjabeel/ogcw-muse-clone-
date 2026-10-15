@@ -648,3 +648,10 @@ html[data-search-open] body { overflow: hidden; }
 .fx-money { min-width: 0; }
 .fx-money input { width: 100%; }
 .sx .fx-money input:focus-visible { outline: none; }
+
+/* The menu groups without pictures (owner, 15 Oct): the links one under another, a line under each */
+.acc-head { grid-template-columns: 30px minmax(0, 1fr) 28px; }
+.acc-links { grid-template-columns: minmax(0, 1fr); gap: 0; margin-bottom: 4px; padding-bottom: 6px; }
+.acc-links li { border-bottom: 1px solid var(--sx-line); }
+.acc-link { padding: 11px 0; }
+.acc-all { margin-top: 10px; }
