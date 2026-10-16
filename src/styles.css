@@ -3358,3 +3358,52 @@ html:not([data-entry]) .site-intro { display: none; }
 .site-intro[data-stage="clear"] .site-intro-mark { opacity: 0; }
 html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
 @media (max-width: 700px) { .site-intro-mark { font-size: clamp(28px, calc(8.4 * var(--vw, 1vw)), 44px); } }
+
+/* ------------------------------------------------------------------
+   Site editor, 16 Oct 2026 (src/components/site-text.tsx): any picture can
+   be changed (a menu with upload, camera on phones, drop, fit and "clear"),
+   and any section sized from its edges. Phones get bigger handles and the
+   photo menu as a sheet at the bottom of the screen.
+   ------------------------------------------------------------------ */
+[data-pic-clear] { opacity: 1 !important; filter: none !important; mix-blend-mode: normal !important; }
+[data-pic-clear]::before, [data-pic-clear]::after { display: none !important; }
+
+.site-sec-pill { position: fixed; z-index: 87; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1.5px solid var(--ogcw-accent); border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font: 700 11.5px/1 var(--ogcw-ui); letter-spacing: .02em; box-shadow: 0 6px 18px rgb(0 0 0 / .25); cursor: pointer; animation: site-pop .15s ease both; }
+.site-sec-pill:hover, .site-sec-pill:focus-visible { background: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
+.site-sec-frame { position: fixed; z-index: 86; border: 2px dashed var(--ogcw-accent); background: color-mix(in srgb, var(--ogcw-accent) 5%, transparent); pointer-events: none; }
+.site-sec-handle { position: fixed; z-index: 91; width: 18px; height: 44px; padding: 0; border: 2px solid var(--ogcw-bg); border-radius: 9px; background: var(--ogcw-accent); box-shadow: 0 4px 14px rgb(0 0 0 / .35); cursor: ew-resize; touch-action: none; }
+.site-sec-handle.is-h { width: 44px; height: 18px; cursor: ns-resize; }
+.site-sec-handle.is-wh { width: 26px; height: 26px; border-radius: 6px; cursor: nwse-resize; }
+.site-sec-handle:hover, .site-sec-handle:focus-visible { background: var(--ogcw-text); outline: none; }
+.site-sec-bar { position: fixed; z-index: 92; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: calc(100vw - 16px); padding: 5px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font: 600 12px/1 var(--ogcw-ui); box-shadow: 0 10px 30px rgb(0 0 0 / .3); }
+.site-sec-read { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; color: var(--ogcw-text-2); font-variant-numeric: tabular-nums; }
+.site-sec-bar button { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 12px; border-radius: 999px; font-weight: 700; color: var(--ogcw-text); cursor: pointer; }
+.site-sec-bar button:hover { background: var(--ogcw-surface); }
+.site-sec-bar button.is-done { background: var(--ogcw-accent); color: var(--ogcw-bg); }
+
+.site-photo-menu { width: 288px; max-height: calc(100vh - 24px); overflow-y: auto; }
+.site-photo-head { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 10px; padding: 4px 4px 8px; }
+.site-photo-thumb { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--ogcw-surface); }
+.site-photo-menu .site-photo-head p { padding: 0; }
+.site-photo-head small { display: block; margin-top: 4px; font-size: 11.5px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ogcw-text-2); }
+.site-photo-menu button.is-main { justify-content: center; min-height: 42px; background: var(--ogcw-accent); color: var(--ogcw-bg); }
+.site-photo-menu button.is-main:hover:not(:disabled) { background: var(--ogcw-text); }
+.site-photo-drop { display: block; padding: 2px 0 6px; font-size: 11.5px; text-align: center; color: var(--ogcw-text-2); }
+.site-photo-menu.is-dropping { outline: 2px dashed var(--ogcw-accent); outline-offset: 4px; }
+.site-photo-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 4px 0; padding: 3px; border-radius: 10px; background: var(--ogcw-surface); }
+.site-photo-menu .site-photo-opts button { justify-content: center; min-height: 32px; font-size: 12.5px; }
+.site-photo-menu button[aria-pressed="true"] { background: var(--ogcw-bg); box-shadow: inset 0 0 0 1.5px var(--ogcw-accent); }
+.site-photo-menu button:disabled { opacity: .6; cursor: progress; }
+
+@media (pointer: coarse) {
+  .site-lay-handle { width: 38px; height: 38px; }
+  .site-lay-handle.is-size { width: 30px; height: 30px; }
+  .site-edit-btn { height: 34px; padding: 0 14px; font-size: 13px; }
+  .site-sec-pill { height: 34px; padding: 0 14px; font-size: 12.5px; }
+  .site-sec-handle { width: 26px; height: 56px; }
+  .site-sec-handle.is-h { width: 56px; height: 26px; }
+  .site-sec-handle.is-wh { width: 34px; height: 34px; }
+  /* The photo menu as a sheet at the foot of the screen */
+  .site-photo-menu { top: auto !important; right: 8px; bottom: 8px; left: 8px !important; width: auto; padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); border-radius: 18px; }
+  .site-photo-menu button { min-height: 46px; font-size: 15px; }
+}

@@ -31,7 +31,7 @@ const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
 export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
 
-type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null };
+type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null; fit?: string | null; clear?: boolean | null };
 // Each edit is its own "Site edit" document; edits saved before that are
 // still in the old single "Site texts" document until the next save moves them
 type SiteDoc = { edits?: SiteItem[] | null; legacy?: { texts?: SiteItem[] | null; images?: SiteItem[] | null } | null } | null;
@@ -40,15 +40,22 @@ const toSite = (doc: SiteDoc): SiteContent => {
   const add = (item: SiteItem, kind: string | undefined, legacy: boolean) => {
     if (!item.key) return;
     if (kind === "layout") {
-      // A text or photo moved on its page
-      const pos = (p?: LayoutPos | null) => (p && Number.isFinite(p.x) && Number.isFinite(p.y) ? { x: p.x, y: p.y, s: Number.isFinite(p.s) && p.s > 0 ? p.s : 1 } : undefined);
+      // A text or photo moved on its page, or a whole section sized
+      const pos = (p?: LayoutPos | null): LayoutPos | undefined => {
+        if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return undefined;
+        const out: LayoutPos = { x: p.x, y: p.y, s: Number.isFinite(p.s) && p.s > 0 ? p.s : 1 };
+        if (typeof p.w === "number" && Number.isFinite(p.w) && p.w > 0) out.w = p.w;
+        if (typeof p.h === "number" && Number.isFinite(p.h) && p.h > 0) out.h = p.h;
+        if (p.clip) out.clip = true;
+        return out;
+      };
       const d = pos(item.layout?.d), m = pos(item.layout?.m);
       if (d || m) site.layouts[item.key] = { ...(d ? { d } : {}), ...(m ? { m } : {}) };
       return;
     }
     if (kind === "image") {
       if (!item.src) return;
-      site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}) };
+      site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}), ...(item.fit === "contain" ? { fit: "contain" as const } : {}), ...(item.clear ? { clear: true } : {}) };
     } else {
       if (typeof item.value !== "string" || !item.value.trim()) return;
       site.texts[item.key] = item.value;
@@ -103,7 +110,7 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
     const ratings = ratingTotals();
     const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
       "site": {
-        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
+        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, fit, clear, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
         "legacy": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } }
       },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },
