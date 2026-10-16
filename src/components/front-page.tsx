@@ -428,12 +428,9 @@ function Desk({ label, to, k, lead, more }: { label: string; to: "/sports" | "/g
 }
 
 // The two top-10 lists at the foot of Explore (owner, 16 Oct 2026), where the
-// OGCW 10 and the release dates were: a big photo card each, with a headline
-// and a line that make you want to open it
-const PICKS = [
-  { slug: "best-films-early-2020s-ranked", k: "front.picks.films", tag: "Top 10 · Film", cta: "See the ranking" },
-  { slug: "games-nobody-expected-to-be-this-good", k: "front.picks.games", tag: "Top 10 · Games", cta: "See the list" },
-];
+// OGCW 10 and the release dates were: a tall photo each, and only the
+// headline, under the photo rather than on it
+const PICKS = ["best-films-early-2020s-ranked", "games-nobody-expected-to-be-this-good"];
 
 function Explore() {
   const stories = useStories();
@@ -490,18 +487,12 @@ function Explore() {
 
       <EditSection name="Top 10 lists">
         <div className="fx-picks">
-          {PICKS.map((pick) => {
-            const story = stories.pick(pick.slug);
+          {PICKS.map((slug) => {
+            const story = stories.pick(slug);
             return (
-              <Link key={pick.slug} to="/news/$slug" params={{ slug: story.slug }} className="fx-pick">
+              <Link key={slug} to="/news/$slug" params={{ slug: story.slug }} className="fx-pick">
                 <BsPhoto photo={story.photo} className="fx-photo fx-pick-photo" />
-                <span className="fx-pick-big" aria-hidden="true">10</span>
-                <span className="fx-pick-text">
-                  <span className="fx-pick-tag"><T k={`${pick.k}.tag`}>{pick.tag}</T></span>
-                  <span className="fx-pick-title"><S story={story} f="title" /></span>
-                  <span className="fx-pick-deck"><S story={story} f="deck" /></span>
-                  <span className="fx-pick-cta"><T k={`${pick.k}.cta`}>{pick.cta}</T> <ArrowRight size={15} aria-hidden="true" /></span>
-                </span>
+                <span className="fx-pick-title"><S story={story} f="title" /></span>
               </Link>
             );
           })}
