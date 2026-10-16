@@ -33,6 +33,11 @@ function skipPrebundledDepsInStartCompiler(): Plugin {
 export default defineConfig({
   vite: {
     plugins: [skipPrebundledDepsInStartCompiler()],
+    server: {
+      // Any LocalTunnel address (*.loca.lt) can reach the dev server, so a new
+      // tunnel works straight away; every other host is still checked
+      allowedHosts: [".loca.lt"],
+    },
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
