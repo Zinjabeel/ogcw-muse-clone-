@@ -437,8 +437,8 @@ function Desk({ label, to, k, lead, more }: { label: string; to: "/sports" | "/g
 
 // The two top-10 lists at the foot of Explore (owner, 16 Oct 2026), where the
 // OGCW 10 and the release dates were, in the look of the owner's reference:
-// a wide collage of four people from the list in one colour (violet shading
-// into white), then the label, the headline, the summary and the byline
+// a wide collage of four people from the list (in their own colours), then
+// the label, the headline, the summary and the byline
 // under it. Photos: src/assets/lists, credited on /info/credits.
 const PICKS = [
   {
