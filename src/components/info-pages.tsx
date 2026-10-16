@@ -52,6 +52,15 @@ const LICENCES = {
 
 // [what, photographer, licence, Commons file name]
 const COMMONS_CREDITS: [string, string, string, string][] = [
+  // The two top-10 list collages in Explore (src/assets/lists)
+  ["Margot Robbie at the Barbie premiere", "Eva Rinaldi", "CC BY-SA 2.0", "Margot_Robbie_(53012385004).jpg"],
+  ["Greta Lee at the Berlinale premiere of Past Lives", "Martin Kraft", "CC BY-SA 4.0", "MKr22929_Greta_Lee_(Past_Lives,_Berlinale_2023).jpg"],
+  ["Tom Cruise at the Top Gun: Maverick premiere", "Gabriel Hutchinson", "CC BY-SA 4.0", "Tom_Cruise_at_Top_Gun-_Maverick_premiere.jpg"],
+  ["Robert Pattinson at The Batman premiere in New York", "Loveworldpeace2003", "CC BY-SA 4.0", "Robert_Pattinson_at_Lincoln_Center_attending_“The_Batman”_Premiere_in_NYC_on_March_1st,_2022.jpg"],
+  ["Clair Obscur: Expedition 33 cosplay at Fan Expo Denver", "SpiritedMichelle", "CC BY-SA 4.0", "Clair_Obscur_Expedition_33_cosplay_at_Fan_Expo_Denver_2026_05.jpg"],
+  ["The Vampire Survivors stand at WASD, London", "Captain Galaxy", "CC BY 4.0", "Garlic-filled_skeleton_at_Vampire_Survivors_booth_at_the_WASD_Gaming_Expo,_London_-_March_2023.jpg"],
+  ["Hades cosplay at Poznań Game Arena 2021", "Klapi", "CC BY 4.0", "PGA_2021_Hades_Cosplay.jpg"],
+  ["A Helldivers cosplayer at GalaxyCon Raleigh", "John Manard", "CC BY-SA 2.0", "Helldivers_Cosplayer_at_GalaxyCon_Raleigh_Craftsmanship_Cosplay_Contest_2024_-_03.jpg"],
   ["Taylor Swift’s Eras Tour in London", "BrigidLIS", "CC BY 4.0", "Taylor_Swift_Eras_Tour_London_20240819_1989era.jpg"],
   ["Madonna, The Celebration Tour", "Ronald Woan", "CC BY 4.0", "Madonna_-_The_Celebration_Tour_(53539842925)_(cropped).jpg"],
   ["BTS, Arirang World Tour in Paris (“Swim”)", "Chiyako92", "CC BY-SA 4.0", "BTS_Arirang_World_Tour_in_Paris_(17_July_2026)_-_Swim.jpg"],

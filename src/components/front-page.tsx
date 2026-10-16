@@ -13,6 +13,14 @@ import { RapPoll } from "./rap-vote";
 import { SpotifyIcon } from "./spotify";
 import { StoryMeta } from "./story-meta";
 import { useSiteMenu } from "./ogcw-layout";
+import listRobbie from "@/assets/lists/films-robbie.jpg";
+import listGretaLee from "@/assets/lists/films-greta-lee.jpg";
+import listCruise from "@/assets/lists/films-cruise.jpg";
+import listPattinson from "@/assets/lists/films-pattinson.jpg";
+import listClairObscur from "@/assets/lists/games-clair-obscur.jpg";
+import listHelldivers from "@/assets/lists/games-helldivers.jpg";
+import listHades from "@/assets/lists/games-hades.jpg";
+import listVampire from "@/assets/lists/games-vampire-survivors.jpg";
 import { EditSection, S, T } from "./site-text";
 
 // The front page under the hero. Black and white, in turns, like a
@@ -428,9 +436,34 @@ function Desk({ label, to, k, lead, more }: { label: string; to: "/sports" | "/g
 }
 
 // The two top-10 lists at the foot of Explore (owner, 16 Oct 2026), where the
-// OGCW 10 and the release dates were: a tall photo each, and only the
-// headline, under the photo rather than on it
-const PICKS = ["best-films-early-2020s-ranked", "games-nobody-expected-to-be-this-good"];
+// OGCW 10 and the release dates were, in the look of the owner's reference:
+// a wide collage of four people from the list in one colour (violet shading
+// into white), then the label, the headline, the summary and the byline
+// under it. Photos: src/assets/lists, credited on /info/credits.
+const PICKS = [
+  {
+    slug: "best-films-early-2020s-ranked",
+    label: "Film",
+    k: "front.picks.films",
+    faces: [
+      { src: listRobbie, pos: "50% 18%" },
+      { src: listGretaLee, pos: "50% 30%" },
+      { src: listCruise, pos: "46% 22%" },
+      { src: listPattinson, pos: "50% 20%" },
+    ],
+  },
+  {
+    slug: "games-nobody-expected-to-be-this-good",
+    label: "Games",
+    k: "front.picks.games",
+    faces: [
+      { src: listClairObscur, pos: "50% 22%" },
+      { src: listHelldivers, pos: "55% 30%" },
+      { src: listHades, pos: "50% 24%" },
+      { src: listVampire, pos: "50% 30%" },
+    ],
+  },
+];
 
 function Explore() {
   const stories = useStories();
@@ -487,12 +520,21 @@ function Explore() {
 
       <EditSection name="Top 10 lists">
         <div className="fx-picks">
-          {PICKS.map((slug) => {
-            const story = stories.pick(slug);
+          {PICKS.map((pick) => {
+            const story = stories.pick(pick.slug);
             return (
-              <Link key={slug} to="/news/$slug" params={{ slug: story.slug }} className="fx-pick">
-                <BsPhoto photo={story.photo} className="fx-photo fx-pick-photo" />
+              <Link key={pick.slug} to="/news/$slug" params={{ slug: story.slug }} className="fx-pick">
+                <span className="fx-pick-art" aria-hidden="true">
+                  {pick.faces.map((face, index) => (
+                    <span key={face.src} className="fx-pick-face" style={{ ["--i" as string]: index }}>
+                      <img src={face.src} alt="" loading="lazy" style={{ objectPosition: face.pos }} />
+                    </span>
+                  ))}
+                </span>
+                <span className="fx-pick-label"><T k={`${pick.k}.label`}>{pick.label}</T></span>
                 <span className="fx-pick-title"><S story={story} f="title" /></span>
+                <span className="fx-pick-deck"><S story={story} f="deck" /></span>
+                <span className="fx-pick-by">{story.credit}</span>
               </Link>
             );
           })}
