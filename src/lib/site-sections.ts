@@ -29,6 +29,7 @@ export const SITE_SECTIONS = [
   "Content of the month",
   "Shop on the home page",
   "Explore",
+  "Top 10 lists",
   "Keep exploring",
   "Rap desk",
   "More to explore",

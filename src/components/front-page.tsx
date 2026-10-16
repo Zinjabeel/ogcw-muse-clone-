@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Play, Search } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
-import { DROPS, VIDEOS } from "@/data/drops";
+import { VIDEOS } from "@/data/drops";
 import { useStories } from "@/lib/stories";
 import { useWorkAccess } from "@/lib/work";
 import type { SiteSection } from "@/lib/site-sections";
@@ -44,16 +44,6 @@ function Head({ id, k, kicker, title, children }: { id: string; k: string; kicke
       {children}
     </header>
   );
-}
-
-const day = (iso: string) => new Date(iso).getUTCDate();
-const mon = (iso: string) => new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" }).format(new Date(iso));
-
-/** Today in the browser (the server's day may differ), so past dates drop off */
-function useToday() {
-  const [today, setToday] = useState(() => new Date().toISOString().slice(0, 10));
-  useEffect(() => setToday(new Date().toISOString().slice(0, 10)), []);
-  return today;
 }
 
 /** A story as a tile: photo, label, headline, optional summary, small print */
@@ -290,61 +280,87 @@ function MoreNews() {
 
 // ------------------------------------------------------------ The rundown
 
-// Where the shop band was (owner, 15 Oct 2026: "remove the whole shop thing
-// and have instead a news section"). Six stories as a numbered list of big
-// headlines; pointing at one, or tabbing to it, brings its photo, summary and
-// source up in the panel beside the list. Phones show each photo in its row.
-// The stories are the "The rundown" spot in the studio (newest first when
-// nothing is placed there), so none of them repeats in More news.
+// The stories in focus (owner, 16 Oct 2026: it "feels like a separate
+// website", make it like This week with a bit of Explore). The same white band,
+// hairline columns and type as the rest of the front page: a big lead with its
+// summary and two more threaded under it, two photo stories in the middle, and a numbered list with small
+// photos on the right, like the ranking in Explore. The stories are the
+// "The rundown" spot in the studio (newest first when nothing is placed
+// there), so none of them repeats in More news.
 function Rundown() {
   const stories = useStories();
-  const items = stories.slot("rundown");
-  const [active, setActive] = useState(0);
-  if (!items.length) return null;
-  const on = Math.min(active, items.length - 1);
-  const story = items[on]!;
+  const [lead, ...rest] = stories.slot("rundown");
+  if (!lead) return null;
+  const thread = rest.slice(0, 2);
+  const pair = rest.slice(2, 4);
+  const list = rest.slice(4);
   return (
-    <Band tone="grey" name="The rundown" id="rundown" className="fx-rundown">
+    <Band tone="light" name="The rundown" id="rundown" className="fx-rundown broadsheet">
       <Head id="rundown" k="front.rundown" kicker="In focus" title="The rundown">
         <Link to="/news" className="fx-more"><T k="front.rundown.all">All news</T> <ArrowRight size={14} aria-hidden="true" /></Link>
       </Head>
-      <div className="fx-rd">
-        <ol className="fx-rd-list">
-          {items.map((item, index) => (
-            <li key={item.slug}>
-              <Link
-                to="/news/$slug"
-                params={{ slug: item.slug }}
-                className="fx-rd-item"
-                data-on={index === on || undefined}
-                onPointerEnter={(event) => { if (event.pointerType === "mouse") setActive(index); }}
-                onFocus={() => setActive(index)}
-              >
-                <span className="fx-rd-num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                <span className="fx-rd-text">
-                  <span className="fx-label">{SECTIONS[item.section].label}</span>
-                  <span className="fx-rd-title"><S story={item} f="title" /></span>
-                  <StoryMeta story={item} className="fx-meta" />
-                </span>
-                <BsPhoto photo={item.photo} className="fx-photo fx-rd-thumb" />
-              </Link>
-            </li>
-          ))}
-        </ol>
-        <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-rd-panel" tabIndex={-1} aria-hidden="true">
-          {items.map((item, index) => (
-            <span key={item.slug} className="fx-rd-shot" data-on={index === on || undefined}>
-              <BsPhoto photo={item.photo} className="fx-photo" />
-            </span>
-          ))}
-          <span className="fx-rd-caption" key={story.slug}>
-            <span className="fx-rd-deck"><S story={story} f="deck" /></span>
-            <span className="fx-rd-foot">
-              <span className="fx-rd-source"><T k="front.rundown.via">Via</T> {story.credit}</span>
-              <span className="fx-rd-read"><T k="front.rundown.read">Read the story</T> <ArrowRight size={14} aria-hidden="true" /></span>
-            </span>
-          </span>
-        </Link>
+      <div className="bs-week bs-week-grid fx-rd-grid">
+        <article className="bs-week-lead">
+          <Link to="/news/$slug" params={{ slug: lead.slug }} className="bs-card">
+            <BsPhoto photo={lead.photo} className="bs-photo-week" />
+            <p className="bs-eyebrow"><S story={lead} f="kicker" /></p>
+            <h3 className="bs-title bs-title-week"><S story={lead} f="title" /></h3>
+            <p className="bs-deck"><S story={lead} f="deck" /></p>
+            <StoryMeta story={lead} className="fx-meta" />
+          </Link>
+          {thread.length > 0 && (
+            <div className="bs-thread">
+              <p className="bs-thread-head"><T k="front.rundown.thread">Read next</T></p>
+              <ol className="bs-thread-list">
+                {thread.map((story) => (
+                  <li key={story.slug}>
+                    <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-thread-item">
+                      <BsPhoto photo={story.photo} className="bs-thread-thumb" />
+                      <span className="bs-thread-text">
+                        <span className="bs-eyebrow"><S story={story} f="kicker" /></span>
+                        <span className="bs-thread-title"><S story={story} f="title" /></span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </article>
+        {pair.length > 0 && (
+          <div className="bs-week-mid">
+            {pair.map((story) => (
+              <article key={story.slug}>
+                <Link to="/news/$slug" params={{ slug: story.slug }} className="bs-card">
+                  <BsPhoto photo={story.photo} className="bs-photo-secondary" />
+                  <p className="bs-eyebrow"><S story={story} f="kicker" /></p>
+                  <h3 className="bs-title"><S story={story} f="title" /></h3>
+                  <p className="bs-deck bs-deck-sm"><S story={story} f="deck" /></p>
+                  <StoryMeta story={story} className="fx-meta" />
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
+        {list.length > 0 && (
+          <aside className="bs-week-brief" aria-labelledby="rundown-more-title">
+            <h3 id="rundown-more-title" className="bs-brief-head"><T k="front.rundown.more">Also in focus</T></h3>
+            <ol className="fx-rank fx-rd-list">
+              {list.map((story, index) => (
+                <li key={story.slug}>
+                  <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-rank-item">
+                    <span className="fx-rank-num" aria-hidden="true">{index + 1}</span>
+                    <span className="fx-rd-text">
+                      <span className="fx-label">{SECTIONS[story.section].label}</span>
+                      <span className="fx-rank-title"><S story={story} f="title" /></span>
+                    </span>
+                    <BsPhoto photo={story.photo} className="fx-rank-thumb" />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )}
       </div>
     </Band>
   );
@@ -410,14 +426,19 @@ function Desk({ label, to, k, lead, more }: { label: string; to: "/sports" | "/g
   );
 }
 
+// The two top-10 lists at the foot of Explore (owner, 16 Oct 2026), where the
+// OGCW 10 and the release dates were: a big photo card each, with a headline
+// and a line that make you want to open it
+const PICKS = [
+  { slug: "best-films-early-2020s-ranked", k: "front.picks.films", tag: "Top 10 · Film", cta: "See the ranking" },
+  { slug: "games-nobody-expected-to-be-this-good", k: "front.picks.games", tag: "Top 10 · Games", cta: "See the list" },
+];
+
 function Explore() {
   const stories = useStories();
-  const today = useToday();
   const [lead = stories.pick("vmas-2026-winners")] = stories.slot("front-lead");
   const latest = stories.slot("wire-latest");
-  const ranked = stories.slot("ranking");
   const more = stories.slot("explore-more");
-  const drops = DROPS.filter((drop) => drop.date >= today).slice(0, 5);
   return (
     <Band tone="light" name="Explore" id="explore" className="fx-explore">
       <Head id="explore" k="front.explore" kicker="Explore" title="A little of everything" />
@@ -466,40 +487,25 @@ function Explore() {
 
       <EditSection name="Rap desk"><MusicCard /></EditSection>
 
-      <div className="fx-ex-lists">
-        <section aria-labelledby="ogcw10-title">
-          <p id="ogcw10-title" className="fx-col-head"><T k="front.ranking.kicker">The OGCW 10</T></p>
-          <ol className="fx-rank">
-            {ranked.map((story, index) => (
-              <li key={story.slug}>
-                <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-rank-item">
-                  <span className="fx-rank-num" aria-hidden="true">{index + 1}</span>
-                  <span className="fx-rank-title"><S story={story} f="title" /></span>
-                  <BsPhoto photo={story.photo} className="fx-rank-thumb" />
-                </Link>
-              </li>
-            ))}
-          </ol>
-          <Link to="/forum/$room" params={{ room: "ogcw-10" }} className="fx-more fx-more-block"><T k="front.ranking.argue">Argue the ranking in the forum</T> <ArrowRight size={14} aria-hidden="true" /></Link>
-        </section>
-        <section aria-labelledby="dates-title">
-          <p id="dates-title" className="fx-col-head"><T k="front.drops.title2">Release dates</T></p>
-          <ol className="fx-dates">
-            {drops.map((drop) => (
-              <li key={drop.date + drop.name} className="fx-date">
-                <span className="fx-date-day"><b>{day(drop.date)}</b>{mon(drop.date)}</span>
-                <span>
-                  <span className="fx-label">{drop.kind}</span>
-                  <span className="fx-date-name"><T>{drop.name}</T></span>
+      <EditSection name="Top 10 lists">
+        <div className="fx-picks">
+          {PICKS.map((pick) => {
+            const story = stories.pick(pick.slug);
+            return (
+              <Link key={pick.slug} to="/news/$slug" params={{ slug: story.slug }} className="fx-pick">
+                <BsPhoto photo={story.photo} className="fx-photo fx-pick-photo" />
+                <span className="fx-pick-big" aria-hidden="true">10</span>
+                <span className="fx-pick-text">
+                  <span className="fx-pick-tag"><T k={`${pick.k}.tag`}>{pick.tag}</T></span>
+                  <span className="fx-pick-title"><S story={story} f="title" /></span>
+                  <span className="fx-pick-deck"><S story={story} f="deck" /></span>
+                  <span className="fx-pick-cta"><T k={`${pick.k}.cta`}>{pick.cta}</T> <ArrowRight size={15} aria-hidden="true" /></span>
                 </span>
-                <span className="fx-date-detail"><T>{drop.detail}</T></span>
-              </li>
-            ))}
-          </ol>
-          <Link to="/shop/drops" className="fx-more fx-more-block"><T k="front.drops.all">Every release date</T> <ArrowRight size={14} aria-hidden="true" /></Link>
-        </section>
-      </div>
-    </Band>
+              </Link>
+            );
+          })}
+        </div>
+      </EditSection>    </Band>
   );
 }
 

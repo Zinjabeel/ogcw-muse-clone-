@@ -35,7 +35,7 @@ export const SLOTS = [
   // The Wire, the first band under the hero
   { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["vmas-2026-winners"] },
   { id: "wire-latest", area: "The Wire", name: "Just in", note: "Five numbered stories beside the main story in Explore; empty places take the newest stories not placed anywhere else", max: 5, defaults: [] },
-  { id: "rundown", area: "The rundown", name: "The rundown", note: "Six numbered stories in the band under More news; pointing at one shows its photo and summary beside the list. Empty places take the newest stories not placed anywhere else", max: 6, defaults: [] },
+  { id: "rundown", area: "The rundown", name: "The rundown", note: "Nine stories in the band under More news: the big lead and two under it, two with photos in the middle, then four numbered on the right. Empty places take the newest stories not placed anywhere else", max: 9, defaults: [] },
   { id: "shop-news", area: "Featured drops", name: "Drop news", note: "Three stories under the Featured drops cards, about the brands and releases on show", max: 3, defaults: ["sneaker-drops-late-september-2026", "retro-football-shirts-world-cup-2026", "air-jordan-release-dates-october-december-2026"] },
   { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["j-cole-fall-off-tour-europe-berlin", "burna-boy-london-stadium-2027", "super-bowl-lxi-halftime-sofi-what-we-know", "drake-fomo-film-2027-tour", "latin-grammys-2026-nominations"] },
 
