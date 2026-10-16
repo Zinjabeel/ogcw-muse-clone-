@@ -68,6 +68,8 @@ export const SLOTS = [
   { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["complexcon-2026-playboi-carti-ten-years"], section: "culture" },
   { id: "culture-more", area: "Culture & fashion", name: "More culture", note: "Four stories beside it", max: 4, defaults: ["rock-hall-2026-wu-tang-clan-queen-latifah", "megan-thee-stallion-marie-claire-act-iii", "saint-laurent-ss27-vaccarello", "tyla-apop-world-tour-paris"], section: "culture" },
 
+  { id: "culture-extra", area: "Culture & fashion", name: "Three more", note: "A row of three culture stories under the main grid, beside the favourite-brand vote", max: 3, defaults: [], section: "culture" },
+
   // The Explore page (not the front page, so its stories may show elsewhere)
   { id: "explore-pick", area: "Explore page", name: "Editor’s pick", note: "The big tile on the Explore page", max: 1, defaults: ["tokyo-game-show-2026-typhoon"], list: true },
   { id: "trending", area: "Explore page", name: "Trending now", note: "On the Explore page, in the menu and on the Trends page", max: 5, defaults: LIST_SLUGS.trending, list: true },

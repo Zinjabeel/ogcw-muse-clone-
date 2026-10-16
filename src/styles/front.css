@@ -278,3 +278,25 @@
   .fx-pick { min-height: 420px; }
 }
 @media (prefers-reduced-motion: reduce) { .fx-pick-photo img { transition: none; } }
+
+/* ---------------- Culture & fashion, second row: three more stories and the
+   favourite-brand vote, in the same four columns */
+.fx-culture-more { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(20px, calc(2.2 * var(--vw, 1vw)), 32px); margin-top: clamp(28px, calc(3 * var(--vw, 1vw)), 44px); padding-top: clamp(28px, calc(3 * var(--vw, 1vw)), 44px); border-top: 1px solid var(--ogcw-border); }
+.fx-poll { display: grid; align-content: start; gap: 10px; padding: 20px; border: 1px solid var(--ogcw-border); border-top: 3px solid var(--ogcw-accent); background: var(--ogcw-surface); }
+.fx-poll-q { margin: 0 0 6px; font-family: var(--ogcw-display); font-size: 22px; font-weight: 600; line-height: 1.15; letter-spacing: -.01em; }
+.fx-poll-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.fx-poll-option { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 38px; overflow: hidden; padding: 8px 12px; border: 1px solid var(--ogcw-border); background: var(--ogcw-bg); color: var(--ogcw-text); font-family: var(--ogcw-ui); font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; transition: border-color .2s ease, transform .1s ease; }
+.fx-poll-option:hover { border-color: var(--ogcw-text); }
+.fx-poll-option:active { transform: translateY(1px); }
+.fx-poll-option:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
+.fx-poll-option[data-picked] { border-color: var(--ogcw-accent); }
+.fx-poll-bar { position: absolute; inset: 0 auto 0 0; width: var(--share, 0%); background: color-mix(in srgb, var(--ogcw-accent) 22%, transparent); transition: width .7s cubic-bezier(.16, 1, .3, 1); }
+.fx-poll-option[data-picked] .fx-poll-bar { background: color-mix(in srgb, var(--ogcw-accent) 42%, transparent); }
+.fx-poll-name, .fx-poll-share { position: relative; display: inline-flex; align-items: center; gap: 6px; }
+.fx-poll-share { font-variant-numeric: tabular-nums; color: var(--ogcw-text-2); }
+.fx-poll-foot { margin: 4px 0 0; font-family: var(--ogcw-ui); font-size: 12px; color: var(--ogcw-text-2); }
+.fx-poll-change { padding: 0; border: 0; background: none; color: var(--ogcw-text); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.fx-poll-option:disabled { cursor: progress; }
+@media (max-width: 1023px) { .fx-culture-more { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 639px) { .fx-culture-more { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .fx-poll-bar { transition: none; } }

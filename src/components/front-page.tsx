@@ -7,6 +7,7 @@ import { useStories } from "@/lib/stories";
 import { useWorkAccess } from "@/lib/work";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
+import { BrandPoll } from "./brand-poll";
 import { NewsWeek } from "./news-week";
 import { RapPoll } from "./rap-vote";
 import { SpotifyIcon } from "./spotify";
@@ -557,6 +558,7 @@ function CultureFashion() {
   const stories = useStories();
   const [lead] = stories.slot("culture-lead");
   const more = stories.slot("culture-more");
+  const extra = stories.slot("culture-extra");
   if (!lead) return null;
   return (
     <Band tone="light" name="Culture & fashion" id="culture" className="fx-culture">
@@ -566,6 +568,11 @@ function CultureFashion() {
       <div className="fx-culture-grid">
         <Tile story={lead} size="xl" deck />
         {more.map((story) => <Tile key={story.slug} story={story} size="sm" />)}
+      </div>
+      {/* Three more culture stories, and the favourite-brand vote beside them */}
+      <div className="fx-culture-more">
+        {extra.map((story) => <Tile key={story.slug} story={story} size="sm" />)}
+        <EditSection name="Brand poll"><BrandPoll /></EditSection>
       </div>
     </Band>
   );
