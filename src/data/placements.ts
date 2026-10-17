@@ -33,42 +33,42 @@ export const SLOTS = [
   { id: "hero-top", area: "Hero", name: "Top stories", note: "The stories that take turns in the Gallery 2 hero", max: 3, defaults: ["gta-vi-countdown", "paris-fashion-week-ss27", "taylor-swift-the-life-of-a-showgirl-the-encore"], list: true },
 
   // The Wire, the first band under the hero
-  { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["vmas-2026-winners"] },
+  { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["call-of-duty-modern-warfare-4-launch-october-23"] },
   { id: "wire-latest", area: "The Wire", name: "Just in", note: "Five numbered stories beside the main story in Explore; empty places take the newest stories not placed anywhere else", max: 5, defaults: [] },
   { id: "rundown", area: "The rundown", name: "The rundown", note: "Nine stories in the band under More news: the big lead and two under it, two with photos in the middle, then four numbered on the right. Empty places take the newest stories not placed anywhere else", max: 9, defaults: [] },
   { id: "shop-news", area: "Featured drops", name: "Drop news", note: "Three stories under the Featured drops cards, about the brands and releases on show", max: 3, defaults: ["sneaker-drops-late-september-2026", "retro-football-shirts-world-cup-2026", "air-jordan-release-dates-october-december-2026"] },
-  { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["j-cole-fall-off-tour-europe-berlin", "burna-boy-london-stadium-2027", "super-bowl-lxi-halftime-sofi-what-we-know", "drake-fomo-film-2027-tour", "latin-grammys-2026-nominations"] },
+  { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["jay-z-in-8-hbo-rick-rubin", "hellraiser-revival-divided-reviews", "roma-3-4-real-madrid-mourinho-comeback"] },
 
   // The week
-  { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["lil-baby-new-album-november-6"] },
-  { id: "week-thread", area: "The week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["dior-ss27-jonathan-anderson", "drake-solar-eclipse-choosin-texas-publishing", "milan-fashion-week-ss27-review"] },
-  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["jay-z-30-tour-sofi-finale", "ye-st-petersburg-gazprom-arena"] },
-  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["dave-raindance-year"] },
-  { id: "week-brief", area: "The week", name: "In brief", note: "Five short items, numbered", max: 5, defaults: ["xbox-disc-to-digital-all-players", "grasshopper-manufacture-leaves-netease", "kick-partner-program-payout-fix", "wwe-main-event-moves-to-rumble", "dennis-haskins-dies"] },
-  { id: "week-cluster", area: "The week", name: "Big news", note: "Three places, each fading between two stories every few seconds", max: 6, defaults: ["qobuz-ai-music-tags", "sony-music-joins-ariam", "professional-sound-alliance-launch", "mercury-prize-2026-shortlist", "emmys-2026-winners", "venice-2026-woman-unknown-golden-lion"] },
+  { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["gta-vi-launch-trailer-justice-flower-in-a-hurricane"] },
+  { id: "week-thread", area: "The week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["sony-playstation-discs-end-2028-backlash", "rick-ross-arrested-miami-beach-battery", "meta-new-mexico-40-billion-penalty"] },
+  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["liverpool-0-3-man-city-anfield-october-2026", "takeoff-murder-trial-november-9-houston"] },
+  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["man-city-guilty-premier-league-charges-appeal"] },
+  { id: "week-brief", area: "The week", name: "In brief", note: "Five short items, numbered", max: 5, defaults: ["helldivers-2-scope-of-authority-warbond", "ps-plus-october-2026-mafia-horizon-mycopunk", "enshrouded-1-0-ps5-launch", "lil-wayne-fortnite-icon-series", "marvels-wolverine-disc-sales-35-percent"] },
+  { id: "week-cluster", area: "The week", name: "Big news", note: "Three places, each fading between two stories every few seconds", max: 6, defaults: ["meta-connect-2026-ray-ban-audio-muse-charm", "outkast-sue-ovrkast-trademark", "macklemore-dropped-ed-sheeran-loop-tour", "ronaldo-981st-goal-saudi-scarf", "eminem-nerds-clothing-marshalls-massacre"] },
 
   // The rap desk
-  { id: "rap-spotlight", area: "Rap desk", name: "Spotlight", note: "The big story on the rap desk", max: 1, defaults: ["yung-lean-thats-it-gta-vi-future-metro-boomin"], section: "music" },
-  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Two headlines under the spotlight in Explore", max: 2, defaults: ["quavo-qromelife-pharrell", "anderson-paak-cordae-heavy-is-the-crown"], section: "music" },
+  { id: "rap-spotlight", area: "Rap desk", name: "Spotlight", note: "The big story on the rap desk", max: 1, defaults: ["john-legend-pharrell-muse-album-october-23"], section: "music" },
+  { id: "rap-beat", area: "Rap desk", name: "On the rap beat", note: "Two headlines under the spotlight in Explore", max: 2, defaults: ["rakim-kurupt-masta-killa-the-godbody", "yeat-cocoon-drake-miss-my-dawg"], section: "music" },
 
   // The OGCW 10
   { id: "ranking", area: "The OGCW 10", name: "The ranking", note: "Five stories, ranked: the order here is the order on the page", max: 5, defaults: ["gta-vi-countdown", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "avengers-endgame-encore-box-office", "drake-iceman-top-three-fomo", "marvels-wolverine-sales", "z-event-2026-final-edition", "latin-grammys-2026-nominations", "tokyo-game-show-2026-typhoon", "onimusha-way-of-the-sword-launch"] },
 
   // The sports desk
-  { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["nfl-week-5-2026-what-to-watch"], section: "sports" },
-  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Two headlines under it", max: 2, defaults: ["fury-joshua-cardiff-december-11-netflix", "premier-league-returns-liverpool-man-city-anfield"], section: "sports" },
+  { id: "sports-lead", area: "Sports desk", name: "Main story", note: "The big story on the sports desk", max: 1, defaults: ["ballon-dor-2026-shortlist-kane-mbappe-yamal-messi"], section: "sports" },
+  { id: "sports-more", area: "Sports desk", name: "More sports", note: "Two headlines under it", max: 2, defaults: ["gyokeres-nations-league-record-isak-injured", "harry-kane-champions-league-record-viking"], section: "sports" },
 
   // Games & streaming
-  { id: "games-lead", area: "Games & streaming", name: "Games: main story", note: "The big games story", max: 1, defaults: ["october-2026-games"], section: "games" },
-  { id: "games-more", area: "Games & streaming", name: "Games: more", note: "Two headlines under it", max: 2, defaults: ["witcher-3-remastered-launch", "switch-2-calendar-september-direct"], section: "games" },
+  { id: "games-lead", area: "Games & streaming", name: "Games: main story", note: "The big games story", max: 1, defaults: ["star-wars-galactic-racer-reviews"], section: "games" },
+  { id: "games-more", area: "Games & streaming", name: "Games: more", note: "Two headlines under it", max: 2, defaults: ["warhammer-40000-boltgun-2-reviews", "wolf-among-us-remastered-october-29"], section: "games" },
   { id: "streaming-lead", area: "Games & streaming", name: "Streaming: main story", note: "The big streaming story", max: 1, defaults: ["kai-cenat-vivet-nyfw"], section: "streaming" },
   { id: "streaming-more", area: "Games & streaming", name: "Streaming: more", note: "Two headlines under it", max: 2, defaults: ["twitchcon-san-diego-2026", "worlds-2026-north-america"], section: "streaming" },
 
   // Culture & fashion
-  { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["complexcon-2026-playboi-carti-ten-years"], section: "culture" },
-  { id: "culture-more", area: "Culture & fashion", name: "More culture", note: "Four stories beside it", max: 4, defaults: ["rock-hall-2026-wu-tang-clan-queen-latifah", "megan-thee-stallion-marie-claire-act-iii", "saint-laurent-ss27-vaccarello", "tyla-apop-world-tour-paris"], section: "culture" },
+  { id: "culture-lead", area: "Culture & fashion", name: "Main story", note: "The big culture story", max: 1, defaults: ["supreme-martine-rose-fall-2026"], section: "culture" },
+  { id: "culture-more", area: "Culture & fashion", name: "More culture", note: "Four stories beside it", max: 4, defaults: ["nigo-j-hope-nike-air-force-1", "bad-bunny-adidas-gazelle-indoor-solar-gold", "jaylen-brown-7uice-bape-sta", "lisa-lloud-von-dutch-hollywood"], section: "culture" },
 
-  { id: "culture-extra", area: "Culture & fashion", name: "Three more", note: "A row of three culture stories under the main grid, beside the favourite-brand vote", max: 3, defaults: [], section: "culture" },
+  { id: "culture-extra", area: "Culture & fashion", name: "Three more", note: "A row of three culture stories under the main grid, beside the favourite-brand vote", max: 3, defaults: ["loewe-on-cloudsolo-hiker-cloudtilt-cosmic", "palace-skateboards-wallpaper-guest-edit", "outkast-waffle-house-merch-atlanta"], section: "culture" },
 
   // The Explore page (not the front page, so its stories may show elsewhere)
   { id: "explore-pick", area: "Explore page", name: "Editor’s pick", note: "The big tile on the Explore page", max: 1, defaults: ["tokyo-game-show-2026-typhoon"], list: true },
