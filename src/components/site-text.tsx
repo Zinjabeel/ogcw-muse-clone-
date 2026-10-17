@@ -1,9 +1,10 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { createClient, type SanityClient } from "@sanity/client";
-import { Camera, Check, Eye, ImagePlus, Loader2, Maximize2, Move, PenLine, RotateCcw, Scaling, Sun, Undo2, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Check, Eye, EyeOff, ImagePlus, Loader2, Maximize2, Move, PenLine, Plus, RotateCcw, Scaling, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
-import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SiteContent, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
+import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
 import { useWorkAccess } from "@/lib/work";
@@ -332,40 +333,98 @@ function findSection(thing: string): HTMLElement | null {
   try { return (document.querySelectorAll(body.slice(0, at))[Number(body.slice(at + 1))] as HTMLElement | undefined) ?? null; } catch { return null; }
 }
 
-// What a section's own inline sizes were before it was sized, to put back
-const ORIGINAL_SIZE = new WeakMap<HTMLElement, Record<"width" | "maxWidth" | "marginLeft" | "marginRight" | "height" | "minHeight" | "overflow" | "boxSizing", string>>();
-/** Sizes one section in place (none: back to how it was) */
-function sizeSection(el: HTMLElement, pos: LayoutPos | undefined) {
-  if (!ORIGINAL_SIZE.has(el)) {
-    const s = el.style;
-    ORIGINAL_SIZE.set(el, { width: s.width, maxWidth: s.maxWidth, marginLeft: s.marginLeft, marginRight: s.marginRight, height: s.height, minHeight: s.minHeight, overflow: s.overflow, boxSizing: s.boxSizing });
+// Inline styles this editor put on the page, with what was there before,
+// so they can be taken off again without touching anything else
+const TOUCHED = new WeakMap<HTMLElement, Map<string, [string, string]>>();
+function touch(el: HTMLElement, prop: string, value: string) {
+  let saved = TOUCHED.get(el);
+  if (!saved) TOUCHED.set(el, (saved = new Map()));
+  if (!saved.has(prop)) saved.set(prop, [el.style.getPropertyValue(prop), el.style.getPropertyPriority(prop)]);
+  el.style.setProperty(prop, value);
+}
+function untouch(el: HTMLElement) {
+  const saved = TOUCHED.get(el);
+  if (!saved) return;
+  for (const [prop, [value, priority]] of saved) {
+    if (value) el.style.setProperty(prop, value, priority);
+    else el.style.removeProperty(prop);
   }
-  const original = ORIGINAL_SIZE.get(el)!;
-  const style = el.style;
-  if (pos?.w) {
-    style.boxSizing = "border-box";
-    style.width = `${pos.w}%`;
-    style.maxWidth = "none";
-    style.marginLeft = style.marginRight = `${(100 - pos.w) / 2}%`;
-  } else {
-    style.width = original.width;
-    style.maxWidth = original.maxWidth;
-    style.marginLeft = original.marginLeft;
-    style.marginRight = original.marginRight;
-    style.boxSizing = original.boxSizing;
-  }
-  if (pos?.h) {
-    style.height = pos.clip ? `${pos.h}px` : original.height;
-    style.minHeight = pos.clip ? original.minHeight : `${pos.h}px`;
-    style.overflow = pos.clip ? "hidden" : original.overflow;
-  } else {
-    style.height = original.height;
-    style.minHeight = original.minHeight;
-    style.overflow = original.overflow;
-  }
-  if (!pos?.w && !pos?.h) ORIGINAL_SIZE.delete(el);
+  TOUCHED.delete(el);
 }
 
+/** A section's content: its "…-wrap" column (one or two levels in), or its only child */
+export function contentOf(el: HTMLElement): HTMLElement | null {
+  const isWrap = (node: Element) => [...node.classList].some((name) => /wrap/.test(name) && !/^site-/.test(name));
+  const kids = [...el.children].filter((node): node is HTMLElement => node instanceof HTMLElement);
+  const own = kids.find(isWrap);
+  if (own) return own;
+  for (const kid of kids) {
+    const inner = [...kid.children].find(isWrap);
+    if (inner instanceof HTMLElement) return inner;
+  }
+  return kids.length === 1 ? kids[0]! : null;
+}
+
+/** Roughly how light a colour is, 0 (black) to 1 (white) */
+const lightness = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+};
+
+/**
+ * Puts a section's look on it (none: back to how it was): the content's width
+ * and the space around it, the colour and how much of the section it covers
+ * (split in two if asked), and whether it is hidden. Words inside take the
+ * site's light or dark text colours to suit the colour behind them.
+ */
+export function lookSection(el: HTMLElement, pos: LayoutPos | undefined, editing: boolean) {
+  const content = contentOf(el);
+  untouch(el);
+  if (content) untouch(content);
+  el.removeAttribute("data-sec-hidden");
+  if (!pos) return;
+  if (pos.cw) {
+    if (content) {
+      touch(content, "box-sizing", "border-box");
+      touch(content, "width", `${pos.cw}%`);
+      touch(content, "max-width", "none");
+      touch(content, "margin-left", "auto");
+      touch(content, "margin-right", "auto");
+    } else {
+      touch(el, "padding-left", `${(100 - pos.cw) / 2}%`);
+      touch(el, "padding-right", `${(100 - pos.cw) / 2}%`);
+    }
+  }
+  if (pos.pt !== undefined) touch(el, "padding-top", `${pos.pt}px`);
+  if (pos.pb !== undefined) touch(el, "padding-bottom", `${pos.pb}px`);
+  if (pos.bg) {
+    const second = pos.split && pos.bg2 ? pos.bg2 : pos.bg;
+    const at = pos.at ?? 50;
+    const paint = pos.split && pos.bg2
+      ? `linear-gradient(${pos.split === "x" ? "to right" : "to bottom"}, ${pos.bg} 0 ${at}%, ${second} ${at}% 100%)`
+      : `linear-gradient(${pos.bg}, ${pos.bg})`;
+    touch(el, "background", `${paint} center / ${pos.bw ?? 100}% ${pos.bh ?? 100}% no-repeat`);
+    const dark = lightness(pos.bg) < 0.5;
+    touch(el, "--ogcw-text", dark ? "#F4F4F2" : "#121212");
+    touch(el, "--ogcw-text-2", dark ? "#B5B2AB" : "#5C5C5A");
+    touch(el, "--ogcw-border", dark ? "#4A4A4A" : "#D6D6D3");
+    touch(el, "--ogcw-surface", dark ? "#3A3A3A" : "#ECECEA");
+    touch(el, "color", "var(--ogcw-text)");
+  }
+  if (pos.hide) {
+    if (editing) el.setAttribute("data-sec-hidden", "");
+    else touch(el, "display", "none");
+  }
+  if (pos.order !== undefined) touch(el, "order", String(pos.order));
+}
+
+/** Lays a part of the page out as a column, so the sections in it can change places */
+function stackParent(el: HTMLElement | null, on: boolean) {
+  if (!el) return;
+  if (!on) return untouch(el);
+  touch(el, "display", "flex");
+  touch(el, "flex-direction", "column");
+}
 // What a box's own inline styles were before it was moved, to put back
 const ORIGINAL = new WeakMap<HTMLElement, { position: string; zIndex: string; display: string; origin: string }>();
 /** Shift and scale one element in place (none: back to how it was) */
@@ -394,14 +453,65 @@ function placeInline(el: HTMLElement, pos: LayoutPos | undefined) {
   el.style.transformOrigin = "0 0";
 }
 
-/** Puts this page's moved pictures, sized sections and replaced pictures in place, for everyone */
+/** Puts this page's moved pictures, section looks, added sections and replaced pictures in place, for everyone */
 export function SiteLayouts() {
-  const { pageLayouts, pictures, image } = useSiteText();
+  const { pageLayouts, pictures, image, editing } = useSiteText();
+
+  // Sections an admin added: each gets a place on the page right after the
+  // section it follows (after any added before it), and is drawn into it
+  const blocks = Object.entries(pageLayouts)
+    .filter(([thing]) => thing.startsWith("blk:"))
+    .map(([thing, layout]) => ({ id: thing.slice(4), def: layout.d ?? layout.m }))
+    .filter((block): block is { id: string; def: LayoutPos } => !!block.def?.kind && !!block.def.after)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  const blockKey = blocks.map((block) => `${block.id}>${block.def.after}`).join("|");
+  const [hosts, setHosts] = useState<Record<string, HTMLElement>>({});
+  useEffect(() => {
+    const list = blockKey ? blockKey.split("|").map((entry) => { const [id = "", after = ""] = entry.split(">"); return { id, after }; }) : [];
+    const made: Record<string, HTMLElement> = {};
+    let retry = 0;
+    let tries = 0;
+    const place = () => {
+      for (let round = 0; round <= list.length; round += 1) {
+        let progress = false;
+        for (const block of list) {
+          if (made[block.id]) continue;
+          const anchor = findSection(block.after);
+          // Only once React has taken over the anchor and everything beside it:
+          // a section slipped in earlier would make it rebuild that part of the page
+          const parent = anchor?.parentElement;
+          const settled = (node: Element) => hydrated(node) || node.classList.contains("site-block");
+          if (!anchor || !parent || !settled(anchor) || !(hydrated(parent) || parent === document.body) || ![...parent.children].every(settled)) continue;
+          const host = document.createElement("section");
+          host.id = `blk-${block.id}`;
+          host.className = "site-block";
+          host.dataset["blk"] = block.id;
+          let before: Element = anchor;
+          while (before.nextElementSibling instanceof HTMLElement && before.nextElementSibling.classList.contains("site-block") && (before.nextElementSibling.dataset["blk"] ?? "") < block.id) before = before.nextElementSibling;
+          before.after(host);
+          made[block.id] = host;
+          progress = true;
+        }
+        if (!progress) break;
+      }
+      setHosts({ ...made });
+      tries += 1;
+      if (list.some((block) => !made[block.id]) && tries < 40) retry = window.setTimeout(place, 300);
+    };
+    place();
+    return () => {
+      window.clearTimeout(retry);
+      for (const host of Object.values(made)) host.remove();
+      setHosts({});
+    };
+  }, [blockKey]);
+
   useEffect(() => {
     const things = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("i:") || thing.startsWith("src:"));
     const sections = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("sec:"));
     const placed = new Set<HTMLElement>();
-    const sized = new Set<HTMLElement>();
+    const looked = new Set<HTMLElement>();
+    const stacked = new Set<HTMLElement>();
     const swapped = new Set<HTMLImageElement>();
     const media = window.matchMedia(BP_QUERY);
     let frame = 0;
@@ -412,7 +522,7 @@ export function SiteLayouts() {
       // them first would make it complain), and looked at again shortly
       let waiting = false;
       const ready = (el: Element) => {
-        const ok = hydrated(el);
+        const ok = hydrated(el) || !!el.closest(".site-block");
         if (!ok) waiting = true;
         return ok;
       };
@@ -438,16 +548,31 @@ export function SiteLayouts() {
       for (const el of placed) if (!seen.has(el)) placeInline(el, undefined);
       placed.clear();
       for (const el of seen) placed.add(el);
+      // Sections: their look, and the parts that hold reordered sections laid out as columns
       const seenSections = new Set<HTMLElement>();
+      const seenStacks = new Set<HTMLElement>();
       for (const [thing, layout] of sections) {
         const el = findSection(thing);
         if (!el || !ready(el)) continue;
+        const pos = layout[bp];
         seenSections.add(el);
-        sizeSection(el, layout[bp]);
+        lookSection(el, pos, editing);
+        if (pos?.order !== undefined && el.parentElement) seenStacks.add(el.parentElement);
       }
-      for (const el of sized) if (!seenSections.has(el)) sizeSection(el, undefined);
-      sized.clear();
-      for (const el of seenSections) sized.add(el);
+      for (const el of looked) if (!seenSections.has(el)) lookSection(el, undefined, editing);
+      looked.clear();
+      for (const el of seenSections) looked.add(el);
+      for (const el of stacked) if (!seenStacks.has(el)) stackParent(el, false);
+      for (const el of seenStacks) stackParent(el, true);
+      stacked.clear();
+      for (const el of seenStacks) stacked.add(el);
+      // An added section takes the place of the section it follows
+      for (const host of document.querySelectorAll<HTMLElement>(".site-block")) {
+        const before = host.previousElementSibling;
+        const order = before instanceof HTMLElement ? before.style.getPropertyValue("order") : "";
+        if (order && !host.style.getPropertyValue("order")) host.style.setProperty("order", order);
+        if (!order && !TOUCHED.get(host)?.has("order")) host.style.removeProperty("order");
+      }
       window.clearTimeout(retry);
       if (waiting) retry = window.setTimeout(apply, 200);
     };
@@ -462,13 +587,61 @@ export function SiteLayouts() {
       window.clearTimeout(retry);
       media.removeEventListener("change", apply);
       for (const el of placed) placeInline(el, undefined);
-      for (const el of sized) sizeSection(el, undefined);
+      for (const el of looked) lookSection(el, undefined, editing);
+      for (const el of stacked) stackParent(el, false);
       for (const img of swapped) showPicture(img, undefined, !!img.dataset["imgKey"]);
     };
-  }, [pageLayouts, pictures, image]);
-  return null;
+  }, [pageLayouts, pictures, image, editing, hosts]);
+
+  return (
+    <>
+      {blocks.map((block) => hosts[block.id] ? createPortal(<EditSection name="Added sections"><AddedSection id={block.id} def={block.def} /></EditSection>, hosts[block.id]!, block.id) : null)}
+    </>
+  );
 }
 
+// ---------------------------------------------------------------- Added sections
+// What an admin adds with "Add a section": words (a heading and a paragraph),
+// a picture, both, or a plain band of colour, in one to three columns. Each
+// heading, paragraph and picture is an ordinary site edit, so it is typed and
+// changed on the page like any other. Until something is written, visitors
+// don't see the empty parts; admins see "Your heading" and an empty picture.
+
+const EMPTY_PICTURE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#d9d9d6"/><text x="600" y="410" font-family="Inter, sans-serif" font-size="42" font-weight="700" fill="#77756f" text-anchor="middle">Point here and press “Change photo”</text></svg>')}`;
+
+function AddedText({ k, as, usual }: { k: string; as: "h2" | "p"; usual: string }) {
+  const site = useSiteText();
+  if (!site.text(k) && !site.editing) return null;
+  const Tag = as;
+  return <Tag className={as === "h2" ? "site-block-title" : "site-block-copy"}><T k={k}>{usual}</T></Tag>;
+}
+function AddedPicture({ k }: { k: string }) {
+  const site = useSiteText();
+  if (!site.image(k) && !site.editing) return null;
+  return <EditableImage k={k} src={EMPTY_PICTURE} alt="" className="site-block-img" loading="lazy" />;
+}
+function AddedSection({ id, def }: { id: string; def: LayoutPos }) {
+  const cols = Math.min(3, Math.max(1, Math.round(def.cols ?? 1)));
+  if (def.kind === "band") return <div className="site-block-wrap site-block-band" style={{ minHeight: def.band ?? 160 }} />;
+  return (
+    <div className="site-block-wrap" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      {Array.from({ length: cols }, (_, column) => {
+        const k = `blk.${id}.${column}`;
+        return (
+          <div key={column} className={`site-block-col${def.kind === "textimage" ? " has-picture" : ""}`}>
+            {(def.kind === "image" || def.kind === "textimage") && <AddedPicture k={`${k}.img`} />}
+            {def.kind !== "image" && (
+              <div className="site-block-words">
+                <AddedText k={`${k}.h`} as="h2" usual="Your heading" />
+                <AddedText k={`${k}.p`} as="p" usual="Write something here. Point at it and press Edit to change it." />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 // ---------------------------------------------------------------- Saving
 
 /** Writing to Sanity as the admin logged in to the studio on this browser */
@@ -568,7 +741,11 @@ type Drag = { mode: "move" | "size"; el: HTMLElement; thing: string; text: boole
 type PhotoTarget = { k: string; rect: DOMRect; swapped: boolean; alt: string; section: SiteSection | null; usual: string; current: SiteImage };
 /** The section being sized, and the drag on one of its edges */
 type Sizing = { el: HTMLElement; thing: string; rect: DOMRect };
-type SecDrag = { mode: "w" | "wl" | "h" | "wh"; x: number; y: number; w: number; h: number; natural: number; across: number; zoom: number; bp: "d" | "m"; base: SiteLayout | undefined; next?: LayoutPos };
+/** A change to a section's look: a field set to undefined is taken off */
+type LookPatch = { [K in keyof LayoutPos]?: LayoutPos[K] | undefined };
+type SecDrag = { mode: "w" | "wl" | "h"; x: number; y: number; cw: number; pb: number; across: number; zoom: number };
+/** The colours to choose from for a section (any other colour is one click away) */
+const SECTION_COLOURS: [string, string][] = [["White", "#FFFFFF"], ["Off-white", "#F4F4F2"], ["Light grey", "#E7E7E5"], ["Charcoal", "#303030"], ["Black", "#0D0D0D"], ["Yellow", "#FFE600"], ["Gold", "#86600E"]];
 
 const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 
@@ -613,6 +790,11 @@ export function SiteEditor() {
   sizingRef.current = sizing;
   const drag = useRef<Drag | null>(null);
   const secDrag = useRef<SecDrag | null>(null);
+  // The section being edited: its sizes as they are now, and slider changes not yet in the changes
+  const [measured, setMeasured] = useState({ cw: 100, pt: 0, pb: 0, zoom: 1 });
+  const [draft, setDraft] = useState<LookPatch>({});
+  const draftRef = useRef<{ patch: LookPatch; everywhere: boolean }>({ patch: {}, everywhere: false });
+  const draftTimer = useRef<number | undefined>(undefined);
   const [dragging, setDragging] = useState(false);
   const [touch, setTouch] = useState(false);
 
@@ -812,13 +994,29 @@ export function SiteEditor() {
     requestAnimationFrame(() => setTarget((t) => (t ? { ...t, rect: t.el.getBoundingClientRect() } : t)));
   };
 
-  // ------------------------------------------------ Sizing a section
+  // ------------------------------------------------ Editing a section
+  // "Edit section" opens a panel: the content's width and the space around it
+  // (also by dragging the handles on its sides and bottom), its colour, a split
+  // into two colours, how much of the section the colour covers, moving it up
+  // or down, hiding it, and adding a new section below it. Sizes are kept for
+  // this kind of screen (computer or phone); colours, hiding and places for both.
   const startSizing = (el: HTMLElement) => {
-    setSizing({ el, thing: sectionThing(el), rect: el.getBoundingClientRect() });
+    const rect = el.getBoundingClientRect();
+    const content = contentOf(el);
+    const style = getComputedStyle(el);
+    const zoom = rect.height / (el.offsetHeight || 1) || 1;
+    setMeasured({
+      cw: content ? Math.round((content.getBoundingClientRect().width / (rect.width || 1)) * 100) : 100,
+      pt: Math.round(parseFloat(style.paddingTop) || 0),
+      pb: Math.round(parseFloat(style.paddingBottom) || 0),
+      zoom,
+    });
+    setDraft({});
+    setSizing({ el, thing: sectionThing(el), rect });
     setSection(null);
     setTarget(null);
   };
-  /** The part of the page around the one being sized */
+  /** The part of the page around the one being edited */
   const outer = () => {
     const current = sizingRef.current;
     if (!current) return;
@@ -826,62 +1024,127 @@ export function SiteEditor() {
     const next = all.find(isPainted) ?? all[0];
     if (next) startSizing(next);
   };
+  const secMeta = () => ({ section: pageSection(pathname), page: pathname });
+  /** Changes a section's look: sizes for this kind of screen, or (everywhere) for computers and phones alike; an undefined field is taken off */
+  const restyle = (thing: string, patch: LookPatch, everywhere = false) => {
+    const base = site.layout(thing) ?? {};
+    const next: SiteLayout = { ...base };
+    for (const at of everywhere ? (["d", "m"] as const) : [bpNow()]) {
+      const merged: Record<string, unknown> = { x: 0, y: 0, s: 1, ...(base[at] ?? {}), ...patch };
+      for (const [name, value] of Object.entries(merged)) if (value === undefined) delete merged[name];
+      if (Object.keys(merged).some((name) => !["x", "y", "s"].includes(name))) next[at] = merged as LayoutPos;
+      else delete next[at];
+    }
+    site.change(layoutKey(pathname, thing), "layout", next.d || next.m ? next : null, secMeta());
+  };
+  // Sliders show the change at once and put it in the changes when they settle
+  const nudge = (patch: LookPatch, everywhere = false) => {
+    const current = sizingRef.current;
+    if (!current) return;
+    const merged = { ...draftRef.current.patch, ...patch };
+    draftRef.current = { patch: merged, everywhere: draftRef.current.everywhere || everywhere };
+    setDraft(merged);
+    const pos = { x: 0, y: 0, s: 1, ...(site.layout(current.thing)?.[bpNow()] ?? {}), ...merged } as LayoutPos;
+    lookSection(current.el, pos, true);
+    setSizing({ ...current, rect: current.el.getBoundingClientRect() });
+    window.clearTimeout(draftTimer.current);
+    draftTimer.current = window.setTimeout(settleDraft, 450);
+  };
+  /** The slider changes not yet put in the changes (taken out, to go with another change) */
+  const takeDraft = () => {
+    const taken = draftRef.current;
+    draftRef.current = { patch: {}, everywhere: false };
+    window.clearTimeout(draftTimer.current);
+    setDraft({});
+    return taken;
+  };
+  const settleDraft = () => {
+    const current = sizingRef.current;
+    const { patch, everywhere } = takeDraft();
+    if (current && Object.keys(patch).length) restyle(current.thing, patch, everywhere);
+  };
+  /** A click (a colour, a split, hiding): for computers and phones alike, with any slider changes */
+  const pickStyle = (patch: LookPatch) => {
+    const current = sizingRef.current;
+    if (!current) return;
+    restyle(current.thing, { ...takeDraft().patch, ...patch }, true);
+  };
   const startSecDrag = (mode: SecDrag["mode"]) => (event: ReactPointerEvent<HTMLButtonElement>) => {
     const current = sizingRef.current;
     if (!current || event.button > 0) return;
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const el = current.el;
-    const bp = bpNow();
-    const base = site.layout(current.thing);
-    const pos = base?.[bp];
-    // Its height with nothing set: below that, the rest gets cut off
-    const saved = { height: el.style.height, minHeight: el.style.minHeight };
-    el.style.height = "auto";
-    el.style.minHeight = "0px";
-    const natural = el.offsetHeight;
-    el.style.height = saved.height;
-    el.style.minHeight = saved.minHeight;
-    const rect = el.getBoundingClientRect();
-    const across = el.parentElement?.getBoundingClientRect().width || rect.width;
-    secDrag.current = { mode, x: event.clientX, y: event.clientY, w: pos?.w ?? Math.round((rect.width / across) * 1000) / 10, h: pos?.h ?? el.offsetHeight, natural, across, zoom: rect.height / (el.offsetHeight || 1) || 1, bp, base };
+    settleDraft();
+    const live = site.layout(current.thing)?.[bpNow()];
+    secDrag.current = { mode, x: event.clientX, y: event.clientY, cw: live?.cw ?? measured.cw, pb: live?.pb ?? measured.pb, across: current.el.getBoundingClientRect().width || 1, zoom: measured.zoom };
     setDragging(true);
   };
   const moveSecDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const d = secDrag.current;
-    const current = sizingRef.current;
-    if (!d || !current) return;
+    if (!d) return;
     const dx = event.clientX - d.x, dy = event.clientY - d.y;
-    const before = d.base?.[d.bp];
-    const next: LayoutPos = { x: 0, y: 0, s: 1, ...(before?.w ? { w: before.w } : {}), ...(before?.h ? { h: before.h, ...(before.clip ? { clip: true } : {}) } : {}) };
-    if (d.mode !== "h") next.w = Math.min(150, Math.max(20, Math.round((d.w + ((d.mode === "wl" ? -dx : dx) * 200) / d.across) * 10) / 10));
-    if (d.mode === "h" || d.mode === "wh") {
-      next.h = Math.max(40, Math.round(d.h + dy / d.zoom));
-      if (next.h < d.natural - 1) next.clip = true;
-      else delete next.clip;
-    }
-    d.next = next;
-    sizeSection(current.el, next);
-    setSizing({ ...current, rect: current.el.getBoundingClientRect() });
+    if (d.mode === "h") nudge({ pb: Math.max(0, Math.round(d.pb + dy / d.zoom)) });
+    else nudge({ cw: Math.min(100, Math.max(20, Math.round(d.cw + ((d.mode === "wl" ? -dx : dx) * 200) / d.across))) });
   };
   const endSecDrag = () => {
-    const d = secDrag.current;
-    const current = sizingRef.current;
     secDrag.current = null;
     setDragging(false);
-    if (!d?.next || !current) return;
-    site.change(layoutKey(pathname, current.thing), "layout", { ...(d.base ?? {}), [d.bp]: d.next }, { section: pageSection(pathname), page: pathname });
+    settleDraft();
   };
-  const resetSize = () => {
+  /** Moves the section one place up or down among the parts beside it */
+  const moveSection = (step: -1 | 1) => {
+    const current = sizingRef.current;
+    const parent = current?.el.parentElement;
+    if (!current || !parent) return;
+    const pending = takeDraft().patch;
+    const parts = [...parent.children].filter((node): node is HTMLElement => node instanceof HTMLElement && !/^(SCRIPT|STYLE|TEMPLATE|LINK)$/.test(node.tagName));
+    const ordered = parts.map((node, index) => ({ node, order: parseFloat(getComputedStyle(node).order) || 0, index })).sort((a, b) => a.order - b.order || a.index - b.index).map((item) => item.node);
+    const from = ordered.indexOf(current.el);
+    const to = from + step;
+    if (from < 0 || to < 0 || to >= ordered.length) return;
+    [ordered[from], ordered[to]] = [ordered[to]!, ordered[from]!];
+    ordered.forEach((node, index) => restyle(sectionThing(node), node === current.el ? { ...pending, order: (index + 1) * 10 } : { order: (index + 1) * 10 }, true));
+    window.setTimeout(() => setSizing((s) => (s ? { ...s, rect: s.el.getBoundingClientRect() } : s)), 120);
+  };
+  /** Adds a new section right after this one, and opens it */
+  const addSection = (kind: SectionKind) => {
     const current = sizingRef.current;
     if (!current) return;
-    const bp = bpNow();
-    const rest: SiteLayout = { ...(site.layout(current.thing) ?? {}) };
-    delete rest[bp];
-    sizeSection(current.el, rest[bp]);
-    site.change(layoutKey(pathname, current.thing), "layout", rest.d || rest.m ? rest : null, { section: pageSection(pathname), page: pathname });
-    requestAnimationFrame(() => setSizing((s) => (s ? { ...s, rect: s.el.getBoundingClientRect() } : s)));
+    settleDraft();
+    const id = Date.now().toString(36);
+    const def: LayoutPos = { x: 0, y: 0, s: 1, kind, after: current.thing, cols: 1, ...(kind === "band" ? { band: 160 } : {}) };
+    site.change(layoutKey(pathname, `blk:${id}`), "layout", { d: def, m: def }, secMeta());
+    let tries = 0;
+    const open = () => {
+      const host = document.getElementById(`blk-${id}`);
+      if (host) { host.scrollIntoView({ block: "center", behavior: "smooth" }); window.setTimeout(() => startSizing(host), 450); }
+      else if ((tries += 1) < 20) window.setTimeout(open, 150);
+    };
+    window.setTimeout(open, 150);
+  };
+  /** An added section: change what it is and its columns, or delete it */
+  const changeAdded = (id: string, patch: Partial<LayoutPos>) => {
+    const base = site.layout(`blk:${id}`);
+    if (!base) return;
+    const next: SiteLayout = {};
+    for (const at of ["d", "m"] as const) if (base[at]) next[at] = { ...base[at]!, ...patch };
+    site.change(layoutKey(pathname, `blk:${id}`), "layout", next, secMeta());
+    window.setTimeout(() => setSizing((s) => (s ? { ...s, rect: s.el.getBoundingClientRect() } : s)), 120);
+  };
+  const deleteAdded = (id: string) => {
+    site.change(layoutKey(pathname, `blk:${id}`), "layout", null, secMeta());
+    if (site.layout(`sec:#blk-${id}`)) site.change(layoutKey(pathname, `sec:#blk-${id}`), "layout", null, secMeta());
+    setSizing(null);
+  };
+  const resetSection = () => {
+    const current = sizingRef.current;
+    if (!current) return;
+    draftRef.current = { patch: {}, everywhere: false };
+    window.clearTimeout(draftTimer.current);
+    setDraft({});
+    site.change(layoutKey(pathname, current.thing), "layout", null, secMeta());
+    window.setTimeout(() => setSizing((s) => (s ? { ...s, rect: s.el.getBoundingClientRect() } : s)), 120);
   };
 
   // Leaving with unsaved changes: the browser asks first
@@ -1004,7 +1267,7 @@ export function SiteEditor() {
     if (rect.bottom < 120 || rect.top > window.innerHeight - 60) return null;
     return { top: Math.min(window.innerHeight - 50, Math.max(70, rect.top + 12)), left: Math.max(8, Math.min(window.innerWidth - 150, rect.right - 150)) };
   })();
-  const live = sizing ? site.layout(sizing.thing)?.[bpNow()] : undefined;
+
 
   return (
     <>
@@ -1015,43 +1278,138 @@ export function SiteEditor() {
         </button>
         {/* Drawing and writing notes on the page, for Claude (src/components/design-notes.tsx) */}
         <DesignNotes />
-        {editing && <span className="site-edit-hint">{touch ? "Tap any text or picture to edit it; “Section size” resizes a whole section" : "Point at any text or picture: press Edit, or drag its handles. “Section size” resizes a whole section"}</span>}
+        {editing && <span className="site-edit-hint">{touch ? "Tap any text or picture to edit it; “Edit section” changes a whole section" : "Point at any text or picture: press Edit, or drag its handles. “Edit section” changes a whole section, its colours, or adds a new one"}</span>}
       </div>
 
       {pill && section && (
-        <button type="button" className="site-sec-pill" style={pill} onClick={() => startSizing(section.el)} title="Make this section, and its background, wider or narrower, taller or shorter">
-          <Scaling size={13} aria-hidden="true" /> Section size
+        <button type="button" className="site-sec-pill" style={pill} onClick={() => startSizing(section.el)} title="Change this section: its content's size, its colours, its place, or add a new section">
+          <Scaling size={13} aria-hidden="true" /> Edit section
         </button>
       )}
 
       {sizing && (() => {
-        const { rect } = sizing;
+        const { rect, el, thing } = sizing;
         const top = Math.max(64, rect.top);
         const bottom = Math.min(window.innerHeight - 8, rect.bottom);
         const mid = (top + bottom) / 2;
+        const content = contentOf(el)?.getBoundingClientRect();
+        const look = { ...(site.layout(thing)?.[bpNow()] ?? {}), ...draft } as LookPatch;
+        const cw = look.cw ?? measured.cw;
+        const pt = look.pt ?? measured.pt;
+        const pb = look.pb ?? measured.pb;
+        const addedId = el.classList.contains("site-block") ? el.dataset["blk"] ?? null : null;
+        const added = addedId ? site.layout(`blk:${addedId}`)?.d : undefined;
+        const name = el.querySelector("h1, h2, h3")?.textContent?.replace(/\s+/g, " ").trim().slice(0, 48) || (added ? "Your new section" : "This section");
+        const swatch = (value: string | undefined, pick: (colour: string | undefined) => void, label: string) => (
+          <div className="site-sec-swatches" role="group" aria-label={label}>
+            <button type="button" className="is-usual" aria-pressed={!value} onClick={() => pick(undefined)} title="The usual colour">Usual</button>
+            {SECTION_COLOURS.map(([title, hex]) => (
+              <button key={hex} type="button" aria-pressed={value?.toLowerCase() === hex.toLowerCase()} onClick={() => pick(hex)} title={title} style={{ background: hex }} aria-label={title} />
+            ))}
+            <label className="site-sec-custom" title="Any colour">
+              <input type="color" value={value ?? "#ffffff"} onChange={(event) => pick(event.target.value)} aria-label={`${label}: any colour`} />
+              <span aria-hidden="true">+</span>
+            </label>
+          </div>
+        );
+        const slider = (label: string, value: number, min: number, max: number, unit: string, set: (n: number) => void) => (
+          <label className="site-sec-slider">
+            <span>{label}<b>{value}{unit}</b></span>
+            <input type="range" min={min} max={max} value={value} onChange={(event) => set(Number(event.target.value))} onPointerUp={settleDraft} onKeyUp={settleDraft} />
+          </label>
+        );
         return (
           <>
+            {/* The section's frame, its content's frame, and handles for the content's width and the space below */}
             <span className="site-sec-frame" aria-hidden="true" style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }} />
-            <button type="button" className="site-sec-handle is-w" style={{ top: mid - 22, left: rect.right - 9 }} aria-label="Drag to make the section wider or narrower" onPointerDown={startSecDrag("w")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
-            <button type="button" className="site-sec-handle is-w" style={{ top: mid - 22, left: rect.left - 9 }} aria-label="Drag to make the section wider or narrower" onPointerDown={startSecDrag("wl")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
+            {content && <span className="site-sec-content" aria-hidden="true" style={{ top: content.top, left: content.left, width: content.width, height: content.height }} />}
+            <button type="button" className="site-sec-handle is-w" style={{ top: mid - 22, left: (content?.right ?? rect.right) - 9 }} aria-label="Drag to make the content wider or narrower" title="Content width" onPointerDown={startSecDrag("w")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
+            <button type="button" className="site-sec-handle is-w" style={{ top: mid - 22, left: (content?.left ?? rect.left) - 9 }} aria-label="Drag to make the content wider or narrower" title="Content width" onPointerDown={startSecDrag("wl")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
             {rect.bottom < window.innerHeight + 4 && (
-              <>
-                <button type="button" className="site-sec-handle is-h" style={{ top: rect.bottom - 9, left: rect.left + rect.width / 2 - 22 }} aria-label="Drag to make the section taller or shorter" onPointerDown={startSecDrag("h")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
-                <button type="button" className="site-sec-handle is-wh" style={{ top: rect.bottom - 13, left: rect.right - 13 }} aria-label="Drag to resize the section" onPointerDown={startSecDrag("wh")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
-              </>
+              <button type="button" className="site-sec-handle is-h" style={{ top: rect.bottom - 9, left: rect.left + rect.width / 2 - 22 }} aria-label="Drag to change the space below the content" title="Space below" onPointerDown={startSecDrag("h")} onPointerMove={moveSecDrag} onPointerUp={endSecDrag} onPointerCancel={endSecDrag} />
             )}
-            <div className="site-sec-bar" role="toolbar" aria-label="Section size" style={{ top: Math.min(window.innerHeight - 52, Math.max(66, rect.top + 10)), left: Math.max(8, Math.min(window.innerWidth - 380, rect.left + 10)) }}>
-              <span className="site-sec-read">
-                <Scaling size={13} aria-hidden="true" /> {live?.w ? `${live.w}% wide` : "Usual width"} · {live?.h ? `${live.h}px tall` : "usual height"}
-              </span>
-              <button type="button" onClick={outer} title="Size the bigger part around this one instead">Outer part</button>
-              {(live?.w || live?.h) && <button type="button" onClick={resetSize}><RotateCcw size={12} aria-hidden="true" /> Reset</button>}
-              <button type="button" className="is-done" onClick={() => setSizing(null)}><Check size={13} aria-hidden="true" /> Done</button>
-            </div>
+
+            <aside className="site-sec-panel" role="dialog" aria-label="Edit this section">
+              <header className="site-sec-head">
+                <p><Scaling size={14} aria-hidden="true" /> Section<small>{name}</small></p>
+                <button type="button" className="site-sec-x" onClick={() => { settleDraft(); setSizing(null); }} aria-label="Close"><X size={16} aria-hidden="true" /></button>
+              </header>
+
+              <section className="site-sec-group" aria-label="Content">
+                <h3>Content <small>the words and pictures inside</small></h3>
+                {slider("Width", cw, 20, 100, "%", (n) => nudge({ cw: n }))}
+                {slider("Space above", pt, 0, 320, "px", (n) => nudge({ pt: n }))}
+                {slider("Space below", pb, 0, 320, "px", (n) => nudge({ pb: n }))}
+              </section>
+
+              <section className="site-sec-group" aria-label="Colour">
+                <h3>Colour <small>behind the content</small></h3>
+                {swatch(look.bg, (colour) => pickStyle({ bg: colour, ...(colour ? {} : { bg2: undefined, split: undefined }) }), "Colour")}
+                {look.bg && (
+                  <>
+                    {slider("Colour width", look.bw ?? 100, 10, 100, "%", (n) => nudge({ bw: n }))}
+                    {slider("Colour height", look.bh ?? 100, 10, 100, "%", (n) => nudge({ bh: n }))}
+                    <div className="site-sec-seg" role="group" aria-label="Divide the colour">
+                      <button type="button" aria-pressed={!look.split} onClick={() => pickStyle({ split: undefined })}>One colour</button>
+                      <button type="button" aria-pressed={look.split === "x"} onClick={() => pickStyle({ split: "x", bg2: look.bg2 ?? "#0D0D0D" })}>Side by side</button>
+                      <button type="button" aria-pressed={look.split === "y"} onClick={() => pickStyle({ split: "y", bg2: look.bg2 ?? "#0D0D0D" })}>Top and bottom</button>
+                    </div>
+                    {look.split && (
+                      <>
+                        {slider("Divide at", look.at ?? 50, 5, 95, "%", (n) => nudge({ at: n }, true))}
+                        <p className="site-sec-note">Second colour</p>
+                        {swatch(look.bg2, (colour) => pickStyle(colour ? { bg2: colour } : { bg2: undefined, split: undefined }), "Second colour")}
+                      </>
+                    )}
+                  </>
+                )}
+              </section>
+
+              {added && addedId && (
+                <section className="site-sec-group" aria-label="Your section">
+                  <h3>Your section</h3>
+                  <div className="site-sec-seg" role="group" aria-label="What it shows">
+                    {([["text", "Words"], ["image", "Picture"], ["textimage", "Both"], ["band", "Colour band"]] as const).map(([kind, label]) => (
+                      <button key={kind} type="button" aria-pressed={added.kind === kind} onClick={() => changeAdded(addedId, { kind })}>{label}</button>
+                    ))}
+                  </div>
+                  {added.kind !== "band" ? (
+                    <div className="site-sec-seg" role="group" aria-label="Columns">
+                      {[1, 2, 3].map((cols) => <button key={cols} type="button" aria-pressed={(added.cols ?? 1) === cols} onClick={() => changeAdded(addedId, { cols })}>{cols} {cols === 1 ? "column" : "columns"}</button>)}
+                    </div>
+                  ) : (
+                    slider("Band height", added.band ?? 160, 20, 800, "px", (n) => changeAdded(addedId, { band: n }))
+                  )}
+                  <p className="site-sec-note">Point at its words or picture and press Edit or Change photo to fill it in.</p>
+                  <button type="button" className="site-sec-danger" onClick={() => deleteAdded(addedId)}><Trash2 size={14} aria-hidden="true" /> Delete this section</button>
+                </section>
+              )}
+
+              <section className="site-sec-group" aria-label="Section">
+                <h3>Section</h3>
+                <div className="site-sec-row">
+                  <button type="button" onClick={() => moveSection(-1)}><ArrowUp size={14} aria-hidden="true" /> Move up</button>
+                  <button type="button" onClick={() => moveSection(1)}><ArrowDown size={14} aria-hidden="true" /> Move down</button>
+                  <button type="button" onClick={() => pickStyle({ hide: look.hide ? undefined : true })}>{look.hide ? <><Eye size={14} aria-hidden="true" /> Show it</> : <><EyeOff size={14} aria-hidden="true" /> Hide it</>}</button>
+                  <button type="button" onClick={outer} title="Edit the bigger part around this one instead">Outer part</button>
+                </div>
+                <p className="site-sec-note">Add a section below this one</p>
+                <div className="site-sec-row">
+                  <button type="button" onClick={() => addSection("text")}><Plus size={14} aria-hidden="true" /> Words</button>
+                  <button type="button" onClick={() => addSection("image")}><Plus size={14} aria-hidden="true" /> Picture</button>
+                  <button type="button" onClick={() => addSection("textimage")}><Plus size={14} aria-hidden="true" /> Both</button>
+                  <button type="button" onClick={() => addSection("band")}><Plus size={14} aria-hidden="true" /> Colour band</button>
+                </div>
+              </section>
+
+              <footer className="site-sec-foot">
+                <button type="button" onClick={resetSection}><RotateCcw size={13} aria-hidden="true" /> Back to usual</button>
+                <button type="button" className="is-done" onClick={() => { settleDraft(); setSizing(null); }}><Check size={14} aria-hidden="true" /> Done</button>
+              </footer>
+            </aside>
           </>
         );
       })()}
-
       {button && target && !sizing && (
         <>
           <span className={`site-edit-frame${dragging ? " is-dragging" : ""}`} aria-hidden="true" style={{ top: target.rect.top - 3, left: target.rect.left - 4, width: target.rect.width + 8, height: target.rect.height + 6 }} />

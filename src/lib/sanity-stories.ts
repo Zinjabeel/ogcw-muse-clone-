@@ -44,9 +44,17 @@ const toSite = (doc: SiteDoc): SiteContent => {
       const pos = (p?: LayoutPos | null): LayoutPos | undefined => {
         if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return undefined;
         const out: LayoutPos = { x: p.x, y: p.y, s: Number.isFinite(p.s) && p.s > 0 ? p.s : 1 };
-        if (typeof p.w === "number" && Number.isFinite(p.w) && p.w > 0) out.w = p.w;
-        if (typeof p.h === "number" && Number.isFinite(p.h) && p.h > 0) out.h = p.h;
-        if (p.clip) out.clip = true;
+        // A section's look, or a section an admin added (src/lib/site-text.tsx)
+        const num = (value: unknown, min: number, max: number) => (typeof value === "number" && Number.isFinite(value) && value >= min && value <= max ? value : undefined);
+        const colour = (value: unknown) => (typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : undefined);
+        const extra: Record<string, unknown> = {
+          cw: num(p.cw, 10, 200), pt: num(p.pt, 0, 2000), pb: num(p.pb, 0, 2000),
+          bg: colour(p.bg), bg2: colour(p.bg2), split: p.split === "x" || p.split === "y" ? p.split : undefined, at: num(p.at, 0, 100), bw: num(p.bw, 1, 100), bh: num(p.bh, 1, 100),
+          hide: p.hide === true ? true : undefined, order: num(p.order, -100, 1000),
+          kind: p.kind === "text" || p.kind === "image" || p.kind === "textimage" || p.kind === "band" ? p.kind : undefined,
+          after: typeof p.after === "string" && p.after.length <= 300 ? p.after : undefined, cols: num(p.cols, 1, 3), band: num(p.band, 10, 2000),
+        };
+        for (const [name, value] of Object.entries(extra)) if (value !== undefined) (out as Record<string, unknown>)[name] = value;
         return out;
       };
       const d = pos(item.layout?.d), m = pos(item.layout?.m);

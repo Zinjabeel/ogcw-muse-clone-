@@ -9,6 +9,25 @@ import { SITE_SECTIONS } from "../../lib/site-sections";
 
 const formatWhen = (at?: string) => (at ? new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(at)) : "");
 
+// A section's look, or a section an admin added (src/lib/site-text.tsx, LayoutPos)
+const SECTION_FIELDS = [
+  defineField({ name: "cw", title: "Content width (%)", type: "number" }),
+  defineField({ name: "pt", title: "Space above (px)", type: "number" }),
+  defineField({ name: "pb", title: "Space below (px)", type: "number" }),
+  defineField({ name: "bg", title: "Colour", type: "string" }),
+  defineField({ name: "bg2", title: "Second colour", type: "string" }),
+  defineField({ name: "split", title: "Split (x side by side, y top and bottom)", type: "string" }),
+  defineField({ name: "at", title: "Split at (%)", type: "number" }),
+  defineField({ name: "bw", title: "Colour width (%)", type: "number" }),
+  defineField({ name: "bh", title: "Colour height (%)", type: "number" }),
+  defineField({ name: "hide", title: "Hidden", type: "boolean" }),
+  defineField({ name: "order", title: "Place", type: "number" }),
+  defineField({ name: "kind", title: "Added section", type: "string" }),
+  defineField({ name: "after", title: "Comes after", type: "string" }),
+  defineField({ name: "cols", title: "Columns", type: "number" }),
+  defineField({ name: "band", title: "Band height (px)", type: "number" }),
+];
+
 export const siteEdit = defineType({
   name: "siteEdit",
   title: "Site edit",
@@ -31,9 +50,7 @@ export const siteEdit = defineType({
           defineField({ name: "x", type: "number" }),
           defineField({ name: "y", type: "number" }),
           defineField({ name: "s", title: "Size", type: "number" }),
-          defineField({ name: "w", title: "Section width (%)", type: "number" }),
-          defineField({ name: "h", title: "Section height (px)", type: "number" }),
-          defineField({ name: "clip", title: "Section cut off at that height", type: "boolean" }),
+          ...SECTION_FIELDS,
         ],
       })),
     }),
@@ -108,7 +125,7 @@ const contentFields = [
       fields: [
         defineField({ name: "key", title: "Where", type: "string", readOnly: true }),
         defineField({ name: "page", title: "Page", type: "string", readOnly: true }),
-        defineField({ name: "layout", title: "Place and size", type: "object", fields: [defineField({ name: "d", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" }), defineField({ name: "w", type: "number" }), defineField({ name: "h", type: "number" }), defineField({ name: "clip", type: "boolean" })] }), defineField({ name: "m", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" }), defineField({ name: "w", type: "number" }), defineField({ name: "h", type: "number" }), defineField({ name: "clip", type: "boolean" })] })] }),
+        defineField({ name: "layout", title: "Place and size", type: "object", fields: [defineField({ name: "d", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" }), ...SECTION_FIELDS] }), defineField({ name: "m", type: "object", fields: [defineField({ name: "x", type: "number" }), defineField({ name: "y", type: "number" }), defineField({ name: "s", type: "number" }), ...SECTION_FIELDS] })] }),
       ],
       preview: { select: { title: "key", subtitle: "page" } },
     })],

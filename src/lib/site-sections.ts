@@ -31,6 +31,7 @@ export const SITE_SECTIONS = [
   "Explore",
   "Top 10 lists",
   "Brand poll",
+  "Added sections",
   "Keep exploring",
   "Rap desk",
   "More to explore",

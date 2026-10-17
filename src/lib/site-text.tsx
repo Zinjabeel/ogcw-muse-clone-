@@ -17,13 +17,27 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 /** fit: "contain" shows the whole picture instead of filling its frame; clear: no dimming or dark overlay on it */
 export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean };
+/** What an admin can add as a new section: words, a picture, both, or a band of colour */
+export type SectionKind = "text" | "image" | "textimage" | "band";
 /**
  * A move: x and y in page pixels from where it usually sits, s its size (1 = usual).
- * A whole section is sized instead: w its width in % of the space it sits in
- * (centred), h its height in page pixels, clip when that is less than its
- * contents need (the rest is cut off).
+ * A whole section ("sec:" things) keeps x 0, y 0, s 1 and is styled instead:
+ *  - its content: cw its width in % of the section (centred), pt and pb the
+ *    space above and below it in page pixels; the background is untouched
+ *  - its colour: bg (and bg2 for a split: "x" side by side, "y" top and
+ *    bottom, at % from the start), and how much of the section the colour
+ *    covers, bw and bh in % (centred)
+ *  - hide: hidden for visitors; order: its place among the parts beside it
+ * A section an admin added ("blk:" things) also has kind, after (the
+ * section it follows), cols (1 to 3) and, for a colour band, band (its height).
  */
-export type LayoutPos = { x: number; y: number; s: number; w?: number; h?: number; clip?: boolean };
+export type LayoutPos = {
+  x: number; y: number; s: number;
+  cw?: number; pt?: number; pb?: number;
+  bg?: string; bg2?: string; split?: "x" | "y"; at?: number; bw?: number; bh?: number;
+  hide?: boolean; order?: number;
+  kind?: SectionKind; after?: string; cols?: number; band?: number;
+};
 export type SiteLayout = { d?: LayoutPos; m?: LayoutPos };
 /** Where an edit is from: the part of the site, the page and the usual wording */
 export type EditMeta = { section?: string; page?: string; usual?: string; /** still in the old single "Site texts" document */ legacy?: boolean };
