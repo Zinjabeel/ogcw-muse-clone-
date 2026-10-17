@@ -91,6 +91,13 @@ export const NIGHTS: Night[] = [
 // stories (OGCW has no videos of its own yet). Each plays from YouTube.
 export type Video = { id: string; title: string; channel: string; kind: string; slug: string };
 export const VIDEOS: Video[] = [
+  // October 2026 (each checked with YouTube oEmbed: posted by the official channel)
+  { id: "rz1B4B2yBZY", title: "Grand Theft Auto VI: Launch Trailer", channel: "Rockstar Games", kind: "Trailer", slug: "gta-vi-launch-trailer-justice-flower-in-a-hurricane" },
+  { id: "FeJaG-NOK_8", title: "John Legend: Daylight (official video)", channel: "John Legend", kind: "Music video", slug: "john-legend-pharrell-muse-album-october-23" },
+  { id: "yLFRQaQT0qM", title: "Call of Duty: Modern Warfare 4 campaign trailer", channel: "Call of Duty", kind: "Trailer", slug: "call-of-duty-modern-warfare-4-launch-october-23" },
+  { id: "pR-V3j-sc7s", title: "Star Wars: Galactic Racer launch trailer", channel: "Star Wars", kind: "Trailer", slug: "star-wars-galactic-racer-reviews" },
+  { id: "B3irEK1igZY", title: "Warhammer 40,000: Boltgun 2 release trailer", channel: "Warhammer 40,000", kind: "Trailer", slug: "warhammer-40000-boltgun-2-reviews" },
+  { id: "HhpFCnyfXHg", title: "The Wolf Among Us Remastered: Noir Mode trailer", channel: "Telltale Games", kind: "Trailer", slug: "wolf-among-us-remastered-october-29" },
   { id: "OlmuIckOX0c", title: "The Witcher 3: Wild Hunt Remastered launch trailer", channel: "CD Projekt Red", kind: "Trailer", slug: "witcher-3-remastered-launch" },
   { id: "VQRLujxTm3c", title: "Grand Theft Auto VI: Trailer 2", channel: "Rockstar Games", kind: "Trailer", slug: "gta-vi-countdown" },
   { id: "xWDfREk0ZLs", title: "Pattern Recognition (official video)", channel: "Neuro-sama x ODDEEO", kind: "Music video", slug: "neuro-sama-pattern-recognition-first-concert" },
