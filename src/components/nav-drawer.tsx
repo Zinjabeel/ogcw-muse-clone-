@@ -1,45 +1,54 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowRight, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { ArrowRight, BadgeCheck, Plus, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { EPISODES, SECTIONS, SHOPS, type Article, type Episode, type Photo, type SectionId, type Shop } from "@/data/content";
 import { useStories, type Stories } from "@/lib/stories";
 import { SOCIALS, SocialIcon } from "./socials";
 import { openConsent } from "@/lib/consent";
 import { S, T } from "./site-text";
 
-// Site menu: "The OGCW Index", a full-screen contents page that drops down
-// over the site. Each section is a numbered line in large serif type with
-// what is in it; pointing at one (or tabbing or arrowing to it) shows its
-// latest stories on the right, and the whole screen takes that section's
-// colour, as the hero does. Along the bottom:
-// the smaller pages and OGCW's socials. On phones the list stands alone,
-// each line with its latest headline under it.
+// The site menu (owner, 18 Oct 2026: "redesign it like the shop but infused
+// with the front page"). Built like the shop's menu: a panel that slides in
+// from the left over a dimmed page, with numbered sections that open one at
+// a time. Dressed like the front page: the masthead (One Great Culture
+// World, the date, Certified news), the lead story, gold serif numbers,
+// stories set like "In brief" (gold label, serif headline, small photo), and
+// the black band at the foot with the newsletter, socials and small pages.
+// The section of the page you are on starts open.
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
 type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/forum" | "/about";
-type Section = { label: string; to: SectionPath; note: string; heading: string; tone: string; items: Item[] };
+type Section = { label: string; to: SectionPath; note: string; items: Item[] };
 
 const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
 
-// The menu's lines, with the live stories from the studio
+// The menu's sections, with the live stories from the studio
 function buildSections(stories: Stories): Section[] {
   const longReads = [...stories.all].sort((a, b) => b.words - a.words);
   const section = (id: SectionId) => stories.inSection(id);
+  const count = (n: number) => `${n} ${n === 1 ? "story" : "stories"}`;
   return [
-    { label: "News", to: "/news", note: `${stories.all.length} stories`, heading: "Latest", tone: "#6f8499", items: asItems(stories.all.slice(0, 4)) },
-    { label: "Music", to: "/music", note: `${section("music").length} stories`, heading: "Latest in Music", tone: "#6e3320", items: asItems(section("music").slice(0, 4)) },
-    { label: "Games", to: "/games", note: `${section("games").length} stories`, heading: "Latest in Games", tone: "#4f7f96", items: asItems(section("games").slice(0, 4)) },
-    { label: "Streaming", to: "/streaming", note: `${section("streaming").length} stories`, heading: "Latest in Streaming", tone: "#5a4a8a", items: asItems(section("streaming").slice(0, 4)) },
-    { label: "Culture", to: "/culture", note: `${section("culture").length} stories`, heading: "Latest in Culture", tone: "#6b3a3a", items: asItems(section("culture").slice(0, 4)) },
-    { label: "Sports", to: "/sports", note: `${section("sports").length} stories`, heading: "Latest in Sports", tone: "#2f5d46", items: asItems(section("sports").slice(0, 4)) },
-    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", tone: "#7b6f5a", items: EPISODES.slice(0, 4).map((e) => ({ kind: "episode", e })) },
-    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", tone: "#a91728", items: SHOPS.slice(0, 4).map((s) => ({ kind: "shop", s })) },
-    { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", tone: "#3f6b5a", items: asItems(stories.trending.slice(0, 4)) },
-    { label: "Forum", to: "/forum", note: "Seven rooms", heading: "The longest reads", tone: "#7a5a3c", items: asItems(longReads.slice(0, 4)) },
-    { label: "About", to: "/about", note: "Who we are", heading: "Editors’ picks", tone: "#8c5e4a", items: asItems(stories.editorsPicks.slice(0, 4)) },
+    { label: "News", to: "/news", note: count(stories.all.length), items: asItems(stories.all.slice(0, 3)) },
+    { label: "Music", to: "/music", note: count(section("music").length), items: asItems(section("music").slice(0, 3)) },
+    { label: "Games", to: "/games", note: count(section("games").length), items: asItems(section("games").slice(0, 3)) },
+    { label: "Streaming", to: "/streaming", note: count(section("streaming").length), items: asItems(section("streaming").slice(0, 3)) },
+    { label: "Culture", to: "/culture", note: count(section("culture").length), items: asItems(section("culture").slice(0, 3)) },
+    { label: "Sports", to: "/sports", note: count(section("sports").length), items: asItems(section("sports").slice(0, 3)) },
+    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, items: EPISODES.slice(0, 3).map((e) => ({ kind: "episode", e })) },
+    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, items: SHOPS.slice(0, 3).map((s) => ({ kind: "shop", s })) },
+    { label: "Trends", to: "/trends", note: "The report", items: asItems(stories.trending.slice(0, 3)) },
+    { label: "Forum", to: "/forum", note: "Seven rooms", items: asItems(longReads.slice(0, 3)) },
+    { label: "About", to: "/about", note: "Who we are", items: asItems(stories.editorsPicks.slice(0, 3)) },
   ];
 }
 
+// Quick links under the masthead
+const QUICK = [
+  { key: "latest", label: "Latest news", to: "/news" },
+  { key: "trending", label: "Trending", to: "/trends" },
+  { key: "originals", label: "Originals", to: "/originals" },
+  { key: "explore", label: "Explore", to: "/explore" },
+] as const;
 const PAGES = [
   { label: "About", to: "/about" },
   { label: "FAQ", info: "faq" },
@@ -55,15 +64,15 @@ const LEGAL = [
 ] as const;
 
 const pad = (n: number) => String(n).padStart(2, "0");
+const shortDate = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(iso));
 const itemKey = (item: Item) => (item.kind === "article" ? item.a.slug : item.kind === "episode" ? item.e.slug : item.s.slug);
 const itemPhoto = (item: Item) => (item.kind === "article" ? item.a.photo : item.kind === "episode" ? item.e.still : item.s.hero);
 const itemTitle = (item: Item) => (item.kind === "article" ? item.a.title : item.kind === "episode" ? item.e.title : `Shop ${item.s.name}`);
 /** An item's title on the page: a story's headline can be changed there by an admin */
 const ItemTitle = ({ item }: { item: Item }) => (item.kind === "article" ? <S story={item.a} f="title" /> : <T>{itemTitle(item)}</T>);
-const itemSub = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${SECTIONS[item.a.section].label}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
-const eventDay = (iso: string) => new Date(iso).getUTCDate();
-const eventMonth = (iso: string) => new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" }).format(new Date(iso));
+const itemLabel = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${shortDate(item.a.updated ?? item.a.date)}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
 
+/** A small photo (also used by the search screen) */
 export function Thumb({ photo }: { photo: Photo }) {
   const crop = photo.crop ?? { pos: "50% 50%" };
   return (
@@ -84,30 +93,37 @@ function ItemLink({ item, className, onGo, children }: { item: Item; className: 
   return <Link to="/shop/$slug" params={{ slug: item.s.slug }} className={className} onClick={onGo}>{children}</Link>;
 }
 
+const photoStyle = (photo: Photo): CSSProperties => ({ objectPosition: photo.crop?.pos ?? "50% 50%" });
 
 export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose: () => void; onSearch: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
-  const [preview, setPreview] = useState(0);
-  const [today, setToday] = useState<{ iso: string; label: string } | null>(null);
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [today, setToday] = useState<string | null>(null);
   const stories = useStories();
-  const SECTIONS = useMemo(() => buildSections(stories), [stories]);
-  // The line for the page you’re on is marked, and previewed first
+  const sections = useMemo(() => buildSections(stories), [stories]);
+  // The lead story: the one at the top of the front page
+  const lead = stories.slot("front-lead")[0] ?? stories.all[0];
+  // The section of the page you're on is marked, and starts open
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const currentIndex = SECTIONS.findIndex((s) => pathname === s.to || pathname.startsWith(`${s.to}/`));
+  const currentIndex = sections.findIndex((s) => pathname === s.to || pathname.startsWith(`${s.to}/`));
 
   useEffect(() => {
     const el = dialog.current;
     if (!el) return;
     if (open && !el.open) {
-      setPreview(Math.max(currentIndex, 0));
-      const now = new Date();
-      setToday({ iso: now.toISOString().slice(0, 10), label: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(now) });
+      setOpenKey(currentIndex >= 0 ? sections[currentIndex]!.to : null);
+      setToday(new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date()));
+      // Focus starts on the panel itself, at the top: the first Tab reaches the
+      // close button, and nothing looks pressed when the menu opens
       el.showModal();
+      const panel = el.querySelector<HTMLElement>(".om-panel");
+      panel?.scrollTo({ top: 0 });
+      panel?.focus({ preventScroll: true });
     }
-  }, [open, currentIndex]);
+  }, [open, currentIndex, sections]);
 
-  // Listen for the native close event so every way of closing reports back.
+  // Every way of closing (Esc, a link, the close button) reports back
   useEffect(() => {
     const el = dialog.current;
     if (!el) return;
@@ -118,134 +134,121 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const close = (then?: () => void) => {
     const el = dialog.current;
     if (!el || closing) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const finish = () => {
       el.close();
       setClosing(false);
       then?.();
     };
-    if (reduce) return finish();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
     setClosing(true);
-    window.setTimeout(finish, 280);
+    window.setTimeout(finish, 300);
   };
   const go = () => close();
+  // A click on the dimmed page beside the panel closes the menu
+  const onBackdrop = (event: MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) close(); };
 
-  // Up and down arrows move through the index
-  const onListKey = (event: KeyboardEvent<HTMLOListElement>) => {
+  // Up and down arrows move between the sections
+  const onListKey = (event: KeyboardEvent<HTMLUListElement>) => {
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-    const rows = [...event.currentTarget.querySelectorAll<HTMLAnchorElement>(".ix-row")];
-    const at = rows.indexOf(document.activeElement as HTMLAnchorElement);
-    const next = rows[(at + (event.key === "ArrowDown" ? 1 : -1) + rows.length) % rows.length];
+    const heads = [...event.currentTarget.querySelectorAll<HTMLButtonElement>(".om-head")];
+    const at = heads.indexOf(document.activeElement as HTMLButtonElement);
+    if (at < 0) return;
     event.preventDefault();
-    next?.focus();
+    heads[(at + (event.key === "ArrowDown" ? 1 : -1) + heads.length) % heads.length]?.focus();
   };
 
   return (
-    <dialog
-      ref={dialog}
-      className="ix"
-      aria-label="Menu"
-      data-closing={closing ? "" : undefined}
-      style={{ "--tone": SECTIONS[preview]!.tone } as CSSProperties}
-      onCancel={(event) => { event.preventDefault(); close(); }}
-    >
-      {/* The ambient light: the previewed section's lead photo, blurred */}
-      <div className="ix-glow" aria-hidden="true">
-        {SECTIONS.map((section, index) => {
-          const lead = section.items[0];
-          return lead ? <img key={section.label} src={itemPhoto(lead).src} alt="" className={index === preview ? "is-on" : undefined} /> : null;
-        })}
-      </div>
-
-      <div className="ix-inner">
-        {/* The close button sits exactly where the menu button was */}
-        <div className="ix-top">
-          <div className="ix-brand">
-            <button type="button" className="ix-close" aria-label="Close menu" onClick={go}>
-              <X size={18} strokeWidth={1.75} aria-hidden="true" />
-            </button>
-            <Link to="/" className="ix-logo" aria-label="OGCW home" onClick={go}><T>OGCW</T></Link>
-          </div>
-          <p className="ix-dateline">
-            <span><T k="ix.index">The Index</T></span>
-            {today && <span className="ix-today">{today.label}</span>}
-          </p>
-          <button type="button" className="ix-search" onClick={() => close(onSearch)}>
-            <Search size={15} strokeWidth={1.75} aria-hidden="true" /> <span><T k="ix.search">Search</T></span>
+    <dialog ref={dialog} className="om" aria-label="Menu" data-closing={closing ? "" : undefined} onCancel={(event) => { event.preventDefault(); close(); }} onClick={onBackdrop}>
+      <div className="om-panel" data-band="light" tabIndex={-1}>
+        {/* The close button sits where the menu button was */}
+        <div className="om-top">
+          <button type="button" className="om-close" aria-label="Close menu" onClick={go}><X size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          <Link to="/" className="om-logo" aria-label="OGCW home" onClick={go}><T>OGCW</T></Link>
+          <button type="button" className="om-search" onClick={() => close(onSearch)}>
+            <Search size={15} strokeWidth={1.9} aria-hidden="true" /> <span><T k="ix.search">Search</T></span>
           </button>
         </div>
 
-        <div className="ix-body">
-          <nav className="ix-nav" aria-label="Sections">
-            <ol className="ix-list" onKeyDown={onListKey}>
-              {SECTIONS.map((section, index) => {
-                const lead = section.items[0];
-                return (
-                  <li key={section.label} style={{ "--i": index } as CSSProperties}>
-                    <Link
-                      to={section.to}
-                      className="ix-row"
-                      data-on={index === preview}
-                      aria-current={index === currentIndex ? "page" : undefined}
-                      onPointerEnter={(event) => { if (event.pointerType === "mouse") setPreview(index); }}
-                      onFocus={() => setPreview(index)}
-                      onClick={go}
-                    >
-                      <span className="ix-num">{pad(index + 1)}</span>
-                      <span className="ix-name"><span><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span></span>
-                      <span className="ix-note">{section.note}</span>
-                      {lead && <span className="ix-latest">{section.to === "/shop" ? SHOPS.map((s) => s.name).join(", ") : <ItemTitle item={lead} />}</span>}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
+        {/* The front page's masthead, small */}
+        <div className="om-mast">
+          <p className="om-mast-name"><T k="ix.mast">One Great Culture World</T></p>
+          <p className="om-mast-meta">
+            <span>{today ?? <T k="ix.updated">Updated daily</T>}</span>
+            <span className="om-mast-cert"><BadgeCheck size={13} strokeWidth={2} aria-hidden="true" /><T k="home.news.certified">Certified news</T></span>
+          </p>
+          <nav className="om-quick" aria-label="Quick links">
+            {QUICK.map((link) => <Link key={link.key} to={link.to} onClick={go}><T k={`ix.quick.${link.key}`}>{link.label}</T></Link>)}
           </nav>
-
-          {/* What is in the section under the pointer */}
-          <div className="ix-preview">
-            {SECTIONS.map((section, index) => {
-              const on = index === preview;
-              const [lead, ...rest] = section.items;
-              const crop = lead ? itemPhoto(lead).crop : undefined;
-              return (
-                <section key={section.label} className="ix-card" data-on={on} inert={!on} aria-hidden={on ? undefined : true} aria-label={`${section.heading}: ${section.label}`}>
-                  <p className="ix-card-head">
-                    <span><T k={`ix.${section.to.slice(1)}.heading`}>{section.heading}</T></span>
-                    <span className="ix-card-num">{pad(index + 1)} / {pad(SECTIONS.length)}</span>
-                  </p>
-                  {lead && (
-                    <ItemLink item={lead} className="ix-lead" onGo={go}>
-                      <span className="ix-lead-media">
-                        <img src={itemPhoto(lead).src} alt="" loading="lazy" style={{ objectPosition: crop?.pos ?? "50% 50%" }} />
-                      </span>
-                      <span className="ix-lead-sub">{itemSub(lead)}</span>
-                      <span className="ix-lead-title"><ItemTitle item={lead} /></span>
-                    </ItemLink>
-                  )}
-                  <ol className="ix-more">
-                    {rest.slice(0, 3).map((item) => (
-                      <li key={itemKey(item)}>
-                        <ItemLink item={item} className="ix-more-link" onGo={go}>
-                          <span className="ix-more-title"><ItemTitle item={item} /></span>
-                          <span className="ix-more-sub">{itemSub(item)}</span>
-                        </ItemLink>
-                      </li>
-                    ))}
-                  </ol>
-                  <Link to={section.to} className="ix-all" onClick={go}>
-                    <T k="ix.go">Go to</T> <T k={`nav.${section.to.slice(1)}`}>{section.label}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
-                  </Link>
-                </section>
-              );
-            })}
-          </div>
         </div>
 
-        <div className="ix-foot">
-          <div className="ix-foot-side">
-            <nav className="ix-pages" aria-labelledby="ix-pages-title">
-              <p id="ix-pages-title" className="ix-foot-head"><T k="ix.pages">More from OGCW</T></p>
+        {/* The lead story, as on the front page */}
+        {lead && (
+          <Link to="/news/$slug" params={{ slug: lead.slug }} className="om-lead" onClick={go}>
+            <span className="om-lead-photo"><img src={lead.photo.src} alt="" loading="lazy" style={photoStyle(lead.photo)} /></span>
+            <span className="om-lead-label"><T k="ix.lead">The lead</T> · <S story={lead} f="kicker" /></span>
+            <span className="om-lead-title"><S story={lead} f="title" /></span>
+          </Link>
+        )}
+
+        {/* The sections, numbered, opening one at a time */}
+        <nav className="om-index" aria-labelledby="om-index-title">
+          <p id="om-index-title" className="om-index-head"><T k="ix.index">The Index</T></p>
+          <ul className="om-acc" onKeyDown={onListKey}>
+            {sections.map((section, index) => {
+              const on = openKey === section.to;
+              const id = `om-${section.to.slice(1)}`;
+              return (
+                <li key={section.to} className="om-item" data-open={on || undefined} data-here={index === currentIndex || undefined} style={{ "--i": index } as CSSProperties}>
+                  <button type="button" className="om-head" aria-expanded={on} aria-controls={id} onClick={() => setOpenKey(on ? null : section.to)}>
+                    <span className="om-no" aria-hidden="true">{pad(index + 1)}</span>
+                    <span className="om-name"><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span>
+                    <span className="om-note">{index === currentIndex ? <T k="ix.here">You’re here</T> : section.note}</span>
+                    <span className="om-plus" aria-hidden="true"><Plus size={16} strokeWidth={1.9} /></span>
+                  </button>
+                  <div className="om-drop" id={id} role="region" aria-label={section.label}>
+                    <div className="om-inner">
+                      <ol className="om-brief">
+                        {section.items.map((item, n) => (
+                          <li key={itemKey(item)}>
+                            <ItemLink item={item} className="om-brief-link" onGo={go}>
+                              <span className="om-brief-num" aria-hidden="true">{n + 1}</span>
+                              <span className="om-brief-text">
+                                <span className="om-brief-label">{itemLabel(item)}</span>
+                                <span className="om-brief-title"><ItemTitle item={item} /></span>
+                              </span>
+                              <span className="om-brief-photo"><img src={itemPhoto(item).src} alt="" loading="lazy" style={photoStyle(itemPhoto(item))} /></span>
+                            </ItemLink>
+                          </li>
+                        ))}
+                      </ol>
+                      <Link to={section.to} className="om-go" onClick={go}>
+                        <T k="ix.go">Go to</T> <T k={`nav.${section.to.slice(1)}`}>{section.label}</T> <ArrowRight size={14} strokeWidth={2.2} aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* The black band, as at the foot of the front page */}
+        <div className="om-foot" data-band="dark">
+          <p className="om-foot-kicker"><span className="om-tick" aria-hidden="true" /><T k="connect.newsletter.label">Newsletter</T></p>
+          <p className="om-foot-title"><T k="connect.newsletter.title">Stay in the culture.</T></p>
+          <Link to="/info/$slug" params={{ slug: "newsletter" }} className="om-foot-btn" onClick={go}>
+            <T k="ix.signup">Sign up</T> <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
+          </Link>
+          <ul className="om-social" aria-label="Follow OGCW">
+            {SOCIALS.map((social) => (
+              <li key={social.name}>
+                <a href={social.href} target="_blank" rel="noreferrer" aria-label={`OGCW on ${social.name}`}><SocialIcon path={social.path} size={16} /></a>
+              </li>
+            ))}
+          </ul>
+          <div className="om-small">
+            <nav aria-labelledby="om-pages-title">
+              <p id="om-pages-title" className="om-small-head"><T k="ix.pages">More from OGCW</T></p>
               <ul>
                 {PAGES.map((page) => (
                   <li key={page.label}>
@@ -256,27 +259,13 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
                 ))}
               </ul>
             </nav>
-            <nav className="ix-pages" aria-labelledby="ix-legal-title">
-              <p id="ix-legal-title" className="ix-foot-head"><T k="ix.legal">Legal</T></p>
+            <nav aria-labelledby="om-legal-title">
+              <p id="om-legal-title" className="om-small-head"><T k="ix.legal">Legal</T></p>
               <ul>
-                {LEGAL.map((page) => (
-                  <li key={page.label}><Link to="/info/$slug" params={{ slug: page.info }} onClick={go}><T k={`more.${page.info}`}>{page.label}</T></Link></li>
-                ))}
-                <li><button type="button" className="ix-text-button" onClick={() => close(openConsent)}><T k="ix.cookies">Cookie settings</T></button></li>
+                {LEGAL.map((page) => <li key={page.label}><Link to="/info/$slug" params={{ slug: page.info }} onClick={go}><T k={`more.${page.info}`}>{page.label}</T></Link></li>)}
+                <li><button type="button" onClick={() => close(openConsent)}><T k="ix.cookies">Cookie settings</T></button></li>
               </ul>
             </nav>
-            <div className="ix-social">
-              <p className="ix-foot-head"><T k="ix.follow">Follow</T></p>
-              <ul>
-                {SOCIALS.map((social) => (
-                  <li key={social.name}>
-                    <a href={social.href} target="_blank" rel="noreferrer" aria-label={`OGCW on ${social.name}`}>
-                      <SocialIcon path={social.path} size={16} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </div>
