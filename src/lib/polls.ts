@@ -10,7 +10,8 @@ const VOTER_KEY = "ogcw-voter";
 const mineKey = (poll: string) => `ogcw-poll-${poll}`;
 
 const randomId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
-function voterId() {
+/** This browser's random voter id (also used by the story questions) */
+export function voterId() {
   try {
     let id = localStorage.getItem(VOTER_KEY);
     if (!id) {

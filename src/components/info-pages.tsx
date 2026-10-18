@@ -311,8 +311,8 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <li>OGCW exclusives and Originals</li>
         </ul>
         <h2>Sign up</h2>
-        <div className="info-form"><NewsletterForm /></div>
-        <p className="info-note">The newsletter launches soon. Until it does, this form doesn’t send or store your address. When it launches, we’ll only use your email to send the newsletter, as set out in the <Page slug="privacy">Privacy Policy</Page>.</p>
+        <div className="info-form"><NewsletterForm source="newsletter-page" /></div>
+        <p className="info-note">The newsletter launches soon. We keep your address safely until then, so you get the first issue, and we’ll only use it to send the newsletter, as set out in the <Page slug="privacy">Privacy Policy</Page>. To be taken off the list, email <Mail subject="Newsletter: take me off">{BUSINESS_EMAIL}</Mail>.</p>
       </>
     ),
   },
@@ -438,7 +438,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             <tr><td>Your name, email address and password, if you create an account</td><td>To let you log in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it. If you log in with Google or GitHub instead, they share your name, email address and username with us, and no password.</td><td>Our agreement with you when you create an account</td></tr>
             <tr><td>Your answers to polls and to the questions at the end of stories</td><td>To count them and show the results. They are counted without your name.</td><td>Our legitimate interest in running polls you choose to take part in</td></tr>
             <tr><td>Notes you write under a story</td><td>To read your feedback. Notes are stored with the story and the time, and never published.</td><td>Our legitimate interest in improving our reporting</td></tr>
-            <tr><td>Your email address, when the newsletter launches</td><td>To send you the newsletter.</td><td>Your consent, which you can withdraw at any time</td></tr>
+            <tr><td>Your email address, if you sign up for the newsletter</td><td>To send you the newsletter once it launches. It is kept by Supabase, on servers in the EU (Frankfurt), and is never shown on the site.</td><td>Your consent, which you can withdraw at any time</td></tr>
             <tr><td>Emails you send us</td><td>To answer you and deal with your request.</td><td>Our legitimate interest in replying, or steps you ask us to take</td></tr>
             <tr><td>Preferences stored in your browser</td><td>To remember your theme, hero choice and answers.</td><td>Your consent (see the <Page slug="cookies">Cookie Policy</Page>)</td></tr>
           </tbody>
