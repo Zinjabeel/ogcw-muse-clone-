@@ -611,6 +611,50 @@ function CultureFashion() {
   );
 }
 
+// ------------------------------------------------------------ The latest
+
+// After the last section, more news (owner, 18 Oct 2026): every story not
+// already on the front page, newest first, twelve at a time with "Load more"
+// under them (the site's rule for long lists).
+const LATEST_STEP = 12;
+
+function Latest() {
+  const stories = useStories();
+  const pool = stories.all.filter((story) => !stories.onFront.has(story.slug) && !stories.hidden.has(story.slug));
+  const [shown, setShown] = useState(LATEST_STEP);
+  const grid = useRef<HTMLDivElement>(null);
+  if (!pool.length) return null;
+  const visible = pool.slice(0, shown);
+  const more = () => {
+    const from = shown;
+    setShown(shown + LATEST_STEP);
+    // The keyboard carries on from the first new story
+    requestAnimationFrame(() => grid.current?.querySelectorAll<HTMLAnchorElement>(".fx-tile")[from]?.focus({ preventScroll: true }));
+  };
+  return (
+    <Band tone="light" name="The latest" id="latest" className="fx-latest">
+      <Head id="latest" k="front.latest" kicker="Every story, newest first" title="The latest">
+        <Link to="/news" className="fx-more"><T k="front.latest.link">All news</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+      </Head>
+      <div className="fx-latest-grid" ref={grid}>
+        {visible.map((story) => <Tile key={story.slug} story={story} size="sm" />)}
+      </div>
+      <div className="fx-latest-foot">
+        <p className="fx-latest-count" aria-live="polite">
+          <T k="front.latest.showing">Showing</T> {visible.length} <T k="front.latest.of">of</T> {pool.length}
+        </p>
+        {shown < pool.length ? (
+          <button type="button" className="fx-btn fx-btn-ghost fx-latest-more" onClick={more}>
+            <T k="front.latest.more">Load more</T> <ChevronDown size={16} aria-hidden="true" />
+          </button>
+        ) : (
+          <Link to="/news" className="fx-btn fx-btn-ghost fx-latest-more"><T k="front.latest.all">Every story on the news page</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+        )}
+      </div>
+    </Band>
+  );
+}
+
 export function FrontPage() {
   return (
     <div className="front">
@@ -620,6 +664,7 @@ export function FrontPage() {
       <Explore />
       <Watch />
       <CultureFashion />
+      <Latest />
     </div>
   );
 }

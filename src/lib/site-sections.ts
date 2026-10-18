@@ -21,6 +21,7 @@ export const SITE_SECTIONS = [
   "Games & streaming",
   "Watch",
   "Culture & fashion",
+  "The latest",
   "Stay in the culture",
   // Earlier parts of the home page (their saved edits stay filed here)
   "OGCW News",

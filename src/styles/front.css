@@ -302,6 +302,15 @@
 .fx-poll-foot { margin: 4px 0 0; font-family: var(--ogcw-ui); font-size: 12px; color: var(--ogcw-text-2); }
 .fx-poll-change { padding: 0; border: 0; background: none; color: var(--ogcw-text); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .fx-poll-option:disabled { cursor: progress; }
+/* The latest: more news after the last section, twelve at a time (owner, 18 Oct 2026) */
+.front .fx-latest { padding-top: 0; padding-bottom: var(--fx-pad) !important; }
+.front .fx-latest .fx-wrap { padding-top: var(--fx-pad); border-top: 1px solid var(--ogcw-border); }
+.fx-latest-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(28px, calc(3 * var(--vw, 1vw)), 44px) clamp(20px, calc(2.2 * var(--vw, 1vw)), 32px); }
+.fx-latest-foot { display: grid; justify-items: center; gap: 14px; margin-top: clamp(36px, calc(4 * var(--vw, 1vw)), 56px); }
+.fx-latest-count { margin: 0; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); font-variant-numeric: tabular-nums; }
+.fx-latest-more { margin-top: 0; min-width: 220px; }
+@media (max-width: 1023px) { .fx-latest-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 639px) { .fx-latest-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 1023px) { .fx-culture-more { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 639px) { .fx-culture-more { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .fx-poll-bar { transition: none; } }
