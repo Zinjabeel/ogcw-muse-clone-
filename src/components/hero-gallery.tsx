@@ -124,7 +124,8 @@ export function HeroGallery() {
       {/* The ambient light: the middle card's photo, blurred, over a wash of its colour */}
       <div className="gallery-bg" aria-hidden="true">
         {CARDS.map((card, index) => (
-          <img key={card.id} src={site.image(`hero.card.${card.id}`)?.src ?? card.photo} alt="" className={index === active ? "is-on" : undefined} />
+          // Lazy: while another hero is chosen this one is hidden, and its photos then aren't fetched at all (shown, they load at once)
+          <img key={card.id} src={site.image(`hero.card.${card.id}`)?.src ?? card.photo} alt="" className={index === active ? "is-on" : undefined} loading="lazy" />
         ))}
       </div>
 
@@ -165,7 +166,7 @@ export function HeroGallery() {
                     if (offset !== 0) { event.preventDefault(); go(offset); }
                   }}
                 >
-                  <EditableImage k={`hero.card.${card.id}`} src={card.photo} alt={card.alt} loading={distance < 2 ? "eager" : "lazy"} draggable={false} />
+                  <EditableImage k={`hero.card.${card.id}`} src={card.photo} alt={card.alt} loading="lazy" draggable={false} />
                   <span className="gallery-card-body">
                     <span className="gallery-card-label"><T k={`hero.card.${card.id}.label`}>{card.label}</T></span>
                     <span className="gallery-card-title"><T k={`hero.card.${card.id}.title`}>{card.title}</T></span>

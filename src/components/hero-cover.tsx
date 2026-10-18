@@ -176,7 +176,8 @@ export function HeroCover() {
             src={story.photo.src}
             alt={index === current ? story.photo.alt : ""}
             className={index === current ? "is-on" : undefined}
-            loading={index === 0 ? "eager" : "lazy"}
+            // Lazy: hidden while another hero is chosen, so its photos aren't fetched then (shown, they load at once)
+            loading="lazy"
             style={{ objectPosition: story.slug === USUAL_COVER ? "50% 45%" : story.photo.crop?.pos ?? "50% 30%" }}
           />
         ))}

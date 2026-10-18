@@ -83,6 +83,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      // For feed readers (src/routes/rss[.]xml.ts); not shown on the page
+      { rel: "alternate", type: "application/rss+xml", title: "OGCW", href: "/rss.xml" },
     ],
   }),
   // Every story, and which goes where on the front page, live from the

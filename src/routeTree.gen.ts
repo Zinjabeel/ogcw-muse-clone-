@@ -18,7 +18,10 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SportsRouteImport } from './routes/sports'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
@@ -94,9 +97,24 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SportsRoute = SportsRouteImport.update({
@@ -255,7 +273,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -296,7 +317,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -338,7 +362,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
@@ -381,7 +408,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
     | '/sports'
     | '/streaming'
     | '/trends'
@@ -422,7 +452,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
     | '/sports'
     | '/streaming'
     | '/trends'
@@ -463,7 +496,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
     | '/sports'
     | '/streaming'
     | '/trends'
@@ -505,7 +541,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MusicRoute: typeof MusicRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SportsRoute: typeof SportsRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
@@ -602,11 +641,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sports': {
@@ -825,7 +885,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MusicRoute: MusicRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SportsRoute: SportsRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,

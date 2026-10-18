@@ -217,10 +217,11 @@ function WhatsNew() {
     else if (dir < 0 && el.scrollLeft <= 4) el.scrollTo({ left: el.scrollWidth, behavior: smooth });
     else el.scrollBy({ left: dir * by, behavior: smooth });
   };
-  // It moves on by itself every few seconds (the pointer doesn't stop it: owner's rule); not with reduced motion
+  // It moves on by itself every few seconds (the pointer doesn't stop it: owner's rule); not with reduced motion,
+  // and not while someone is tabbing through its cards with the keyboard, so a card never slides away from them
   useEffect(() => {
     if (reduced()) return;
-    const timer = window.setInterval(() => { if (!document.hidden) step(1); }, 3800);
+    const timer = window.setInterval(() => { if (!document.hidden && !track.current?.contains(document.activeElement)) step(1); }, 3800);
     return () => window.clearInterval(timer);
   }, []);
   return (

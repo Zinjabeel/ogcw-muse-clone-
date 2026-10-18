@@ -8,6 +8,7 @@ import { Img, SECTION_PATH, StoryCard, StoryRow } from "../components/cards";
 import { ArticleFeedback } from "../components/article-feedback";
 import { formatDate, getArticle, SECTIONS, type Article, type Block } from "../data/content";
 import { getSanityStory } from "../lib/sanity-stories";
+import { articleJsonLd } from "../lib/feeds";
 import { useStories } from "../lib/stories";
 import { T } from "@/components/site-text";
 
@@ -29,6 +30,9 @@ export const Route = createFileRoute("/news/$slug")({
   head: ({ loaderData }) => {
     const story = loaderData?.story;
     const title = story ? `${story.title} — OGCW` : "OGCW";
+    // The lead photo for link previews, and the article details Google reads
+    // (src/lib/feeds.ts); nothing on the page itself changes
+    const image = story?.photo?.src && /^https?:\/\//.test(story.photo.src) ? story.photo.src : null;
     return {
       meta: [
         { title },
@@ -36,8 +40,11 @@ export const Route = createFileRoute("/news/$slug")({
         { property: "og:title", content: title },
         { property: "og:description", content: story?.deck ?? "" },
         { property: "og:type", content: "article" },
+        ...(image ? [{ property: "og:image", content: image }, { name: "twitter:image", content: image }] : []),
+        ...(story ? [{ property: "article:published_time", content: story.date }, { property: "article:section", content: SECTIONS[story.section]?.label ?? story.section }] : []),
         { name: "twitter:card", content: "summary_large_image" },
       ],
+      scripts: story ? [{ type: "application/ld+json", children: articleJsonLd(story) }] : [],
     };
   },
   component: ArticlePage,

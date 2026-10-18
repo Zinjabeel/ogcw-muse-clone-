@@ -94,7 +94,8 @@ export function HeroGallery2() {
 
       <div className="gallery-bg" aria-hidden="true">
         {FEATURES.map((item, index) => (
-          <img key={item.story.slug} src={item.story.photo.src} alt="" className={index === feature ? "is-on" : undefined} />
+          // Lazy: while another hero is chosen this one is hidden, and its photos then aren't fetched at all (shown, they load at once)
+          <img key={item.story.slug} src={item.story.photo.src} alt="" className={index === feature ? "is-on" : undefined} loading="lazy" />
         ))}
       </div>
 
@@ -133,7 +134,7 @@ export function HeroGallery2() {
                   </div>
                 </div>
                 <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-picture" tabIndex={-1} aria-hidden="true">
-                  <img src={item.story.photo.src} alt="" style={{ objectPosition: item.story.photo.crop?.pos ?? "50% 50%" }} loading={index === 0 ? "eager" : "lazy"} />
+                  <img src={item.story.photo.src} alt="" style={{ objectPosition: item.story.photo.crop?.pos ?? "50% 50%" }} loading="lazy" />
                 </Link>
               </article>
             ))}
