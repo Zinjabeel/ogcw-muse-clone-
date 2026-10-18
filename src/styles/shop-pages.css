@@ -927,3 +927,32 @@ a.dp-also-item:hover .dp-also-name { text-decoration: underline; text-underline-
 }
 /* While the shop checks whether this is an admin: a plain page, nothing of the shop */
 .sx-gate { min-height: 100vh; background: var(--ogcw-bg); }
+
+/* ---------- The split row (owner, 18 Oct 2026): collections in two halves ---------- */
+/* White on the left with the title and the big photo in its middle, black on
+   the right with the four cards two over two, evenly spaced, names under them.
+   The halves meet at exactly 50%, where the editor's "side by side" colours
+   divide, so both agree; one above the other on a phone */
+.sh-row[data-split] { padding: 0; overflow: hidden; background: linear-gradient(to right, #fff 0 50%, #0d0d0d 50% 100%); color: #0d0d0d; }
+.sh-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sh-half { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(20px, calc(2.2 * var(--vw, 1vw)), 36px); min-width: 0; padding: clamp(36px, calc(4 * var(--vw, 1vw)), 72px) clamp(18px, calc(3.2 * var(--vw, 1vw)), 60px); }
+.sh-half.is-light { color: #0d0d0d; }
+.sh-half.is-light .sh-h2 { text-align: center; text-wrap: balance; }
+.sh-half.is-light .sh-spot-photo { width: min(100%, 480px); min-height: 0; aspect-ratio: 4 / 5; }
+.sh-half.is-light .sh-spot-line { font-size: clamp(20px, calc(1.9 * var(--vw, 1vw)), 32px); }
+.sh-half.is-dark { --ogcw-text: #f4f4f2; --ogcw-text-2: #b5b2ab; --ogcw-border: #4a4a4a; color: #f2f0ea; }
+.sh-split-cards { width: min(100%, 560px); grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(22px, calc(2.2 * var(--vw, 1vw)), 36px) clamp(16px, calc(1.8 * var(--vw, 1vw)), 28px); }
+.sh-half.is-dark .sh-square-link { justify-items: center; text-align: center; }
+.sh-half.is-dark .sh-square-photo { width: 100%; }
+.sh-half.is-dark .sh-square-brand { color: rgb(242 240 234 / .6); }
+.sh-half.is-dark .sh-square-name { color: #f2f0ea; }
+.sh-half.is-dark .sh-cta { background: #f2f0ea; color: #0a0a0a; }
+.sh-half.is-dark .sh-cta:hover { background: #fff; }
+@media (max-width: 900px) {
+  /* One above the other: the halves keep their own space, so the side-by-side
+     colours never show as half-strips above and below them */
+  .sh-row[data-split] { padding-block: 0 !important; }
+  .sh-split { grid-template-columns: minmax(0, 1fr); }
+  .sh-half.is-light { background: #fff; }
+  .sh-half.is-dark { background: #0d0d0d; }
+}

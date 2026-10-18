@@ -54,7 +54,7 @@ const LOOKS = [
 type RowSearch = { cat?: string; q?: string; tag?: string; kind?: string };
 /** A spotlight row: one big photo with a line and a button beside four cards, two over two */
 type Spot = { image: string; alt: string; line: string };
-type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string; spot?: Spot; size?: "denim" | "collections" };
+type Row = { key: string; title: string; tone: "dark" | "light"; items: ShopProduct[]; search: RowSearch; cta: string; spot?: Spot; size?: "denim" | "collections"; split?: true };
 const ROWS: Record<string, Row> = {
   sneakers: { key: "sneakers", title: "Sneakers right now", tone: "light", search: { cat: "sneakers" }, cta: "Shop all sneakers", items: pieces("aj4-black-cat-2025", "nigel-sylvester-aj4-brick-after-brick", "samba-og-cheetah-preloved-red", "nb-1906r-silver-metallic-black") },
   travis: { key: "travis", title: "Travis Scott x Cactus Jack", tone: "dark", search: { q: "Cactus Jack" }, cta: "Shop Cactus Jack", items: pieces("days-before-rodeo-hoodie", "circus-maximus-hoodie", "utopia-hoodie", "apple-pie-hoodie") },
@@ -63,7 +63,9 @@ const ROWS: Record<string, Row> = {
   // Spotlight photos: Christian Agbede and Gilles De Muynck on Unsplash (Unsplash License)
   denim: { key: "denim", title: "Denim", tone: "dark", search: { cat: "clothing", kind: "Jeans" }, cta: "Shop all denim", size: "denim", items: pieces("levis-denim-tears-logo-japan-jeans", "amiri-carpenter-jeans-aged-black", "butter-goods-solar-fade-grey", "supreme-dickies-cordura-cargo-denim"),
     spot: { image: "/shop/looks/spot-denim.webp", alt: "A young man in a black beanie and very wide washed jeans leaning on the bonnet of a white car", line: "Wide, washed and worn in: Denim Tears, Amiri, Ksubi and more." } },
-  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all collections", size: "collections", items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
+  // Split in two (owner, 18 Oct): the photo in the middle of a white half, the
+  // four watches evenly on a black half with their names under them
+  collections: { key: "collections", title: "Collections", tone: "light", search: { cat: "accessories" }, cta: "Shop all collections", size: "collections", split: true, items: pieces("rolex-explorer-114270", "omega-seamaster-300m-blue", "cartier-tank-basculante", "vacheron-patrimony-rose-gold"),
     spot: { image: "/shop/looks/spot-watch.webp", alt: "A hand fastening a gold skeleton watch on a brown leather strap, under a pale blue shirt cuff", line: "Watches, caps and bags. The watches are pre-owned." } },
 };
 // The bands between the rows: a line, a button and a row of pictures each
@@ -267,6 +269,7 @@ function Looks() {
 /* ---------- The collection rows: four cards each, black and white in turn ---------- */
 
 function CollectionRow({ row }: { row: Row }) {
+  if (row.split && row.spot) return <SplitRow row={row} spot={row.spot} />;
   return (
     <section className="sh-row" data-tone={row.tone} aria-label={row.title}>
       <header className="sh-head">
@@ -293,6 +296,36 @@ function CollectionRow({ row }: { row: Row }) {
       )}
       <div className="sh-row-cta">
         <Link to="/shop/all" search={row.search} className="sh-cta"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+      </div>
+    </section>
+  );
+}
+
+/* A row in two halves: on the white one the title over the big photo, both in
+   the middle; on the black one the four cards, two over two and evenly spaced,
+   their names under them, then the button. The section keeps just the class
+   "sh-row" (the site editor knows it by that) and is one box inside, so the
+   colours chosen in the editor still paint it */
+function SplitRow({ row, spot }: { row: Row; spot: Spot }) {
+  return (
+    <section className="sh-row" data-tone={row.tone} data-split="" aria-label={row.title}>
+      <div className="sh-split">
+        <div className="sh-half is-light">
+          <h2 className="sh-h2"><T k={`shop.row.${row.key}`}>{row.title}</T></h2>
+          <Link to="/shop/all" search={row.search} className="sh-spot-photo">
+            <img src={spot.image} alt={spot.alt} loading="lazy" />
+            <span className="sh-spot-text">
+              <span className="sh-spot-line"><T k={`shop.row.${row.key}.line`}>{spot.line}</T></span>
+              <span className="sh-spot-go"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={15} aria-hidden="true" /></span>
+            </span>
+          </Link>
+        </div>
+        <div className="sh-half is-dark">
+          <ul className="sh-cards sh-split-cards">
+            {row.items.map((product) => <li key={product.id}><ShopCard product={product} tone="dark" /></li>)}
+          </ul>
+          <Link to="/shop/all" search={row.search} className="sh-cta"><T k={`shop.row.${row.key}.cta`}>{row.cta}</T> <ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
       </div>
     </section>
   );
