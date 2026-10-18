@@ -8,17 +8,19 @@ import { openConsent } from "@/lib/consent";
 import { S, T } from "./site-text";
 
 // The site menu (owner, 18 Oct 2026: "redesign it like the shop but infused
-// with the front page"). Built like the shop's menu: a panel that slides in
-// from the left over a dimmed page, with numbered sections that open one at
-// a time. Dressed like the front page: the masthead (One Great Culture
-// World, the date, Certified news), the lead story, gold serif numbers,
-// stories set like "In brief" (gold label, serif headline, small photo), and
-// the black band at the foot with the newsletter, socials and small pages.
-// The section of the page you are on starts open.
+// with the front page", then "make it look a lot better"). Built like the
+// shop's menu: a panel that slides in from the left. Dressed like the front
+// page: its masthead, gold serif numbers, stories set like "In brief", and
+// the black band at the foot. On computers the rest of the screen becomes a
+// dark spread for the section under the pointer (or the keyboard): its lead
+// story big, two more beside it, and a button to the section. On phones the
+// panel fills the screen, the lead story sits under the masthead, and each
+// section opens in place to its latest three. The section of the page you
+// are on is marked, shown first, and starts open.
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
 type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/forum" | "/about";
-type Section = { label: string; to: SectionPath; note: string; items: Item[] };
+type Section = { label: string; to: SectionPath; note: string; heading: string; items: Item[] };
 
 const asItems = (list: Article[]): Item[] => list.map((a) => ({ kind: "article", a }));
 
@@ -28,17 +30,17 @@ function buildSections(stories: Stories): Section[] {
   const section = (id: SectionId) => stories.inSection(id);
   const count = (n: number) => `${n} ${n === 1 ? "story" : "stories"}`;
   return [
-    { label: "News", to: "/news", note: count(stories.all.length), items: asItems(stories.all.slice(0, 3)) },
-    { label: "Music", to: "/music", note: count(section("music").length), items: asItems(section("music").slice(0, 3)) },
-    { label: "Games", to: "/games", note: count(section("games").length), items: asItems(section("games").slice(0, 3)) },
-    { label: "Streaming", to: "/streaming", note: count(section("streaming").length), items: asItems(section("streaming").slice(0, 3)) },
-    { label: "Culture", to: "/culture", note: count(section("culture").length), items: asItems(section("culture").slice(0, 3)) },
-    { label: "Sports", to: "/sports", note: count(section("sports").length), items: asItems(section("sports").slice(0, 3)) },
-    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, items: EPISODES.slice(0, 3).map((e) => ({ kind: "episode", e })) },
-    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, items: SHOPS.slice(0, 3).map((s) => ({ kind: "shop", s })) },
-    { label: "Trends", to: "/trends", note: "The report", items: asItems(stories.trending.slice(0, 3)) },
-    { label: "Forum", to: "/forum", note: "Seven rooms", items: asItems(longReads.slice(0, 3)) },
-    { label: "About", to: "/about", note: "Who we are", items: asItems(stories.editorsPicks.slice(0, 3)) },
+    { label: "News", to: "/news", note: count(stories.all.length), heading: "The latest", items: asItems(stories.all.slice(0, 3)) },
+    { label: "Music", to: "/music", note: count(section("music").length), heading: "Latest in Music", items: asItems(section("music").slice(0, 3)) },
+    { label: "Games", to: "/games", note: count(section("games").length), heading: "Latest in Games", items: asItems(section("games").slice(0, 3)) },
+    { label: "Streaming", to: "/streaming", note: count(section("streaming").length), heading: "Latest in Streaming", items: asItems(section("streaming").slice(0, 3)) },
+    { label: "Culture", to: "/culture", note: count(section("culture").length), heading: "Latest in Culture", items: asItems(section("culture").slice(0, 3)) },
+    { label: "Sports", to: "/sports", note: count(section("sports").length), heading: "Latest in Sports", items: asItems(section("sports").slice(0, 3)) },
+    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episodes", items: EPISODES.slice(0, 3).map((e) => ({ kind: "episode", e })) },
+    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", items: SHOPS.slice(0, 3).map((s) => ({ kind: "shop", s })) },
+    { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", items: asItems(stories.trending.slice(0, 3)) },
+    { label: "Forum", to: "/forum", note: "Seven rooms", heading: "The longest reads", items: asItems(longReads.slice(0, 3)) },
+    { label: "About", to: "/about", note: "Who we are", heading: "Editors’ picks", items: asItems(stories.editorsPicks.slice(0, 3)) },
   ];
 }
 
@@ -71,6 +73,7 @@ const itemTitle = (item: Item) => (item.kind === "article" ? item.a.title : item
 /** An item's title on the page: a story's headline can be changed there by an admin */
 const ItemTitle = ({ item }: { item: Item }) => (item.kind === "article" ? <S story={item.a} f="title" /> : <T>{itemTitle(item)}</T>);
 const itemLabel = (item: Item) => (item.kind === "article" ? `${item.a.kicker} · ${shortDate(item.a.updated ?? item.a.date)}` : item.kind === "episode" ? `${item.e.series} · ${item.e.length}` : item.s.tagline);
+const itemDeck = (item: Item) => (item.kind === "article" ? item.a.deck : item.kind === "episode" ? item.e.summary : item.s.tagline);
 
 /** A small photo (also used by the search screen) */
 export function Thumb({ photo }: { photo: Photo }) {
@@ -99,12 +102,13 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const dialog = useRef<HTMLDialogElement>(null);
   const [closing, setClosing] = useState(false);
   const [openKey, setOpenKey] = useState<string | null>(null);
+  const [stage, setStage] = useState(0);
   const [today, setToday] = useState<string | null>(null);
   const stories = useStories();
   const sections = useMemo(() => buildSections(stories), [stories]);
   // The lead story: the one at the top of the front page
   const lead = stories.slot("front-lead")[0] ?? stories.all[0];
-  // The section of the page you're on is marked, and starts open
+  // The section of the page you're on is marked, shown first and starts open
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const currentIndex = sections.findIndex((s) => pathname === s.to || pathname.startsWith(`${s.to}/`));
 
@@ -113,6 +117,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
     if (!el) return;
     if (open && !el.open) {
       setOpenKey(currentIndex >= 0 ? sections[currentIndex]!.to : null);
+      setStage(Math.max(currentIndex, 0));
       setToday(new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date()));
       // Focus starts on the panel itself, at the top: the first Tab reaches the
       // close button, and nothing looks pressed when the menu opens
@@ -141,17 +146,20 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
     };
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
     setClosing(true);
-    window.setTimeout(finish, 300);
+    window.setTimeout(finish, 320);
   };
   const go = () => close();
-  // A click on the dimmed page beside the panel closes the menu
-  const onBackdrop = (event: MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) close(); };
+  // A click on the dimmed page beside the panel (or the spread's empty space) closes the menu
+  const onBackdrop = (event: MouseEvent<HTMLDialogElement>) => {
+    const target = event.target as HTMLElement;
+    if (target === event.currentTarget || target.classList.contains("om-stage")) close();
+  };
 
   // Up and down arrows move between the sections
   const onListKey = (event: KeyboardEvent<HTMLUListElement>) => {
     if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-    const heads = [...event.currentTarget.querySelectorAll<HTMLButtonElement>(".om-head")];
-    const at = heads.indexOf(document.activeElement as HTMLButtonElement);
+    const heads = [...event.currentTarget.querySelectorAll<HTMLAnchorElement>(".om-head")];
+    const at = heads.indexOf(document.activeElement as HTMLAnchorElement);
     if (at < 0) return;
     event.preventDefault();
     heads[(at + (event.key === "ArrowDown" ? 1 : -1) + heads.length) % heads.length]?.focus();
@@ -181,7 +189,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
           </nav>
         </div>
 
-        {/* The lead story, as on the front page */}
+        {/* The lead story, as on the front page (phones; computers have the spread) */}
         {lead && (
           <Link to="/news/$slug" params={{ slug: lead.slug }} className="om-lead" onClick={go}>
             <span className="om-lead-photo"><img src={lead.photo.src} alt="" loading="lazy" style={photoStyle(lead.photo)} /></span>
@@ -190,22 +198,38 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
           </Link>
         )}
 
-        {/* The sections, numbered, opening one at a time */}
+        {/* The sections, numbered: each goes to its page, and its latest show
+            in the spread (computers) or open in place with the + (phones) */}
         <nav className="om-index" aria-labelledby="om-index-title">
-          <p id="om-index-title" className="om-index-head"><T k="ix.index">The Index</T></p>
-          <ul className="om-acc" onKeyDown={onListKey}>
+          <p id="om-index-title" className="om-index-head">
+            <span><T k="ix.index">The Index</T></span>
+            <span className="om-index-count">{pad(sections.length)} <T k="ix.sections">sections</T></span>
+          </p>
+          <ul className="om-acc" onKeyDown={onListKey} onPointerLeave={() => setStage(Math.max(currentIndex, 0))}>
             {sections.map((section, index) => {
               const on = openKey === section.to;
               const id = `om-${section.to.slice(1)}`;
               return (
-                <li key={section.to} className="om-item" data-open={on || undefined} data-here={index === currentIndex || undefined} style={{ "--i": index } as CSSProperties}>
-                  <button type="button" className="om-head" aria-expanded={on} aria-controls={id} onClick={() => setOpenKey(on ? null : section.to)}>
-                    <span className="om-no" aria-hidden="true">{pad(index + 1)}</span>
-                    <span className="om-name"><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span>
-                    <span className="om-note">{index === currentIndex ? <T k="ix.here">You’re here</T> : section.note}</span>
-                    <span className="om-plus" aria-hidden="true"><Plus size={16} strokeWidth={1.9} /></span>
-                  </button>
-                  <div className="om-drop" id={id} role="region" aria-label={section.label}>
+                <li key={section.to} className="om-item" data-open={on || undefined} data-here={index === currentIndex || undefined} data-on={index === stage || undefined} style={{ "--i": index } as CSSProperties}>
+                  <div className="om-row">
+                    <Link
+                      to={section.to}
+                      className="om-head"
+                      aria-current={index === currentIndex ? "page" : undefined}
+                      onPointerEnter={(event) => { if (event.pointerType === "mouse") setStage(index); }}
+                      onFocus={() => setStage(index)}
+                      onClick={go}
+                    >
+                      <span className="om-no" aria-hidden="true">{pad(index + 1)}</span>
+                      <span className="om-name"><T k={`nav.${section.to.slice(1)}`}>{section.label}</T></span>
+                      <span className="om-note">{index === currentIndex ? <T k="ix.here">You’re here</T> : section.note}</span>
+                      <ArrowRight className="om-arrow" size={18} strokeWidth={2} aria-hidden="true" />
+                    </Link>
+                    <button type="button" className="om-plus" aria-expanded={on} aria-controls={id} aria-label={`The latest in ${section.label}`} onClick={() => setOpenKey(on ? null : section.to)}>
+                      <Plus size={17} strokeWidth={1.9} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <div className="om-drop" id={id} role="region" aria-label={section.heading}>
                     <div className="om-inner">
                       <ol className="om-brief">
                         {section.items.map((item, n) => (
@@ -268,6 +292,44 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
             </nav>
           </div>
         </div>
+      </div>
+
+      {/* The spread (computers): the section under the pointer, like a page of the front */}
+      <div className="om-stage">
+        {sections.map((section, index) => {
+          const on = index === stage;
+          const [first, ...rest] = section.items;
+          return (
+            <section key={section.to} className="om-card" data-on={on || undefined} inert={!on} aria-hidden={on ? undefined : true} aria-label={`${section.heading}: ${section.label}`}>
+              <header className="om-card-head">
+                <p className="om-card-kicker"><span className="om-tick" aria-hidden="true" />{pad(index + 1)} · <T k={`nav.${section.to.slice(1)}`}>{section.label}</T></p>
+                <h2 className="om-card-title"><T k={`ix.${section.to.slice(1)}.heading`}>{section.heading}</T></h2>
+              </header>
+              {first && (
+                <ItemLink item={first} className="om-card-lead" onGo={go}>
+                  <span className="om-card-photo"><img src={itemPhoto(first).src} alt="" loading="lazy" style={photoStyle(itemPhoto(first))} /></span>
+                  <span className="om-card-label">{itemLabel(first)}</span>
+                  <span className="om-card-lead-title"><ItemTitle item={first} /></span>
+                  {itemDeck(first) && <span className="om-card-deck">{itemDeck(first)}</span>}
+                </ItemLink>
+              )}
+              <div className="om-card-side">
+                {rest.map((item) => (
+                  <ItemLink key={itemKey(item)} item={item} className="om-card-more" onGo={go}>
+                    <span className="om-card-thumb"><img src={itemPhoto(item).src} alt="" loading="lazy" style={photoStyle(itemPhoto(item))} /></span>
+                    <span className="om-card-more-text">
+                      <span className="om-card-label">{itemLabel(item)}</span>
+                      <span className="om-card-more-title"><ItemTitle item={item} /></span>
+                    </span>
+                  </ItemLink>
+                ))}
+                <Link to={section.to} className="om-card-go" onClick={go}>
+                  <T k="ix.go">Go to</T> <T k={`nav.${section.to.slice(1)}`}>{section.label}</T> <ArrowRight size={16} strokeWidth={2.2} aria-hidden="true" />
+                </Link>
+              </div>
+            </section>
+          );
+        })}
       </div>
     </dialog>
   );
