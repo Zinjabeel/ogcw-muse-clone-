@@ -1,25 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, Plus, Star } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { ChevronRight } from "lucide-react";
+import { useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
 import { SiteShell } from "../components/ogcw-layout";
 import { BsPhoto } from "../components/broadsheet";
-import { SECTION_PATH } from "../components/cards";
-import { EPISODES, SECTIONS, SECTION_IDS, SHOPS, type Article, type Photo } from "../data/content";
+import { EPISODES, SECTIONS, type Article, type Photo } from "../data/content";
+import { TREND_TOPICS } from "../data/trends";
 import { useStories, type Stories } from "../lib/stories";
-import { ROOMS } from "../lib/forum";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
 import { S, T } from "@/components/site-text";
-import { SOCIALS, SocialIcon } from "@/components/socials";
-import { NewsletterForm } from "@/components/connect-section";
-import { LabelBadge, StoryDate } from "@/components/story-meta";
+import { SOCIALS } from "@/components/socials";
 
-// The About page (owner, 18 Oct 2026: "not just a little text and pictures,
-// take inspiration from other websites and make it better"). Built in the
-// front page's bands, top to bottom: who we are, with the newest story from
-// each desk and the site in numbers; our position and the standard every
-// story is held to; the anatomy of a real OGCW story; what we cover; where
-// the news comes from; the community (socials, newsletter, forum); questions;
-// and how to reach us. Every number, photo and name is live from the stories.
+// The About page (owner, 19 Oct 2026: "take inspiration from Moncler's In
+// Moncler page and recreate it like that"). Its language, in OGCW's type and
+// colours: full-screen photo chapters with a few words on them, calm
+// off-white chapters laid out in three (title, picture, words), small quiet
+// headings, uppercase text links with a chevron, and nothing that moves on
+// scroll (the owner turned scroll effects down). Top to bottom: who we are;
+// our position on a gold-washed photo; how we work; the desks (pick one and
+// its picture changes, like Moncler's icons); the standard; join in; more
+// from OGCW as four tall pictures; get in touch. Every story, number and
+// photo credit is live.
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -35,90 +35,145 @@ export const Route = createFileRoute("/about")({
   component: About,
 });
 
-type Tone = "light" | "dark" | "grey" | "gold";
-const pad = (n: number) => String(n).padStart(2, "0");
-const num = (n: number) => n.toLocaleString("en-GB");
+// The full-screen photos (Unsplash)
+const shot = (id: string, width = 2400) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+const CROWD = { src: shot("photo-1501386761578-eac5c94b800a"), alt: "Fans with their hands up in front of a lit stage at a concert" };
+const READER = { src: shot("photo-1495020689067-958852a7765e", 2000), alt: "" };
+const SCREENS = { src: shot("photo-1542751371-adc38448a05e"), alt: "A gamer in headphones in front of glowing screens" };
 
-function Band({ tone, id, className = "", children }: { tone: Tone; id: string; className?: string; children: ReactNode }) {
+/** An uppercase text link with a chevron, the page's one kind of link */
+function More({ to, href, children, hash }: { to?: "/news" | "/forum" | "/originals" | "/trends" | "/explore" | "/tour/bts-arirang" | "/music" | "/games" | "/culture" | "/sports"; href?: string; hash?: string; children: ReactNode }) {
+  const inner = <>{children}<ChevronRight size={15} strokeWidth={1.8} aria-hidden="true" /></>;
+  if (to) return <Link to={to} {...(hash ? { hash } : {})} className="ab-more">{inner}</Link>;
+  const external = href?.startsWith("http");
+  return <a href={href} className="ab-more" {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{inner}</a>;
+}
+
+// ------------------------------------------------------------ 1. Who we are
+
+function Hero() {
   return (
-    <section className={`fx-band ab-band ${className}`} data-band={tone} aria-labelledby={`${id}-title`} id={id}>
-      <div className="fx-wrap">{children}</div>
+    <section className="ab-hero" aria-labelledby="about-title">
+      <img className="ab-hero-img" src={CROWD.src} alt={CROWD.alt} fetchPriority="high" />
+      <div className="ab-hero-text">
+        <p className="ab-hero-kicker"><T k="intro.about-ogcw.kicker">About OGCW</T></p>
+        <h1 id="about-title" className="ab-hero-title"><T k="intro.about-ogcw.title">We report from inside culture.</T></h1>
+        <p className="ab-hero-copy"><T k="intro.about-ogcw.copy">OGCW is an independent editorial platform following the people, places and ideas shaping what comes next.</T></p>
+        <More to="/news"><T k="about.cta.read">Read the latest</T></More>
+      </div>
+      <p className="ab-credit">Photo: Unsplash</p>
     </section>
   );
 }
 
-function Head({ id, k, kicker, title, children }: { id: string; k: string; kicker: string; title: string; children?: ReactNode }) {
+// ------------------------------------------------------------ 2. Our position (on a gold wash)
+
+function Position() {
   return (
-    <header className="fx-head">
-      <div>
-        <p className="fx-kicker"><T k={`${k}.kicker`}>{kicker}</T></p>
-        <h2 id={`${id}-title`} className="fx-title"><T k={`${k}.title`}>{title}</T></h2>
+    <section className="ab-wash" aria-labelledby="position-title">
+      <span className="ab-wash-photo" aria-hidden="true"><img src={READER.src} alt="" loading="lazy" /></span>
+      <div className="ab-grid ab-wash-grid">
+        <h2 id="position-title" className="ab-h2 ab-wash-title"><T k="about.statement">We pay attention before everyone else does.</T></h2>
+        <p className="ab-wash-copy"><T k="about.copy">We cover style, sound, art and design without flattening them into trends. Our work values original reporting, strong images and the people who build scenes long before they become markets.</T></p>
       </div>
-      {children}
-    </header>
+      <p className="ab-credit">Photo: Unsplash</p>
+    </section>
   );
 }
 
-// ------------------------------------------------------------ Who we are
+// ------------------------------------------------------------ 3. How we work (title, picture, words)
 
-/** The site in numbers, counted from the stories themselves */
-function numbers(live: Stories) {
-  const words = live.all.reduce((sum, story) => sum + story.words, 0);
-  const links = new Set(live.all.flatMap((story) => story.sources.map((source) => source.url))).size;
-  return [
-    { value: live.all.length, label: "Stories published" },
-    { value: words, label: "Words of reporting" },
-    { value: links, label: "Sources linked" },
-    { value: EPISODES.length, label: "Originals episodes" },
-    { value: ROOMS.length, label: "Forum rooms" },
-  ];
-}
-
-/** The newest story from each desk, newest first (the photos at the top) */
-const deskLeads = (live: Stories) => SECTION_IDS.flatMap((id) => live.inSection(id)[0] ?? []).sort((a, b) => b.date.localeCompare(a.date));
-
-function Hero({ live, newest }: { live: Stories; newest: Article[] }) {
+function HowWeWork({ story }: { story: Article | undefined }) {
   return (
-    <section className="fx-band ab-band ab-hero" data-band="dark" aria-labelledby="about-title">
-      <div className="fx-wrap">
-        <div className="ab-hero-grid">
-          <div className="ab-hero-text">
-            <p className="fx-kicker"><T k="intro.about-ogcw.kicker">About OGCW</T></p>
-            <h1 id="about-title" className="ab-hero-title"><T k="intro.about-ogcw.title">We report from inside culture.</T></h1>
-            <p className="ab-hero-copy"><T k="intro.about-ogcw.copy">OGCW is an independent editorial platform following the people, places and ideas shaping what comes next.</T></p>
-            <div className="ab-hero-ctas">
-              <Link to="/news" className="fx-btn"><T k="about.cta.read">Read the latest</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></Link>
-              <a href="#socials" className="fx-btn fx-btn-ghost"><T k="about.cta.follow">Follow OGCW</T></a>
-            </div>
-          </div>
-          <ul className="ab-mosaic" aria-label="The newest story from each desk">
-            {newest.map((story, index) => (
-              <li key={story.slug}>
-                <Link to="/news/$slug" params={{ slug: story.slug }} className="ab-mosaic-tile">
-                  <BsPhoto photo={story.photo} className="ab-mosaic-photo" eager={index < 2} />
-                  <span className="ab-mosaic-text">
-                    <span className="ab-mosaic-desk"><T>{SECTIONS[story.section].label}</T></span>
-                    <span className="ab-mosaic-title"><S story={story} f="title" /></span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+    <section className="ab-paper ab-tri" aria-labelledby="how-title">
+      <div className="ab-grid ab-tri-grid">
+        <h2 id="how-title" className="ab-h2 ab-tri-title"><T k="about.how">How we work</T></h2>
+        {story && (
+          <figure className="ab-tri-figure">
+            <Link to="/news/$slug" params={{ slug: story.slug }} className="ab-tri-photo-link" aria-label={story.title}>
+              <BsPhoto photo={story.photo} className="ab-tri-photo" />
+            </Link>
+            <figcaption className="ab-caption"><S story={story} f="kicker" />{story.photo.credit && <> · Photo: {story.photo.credit}</>}</figcaption>
+          </figure>
+        )}
+        <div className="ab-tri-text">
+          <p className="ab-body"><T k="about.how.copy">Every story names where its news comes from, links its sources and credits its photos. Readers rate what they read, and when we get something wrong, we fix it and say so.</T></p>
+          <More href="#standard"><T k="about.how.more">Our standard</T></More>
         </div>
-        <dl className="ab-numbers">
-          {numbers(live).map((item) => (
-            <div key={item.label}>
-              <dt><T>{item.label}</T></dt>
-              <dd>{num(item.value)}</dd>
-            </div>
-          ))}
-        </dl>
       </div>
     </section>
   );
 }
 
-// ------------------------------------------------------------ Our position + the standard
+// ------------------------------------------------------------ 4. The desks (pick one, its picture changes)
+
+type Desk = { id: string; name: string; to: "/music" | "/games" | "/culture" | "/sports"; intro: string; count: number; story: Article | undefined };
+
+function deskList(live: Stories): Desk[] {
+  const newest = (...ids: Article["section"][]) => live.all.filter((s) => ids.includes(s.section));
+  const desk = (id: Article["section"], to: Desk["to"], extra: Article["section"][] = []): Desk => {
+    const list = newest(id, ...extra);
+    return { id, name: SECTIONS[id].label, to, intro: SECTIONS[id].intro, count: list.length, story: list[0] };
+  };
+  return [desk("music", "/music"), desk("games", "/games", ["streaming"]), desk("culture", "/culture"), desk("sports", "/sports")];
+}
+
+function Desks({ live }: { live: Stories }) {
+  const desks = useMemo(() => deskList(live), [live]);
+  const [on, setOn] = useState(0);
+  const desk = desks[on]!;
+  // Up/down (and left/right) arrows move between the desks
+  const onKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    const step = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 0;
+    if (!step) return;
+    event.preventDefault();
+    const next = (on + step + desks.length) % desks.length;
+    setOn(next);
+    event.currentTarget.querySelectorAll<HTMLButtonElement>("[role='tab']")[next]?.focus();
+  };
+  return (
+    <section className="ab-desks" aria-labelledby="desks-title">
+      {desk.story && <span className="ab-desks-bg" aria-hidden="true"><img key={desk.story.photo.src} src={desk.story.photo.src} alt="" loading="lazy" /></span>}
+      <div className="ab-grid ab-desks-grid">
+        <div className="ab-desks-nav">
+          <h2 id="desks-title" className="ab-desks-heading"><T k="about.cover.title">What we cover</T></h2>
+          <div className="ab-desks-list" role="tablist" aria-labelledby="desks-title" onKeyDown={onKey}>
+            {desks.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                id={`desk-tab-${item.id}`}
+                aria-selected={index === on}
+                aria-controls="desk-panel"
+                tabIndex={index === on ? 0 : -1}
+                className="ab-desks-tab"
+                onClick={() => setOn(index)}
+                onPointerEnter={(event) => { if (event.pointerType === "mouse") setOn(index); }}
+              >
+                <T>{item.name}</T>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="ab-desks-panel" role="tabpanel" id="desk-panel" aria-labelledby={`desk-tab-${desk.id}`}>
+          {desk.story && (
+            <Link to="/news/$slug" params={{ slug: desk.story.slug }} className="ab-desks-figure" key={desk.id} aria-label={desk.story.title}>
+              <BsPhoto photo={desk.story.photo} className="ab-desks-photo" />
+            </Link>
+          )}
+          <div className="ab-desks-text" key={`${desk.id}-text`}>
+            <p className="ab-body"><T>{desk.intro}</T></p>
+            <p className="ab-desks-meta">{desk.count} stories{desk.story && <> · Latest: <S story={desk.story} f="title" /></>}</p>
+            <More to={desk.to}><T k="about.cover.go">Explore</T> <T>{desk.name}</T></More>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------ 5. The standard
 
 const STANDARD: { k?: string; title: string; copy: ReactNode }[] = [
   { k: "about.how.1", title: "Reported, not aggregated", copy: <T k="about.how.1.copy">We go to the shows, the studios and the rooms, and write about what we saw and who we met there.</T> },
@@ -131,335 +186,130 @@ const STANDARD: { k?: string; title: string; copy: ReactNode }[] = [
   { k: "about.how.3", title: "Corrections, openly", copy: <>Spotted a mistake? Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> <T>and we’ll fix it and say so.</T></> },
 ];
 
-function Position() {
+function Standard() {
   return (
-    <Band tone="light" id="position">
-      <div className="ab-position">
-        <p id="position-title" className="fx-kicker"><T k="about.position">Our position</T></p>
-        <div>
-          <p className="ab-statement"><T k="about.statement">We pay attention before everyone else does.</T></p>
-          <p className="ab-lede"><T k="about.copy">We cover style, sound, art and design without flattening them into trends. Our work values original reporting, strong images and the people who build scenes long before they become markets.</T></p>
+    <section className="ab-paper ab-standard" id="standard" aria-labelledby="standard-title">
+      <div className="ab-grid ab-standard-grid">
+        <h2 id="standard-title" className="ab-h2 ab-standard-title"><T k="about.standard.title">The OGCW standard</T></h2>
+        <ul className="ab-rules">
+          {STANDARD.map((rule) => (
+            <li key={rule.title}>
+              <h3 className="ab-rule-title">{rule.k ? <T k={rule.k}>{rule.title}</T> : <T>{rule.title}</T>}</h3>
+              <p className="ab-rule-copy">{rule.copy}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------ 6. Join in (full screen)
+
+function JoinIn() {
+  return (
+    <section className="ab-join" id="socials" aria-labelledby="join-title">
+      <img className="ab-join-img" src={SCREENS.src} alt={SCREENS.alt} loading="lazy" />
+      <div className="ab-grid ab-join-grid">
+        <h2 id="join-title" className="ab-h2 ab-join-title"><T k="about.join.title">Join the conversation</T></h2>
+        <div className="ab-join-text">
+          <p className="ab-body"><T k="about.join.copy">Argue the rankings in the forum, get the biggest stories by email, and follow OGCW on social media.</T></p>
+          <p className="ab-more-row">
+            <More to="/forum"><T k="about.forum.open">Open the forum</T></More>
+            <More href="/info/newsletter"><T k="about.join.newsletter">Newsletter</T></More>
+          </p>
+          <p className="ab-more-row" aria-label="Follow OGCW">
+            {SOCIALS.map((social) => <More key={social.name} href={social.href}><T>{social.name}</T></More>)}
+          </p>
         </div>
       </div>
-
-      <div className="ab-standard">
-        <Head id="standard" k="about.standard" kicker="How we work" title="The OGCW standard" />
-        <ol className="ab-rules">
-          {STANDARD.map((rule, index) => (
-            <li key={rule.title}>
-              <span className="ab-rule-no" aria-hidden="true">{pad(index + 1)}</span>
-              <strong className="ab-rule-title">{rule.k ? <T k={rule.k}>{rule.title}</T> : <T>{rule.title}</T>}</strong>
-              <span className="ab-rule-copy">{rule.copy}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </Band>
+      <p className="ab-credit">Photo: Unsplash</p>
+    </section>
   );
 }
 
-// ------------------------------------------------------------ Anatomy of a story
+// ------------------------------------------------------------ 7. More from OGCW (four tall pictures)
 
-const PARTS = [
-  { title: "The label", copy: "CERTIFIED, TRENDIEST or NEWEST, when a story has earned one." },
-  { title: "Headline and deck", copy: "The headline says what happened; the line under it fills in the detail." },
-  { title: "The source", copy: "Where the news comes from, or OGCW for our own reporting." },
-  { title: "The date", copy: "The day it happened, or the latest update on a story that is still going." },
-  { title: "The photo credit", copy: "The photographer, agency or archive behind the picture." },
-  { title: "Your rating", copy: "One to five stars and a yes or no question at the end of every story." },
-  { title: "The sources", copy: "The links behind the facts, so you can check them yourself." },
-];
+type Card = { label: string; to: "/originals" | "/trends" | "/tour/bts-arirang" | "/explore"; photo: Photo | undefined };
 
-/** A question readers can answer with the Yes and No buttons */
-const YES_NO = /^(Are|Is|Was|Were|Will|Would|Do|Does|Did|Can|Could|Should|Has|Have)\b/;
-
-function Pin({ n }: { n: number }) {
-  return <span className="ab-pin" aria-hidden="true">{n}</span>;
-}
-
-function Anatomy({ live, skip }: { live: Stories; skip: Set<string> }) {
-  const [on, setOn] = useState(0);
-  // A real, recent story that shows every part (a label, a credited photo,
-  // sources), and isn't one of the photos at the top of the page
-  const story = useMemo(
-    () => live.all.find((s) => !skip.has(s.slug) && live.label(s) && s.photo.credit && s.sources.length >= 2 && (!s.ask || YES_NO.test(s.ask))) ?? live.all[0],
-    [live, skip],
-  );
-  if (!story) return null;
-  const part = (n: number) => ({ className: "ab-part", "data-on": on === n || undefined, onPointerEnter: () => setOn(n), onPointerLeave: () => setOn(0) });
+function MoreFromOgcw({ live, skip }: { live: Stories; skip: Set<string> }) {
+  const cards = useMemo((): Card[] => {
+    const used = new Set(skip);
+    const free = (...candidates: (Article | undefined)[]) => {
+      const story = candidates.find((s) => s && !used.has(s.photo.src));
+      if (story) used.add(story.photo.src);
+      return story?.photo;
+    };
+    return [
+      { label: "Originals", to: "/originals", photo: EPISODES[0]?.still },
+      { label: "The trend report", to: "/trends", photo: free(...TREND_TOPICS.map((t) => live.get(t.slug))) },
+      { label: "BTS on tour", to: "/tour/bts-arirang", photo: free(live.get("bts-arirang-world-tour-latin-america"), ...live.inSection("music")) },
+      { label: "Explore", to: "/explore", photo: free(...live.editorsPicks, ...live.trending, ...live.all) },
+    ];
+  }, [live, skip]);
   return (
-    <Band tone="grey" id="anatomy">
-      <Head id="anatomy" k="about.anatomy" kicker="Inside a story" title="Anatomy of an OGCW story">
-        <Link to="/news/$slug" params={{ slug: story.slug }} className="fx-more"><T k="about.anatomy.open">Read this story</T> <ArrowRight size={15} aria-hidden="true" /></Link>
-      </Head>
-      <div className="ab-anatomy">
-        <figure className="ab-paper" aria-label="A story from OGCW, with its parts numbered">
-          <div {...part(1)}><Pin n={1} /><p className="ab-paper-kicker"><LabelBadge label={live.label(story)} /> <S story={story} f="kicker" /></p></div>
-          <div {...part(2)}><Pin n={2} />
-            <p className="ab-paper-title"><S story={story} f="title" /></p>
-            <p className="ab-paper-deck"><S story={story} f="deck" /></p>
-          </div>
-          <div className="ab-paper-byline">
-            <div {...part(3)}><Pin n={3} /><span>{story.credit === "OGCW" ? "By" : "Source:"} <strong>{story.credit}</strong></span></div>
-            <div {...part(4)}><Pin n={4} /><StoryDate story={story} long /></div>
-          </div>
-          <div {...part(5)}><Pin n={5} />
-            <BsPhoto photo={story.photo} className="ab-paper-photo" />
-            <p className="ab-paper-caption">Photo: {story.photo.credit}</p>
-          </div>
-          <div {...part(6)}><Pin n={6} />
-            <p className="ab-paper-rate"><T k="story.rate">Rate this story</T> <span className="ab-paper-stars" aria-hidden="true">{[1, 2, 3, 4, 5].map((n) => <Star key={n} size={17} strokeWidth={1.5} />)}</span></p>
-            <p className="ab-paper-ask">{story.ask ?? "Was this helpful?"} <span className="ab-paper-yes">Yes</span><span className="ab-paper-yes">No</span></p>
-          </div>
-          <div {...part(7)}><Pin n={7} />
-            <p className="ab-paper-sources-title"><T k="story.sources">Sources</T></p>
-            <ul className="ab-paper-sources">{story.sources.slice(0, 3).map((source) => <li key={source.url}>{source.name}</li>)}</ul>
-          </div>
-        </figure>
-        <ol className="ab-keys">
-          {PARTS.map((item, index) => (
-            <li key={item.title} data-on={on === index + 1 || undefined} onPointerEnter={() => setOn(index + 1)} onPointerLeave={() => setOn(0)}>
-              <Pin n={index + 1} />
-              <span>
-                <strong><T>{item.title}</T></strong>
-                <span><T>{item.copy}</T></span>
-              </span>
-            </li>
-          ))}
-        </ol>
+    <section className="ab-paper ab-beyond" aria-labelledby="beyond-title">
+      <div className="ab-grid ab-beyond-head">
+        <h2 id="beyond-title" className="ab-h2"><T k="about.beyond.title">More from OGCW</T></h2>
+        <div className="ab-beyond-text">
+          <p className="ab-body"><T k="about.beyond.copy">Interviews and podcasts with the people in the news, the season’s trend report, a tour followed city by city, and everything else in one place.</T></p>
+        </div>
       </div>
-    </Band>
-  );
-}
-
-// ------------------------------------------------------------ What we cover
-
-type Desk = { to: (typeof SECTION_PATH)[keyof typeof SECTION_PATH] | "/originals" | "/shop"; name: string; note: string; count: string; photo: Photo | undefined; latest: string | undefined };
-
-function deskList(live: Stories): Desk[] {
-  const notes: Record<string, string> = {
-    music: "New releases, tours and the big awards nights",
-    games: "Launches, sales and the showcases ahead",
-    streaming: "The creators and records on Twitch, YouTube and Kick",
-    culture: "Fashion, television and sneakers",
-    sports: SECTIONS.sports.intro.replace(/\.$/, ""),
-  };
-  const desks = SECTION_IDS.map((id): Desk => {
-    const stories: Article[] = live.inSection(id);
-    // The desk's second-newest photo: the newest is already at the top of the page
-    const photo = (stories[1] ?? stories[0])?.photo;
-    return { to: SECTION_PATH[id], name: SECTIONS[id].label, note: notes[id] ?? SECTIONS[id].intro, count: `${stories.length} stories`, photo, latest: stories[0]?.title };
-  });
-  return [
-    ...desks,
-    { to: "/originals", name: "Originals", note: "The best interviews and podcasts with rappers, streamers and stars", count: `${EPISODES.length} episodes`, photo: EPISODES[0]?.still, latest: EPISODES[0]?.title },
-    { to: "/shop", name: "Shop", note: "The pieces behind the stories, picked by our desk", count: `${SHOPS.length} shops`, photo: SHOPS[0]?.hero, latest: undefined },
-  ];
-}
-
-function Cover({ live }: { live: Stories }) {
-  return (
-    <Band tone="dark" id="cover">
-      <Head id="cover" k="about.cover" kicker="The desks" title="What we cover" />
-      <ul className="ab-desks">
-        {deskList(live).map((desk) => (
-          <li key={desk.to}>
-            <Link to={desk.to} className="ab-desk">
-              {desk.photo && <BsPhoto photo={desk.photo} className="ab-desk-photo" />}
-              <span className="ab-desk-text">
-                <span className="ab-desk-count">{desk.count}</span>
-                <span className="ab-desk-name"><T>{desk.name}</T> <ArrowRight size={22} strokeWidth={1.6} aria-hidden="true" /></span>
-                <span className="ab-desk-note"><T>{desk.note}</T></span>
-                {desk.latest && <span className="ab-desk-latest">Latest: {desk.latest}</span>}
-              </span>
+      <ul className="ab-cards">
+        {cards.map((card) => (
+          <li key={card.to}>
+            <Link to={card.to} className="ab-card">
+              {card.photo && <BsPhoto photo={card.photo} className="ab-card-photo" />}
+              <span className="ab-card-label"><T>{card.label}</T><ChevronRight size={15} strokeWidth={1.8} aria-hidden="true" /></span>
             </Link>
           </li>
         ))}
       </ul>
-    </Band>
+    </section>
   );
 }
 
-// ------------------------------------------------------------ Where the news comes from
+// ------------------------------------------------------------ 8. Get in touch
 
-function Sources({ live }: { live: Stories }) {
-  // Our own reporting is counted on its own; the bars are everyone else
-  const credits = useMemo(() => {
-    const names = [...new Set(live.all.map((a) => a.credit))].filter((name) => name !== "OGCW");
-    const ranked = names
-      .map((name) => {
-        const stories = live.all.filter((a) => a.credit === name);
-        return { name, stories, beats: [...new Set(stories.map((s) => s.kicker))].slice(0, 2) };
-      })
-      .sort((a, b) => b.stories.length - a.stories.length || b.stories[0]!.date.localeCompare(a.stories[0]!.date));
-    return { others: names.length, own: live.all.filter((a) => a.credit === "OGCW").length, top: ranked.slice(0, 8) };
-  }, [live]);
-  const max = credits.top[0]?.stories.length ?? 1;
-  return (
-    <Band tone="light" id="our-sources">
-      <Head id="our-sources" k="about.sources" kicker="The record" title="Where the news comes from" />
-      <div className="ab-sources">
-        <div className="ab-sources-intro">
-          <p className="ab-lede"><T k="about.sources.copy">Every story names where its news comes from: the company, label, league or publication behind it, or OGCW for our own reporting and round-ups. These are the names that appear most, counted live from every story on the site.</T></p>
-          <div className="ab-sources-totals">
-            <p className="ab-sources-total"><span>{num(credits.own)}</span> <T>stories of our own reporting and round-ups</T></p>
-            <p className="ab-sources-total"><span>{num(credits.others)}</span> <T>other sources credited so far</T></p>
-          </div>
-        </div>
-        <ol className="ab-bars">
-          {credits.top.map((source, index) => (
-            <li key={source.name} className="ab-bar">
-              <span className="ab-bar-rank" aria-hidden="true">{pad(index + 1)}</span>
-              <span className="ab-bar-body">
-                <span className="ab-bar-name"><T>{source.name}</T> <small>{source.beats.join(" · ")}</small></span>
-                <span className="ab-bar-track" aria-hidden="true"><span style={{ width: `${(source.stories.length / max) * 100}%` }} /></span>
-                <Link to="/news/$slug" params={{ slug: source.stories[0]!.slug }} className="ab-bar-latest">Latest: {source.stories[0]!.title}</Link>
-              </span>
-              <span className="ab-bar-count">{source.stories.length} <small>{source.stories.length === 1 ? "story" : "stories"}</small></span>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </Band>
-  );
-}
-
-// ------------------------------------------------------------ The community
-
-// Where to follow OGCW (the "Socials" link on the news front comes here)
-const SOCIAL_NOTES: Record<(typeof SOCIALS)[number]["name"], string> = {
-  Instagram: "Photos from the shows, the streets and the studio",
-  TikTok: "The day’s stories in a minute",
-  YouTube: "Clips, interviews and short videos",
-  X: "Breaking news as it happens",
-};
-
-function Community() {
-  return (
-    <Band tone="gold" id="socials" className="ab-join">
-      <Head id="socials" k="about.join" kicker="The community" title="Join in" />
-      <div className="ab-join-grid">
-        <section aria-labelledby="follow-ogcw">
-          <h3 id="follow-ogcw" className="ab-join-title"><T k="about.follow">Follow OGCW</T></h3>
-          <ul className="ab-socials">
-            {SOCIALS.map((social) => (
-              <li key={social.name}>
-                <a href={social.href} target="_blank" rel="noopener noreferrer" className="ab-social">
-                  <span className="ab-social-icon"><SocialIcon path={social.path} size={18} /></span>
-                  <span className="ab-social-text">
-                    <span className="ab-social-name"><T>{social.name}</T></span>
-                    <span className="ab-social-note"><T>{SOCIAL_NOTES[social.name]}</T></span>
-                  </span>
-                  <ArrowUpRight size={18} strokeWidth={1.6} aria-hidden="true" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section aria-labelledby="about-newsletter">
-          <h3 id="about-newsletter" className="ab-join-title"><T k="connect.newsletter.title">Stay in the culture.</T></h3>
-          <p className="ab-join-copy"><T k="connect.newsletter.copy">Get the biggest stories from OGCW directly to your inbox.</T></p>
-          <NewsletterForm source="about" />
-        </section>
-
-        <section aria-labelledby="about-forum">
-          <h3 id="about-forum" className="ab-join-title"><T k="about.forum">The forum</T></h3>
-          <p className="ab-join-copy"><T k="about.forum.copy">Argue the ranking, the drops and the games with everyone else who reads OGCW.</T></p>
-          <ul className="ab-rooms">
-            {ROOMS.map((room) => (
-              <li key={room.id}><Link to="/forum/$room" params={{ room: room.id }} className="ab-room"><T>{room.name}</T></Link></li>
-            ))}
-          </ul>
-          <Link to="/forum" className="fx-btn fx-btn-dark ab-join-btn"><T k="about.forum.open">Open the forum</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></Link>
-        </section>
-      </div>
-    </Band>
-  );
-}
-
-// ------------------------------------------------------------ Questions
-
-const QUESTIONS: [string, ReactNode][] = [
-  ["Who writes the stories?", <T>Every story is credited to where its news comes from, the company, label, league or publication behind it, or to OGCW for our own reporting and round-ups. We don’t put invented names on stories.</T>],
-  ["What does CERTIFIED mean?", <T>It is stamped on a story by the OGCW editors, or earned when at least five readers rate it 4.5 stars or more on average.</T>],
-  ["How do ratings work?", <T>At the end of every story you can rate it from 1 to 5 stars and answer its yes or no question. The readers’ score appears once three people have rated it.</T>],
-  ["I found a mistake. What do I do?", <>Email <a href={mail("Correction")}>{BUSINESS_EMAIL}</a> <T>with “Correction” in the subject. We fix it and say so.</T></>],
-  ["Can I send you a story or my music?", <><T>Yes. Email</T> <a href={mail("Submit a story")}>{BUSINESS_EMAIL}</a> <T>with “Submit a story” or “Music submissions” in the subject.</T></>],
-  ["Is there a newsletter?", <T>Yes. Sign up above with your email; we’ll send the biggest stories from OGCW straight to your inbox when it launches.</T>],
-];
-
-function Questions() {
-  return (
-    <Band tone="light" id="questions">
-      <div className="ab-faq">
-        <div>
-          <p className="fx-kicker"><T k="about.faq.kicker">Good to know</T></p>
-          <h2 id="questions-title" className="fx-title"><T k="about.faq.title">Questions, answered</T></h2>
-          <Link to="/info/$slug" params={{ slug: "faq" }} className="fx-more fx-more-block"><T k="about.faq.more">More in the FAQ</T> <ArrowRight size={15} aria-hidden="true" /></Link>
-        </div>
-        <div className="ab-faq-list">
-          {QUESTIONS.map(([question, answer]) => (
-            <details key={question} className="ab-q">
-              <summary><span><T>{question}</T></span><Plus size={20} strokeWidth={1.6} aria-hidden="true" /></summary>
-              <p>{answer}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </Band>
-  );
-}
-
-// ------------------------------------------------------------ Get in touch
-
-const ENQUIRIES = [
-  { subject: "Submit a story", note: "Tips, pitches and stories we should be telling" },
-  { subject: "Music submissions", note: "New releases from artists and labels" },
-  { subject: "Advertising", note: "Campaigns, sponsorships and branded content" },
-  { subject: "Partnerships", note: "Events, collaborations and long-term partners" },
-  { subject: "Press", note: "Interviews and press enquiries about OGCW" },
-  { subject: "Correction", note: "Something in a story that needs fixing" },
-];
+const ENQUIRIES = ["Submit a story", "Music submissions", "Advertising", "Partnerships", "Press", "Correction"];
 
 function Contact() {
   return (
-    <Band tone="dark" id="get-in-touch">
-      <div className="ab-contact">
-        <p className="fx-kicker"><T k="about.contact.kicker">Get in touch</T></p>
-        <h2 id="get-in-touch-title" className="fx-title"><T k="about.contact.title">One address for everything</T></h2>
-        <p className="ab-contact-email"><a href={mail("General")}>{BUSINESS_EMAIL}</a></p>
-        <p className="ab-lede"><T>Put one of these in the subject and it reaches the right person.</T></p>
+    <section className="ab-paper ab-contact" aria-labelledby="contact-title">
+      <div className="ab-grid ab-contact-grid">
+        <h2 id="contact-title" className="ab-h2"><T k="about.contact.kicker">Get in touch</T></h2>
+        <div className="ab-contact-text">
+          <p className="ab-body"><T k="about.contact.title">One address for everything</T>. <T>Put one of these in the subject and it reaches the right person.</T></p>
+          <p className="ab-contact-email"><a href={mail("General")}>{BUSINESS_EMAIL}</a></p>
+          <p className="ab-more-row ab-more-grid">
+            {ENQUIRIES.map((subject) => <More key={subject} href={mail(subject)}><T>{subject}</T></More>)}
+          </p>
+        </div>
       </div>
-      <ul className="ab-enquiries">
-        {ENQUIRIES.map((item) => (
-          <li key={item.subject}>
-            <a href={mail(item.subject)} className="ab-enquiry">
-              <span className="ab-enquiry-name"><T>{item.subject}</T></span>
-              <span className="ab-enquiry-note"><T>{item.note}</T></span>
-              <ArrowUpRight size={20} strokeWidth={1.6} className="ab-enquiry-arrow" aria-hidden="true" />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </Band>
+    </section>
   );
 }
 
 function About() {
   const live = useStories();
-  const newest = useMemo(() => deskLeads(live), [live]);
-  const onTop = useMemo(() => new Set(newest.map((story) => story.slug)), [newest]);
+  const desks = useMemo(() => deskList(live), [live]);
+  // How we work shows a recent story with a credited photo that isn't one of the desks' pictures
+  const deskPhotos = useMemo(() => new Set(desks.flatMap((d) => (d.story ? [d.story.photo.src] : []))), [desks]);
+  const howStory = useMemo(
+    () => [...live.editorsPicks, ...live.trending, ...live.all].find((s) => s.photo.credit && !deskPhotos.has(s.photo.src)) ?? live.all[0],
+    [live, deskPhotos],
+  );
+  const used = useMemo(() => new Set([...deskPhotos, ...(howStory ? [howStory.photo.src] : [])]), [deskPhotos, howStory]);
   return (
     <SiteShell>
       <main className="ab">
-        <Hero live={live} newest={newest} />
+        <Hero />
         <Position />
-        <Anatomy live={live} skip={onTop} />
-        <Cover live={live} />
-        <Sources live={live} />
-        <Community />
-        <Questions />
+        <HowWeWork story={howStory} />
+        <Desks live={live} />
+        <Standard />
+        <JoinIn />
+        <MoreFromOgcw live={live} skip={used} />
         <Contact />
       </main>
     </SiteShell>
