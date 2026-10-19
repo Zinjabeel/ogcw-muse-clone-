@@ -8,6 +8,7 @@
 @import "./styles/forum.css";
 @import "./styles/menu.css";
 @import "./styles/about.css";
+@import "./styles/trends.css";
 
 @custom-variant dark (&:is(.dark *));
 
