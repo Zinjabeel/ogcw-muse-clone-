@@ -16,7 +16,7 @@ import { LanguagePicker } from "@/components/cookie-consent";
 // App Store / Google Play badges are marked "Coming soon" and don’t link.
 
 type FooterLink =
-  | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/originals" | "/shop" | "/explore" | "/trends" | "/forum" | "/about" }
+  | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/explore" | "/trends" | "/forum" | "/about" }
   | { label: string; home: string } // a section on the home page, by element id
   | { label: string; info: InfoSlug } // /info/<slug>
   | { label: string; href: string }; // mailto or external
@@ -38,14 +38,15 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
   {
     title: "Explore",
     links: [
-      { label: "News", page: "/news" },
+      { label: "Latest", page: "/news" },
       { label: "Music", page: "/music" },
-      { label: "Games", page: "/games" },
+      { label: "Gaming", page: "/games" },
       { label: "Streaming", page: "/streaming" },
       { label: "Culture", page: "/culture" },
+      { label: "Sports", page: "/sports" },
       { label: "Shop", page: "/shop" },
       { label: "Trends", page: "/trends" },
-      { label: "Latest & Most Read", page: "/explore" },
+      { label: "Explore", page: "/explore" },
     ],
   },
   {

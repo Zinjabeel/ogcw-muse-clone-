@@ -17,27 +17,29 @@ import { S, T } from "./site-text";
 
 type Item = { kind: "article"; a: Article } | { kind: "episode"; e: Episode } | { kind: "shop"; s: Shop };
 type SectionPath = "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/forum" | "/about";
-type Section = { label: string; to: SectionPath; note: string; heading: string; item: Item | undefined };
+type Section = { label: string; to: SectionPath; note: string; heading: string; item: Item | undefined; also?: SectionPath[] };
 
 const article = (a: Article | undefined): Item | undefined => (a ? { kind: "article", a } : undefined);
 
-// The menu's sections, each with its newest story from the studio
+// The menu's sections, with the header's names (owner, 19 Oct 2026: fewer,
+// nothing said twice): the five desks, then the rest of OGCW. Gaming covers
+// the games desk and the streamers. Each shows its newest story.
 function buildSections(stories: Stories): Section[] {
   const longest = [...stories.all].sort((a, b) => b.words - a.words)[0];
   const first = (id: SectionId) => stories.inSection(id)[0];
   const count = (n: number) => `${n} ${n === 1 ? "story" : "stories"}`;
   const inSection = (id: SectionId) => stories.inSection(id).length;
+  const gaming = stories.all.find((a) => a.section === "games" || a.section === "streaming");
   return [
-    { label: "News", to: "/news", note: count(stories.all.length), heading: "The latest", item: article(stories.all[0]) },
+    { label: "Latest", to: "/news", note: count(stories.all.length), heading: "The latest", item: article(stories.all[0]) },
     { label: "Music", to: "/music", note: count(inSection("music")), heading: "Latest in Music", item: article(first("music")) },
-    { label: "Games", to: "/games", note: count(inSection("games")), heading: "Latest in Games", item: article(first("games")) },
-    { label: "Streaming", to: "/streaming", note: count(inSection("streaming")), heading: "Latest in Streaming", item: article(first("streaming")) },
+    { label: "Gaming", to: "/games", note: count(inSection("games") + inSection("streaming")), heading: "Latest in Gaming", item: article(gaming), also: ["/streaming"] },
     { label: "Culture", to: "/culture", note: count(inSection("culture")), heading: "Latest in Culture", item: article(first("culture")) },
     { label: "Sports", to: "/sports", note: count(inSection("sports")), heading: "Latest in Sports", item: article(first("sports")) },
     { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episode", item: EPISODES[0] && { kind: "episode", e: EPISODES[0] } },
-    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", item: SHOPS[0] && { kind: "shop", s: SHOPS[0] } },
-    { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", item: article(stories.trending[0]) },
     { label: "Forum", to: "/forum", note: "Seven rooms", heading: "The longest read", item: article(longest) },
+    { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", item: article(stories.trending[0]) },
+    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", item: SHOPS[0] && { kind: "shop", s: SHOPS[0] } },
     { label: "About", to: "/about", note: "Who we are", heading: "Editors’ pick", item: article(stories.editorsPicks[0]) },
   ];
 }
@@ -89,7 +91,7 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
   const sections = useMemo(() => buildSections(stories), [stories]);
   // The section of the page you're on is marked and previewed first
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const currentIndex = sections.findIndex((s) => pathname === s.to || pathname.startsWith(`${s.to}/`));
+  const currentIndex = sections.findIndex((s) => [s.to, ...(s.also ?? [])].some((to) => pathname === to || pathname.startsWith(`${to}/`)));
   const home = Math.max(currentIndex, 0);
 
   useEffect(() => {

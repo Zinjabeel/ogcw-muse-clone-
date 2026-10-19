@@ -13,25 +13,23 @@ import { EditSection, T } from "./site-text";
 import { SiteMegaPanel, type SiteMenuKey } from "./site-mega-menu";
 import { pageSection } from "@/lib/site-sections";
 
-// Header navigation. The sections always show; Originals and Shop join them
-// from 1280px ("mid"), Trends, Blog and About from 1680px ("wide"). Below
-// those widths they sit in "More".
+// Header navigation (owner, 19 Oct 2026: fewer links, nothing said twice,
+// more editorial names): the five desks at every width, everything else in
+// "More". Gaming covers games and the streamers (/streaming lights it up).
+// Admins can still rename any of them in the site editor (nav.*).
 type Tier = "all" | "mid" | "wide";
-const nav: { label: string; to: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/trends" | "/forum" | "/about"; tier: Tier }[] = [
-  { label: "News", to: "/news", tier: "all" },
+const nav: { label: string; to: "/news" | "/music" | "/games" | "/culture" | "/sports"; tier: Tier; also?: string[] }[] = [
+  { label: "Latest", to: "/news", tier: "all" },
   { label: "Music", to: "/music", tier: "all" },
-  { label: "Games", to: "/games", tier: "all" },
-  { label: "Streaming", to: "/streaming", tier: "all" },
+  { label: "Gaming", to: "/games", tier: "all", also: ["/streaming"] },
   { label: "Culture", to: "/culture", tier: "all" },
   { label: "Sports", to: "/sports", tier: "all" },
-  { label: "Originals", to: "/originals", tier: "wide" },
-  { label: "Shop", to: "/shop", tier: "mid" },
-  { label: "Trends", to: "/trends", tier: "wide" },
-  { label: "Forum", to: "/forum", tier: "wide" },
-  { label: "About", to: "/about", tier: "wide" },
 ];
+/** The pages that live in "More" */
+const IN_MORE = ["/originals", "/forum", "/trends", "/shop", "/about", "/explore", "/work"];
 
 const isCurrent = (pathname: string, to: string) => pathname === to || pathname.startsWith(`${to}/`);
+const isCurrentItem = (pathname: string, item: (typeof nav)[number]) => [item.to, ...(item.also ?? [])].some((to) => isCurrent(pathname, to));
 
 /** The menu panels under the sections (src/components/site-mega-menu.tsx), as
  *  in the shop: pointing at (or focusing) a section opens its panel, leaving
@@ -97,10 +95,9 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
   const siteHeader = useRef<HTMLElement>(null);
   useShopInNewTab(!header);
   const { panel, openPanel, closeSoon, keepOpen, close: closePanel } = useMenuPanel(pathname);
-  // Explore and the info pages always live in More; the mid and wide links
-  // only on narrower screens, so they light More up only there
-  const moreActive = isCurrent(pathname, "/explore") || pathname.startsWith("/info/");
-  const currentTier = nav.find((item) => isCurrent(pathname, item.to))?.tier;
+  // Originals, the forum, the shop, About and the info pages live in More
+  const moreActive = IN_MORE.some((to) => isCurrent(pathname, to)) || pathname.startsWith("/info/");
+  const currentTier = nav.find((item) => isCurrentItem(pathname, item))?.tier;
 
   // The header starts tall (the logo big in the middle, the sections in a row
   // under it) and shrinks as the page scrolls, until it is the usual slim bar
@@ -155,9 +152,8 @@ export function SiteShell({ children, header }: { children: ReactNode; header?: 
                   <Link
                     key={item.to}
                     to={item.to}
-                    {...(item.to === "/shop" ? { target: "_blank" } : {})}
-                    className={`nav-link nav-link-tier-${item.tier} ${isCurrent(pathname, item.to) ? "nav-link-active" : ""}`}
-                    aria-current={isCurrent(pathname, item.to) ? "page" : undefined}
+                    className={`nav-link nav-link-tier-${item.tier} ${isCurrentItem(pathname, item) ? "nav-link-active" : ""}`}
+                    aria-current={isCurrentItem(pathname, item) ? "page" : undefined}
                     aria-expanded={panel === key}
                     data-open={panel === key || undefined}
                     onMouseEnter={() => openPanel(key)}

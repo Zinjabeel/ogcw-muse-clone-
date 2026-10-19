@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowBigUp, ArrowRight, BadgeCheck, Clock, Flame, Footprints, Gamepad2, ListOrdered, MessageSquare, MicVocal, PenLine, Radio, Shirt, TrendingUp, Trophy, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
 import { useUser } from "@/lib/auth";
@@ -60,7 +60,12 @@ export function useRoomPhotos() {
   return useMemo(() => roomPhotos(stories), [stories]);
 }
 
+// The forum's bar: its name, where you are and "Start a thread". The rooms
+// aren't listed here (owner, 19 Oct 2026: the header already says Gaming,
+// Sports…; the rooms are on the forum's pages themselves).
 export function ForumShell({ room, children }: { room?: RoomId; children: ReactNode }) {
+  const current = room ? ROOMS.find((item) => item.id === room) : undefined;
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (
     <SiteShell>
       <EditSection name="Blog">
@@ -68,18 +73,19 @@ export function ForumShell({ room, children }: { room?: RoomId; children: ReactN
           <header className="fm-head" data-band="dark">
             <div className="fx-wrap">
               <Link to="/forum" className="fm-wordmark">OGCW <span>Forum</span></Link>
-              <nav className="fm-rooms" aria-label="Rooms">
-                <ul>
-                  <li><Link to="/forum" className="fm-room" data-on={!room || undefined}><T k="forum.rooms.all">All rooms</T></Link></li>
-                  {ROOMS.map((item) => (
-                    <li key={item.id}>
-                      <Link to="/forum/$room" params={{ room: item.id }} className="fm-room" data-on={room === item.id || undefined}>
-                        <RoomIcon room={item.id} size={14} />{item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
+              {current && (
+                <p className="fm-here">
+                  <span aria-hidden="true">/</span>
+                  <Link to="/forum/$room" params={{ room: current.id }}><RoomIcon room={current.id} size={14} />{current.name}</Link>
+                </p>
+              )}
+              <div className="fm-head-actions">
+                {current && <Link to="/forum" className="fm-head-link"><T k="forum.rooms.all">All rooms</T></Link>}
+                {/* To the composer: on this page, or (from a thread) its room's */}
+                {current && pathname !== `/forum/${current.id}`
+                  ? <Link to="/forum/$room" params={{ room: current.id }} hash="compose" className="fm-head-btn" aria-label="Start a thread"><PenLine size={15} aria-hidden="true" /><span><T k="forum.new">Start a thread</T></span></Link>
+                  : <a href="#compose" className="fm-head-btn" aria-label="Start a thread"><PenLine size={15} aria-hidden="true" /><span><T k="forum.new">Start a thread</T></span></a>}
+              </div>
             </div>
           </header>
           <main className="fm-main">{children}</main>

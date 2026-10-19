@@ -14,9 +14,9 @@ import { EditSection, T } from "./site-text";
 // this page to everyone but the admin.
 
 const LINKS = [
-  { label: "News", to: "/news" },
+  { label: "Latest", to: "/news" },
   { label: "Music", to: "/music" },
-  { label: "Games", to: "/games" },
+  { label: "Gaming", to: "/games" },
   { label: "Culture", to: "/culture" },
   { label: "Sports", to: "/sports" },
 ] as const;

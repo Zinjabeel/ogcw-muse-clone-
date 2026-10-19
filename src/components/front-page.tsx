@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, ty
 import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { VIDEOS } from "@/data/drops";
 import { useStories } from "@/lib/stories";
-import { useWorkAccess } from "@/lib/work";
 import type { SiteSection } from "@/lib/site-sections";
 import { BsPhoto, StoryCard } from "./broadsheet";
 import { BrandPoll } from "./brand-poll";
@@ -73,22 +72,18 @@ function Tile({ story, size = "md", deck = false }: { story: Article; size?: "sm
 // ------------------------------------------------------------ Masthead + This week
 
 // The bar under the masthead. Each keeps its first name (`key`) so the
-// wording admins gave it stays with it.
+// wording admins gave it stays with it. Owner, 19 Oct 2026: nothing the
+// header already says, so no desks here; only what the header doesn't have.
 const NEWS_BAR = [
-  { label: "All news", to: "/news", key: "news" },
-  { label: "Socials", to: "/about", hash: "socials", key: "music" },
   { label: "Stories", to: "/originals", key: "games" },
-  { label: "Stream", to: "/streaming", key: "streaming" },
-  { label: "Culture", to: "/culture", key: "culture" },
-  { label: "Sports", to: "/sports", key: "sports" },
-  { label: "Shop", to: "/shop", key: "shop" },
+  { label: "Trends", to: "/trends", key: "trends" },
+  { label: "Forum", to: "/forum", key: "forum" },
+  { label: "Socials", to: "/about", hash: "socials", key: "music" },
   { label: "Explore", to: "/", hash: "explore", key: "explore" },
 ] as const;
 
 function NewsTop() {
   const { openSearch } = useSiteMenu();
-  // The shop is admin-only until it opens (everyone else gets a 404 there)
-  const showShop = useWorkAccess() === "admin";
   const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   return (
     <EditSection name="OGCW News">
@@ -105,9 +100,9 @@ function NewsTop() {
                 <span className="bs-certified"><BadgeCheck size={14} strokeWidth={2} aria-hidden="true" /><T k="home.news.certified">Certified news</T></span>
               </p>
             </header>
-            <nav className="bs-nav fx-newsbar" aria-label="News sections">
+            <nav className="bs-nav fx-newsbar" aria-label="More from OGCW">
               <ul>
-                {NEWS_BAR.filter((item) => item.key !== "shop" || showShop).map((item) => (
+                {NEWS_BAR.map((item) => (
                   <li key={item.label}>
                     <Link to={item.to} {...("hash" in item ? { hash: item.hash } : {})}><T k={`home.news.nav.${item.key}`}>{item.label}</T></Link>
                   </li>

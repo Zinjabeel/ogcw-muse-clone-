@@ -35,17 +35,22 @@ const sectionLinks: MenuLink[] = (Object.keys(SECTIONS) as SectionId[]).map((id)
 function sectionPanel(stories: Stories, id: SectionId): Panel {
   const used = new Set<string>();
   const take = takeFrom(used);
-  const mine = stories.inSection(id);
-  const pool = mine.length >= 12 ? mine : [...mine, ...stories.all.filter((item) => item.section !== id)];
+  // Gaming covers the games desk and the streamers
+  const desks: SectionId[] = id === "games" ? ["games", "streaming"] : [id];
+  const mine = stories.all.filter((item) => desks.includes(item.section));
+  const pool = mine.length >= 12 ? mine : [...mine, ...stories.all.filter((item) => !desks.includes(item.section))];
   const cards = take(pool, 2);
   const latest = take(pool, 5);
-  const read = take(stories.mostRead.filter((item) => item.section === id).concat(mine), 4);
+  const read = take(stories.mostRead.filter((item) => desks.includes(item.section)).concat(mine), 4);
   const label = SECTIONS[id].label;
+  const more: MenuLink[] = id === "games"
+    ? [{ label: "All gaming news", to: "/games" }, { label: "Streaming", to: "/streaming" }, { label: "The games room in the forum", to: "/forum/$room", params: { room: "games" } }, { label: "The streaming room in the forum", to: "/forum/$room", params: { room: "streaming" } }]
+    : [{ label: `All ${label.toLowerCase()} news`, to: `/${id}` }, { label: `The ${label.toLowerCase()} room in the forum`, to: "/forum/$room", params: { room: SECTION_ROOM[id] } }, { label: "Trends", to: "/trends" }, { label: "Explore", to: "/explore" }];
   return {
     columns: [
       { title: `Latest in ${label}`, links: latest.map(storyLink) },
       { title: "Most read", links: read.map(storyLink) },
-      { title: "More", links: [{ label: `All ${label.toLowerCase()} news`, to: `/${id}` }, { label: `The ${label.toLowerCase()} room in the forum`, to: "/forum/$room", params: { room: SECTION_ROOM[id] } }, { label: "Trends", to: "/trends" }, { label: "Explore", to: "/explore" }] },
+      { title: "More", links: more },
     ],
     cards: cards.map(storyCard),
   };
@@ -126,8 +131,8 @@ function aboutPanel(stories: Stories, more: boolean): Panel {
   return {
     columns: more
       ? [
-          { title: "More of OGCW", links: [{ label: "Originals", to: "/originals" }, { label: "Brand deals", to: "/shop" }, { label: "Trends", to: "/trends" }, { label: "Forum", to: "/forum" }, { label: "About", to: "/about" }] },
-          { title: "Explore and help", links: [{ label: "Explore", to: "/explore" }, info("Press", "press"), info("Brand", "brand"), info("FAQ", "faq"), info("Help", "help")] },
+          { title: "Watch and talk", links: [{ label: "Originals", to: "/originals" }, { label: "Forum", to: "/forum" }, { label: "Trends", to: "/trends" }, { label: "Explore", to: "/explore" }] },
+          { title: "OGCW", links: [{ label: "About", to: "/about" }, { label: "Brand deals", to: "/shop" }, info("Press", "press"), info("FAQ", "faq"), info("Help", "help")] },
         ]
       : [
           { title: "OGCW", links: [{ label: "About OGCW", to: "/about" }, { label: "Work with OGCW", to: "/work" }, info("Press", "press"), info("Brand", "brand")] },
