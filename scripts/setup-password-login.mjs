@@ -27,7 +27,7 @@ const read = (name) => text.match(new RegExp(`^\\s*${name}\\s*=\\s*(.*)$`, "m"))
 let token = read("SANITY_EDITOR_TOKEN");
 if (!token) {
   console.log("Asking Sanity for a studio key (editor role)…");
-  const out = execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", ["sanity", "tokens", "add", "OGCW admin password login", "--role=editor", "--json", "--yes"], {
+  const out = execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", ["sanity", "tokens", "add", "ogcw-admin-password-login", "--role=editor", "--json", "--yes"], {
     encoding: "utf8",
     shell: process.platform === "win32",
     env: { ...process.env, NODE_OPTIONS: [process.env.NODE_OPTIONS, "--use-system-ca"].filter(Boolean).join(" ") },
