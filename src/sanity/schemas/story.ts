@@ -142,7 +142,7 @@ export const story = defineType({
           type: "object",
           fields: [
             defineField({ name: "photo", title: "Photo", type: "photo" }),
-            defineField({ name: "caption", title: "Caption (optional)", type: "string" }),
+            defineField({ name: "caption", title: "Caption (optional)", type: "text", rows: 2, description: "Shift + Enter for a new line." }),
             ...captionFields,
             defineField({
               name: "size",
@@ -173,7 +173,7 @@ export const story = defineType({
               initialValue: "row",
             }),
             defineField({ name: "columns", title: "Photos across (grid)", type: "number", options: { list: [2, 3, 4], layout: "radio", direction: "horizontal" }, hidden: ({ parent }) => (parent as { layout?: string } | undefined)?.layout !== "grid" }),
-            defineField({ name: "caption", title: "Caption (optional)", type: "string" }),
+            defineField({ name: "caption", title: "Caption (optional)", type: "text", rows: 2, description: "Shift + Enter for a new line." }),
             ...captionFields,
             defineField({ name: "first", title: "Left photo (older layout)", type: "photo", hidden: ({ parent }) => !(parent as { first?: unknown } | undefined)?.first }),
             defineField({ name: "second", title: "Right photo (older layout)", type: "photo", hidden: ({ parent }) => !(parent as { second?: unknown } | undefined)?.second }),

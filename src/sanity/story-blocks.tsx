@@ -100,8 +100,9 @@ function CaptionBox({ value, placeholder, onChange, readOnly }: { value: string 
         placeholder={placeholder}
         aria-label="Caption"
         readOnly={readOnly}
-        onChange={(event) => onChange(event.target.value.replace(/\s*\n\s*/g, " "))}
-        onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault(); }}
+        // Enter alone does nothing; Shift + Enter starts a new line in the caption
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) event.preventDefault(); }}
       />
     </span>
   );

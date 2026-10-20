@@ -20,7 +20,7 @@
 @media (min-width: 768px) { .og-article.og-text-large .og-prose { font-size: 22px; } }
 
 /* ---------------------------------------------------------- Captions */
-.og-cap { margin-top: 10px; font-family: var(--ogcw-ui); font-size: 12px; line-height: 1.5; color: var(--ogcw-text-2); }
+.og-cap { white-space: pre-line; margin-top: 10px; font-family: var(--ogcw-ui); font-size: 12px; line-height: 1.5; color: var(--ogcw-text-2); }
 .og-captions-m .og-cap { font-size: 14.5px; }
 .og-captions-l .og-cap { font-family: var(--ogcw-serif); font-size: 17px; line-height: 1.5; color: var(--ogcw-text); }
 .og-captions-s .og-cap { font-family: var(--ogcw-ui); font-size: 12px; color: var(--ogcw-text-2); }
