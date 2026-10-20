@@ -73,11 +73,11 @@ function Tile({ story, size = "md", deck = false }: { story: Article; size?: "sm
 
 // The bar under the masthead. Each keeps its first name (`key`) so the
 // wording admins gave it stays with it. Owner, 19 Oct 2026: nothing the
-// header already says, so no desks here; only what the header doesn't have.
+// header already says, so no desks here; only what the header doesn't have
+// (since 20 Oct the header has Shop, Originals and Forum too).
 const NEWS_BAR = [
-  { label: "Stories", to: "/originals", key: "games" },
   { label: "Trends", to: "/trends", key: "trends" },
-  { label: "Forum", to: "/forum", key: "forum" },
+  { label: "About", to: "/about", key: "about" },
   { label: "Socials", to: "/about", hash: "socials", key: "music" },
   { label: "Explore", to: "/", hash: "explore", key: "explore" },
 ] as const;

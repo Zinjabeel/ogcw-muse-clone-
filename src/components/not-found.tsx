@@ -14,10 +14,10 @@ import { EditSection, T } from "./site-text";
 // this page to everyone but the admin.
 
 const LINKS = [
-  { label: "Latest", to: "/news" },
+  { label: "News for you", to: "/news" },
   { label: "Music", to: "/music" },
   { label: "Gaming", to: "/games" },
-  { label: "Culture", to: "/culture" },
+  { label: "Entertainment", to: "/culture" },
   { label: "Sports", to: "/sports" },
 ] as const;
 const MENU = [...LINKS, { label: "Streaming", to: "/streaming" }, { label: "About", to: "/about" }] as const;

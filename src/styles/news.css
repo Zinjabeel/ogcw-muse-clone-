@@ -1,0 +1,38 @@
+/* ------------------------------------------------------------------
+   The News page (src/routes/news.index.tsx), owner 20 Oct 2026: a hero with
+   the OGCW News masthead and the sections to pick from, then the front
+   page's This week layout (its own styles, in styles.css) with the picked
+   section's stories, then the rest: a few rows at a time, the next row
+   half-faded under a soft blur, and Load more.
+   ------------------------------------------------------------------ */
+
+/* The hero: the smoky grey of the front page's grey band, a black rule at its foot */
+.nx-hero { padding-block: clamp(40px, calc(5 * var(--vw, 1vw)), 76px) clamp(28px, calc(3 * var(--vw, 1vw)), 44px); border-bottom: 2px solid var(--ogcw-text); background: var(--ogcw-bg); color: var(--ogcw-text); }
+:root[data-theme="gold"] .nx-hero { background: radial-gradient(ellipse 70% 120% at 15% 0%, rgb(255 255 255 / .45), transparent 60%), radial-gradient(ellipse 60% 100% at 90% 100%, rgb(0 0 0 / .07), transparent 65%), #d9d9d6; }
+.nx-hero .bs-masthead { padding-bottom: clamp(20px, calc(2 * var(--vw, 1vw)), 32px); }
+.nx-tabs a { display: inline-block; padding-block: 14px; font-size: 12px; font-weight: 500; line-height: 1; letter-spacing: .08em; text-transform: uppercase; color: var(--ogcw-text-2); text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 6px; transition: color .2s ease, text-decoration-color .2s ease; }
+.nx-tabs a:hover { color: var(--ogcw-text); }
+.nx-tabs a:focus-visible { color: var(--ogcw-accent); outline: none; text-decoration-color: currentColor; }
+.nx-tabs a[aria-current="page"] { color: var(--ogcw-text); font-weight: 700; text-decoration-color: var(--ogcw-accent); }
+.nx-intro { max-width: 44rem; margin: 20px auto 0; font-family: var(--ogcw-serif); font-size: 17px; line-height: 1.5; text-align: center; color: var(--ogcw-text-2); }
+
+/* The rest of the stories */
+.nx-more { margin-top: clamp(40px, calc(4 * var(--vw, 1vw)), 64px); }
+.nx-more .bs-all-item { animation: none; }
+/* The next row: half of it, fading out under a soft blur */
+.nx-peek { position: relative; max-height: 400px; overflow: hidden; pointer-events: none; user-select: none; }
+.nx-peek.has-above .bs-all-item { border-top: 1px solid var(--ogcw-border); }
+.nx-peek::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 34%, var(--ogcw-bg) 96%);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 30%, #000 82%); mask-image: linear-gradient(to bottom, transparent 30%, #000 82%);
+}
+.nx-more-foot { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: -28px; }
+.nx-load.fx-btn-ghost { margin-top: 0; background: var(--ogcw-bg); }
+.nx-load.fx-btn-ghost:hover { background: var(--ogcw-text); color: var(--ogcw-bg); }
+
+/* Browsers without blur: the fade alone */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nx-peek::after { -webkit-mask-image: none; mask-image: none; }
+}

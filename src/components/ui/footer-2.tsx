@@ -38,11 +38,11 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
   {
     title: "Explore",
     links: [
-      { label: "Latest", page: "/news" },
+      { label: "News for you", page: "/news" },
       { label: "Music", page: "/music" },
       { label: "Gaming", page: "/games" },
       { label: "Streaming", page: "/streaming" },
-      { label: "Culture", page: "/culture" },
+      { label: "Entertainment", page: "/culture" },
       { label: "Sports", page: "/sports" },
       { label: "Shop", page: "/shop" },
       { label: "Trends", page: "/trends" },

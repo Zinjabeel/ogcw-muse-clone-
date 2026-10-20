@@ -74,7 +74,7 @@ export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
   music: { label: "Music", intro: "New releases, tours and the awards nights everyone is talking about." },
   games: { label: "Gaming", intro: "Launches, sales and the showcases setting up the next few years of play." },
   streaming: { label: "Streaming", intro: "The creators, records and charity marathons that live on Twitch, YouTube and Kick." },
-  culture: { label: "Culture", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
+  culture: { label: "Entertainment", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
   sports: { label: "Sports", intro: "The games, records and athletes crossing over into music and fashion." },
 };
 export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];

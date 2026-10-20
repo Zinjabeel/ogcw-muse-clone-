@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SECTIONS, type Article } from "@/data/content";
 import { useStories } from "@/lib/stories";
 import { BsPhoto, Meta } from "./broadsheet";
@@ -14,23 +14,45 @@ import { useSiteText } from "@/lib/site-text";
 // in the middle column, one with a connected story linked beneath it; an
 // In brief column of five short items, numbered; then a connected row of
 // Big news: three places, each fading on to another story every few seconds.
+// The News page (src/routes/news.index.tsx) uses the same layout, WeekLayout,
+// filled with the newest stories of the section picked there.
+
+/** The stories for each spot of the layout */
+export type WeekStories = { lead: Article; thread: Article[]; middle?: Article | undefined; connected?: Article | undefined; second?: Article | undefined; brief: Article[]; big: Article[] };
+/** The layout's own words (each an editable text) */
+export type WeekLabels = { head: ReactNode; thread: ReactNode; connected: ReactNode; brief: ReactNode; bigTag: ReactNode; bigTitle: ReactNode };
 
 // The stories in each spot are chosen in the studio (src/data/placements.ts).
 export function NewsWeek() {
   const stories = useStories();
   const [LEAD = stories.pick("lil-baby-new-album-november-6")] = stories.slot("week-lead");
-  const THREAD = stories.slot("week-thread");
   const [MIDDLE, SECOND] = stories.slot("week-middle");
-  const [MIDDLE_LINKED] = stories.slot("week-connected");
-  const BRIEF = stories.slot("week-brief");
-  const BIG = stories.slot("week-cluster");
-
   return (
-    <section className="bs-week" aria-labelledby="week-title">
-      <div className="bs-section-head">
-        <h3 id="week-title" className="bs-eyebrow"><T k="home.week.title">This week</T></h3>
-        <Link to="/news" className="bs-more"><T k="home.week.all">All stories</T></Link>
-      </div>
+    <WeekLayout
+      id="week"
+      stories={{ lead: LEAD, thread: stories.slot("week-thread"), middle: MIDDLE, connected: stories.slot("week-connected")[0], second: SECOND, brief: stories.slot("week-brief"), big: stories.slot("week-cluster") }}
+      labels={{
+        head: (
+          <>
+            <h3 id="week-title" className="bs-eyebrow"><T k="home.week.title">This week</T></h3>
+            <Link to="/news" className="bs-more"><T k="home.week.all">All stories</T></Link>
+          </>
+        ),
+        thread: <T k="home.week.thread-other">Also this week</T>,
+        connected: <T k="home.week.connected">Connected</T>,
+        brief: <T k="home.week.brief">In brief</T>,
+        bigTag: <T k="home.week.big.tag">Big news</T>,
+        bigTitle: <T k="home.week.big.title">The stories everyone is talking about</T>,
+      }}
+    />
+  );
+}
+
+export function WeekLayout({ id, stories, labels }: { id: string; stories: WeekStories; labels: WeekLabels }) {
+  const { lead: LEAD, thread: THREAD, middle: MIDDLE, connected: MIDDLE_LINKED, second: SECOND, brief: BRIEF, big: BIG } = stories;
+  return (
+    <section className="bs-week" aria-labelledby={`${id}-title`}>
+      <div className="bs-section-head">{labels.head}</div>
 
       <div className="bs-week-grid">
         {/* The lead, and the rest of fashion month under it */}
@@ -43,7 +65,7 @@ export function NewsWeek() {
             <Meta story={LEAD} />
           </Link>
           <div className="bs-thread">
-            <p className="bs-thread-head"><T k="home.week.thread-other">Also this week</T></p>
+            <p className="bs-thread-head">{labels.thread}</p>
             <ol className="bs-thread-list">
               {THREAD.map((story) => (
                 <li key={story.slug}>
@@ -73,7 +95,7 @@ export function NewsWeek() {
               </Link>
               {MIDDLE_LINKED && MIDDLE_LINKED.slug !== MIDDLE.slug && (
                 <Link to="/news/$slug" params={{ slug: MIDDLE_LINKED.slug }} className="bs-linked">
-                  <span className="bs-linked-tag"><T k="home.week.connected">Connected</T></span>
+                  <span className="bs-linked-tag">{labels.connected}</span>
                   <span className="bs-linked-title"><S story={MIDDLE_LINKED} f="title" /></span>
                   <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
                 </Link>
@@ -93,8 +115,8 @@ export function NewsWeek() {
         </div>
 
         {/* In brief: five shorter stories, numbered, no photos */}
-        <aside className="bs-week-brief bs-reveal" aria-labelledby="brief-title">
-          <h4 id="brief-title" className="bs-brief-head"><T k="home.week.brief">In brief</T></h4>
+        <aside className="bs-week-brief bs-reveal" aria-labelledby={`${id}-brief-title`}>
+          <h4 id={`${id}-brief-title`} className="bs-brief-head">{labels.brief}</h4>
           <ol className="bs-brief-list">
             {BRIEF.map((story, index) => (
               <li key={story.slug}>
@@ -112,7 +134,7 @@ export function NewsWeek() {
         </aside>
       </div>
 
-      <BigNews stories={BIG} />
+      <BigNews id={id} stories={BIG} tag={labels.bigTag} title={labels.bigTitle} />
     </section>
   );
 }
@@ -127,7 +149,7 @@ export function NewsWeek() {
 const PLACES = 3;
 const TICK_MS = 1000; // one place changes per tick: 0, 1, 2, then a rest
 
-function BigNews({ stories }: { stories: Article[] }) {
+function BigNews({ id, stories, tag, title }: { id: string; stories: Article[]; tag: ReactNode; title: ReactNode }) {
   const section = useRef<HTMLElement>(null);
   const { busy } = useSiteText();
   const [turns, setTurns] = useState<number[]>(() => Array(PLACES).fill(0));
@@ -171,13 +193,13 @@ function BigNews({ stories }: { stories: Article[] }) {
     <section
       ref={section}
       className="bs-cluster bs-bignews"
-      aria-labelledby="big-news-title"
+      aria-labelledby={`${id}-big-title`}
       onFocus={(event) => { if (event.target.matches(":focus-visible")) setHold(true); }}
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
     >
       <div className="bs-cluster-head">
-        <p className="bs-cluster-tag"><T k="home.week.big.tag">Big news</T></p>
-        <h4 id="big-news-title" className="bs-cluster-title"><T k="home.week.big.title">The stories everyone is talking about</T></h4>
+        <p className="bs-cluster-tag">{tag}</p>
+        <h4 id={`${id}-big-title`} className="bs-cluster-title">{title}</h4>
       </div>
       <ol className="bs-cluster-row">
         {places.map((queue, place) => {

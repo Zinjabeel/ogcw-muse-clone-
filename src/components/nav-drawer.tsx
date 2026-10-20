@@ -21,25 +21,23 @@ type Section = { label: string; to: SectionPath; note: string; heading: string; 
 
 const article = (a: Article | undefined): Item | undefined => (a ? { kind: "article", a } : undefined);
 
-// The menu's sections, with the header's names (owner, 19 Oct 2026: fewer,
-// nothing said twice): the five desks, then the rest of OGCW. Gaming covers
-// the games desk and the streamers. Each shows its newest story.
+// The menu's sections, with the header's names and in its order (owner, 20
+// Oct 2026), then Trends and About. Gaming covers the games desk and the
+// streamers. Each shows its newest story; no story counts (owner: hide them).
 function buildSections(stories: Stories): Section[] {
   const longest = [...stories.all].sort((a, b) => b.words - a.words)[0];
   const first = (id: SectionId) => stories.inSection(id)[0];
-  const count = (n: number) => `${n} ${n === 1 ? "story" : "stories"}`;
-  const inSection = (id: SectionId) => stories.inSection(id).length;
   const gaming = stories.all.find((a) => a.section === "games" || a.section === "streaming");
   return [
-    { label: "Latest", to: "/news", note: count(stories.all.length), heading: "The latest", item: article(stories.all[0]) },
-    { label: "Music", to: "/music", note: count(inSection("music")), heading: "Latest in Music", item: article(first("music")) },
-    { label: "Gaming", to: "/games", note: count(inSection("games") + inSection("streaming")), heading: "Latest in Gaming", item: article(gaming), also: ["/streaming"] },
-    { label: "Culture", to: "/culture", note: count(inSection("culture")), heading: "Latest in Culture", item: article(first("culture")) },
-    { label: "Sports", to: "/sports", note: count(inSection("sports")), heading: "Latest in Sports", item: article(first("sports")) },
-    { label: "Originals", to: "/originals", note: `${EPISODES.length} episodes`, heading: "New episode", item: EPISODES[0] && { kind: "episode", e: EPISODES[0] } },
+    { label: "News for you", to: "/news", note: "Every story", heading: "The latest", item: article(stories.all[0]) },
+    { label: "Music", to: "/music", note: "Releases and tours", heading: "Latest in Music", item: article(first("music")) },
+    { label: "Gaming", to: "/games", note: "Games and streamers", heading: "Latest in Gaming", item: article(gaming), also: ["/streaming"] },
+    { label: "Entertainment", to: "/culture", note: "Fashion, TV, sneakers", heading: "Latest in Entertainment", item: article(first("culture")) },
+    { label: "Sports", to: "/sports", note: "Games and records", heading: "Latest in Sports", item: article(first("sports")) },
+    { label: "Shop", to: "/shop", note: "Brands and drops", heading: "The shops", item: SHOPS[0] && { kind: "shop", s: SHOPS[0] } },
+    { label: "Originals", to: "/originals", note: "Interviews and podcasts", heading: "New episode", item: EPISODES[0] && { kind: "episode", e: EPISODES[0] } },
     { label: "Forum", to: "/forum", note: "Seven rooms", heading: "The longest read", item: article(longest) },
     { label: "Trends", to: "/trends", note: "The report", heading: "Trending now", item: article(stories.trending[0]) },
-    { label: "Shop", to: "/shop", note: `${SHOPS.length} shops`, heading: "The shops", item: SHOPS[0] && { kind: "shop", s: SHOPS[0] } },
     { label: "About", to: "/about", note: "Who we are", heading: "Editors’ pick", item: article(stories.editorsPicks[0]) },
   ];
 }

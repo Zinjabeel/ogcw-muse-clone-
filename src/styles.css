@@ -9,6 +9,7 @@
 @import "./styles/menu.css";
 @import "./styles/about.css";
 @import "./styles/trends.css";
+@import "./styles/news.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -2943,7 +2944,18 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
 .site-header .nav-link:focus-visible { box-shadow: 0 0 0 2px var(--ogcw-accent); border-radius: 6px; }
 .site-header .nav-link-active, .site-header .nav-link-active:hover { color: var(--ogcw-accent); }
 .site-header .nav-more-button { height: 32px; }
-.site-header .nav-more-button::after { right: 30px; }
+/* The compact header (the News page, owner 20 Oct 2026): one row, the first
+   sections beside the menu button, a small OGCW in the middle, the rest by
+   the icons; it doesn't grow or shrink with the scroll */
+@media (min-width: 1024px) {
+  .site-header-space.is-compact { height: 64px; }
+  .site-header.is-compact { height: 64px; box-shadow: 0 1px 0 var(--ogcw-border); }
+  .site-header.is-compact .site-header-row { height: 64px; }
+  .site-header.is-compact .site-logo { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; letter-spacing: .1em; }
+  .site-header.is-compact .site-nav { position: static; transform: none; gap: 0; }
+  .site-header.is-compact .site-nav-left { margin-left: 6px; }
+  .site-header.is-compact .site-nav-right { margin-right: 10px; }
+}
 @media (prefers-reduced-motion: reduce) { .site-header .nav-link::after { transition: none; } }
 /* The menu panel under the sections (src/components/site-mega-menu.tsx; the panel's look is the shop's .mm-*) */
 .site-header[data-menu] { background: var(--ogcw-bg); box-shadow: 0 1px 0 var(--ogcw-border); }

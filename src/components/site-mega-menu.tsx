@@ -131,8 +131,8 @@ function aboutPanel(stories: Stories, more: boolean): Panel {
   return {
     columns: more
       ? [
-          { title: "Watch and talk", links: [{ label: "Originals", to: "/originals" }, { label: "Forum", to: "/forum" }, { label: "Trends", to: "/trends" }, { label: "Explore", to: "/explore" }] },
-          { title: "OGCW", links: [{ label: "About", to: "/about" }, { label: "Brand deals", to: "/shop" }, info("Press", "press"), info("FAQ", "faq"), info("Help", "help")] },
+          { title: "Discover", links: [{ label: "The trend report", to: "/trends" }, { label: "Explore", to: "/explore" }, { label: "Streaming", to: "/streaming" }, { label: "BTS on tour", to: "/tour/bts-arirang" }] },
+          { title: "OGCW", links: [{ label: "About", to: "/about" }, { label: "Work with OGCW", to: "/work" }, info("Press", "press"), info("FAQ", "faq"), info("Help", "help")] },
         ]
       : [
           { title: "OGCW", links: [{ label: "About OGCW", to: "/about" }, { label: "Work with OGCW", to: "/work" }, info("Press", "press"), info("Brand", "brand")] },

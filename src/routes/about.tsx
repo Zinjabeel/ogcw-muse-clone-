@@ -164,7 +164,7 @@ function Desks({ live }: { live: Stories }) {
           )}
           <div className="ab-desks-text" key={`${desk.id}-text`}>
             <p className="ab-body"><T>{desk.intro}</T></p>
-            <p className="ab-desks-meta">{desk.count} stories{desk.story && <> · Latest: <S story={desk.story} f="title" /></>}</p>
+            {desk.story && <p className="ab-desks-meta">Latest: <S story={desk.story} f="title" /></p>}
             <More to={desk.to}><T k="about.cover.go">Explore</T> <T>{desk.name}</T></More>
           </div>
         </div>
