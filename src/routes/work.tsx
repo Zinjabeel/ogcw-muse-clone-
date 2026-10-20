@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, LayoutDashboard, LogOut, Lock } from "lucide-react";
+import { ArrowRight, KeyRound, LayoutDashboard, LogOut, Lock } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
 import { GitHubMark } from "../components/account-button";
 import { enabledProviders, signIn, signInWith, signOut, useUser, type Provider } from "../lib/auth";
-import { finishStudioLogin, studioLogin, useWorkAccess } from "../lib/work";
+import { finishStudioLogin, loggedInWithPassword, passwordLogin, studioLogin, studioLogout, useWorkAccess } from "../lib/work";
 
 // For Work: the OGCW team's login, in place of a public admin page. Log in
 // with Google, GitHub or email. GitHub logs in through Sanity, the same
@@ -50,6 +50,7 @@ function WorkPage() {
   const [providers, setProviders] = useState<Record<Provider, boolean> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -69,6 +70,20 @@ function WorkPage() {
     setError("");
     setBusy("github");
     studioLogin(search.from === "admin" ? "/work?from=admin" : "/work");
+  };
+
+  const withPassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setBusy("password");
+    try {
+      await passwordLogin(adminPassword);
+      setAdminPassword("");
+      void navigate({ to: "/admin/$", params: { _splat: "" } });
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : "That didn’t work. Try again.");
+      setBusy(null);
+    }
   };
 
   const withProvider = async (provider: Provider) => {
@@ -111,7 +126,18 @@ function WorkPage() {
           <p className="authx-lede">Your account has admin access.</p>
           <div className="authx-actions">
             <Link to="/admin/$" params={{ _splat: "" }} className="auth-submit authx-wide">Open the admin dashboard <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /></Link>
-            {user && <button type="button" className="auth-secondary authx-wide" onClick={() => void signOut()}><LogOut size={15} strokeWidth={2} aria-hidden="true" /> Log out</button>}
+            {(user || loggedInWithPassword()) && (
+              <button
+                type="button"
+                className="auth-secondary authx-wide"
+                onClick={() => {
+                  studioLogout();
+                  void signOut().finally(() => window.location.reload());
+                }}
+              >
+                <LogOut size={15} strokeWidth={2} aria-hidden="true" /> Log out
+              </button>
+            )}
           </div>
         </>
       ) : loggedIn ? (
@@ -135,6 +161,24 @@ function WorkPage() {
             <button type="button" className="authx-provider" disabled={!!busy} onClick={withGitHub}>
               <GitHubMark /> {busy === "github" ? "Opening GitHub…" : "Continue with GitHub"}
             </button>
+            {/* The admin password: straight into the studio (src/lib/admin-password.ts) */}
+            <form className="authx-provider authx-passcode" onSubmit={withPassword}>
+              <KeyRound size={18} strokeWidth={2} aria-hidden="true" />
+              <input
+                type="password"
+                name="admin-password"
+                aria-label="Admin password"
+                placeholder="Admin password"
+                autoComplete="current-password"
+                inputMode="numeric"
+                value={adminPassword}
+                onChange={(event) => setAdminPassword(event.target.value)}
+                disabled={!!busy}
+              />
+              <button type="submit" aria-label="Open the studio" disabled={!!busy || !adminPassword}>
+                {busy === "password" ? "…" : <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
+              </button>
+            </form>
           </div>
           <p className="authx-divider"><span>or with email</span></p>
           <form className="auth-form" onSubmit={withEmail} noValidate>

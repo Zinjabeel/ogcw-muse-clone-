@@ -1,4 +1,5 @@
-import { ARTICLES, SECTIONS, wordCount, type Article, type Block, type Photo, type SectionId } from "@/data/content";
+import { ARTICLES, SECTIONS, wordCount, type Article, type Block, type CaptionLook, type Photo, type SectionId } from "@/data/content";
+import { cleanDesign } from "@/data/designs";
 import { SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
 
 // Sanity's stories → the site's stories (src/data/content.ts), so every page
@@ -11,7 +12,7 @@ export type SanitySpan = { _type: string; text?: string };
 export type SanityBlock = { _type: string; style?: string; listItem?: string; children?: SanitySpan[]; [key: string]: unknown };
 export type SanityStory = {
   slug?: string; section?: string; kicker?: string; title?: string; deck?: string; credit?: string; date?: string; updated?: string; certified?: boolean; ask?: string;
-  photo?: SanityPhoto; body?: SanityBlock[]; sources?: { name?: string; url?: string }[];
+  photo?: SanityPhoto; body?: SanityBlock[]; sources?: { name?: string; url?: string }[]; design?: unknown;
 };
 
 export const SECTION_IDS: SectionId[] = ["music", "games", "streaming", "culture", "sports"];
@@ -43,6 +44,22 @@ export function toPhoto(photo: SanityPhoto | undefined, width = 1600): Photo | u
 
 const text = (block: SanityBlock) => (block.children ?? []).map((span) => span.text ?? "").join("").trim();
 
+/** A photo block's caption look (size, place, style), only the values the site knows */
+export function captionLook(block: Record<string, unknown>): CaptionLook {
+  const look: CaptionLook = {};
+  if (block["captionSize"] === "s" || block["captionSize"] === "m" || block["captionSize"] === "l") look.captionSize = block["captionSize"];
+  if (block["captionAlign"] === "left" || block["captionAlign"] === "center") look.captionAlign = block["captionAlign"];
+  if (block["captionStyle"] === "plain" || block["captionStyle"] === "italic" || block["captionStyle"] === "bar") look.captionStyle = block["captionStyle"];
+  return look;
+}
+
+/** A photos block's photos, in order: the list, or (older blocks) the left and right photo */
+export function galleryPhotos(block: Record<string, unknown>): SanityPhoto[] {
+  const list = block["photos"];
+  if (Array.isArray(list) && list.length) return list as SanityPhoto[];
+  return [block["first"], block["second"]].filter((photo): photo is SanityPhoto => !!photo && typeof photo === "object");
+}
+
 // Sanity's text blocks and OGCW blocks → the site's story blocks. Bullet
 // points in a row become one list.
 export function toBlocks(body: SanityBlock[] = []): Block[] {
@@ -64,7 +81,9 @@ export function toBlocks(body: SanityBlock[] = []): Block[] {
       case "storyImage": {
         const size = (["wide", "full", "side"] as const).find((value) => value === block["size"]);
         const photo = toPhoto(block["photo"] as SanityPhoto, size === "side" ? 900 : size ? 2000 : 1400);
-        if (photo) blocks.push({ type: "image", photo, caption: String(block["caption"] ?? ""), ...(size ? { size } : {}) });
+        const caption = String(block["caption"] ?? "");
+        // No description typed: the caption describes it
+        if (photo) blocks.push({ type: "image", photo: { ...photo, alt: photo.alt || caption }, caption, ...(size ? { size } : {}), ...captionLook(block) });
         break;
       }
       case "questions":
@@ -86,9 +105,15 @@ export function toBlocks(body: SanityBlock[] = []): Block[] {
         break;
       }
       case "storyImagePair": {
-        const first = toPhoto(block["first"] as SanityPhoto, 900);
-        const second = toPhoto(block["second"] as SanityPhoto, 900);
-        if (first && second) blocks.push({ type: "images", photos: [first, second], caption: String(block["caption"] ?? "") });
+        // Photos together (any number); older ones have just a left and a right photo
+        const caption = String(block["caption"] ?? "");
+        const photos = galleryPhotos(block).flatMap((item) => {
+          const photo = toPhoto(item, 1400);
+          return photo ? [{ ...photo, alt: photo.alt || caption }] : [];
+        });
+        const layout = (["row", "slider", "grid"] as const).find((value) => value === block["layout"]);
+        const columns = typeof block["columns"] === "number" && block["columns"] >= 2 && block["columns"] <= 4 ? Math.round(block["columns"]) : undefined;
+        if (photos.length) blocks.push({ type: "images", photos, caption, ...(layout ? { layout } : {}), ...(columns ? { columns } : {}), ...captionLook(block) });
         break;
       }
       case "facts": {
@@ -117,10 +142,14 @@ export function toBlocks(body: SanityBlock[] = []): Block[] {
 
 export function toArticle(doc: SanityStory): Article | null {
   const section = SECTION_IDS.find((id) => id === doc.section);
-  const photo = toPhoto(doc.photo);
-  if (!doc.slug || !doc.title || !section || !photo) return null;
+  const lead = toPhoto(doc.photo);
+  if (!doc.slug || !doc.title || !section || !lead) return null;
+  // No description typed for the lead photo: the headline describes it
+  const photo = { ...lead, alt: lead.alt || doc.title };
   const body = toBlocks(doc.body);
+  const design = cleanDesign(doc.design);
   return {
+    ...(design ? { design } : {}),
     slug: doc.slug,
     section,
     kicker: doc.kicker ?? SECTIONS[section].label,

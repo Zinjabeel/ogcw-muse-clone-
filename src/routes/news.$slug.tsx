@@ -11,6 +11,8 @@ import { getSanityStory } from "../lib/sanity-stories";
 import { articleJsonLd } from "../lib/feeds";
 import { useStories } from "../lib/stories";
 import { T } from "@/components/site-text";
+import { Gallery, StoryPhoto } from "@/components/story-figures";
+import { designClasses } from "@/data/designs";
 
 // A single story, text first: headline, summary and byline beside a
 // modest lead photo, then the story in a reading column with subheads, pull
@@ -88,12 +90,7 @@ function BodyBlock({ block, first }: { block: Block; first: boolean }) {
         </blockquote>
       );
     case "image":
-      return (
-        <figure className={`og-inline ${block.size && block.size !== "inline" ? `og-inline-${block.size}` : ""}`}>
-          <Img photo={block.photo} className="og-inline-photo" />
-          <figcaption>{block.caption}{block.photo.credit && ` Photo: ${block.photo.credit}.`}</figcaption>
-        </figure>
-      );
+      return <StoryPhoto photo={block.photo} size={block.size} look={block} caption={block.caption} />;
     case "questions":
       return (
         <aside className="og-questions" aria-label={block.title}>
@@ -122,14 +119,7 @@ function BodyBlock({ block, first }: { block: Block; first: boolean }) {
     case "related":
       return <RelatedStories title={block.title} slugs={block.slugs} />;
     case "images":
-      return (
-        <figure className="og-inline og-pair">
-          <span className="og-pair-photos">
-            {block.photos.map((photo) => <Img key={photo.src} photo={photo} className="og-pair-photo" />)}
-          </span>
-          <figcaption>{block.caption} Photos: {block.photos.map((photo) => photo.credit).filter(Boolean).join("; ")}.</figcaption>
-        </figure>
-      );
+      return <Gallery photos={block.photos} layout={block.layout} columns={block.columns} look={block} caption={block.caption} />;
     case "list":
       return <ul className="og-list">{block.items.map((item) => <li key={item}>{item}</li>)}</ul>;
     case "facts":
@@ -266,7 +256,9 @@ function ArticlePage() {
     <SiteShell>
       <div className="og-progress" aria-hidden="true" />
       <main>
-        <article className="og-article">
+        {/* The story's design (src/data/designs.ts): the classic look unless the studio chose another */}
+        <article className={`og-article ${designClasses(story.design)}`}>
+          {story.design?.look === "breaking" && <p className="og-breaking-bar"><span className="page-wrap">Breaking</span></p>}
           <header className="page-wrap og-article-head">
             <div className="og-article-top">
               <div>

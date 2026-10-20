@@ -64,6 +64,7 @@ import haskinsPhoto from "../assets/news/dennis-haskins.jpg";
 import { unsplash, youtubeThumb, youtubeUrl } from "./media";
 import { ARIRANG_TOUR, stopLabel, upcomingStops } from "./tours";
 import { STORY_BODIES } from "./stories";
+import type { CaptionSize, StoryDesign } from "./designs";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
@@ -84,12 +85,16 @@ export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 // a checklist ("what to prepare"), questions and answers, the questions a
 // story will answer, a summary, a timeline and links to related stories.
 export type ImageSize = "inline" | "wide" | "full" | "side";
+/** How a caption looks: its size, where it sits, and its style (set per photo in the studio) */
+export type CaptionLook = { captionSize?: CaptionSize; captionAlign?: "left" | "center"; captionStyle?: "plain" | "italic" | "bar" };
+/** Photos together: side by side in one row, a slideshow with arrows, or a grid */
+export type GalleryLayout = "row" | "slider" | "grid";
 export type Block =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
   | { type: "quote"; text: string }
-  | { type: "image"; photo: Photo; caption: string; size?: ImageSize }
-  | { type: "images"; photos: [Photo, Photo]; caption: string }
+  | ({ type: "image"; photo: Photo; caption: string; size?: ImageSize } & CaptionLook)
+  | ({ type: "images"; photos: Photo[]; caption: string; layout?: GalleryLayout; columns?: number } & CaptionLook)
   | { type: "list"; items: string[] }
   | { type: "facts"; title: string; items: [string, string][] }
   | { type: "checklist"; title: string; items: string[] }
@@ -120,6 +125,8 @@ export type Article = {
   body: Block[];
   sources: Source[];
   ask?: string; // the yes/no question at the end ("Are you going?"); "Was this helpful?" when unset
+  /** The page's look, chosen in the studio (src/data/designs.ts); the classic look when unset */
+  design?: StoryDesign;
 };
 
 export { youtubeThumb, youtubeUrl, spotifyTrack } from "./media";

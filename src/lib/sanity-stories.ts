@@ -22,7 +22,7 @@ const client = createClient({
 });
 
 // Links to other stories come back as their web addresses
-const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, credit, date, updated, certified, ask, photo, sources,
+const STORY_FIELDS = `"slug": slug.current, section, kicker, title, deck, credit, date, updated, certified, ask, photo, sources, design,
   "body": body[] { ..., _type == "related" => { "slugs": stories[]->slug.current } }`;
 
 // The site keeps the list for a few seconds so busy pages don't ask Sanity

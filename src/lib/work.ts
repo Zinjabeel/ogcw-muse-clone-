@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { SANITY_PROJECT_ID } from "@/sanity/env";
 import { accessToken } from "./auth";
+import { passwordAdminLogin } from "./admin-password";
 import { getSupabase, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
 
 // Who may open the admin dashboard (/admin, the Sanity studio). Anyone can
@@ -54,12 +55,49 @@ async function sanityMember() {
   if (!token) return false;
   return once(`sanity:${token}`, async () => {
     // Only the project's members can see its details
-    const response = await fetch(`https://api.sanity.io/v2021-06-07/projects/${SANITY_PROJECT_ID}`, { headers: { Authorization: `Bearer ${token}` } });
-    return response.ok;
+    const headers = { Authorization: `Bearer ${token}` };
+    const response = await fetch(`https://api.sanity.io/v2021-06-07/projects/${SANITY_PROJECT_ID}`, { headers });
+    if (response.ok) return true;
+    // The admin password's key (a studio key, not a person) isn't shown the
+    // project's details, but Sanity says whose it is
+    const me = await fetch(`https://${SANITY_PROJECT_ID}.api.sanity.io/v2021-06-07/users/me`, { headers });
+    if (!me.ok) return false;
+    const user = (await me.json().catch(() => null)) as { id?: string } | null;
+    return Boolean(user?.id);
   }).catch(() => false);
 }
 
 const STUDIO_TOKEN_KEY = `__studio_auth_token_${SANITY_PROJECT_ID}`;
+const PASSWORD_LOGIN_KEY = "ogcw-admin-password-login";
+
+/** Log in with the admin password: the server checks it and hands back the studio's key (src/lib/admin-password.ts) */
+export async function passwordLogin(password: string) {
+  const result = await passwordAdminLogin({ data: password });
+  if (!result.ok) throw new Error(result.message);
+  localStorage.setItem(STUDIO_TOKEN_KEY, JSON.stringify({ token: result.token }));
+  localStorage.setItem(PASSWORD_LOGIN_KEY, "1");
+  answers.clear();
+}
+
+/** Logged in here with the admin password (not with GitHub) */
+export function loggedInWithPassword() {
+  try {
+    return localStorage.getItem(PASSWORD_LOGIN_KEY) === "1" && !!localStorage.getItem(STUDIO_TOKEN_KEY);
+  } catch {
+    return false;
+  }
+}
+
+/** Log out of the studio on this browser (the admin password or GitHub) */
+export function studioLogout() {
+  try {
+    localStorage.removeItem(STUDIO_TOKEN_KEY);
+    localStorage.removeItem(PASSWORD_LOGIN_KEY);
+  } catch {
+    // nothing kept, nothing to remove
+  }
+  answers.clear();
+}
 
 /**
  * Log in to the studio with GitHub, through Sanity itself (the same login

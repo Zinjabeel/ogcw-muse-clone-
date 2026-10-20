@@ -691,6 +691,9 @@ const imageItems = (content: SiteContent) =>
     _type: "siteImage",
     key,
     section: content.meta[key]?.section ?? sectionOfKey(key),
+    // The picture it replaces (a "pic." photo is found on the page by it), so Restore puts it back in the right place
+    ...(content.meta[key]?.usual ? { usual: content.meta[key]!.usual } : {}),
+    ...(content.meta[key]?.page ? { page: content.meta[key]!.page } : {}),
     ...(image.alt ? { alt: image.alt } : {}),
     ...(image.fit ? { fit: image.fit } : {}),
     ...(image.clear ? { clear: true } : {}),

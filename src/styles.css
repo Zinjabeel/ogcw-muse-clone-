@@ -10,6 +10,8 @@
 @import "./styles/about.css";
 @import "./styles/trends.css";
 @import "./styles/news.css";
+@import "./styles/story-designs.css";
+@import "./styles/studio-editor.css";
 
 @custom-variant dark (&:is(.dark *));
 

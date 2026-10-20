@@ -106,6 +106,8 @@ const contentFields = [
       fields: [
         defineField({ name: "key", title: "Where", type: "string", readOnly: true }),
         defineField({ name: "section", title: "Part of the site", type: "string", readOnly: true }),
+        defineField({ name: "usual", title: "The picture it replaces", type: "string", readOnly: true }),
+        defineField({ name: "page", title: "Page", type: "string", readOnly: true }),
         defineField({ name: "image", title: "Photo", type: "image" }),
         defineField({ name: "url", title: "…or a photo link", type: "url" }),
         defineField({ name: "alt", title: "Describe the photo", type: "string" }),
@@ -154,6 +156,7 @@ export const siteSnapshot = defineType({
   orderings: [{ title: "Newest first", name: "atDesc", by: [{ field: "at", direction: "desc" }] }],
   preview: {
     select: { at: "at", by: "by", summary: "summary" },
-    prepare: ({ at, by, summary }) => ({ title: formatWhen(at) || "Version", subtitle: [by, summary].filter(Boolean).join(" · ") }),
+    // What changed first, then when and who: easier to find the one to go back to
+    prepare: ({ at, by, summary }) => ({ title: summary ? String(summary).replace(/^./, (first) => first.toUpperCase()) : "Saved the site", subtitle: [formatWhen(at), by].filter(Boolean).join(" · ") }),
   },
 });
