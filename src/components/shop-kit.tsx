@@ -9,6 +9,7 @@ import { Drawer, DrawerBody, DrawerClose, DrawerContent, DrawerDescription, Draw
 import { NotFoundPage } from "./not-found";
 import { SiteShell } from "./ogcw-layout";
 import { ShopHeader } from "./shop-header";
+import { ShopBackdrop } from "./shop-backdrop";
 import { EditSection, T } from "./site-text";
 
 // The OGCW Shop's own pieces: the product card on its stage, the heart that
@@ -362,6 +363,8 @@ export function ShopShell({ children }: { children: ReactNode }) {
     <SiteShell header={<ShopHeader />}>
       <EditSection name="Shop pages">
         <div className="sx">
+          {/* The flowing shards behind every shop page (src/components/shop-backdrop.tsx) */}
+          <ShopBackdrop />
           <main className="sx-main">{children}</main>
           <CartDrawer />
         </div>
