@@ -15,6 +15,7 @@
 @import "./styles/auth-keylight.css";
 @import "./styles/footer-wall.css";
 @import "./styles/shop-backdrop.css";
+@import "./styles/newsletter-prompt.css";
 
 @custom-variant dark (&:is(.dark *));
 

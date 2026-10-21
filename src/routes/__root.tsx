@@ -19,6 +19,7 @@ import { EMPTY_SITE, SiteTextProvider } from "../lib/site-text";
 import { SiteEditor, SiteLayouts } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
+import { NewsletterPrompt } from "../components/newsletter-prompt";
 import { CardHover } from "../components/card-hover";
 import { SiteIntro, introInitScript } from "../components/site-intro";
 import { fitInitScript } from "../lib/laptop-fit";
@@ -130,6 +131,8 @@ function RootComponent() {
             <Outlet />
           </StudioHost>
           <SiteEditor />
+          {/* After logging in: "Subscribe to our newsletter", once per account */}
+          <NewsletterPrompt />
           {/* Pictures an admin moved or resized, in their places for everyone */}
           <SiteLayouts />
           <CardHover />
