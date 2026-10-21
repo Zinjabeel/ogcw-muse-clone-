@@ -1,0 +1,115 @@
+/* ------------------------------------------------------------------
+   The site footer (src/components/ui/footer-2.tsx), after the Driftbar
+   meadow footer the owner picked (21 Oct 2026): one full-height footer,
+   drawn on a 1440 x 672 frame (lengths are design pixels times --u). The
+   pale top holds the brand block and four link columns; a blue-hour meadow
+   film fills the lower half and fades into the page; a giant frosted-glass
+   OGCW sinks into lavender fog. Colours follow the site's theme. Nothing
+   moves on scroll; the only motion is the film and the hovers.
+   ------------------------------------------------------------------ */
+.site-footer.dfoot {
+  --u: min(100vw / 1440, 100vh / 672);
+  --u: min(100vw / 1440, 100svh / 672);
+  --df-paper: var(--ogcw-bg);
+  --df-ink: var(--ogcw-text);
+  --df-body: var(--ogcw-text-2);
+  --df-muted: color-mix(in srgb, var(--ogcw-text-2) 72%, var(--ogcw-bg));
+  --df-mist: color-mix(in srgb, var(--ogcw-bg) 52%, #c9cbef);
+  position: relative;
+  height: 100vh; height: 100svh;
+  overflow: hidden; isolation: isolate;
+  background: var(--df-paper); color: var(--df-ink);
+  font-family: var(--ogcw-ui); -webkit-font-smoothing: antialiased;
+}
+
+/* The film, and the haze over it that keeps the words readable */
+.dfoot-stage { position: absolute; inset: 0; z-index: 0; }
+.dfoot-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; transform: translateY(9%); }
+.dfoot-stage::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 96%, transparent) 26%, color-mix(in srgb, var(--df-paper) 72%, transparent) 44%, color-mix(in srgb, var(--df-paper) 0%, transparent) 70%);
+}
+
+/* The giant frosted-glass OGCW (no outline: the letters' overlaps would show) */
+.dfoot-wordmark {
+  position: absolute; left: 50%; bottom: calc(-2 * var(--u)); z-index: 1;
+  margin: 0; transform: translateX(-50%);
+  font: 600 calc(360 * var(--u)) / .74 var(--ogcw-display); letter-spacing: .01em; white-space: nowrap;
+  pointer-events: none; user-select: none;
+  color: rgb(232 234 250 / .4);
+  background: linear-gradient(to bottom, rgb(255 255 255 / .78), rgb(214 218 246 / .36) 48%, rgb(255 255 255 / .62));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 calc(-1 * var(--u)) 0 rgb(255 255 255 / .55)) drop-shadow(0 0 calc(18 * var(--u)) rgb(190 200 255 / .45));
+}
+.dfoot-fog { position: absolute; inset: auto 0 0; z-index: 2; height: 17%; pointer-events: none; background: linear-gradient(to top, var(--df-mist) 0%, color-mix(in srgb, var(--df-mist) 60%, transparent) 30%, color-mix(in srgb, var(--df-mist) 0%, transparent) 100%); }
+
+/* The words: the brand block and four link columns */
+.dfoot-content {
+  position: relative; z-index: 3;
+  display: grid; grid-template-columns: calc(400 * var(--u)) calc(190 * var(--u)) calc(190 * var(--u)) calc(190 * var(--u)) 1fr; align-items: start;
+  width: calc(1440 * var(--u)); margin: 0 auto; padding: calc(80 * var(--u)) calc(100 * var(--u)) 0 calc(160 * var(--u));
+}
+.dfoot-logo { display: inline-flex; align-items: center; gap: calc(10 * var(--u)); font: 600 calc(17 * var(--u)) / 1 var(--ogcw-display); letter-spacing: .04em; }
+.dfoot-mark { position: relative; flex: none; width: calc(30 * var(--u)); height: calc(30 * var(--u)); border-radius: calc(8 * var(--u)); background: linear-gradient(to bottom, #2b2b2b, #0a0a0a 55%); box-shadow: 0 calc(1 * var(--u)) calc(2 * var(--u)) rgb(0 0 0 / .25); }
+.dfoot-mark::after { content: ""; position: absolute; left: 13%; right: 13%; bottom: 14%; height: 19%; border-radius: 999px; background: #ffe600; }
+.dfoot-title { margin: calc(19 * var(--u)) 0 0; font: 600 calc(20 * var(--u)) / 1.2 var(--ogcw-ui); letter-spacing: -.035em; }
+.dfoot-text { max-width: calc(380 * var(--u)); margin: calc(16 * var(--u)) 0 0; font-size: calc(13.7 * var(--u)); line-height: 1.43; letter-spacing: -.012em; color: var(--df-body); }
+.dfoot-cta { display: inline-flex; align-items: center; gap: calc(6 * var(--u)); height: calc(32.5 * var(--u)); margin-top: calc(20 * var(--u)); padding: 0 calc(16 * var(--u)) 0 calc(15 * var(--u)); border-radius: calc(7 * var(--u)); background: var(--df-ink); color: var(--df-paper); font-size: calc(11.8 * var(--u)); font-weight: 500; letter-spacing: -.01em; transition: background-color .2s ease, transform .2s ease; }
+.dfoot-cta svg { width: calc(13 * var(--u)); height: calc(13 * var(--u)); }
+.dfoot-cta:hover, .dfoot-cta:focus-visible { background: color-mix(in srgb, var(--df-ink) 84%, var(--df-paper)); transform: translateY(-1px); outline: none; }
+.dfoot-copy { margin: calc(23 * var(--u)) 0 0; font-size: calc(12.2 * var(--u)); letter-spacing: .01em; color: var(--df-muted); }
+.dfoot-quiet { color: inherit; transition: color .2s ease; }
+.dfoot-quiet:hover, .dfoot-quiet:focus-visible { color: var(--df-ink); outline: none; }
+.dfoot-by { display: flex; align-items: center; gap: calc(8 * var(--u)); margin-top: calc(18 * var(--u)); font-size: calc(11.8 * var(--u)); font-weight: 500; letter-spacing: -.01em; }
+.dfoot-socials { display: inline-flex; gap: calc(5 * var(--u)); }
+.dfoot-social { display: grid; place-items: center; width: calc(23 * var(--u)); height: calc(23 * var(--u)); border-radius: 50%; background: var(--df-ink); color: var(--df-paper); transition: background-color .2s ease, color .2s ease; }
+.dfoot-social svg { width: calc(11 * var(--u)); height: calc(11 * var(--u)); }
+.dfoot-social:hover, .dfoot-social:focus-visible { background: var(--ogcw-accent); color: #0d0d0d; outline: none; }
+.dfoot-status { display: flex; flex-wrap: wrap; gap: calc(8 * var(--u)); margin: calc(16 * var(--u)) 0 0; padding: 0; list-style: none; }
+.dfoot-chip { display: inline-flex; align-items: center; gap: calc(6 * var(--u)); height: calc(25 * var(--u)); padding: 0 calc(10 * var(--u)); border: 1px solid color-mix(in srgb, var(--df-ink) 12%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--df-paper) 55%, transparent); font-size: calc(10.8 * var(--u)); font-weight: 500; letter-spacing: -.01em; white-space: nowrap; }
+.dfoot-chip svg { width: calc(11 * var(--u)); height: calc(11 * var(--u)); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dfoot-dot { width: calc(6 * var(--u)); height: calc(6 * var(--u)); border-radius: 50%; background: #2fb36a; box-shadow: 0 0 0 calc(2.5 * var(--u)) rgb(47 179 106 / .18); }
+
+.dfoot-col-title { margin: 0; font: 600 calc(16 * var(--u)) / 1 var(--ogcw-ui); letter-spacing: -.035em; }
+.dfoot-list { display: grid; gap: calc(14 * var(--u)); margin: calc(22 * var(--u)) 0 0; padding: 0; list-style: none; font-size: calc(13.2 * var(--u)); line-height: 1.24; letter-spacing: .01em; }
+.dfoot-col-menu .dfoot-list { gap: calc(12 * var(--u)); font-weight: 500; letter-spacing: -.02em; }
+.dfoot .footer-link { transition: opacity .2s ease; }
+.dfoot .footer-link:hover, .dfoot .footer-link:focus-visible { opacity: .55; text-shadow: none; }
+.dfoot .footer-button { font-size: inherit; }
+.dfoot-extras { display: flex; flex-wrap: wrap; align-items: center; gap: calc(6 * var(--u)); margin-top: calc(20 * var(--u)); }
+.dfoot-extras .app-badge { height: calc(34 * var(--u)); background: color-mix(in srgb, var(--df-paper) 60%, transparent); }
+
+/* ---------------------------------------------------------- Tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .site-footer.dfoot { --u: min(100vw / 1040, 100svh / 760); }
+  .dfoot-content { grid-template-columns: calc(330 * var(--u)) repeat(4, 1fr); column-gap: calc(16 * var(--u)); width: calc(1040 * var(--u)); padding: calc(60 * var(--u)) calc(40 * var(--u)) 0; }
+  .dfoot-text { max-width: calc(310 * var(--u)); }
+  .dfoot-wordmark { bottom: calc(10 * var(--u)); font-size: calc(270 * var(--u)); }
+}
+
+/* ---------------------------------------------------------- Phones */
+@media (max-width: 767px) {
+  .site-footer.dfoot { --u: 1px; display: flex; flex-direction: column; height: auto; min-height: 100svh; }
+  .dfoot-stage::after { background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 95%, transparent) 50%, color-mix(in srgb, var(--df-paper) 80%, transparent) 68%, color-mix(in srgb, var(--df-paper) 0%, transparent) 90%); }
+  .dfoot-content { grid-template-columns: auto auto; justify-content: space-between; gap: 36px 12px; width: 100%; margin-bottom: max(34vw, 150px); padding: 40px 20px 0; }
+  .dfoot-brand { grid-column: 1 / -1; }
+  .dfoot-title { font-size: 21px; }
+  .dfoot-text { max-width: 34em; font-size: 14px; }
+  .dfoot-cta { height: 38px; padding: 0 18px 0 16px; border-radius: 8px; font-size: 13px; }
+  .dfoot-cta svg { width: 14px; height: 14px; }
+  .dfoot-copy, .dfoot-by { font-size: 12.5px; }
+  .dfoot-social { width: 30px; height: 30px; }
+  .dfoot-social svg { width: 13px; height: 13px; }
+  .dfoot-chip { height: 28px; font-size: 12px; }
+  .dfoot-col-title { font-size: 15px; }
+  .dfoot-list, .dfoot-col-menu .dfoot-list { gap: 14px; margin-top: 20px; font-size: 13px; letter-spacing: 0; }
+  .dfoot-extras { margin-top: 18px; }
+  .dfoot-extras .app-badge { height: 36px; }
+  .dfoot-wordmark { bottom: 5vw; font-size: 27vw; }
+  .dfoot-fog { height: 7%; }
+}
+@media (max-width: 359px) { .dfoot-content { grid-template-columns: 1fr 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dfoot-cta, .dfoot .footer-link, .dfoot-social { transition: none; }
+}
