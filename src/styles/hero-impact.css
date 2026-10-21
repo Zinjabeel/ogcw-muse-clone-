@@ -1,0 +1,102 @@
+/* ------------------------------------------------------------------
+   Impact grid hero (src/components/hero-impact.tsx), rebuilt 21 Oct 2026
+   after Complex (one big lead, a mosaic of covers) and Moncler (pictures
+   edge to edge with hairline seams, words on black beside or under them,
+   small spaced capitals, a serif headline, thin underlined links).
+   The hero keeps its dark colours in every theme. Nothing moves on scroll:
+   the pictures fade in once, and push in slowly (1s) under the pointer.
+   The older .impact-* rules in styles.css no longer match anything.
+   ------------------------------------------------------------------ */
+.impact.imx {
+  --imx-seam: 3px;
+  --imx-ink: #f2f0ea;
+  --imx-dim: rgb(242 240 234 / .64);
+  --imx-black: #050505;
+  --imx-pad: clamp(22px, calc(3.2 * var(--vw, 1vw)), 64px);
+  display: block; height: auto; min-height: 0; padding: 0 0 var(--hero-gap, 64px);
+  background: var(--imx-black); color: var(--imx-ink); font-family: var(--ogcw-ui);
+}
+.imx-grid { display: grid; gap: var(--imx-seam); background: var(--imx-black); }
+
+/* Small spaced capitals: the labels and the links */
+.imx-label { margin: 0; font-size: 11px; font-weight: 700; line-height: 1.3; letter-spacing: .2em; text-transform: uppercase; color: var(--ogcw-accent); }
+.imx-link {
+  display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding-bottom: 5px;
+  border-bottom: 1px solid currentColor; font-size: 11.5px; font-weight: 700; line-height: 1; letter-spacing: .18em; text-transform: uppercase; color: var(--imx-ink);
+  transition: border-color .3s ease-in-out, gap .3s ease-in-out;
+}
+.imx-link svg { flex: none; }
+
+/* ---------------------------------------------------------- The lead */
+.imx-lead { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; min-width: 0; background: #000; }
+.imx-lead-words { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; min-width: 0; padding: var(--imx-pad); }
+.imx-lead-foot { display: grid; gap: clamp(16px, calc(1.4 * var(--vw, 1vw)), 24px); justify-items: start; }
+.imx-lead-title {
+  margin: 0; max-width: 8ch;
+  font-family: var(--ogcw-display); font-size: clamp(52px, calc(5.4 * var(--vw, 1vw)), 112px); font-weight: 400; line-height: .9; letter-spacing: -.035em;
+  color: var(--imx-ink); text-wrap: balance;
+}
+.imx-lead-deck { max-width: 30rem; margin: 0; font-family: var(--ogcw-serif); font-size: clamp(15.5px, calc(1.1 * var(--vw, 1vw)), 18.5px); line-height: 1.55; color: var(--imx-dim); }
+.imx-lead-link { margin-top: 6px; }
+.imx-lead-link:hover, .imx-lead-link:focus-visible { gap: 12px; border-bottom-color: var(--ogcw-accent); outline: none; }
+
+/* The poster: only its artwork (its own printed frame cropped off), the full height of the lead */
+.imx-poster { position: relative; display: block; height: 100%; aspect-ratio: 1014 / 1550; overflow: hidden; background: #000; }
+.imx-poster-img {
+  position: absolute; left: -19.72%; top: -6.45%; width: 139.45%; max-width: none; height: auto;
+  transform-origin: 50% 40%; transition: transform 1s ease-in-out; animation: imx-in 1.1s ease both;
+}
+/* Another picture put there by an admin simply fills the space */
+.imx-poster.is-own .imx-poster-img { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.imx-lead:hover .imx-poster-img { transform: scale(1.035); }
+
+/* ---------------------------------------------------------- The covers beside it */
+.imx-doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--imx-seam); min-width: 0; }
+.imx-door { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; background: var(--imx-black); color: var(--imx-ink); outline: none; }
+.imx-door-wide { grid-column: 1 / -1; }
+/* The campaign picture keeps its OGCW wordmark in view */
+.imx-door-wide .imx-door-photo img { object-position: 50% 22%; }
+.imx-door-photo { position: relative; display: block; min-height: 0; overflow: hidden; background: #111; }
+.imx-door-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1s ease-in-out; animation: imx-in 1.1s ease both; }
+.imx-door:hover .imx-door-photo img, .imx-door:focus-visible .imx-door-photo img { transform: scale(1.04); }
+.imx-door-words { display: grid; gap: 8px; justify-items: start; padding: clamp(16px, calc(1.4 * var(--vw, 1vw)), 24px) clamp(18px, calc(1.6 * var(--vw, 1vw)), 28px) clamp(18px, calc(1.6 * var(--vw, 1vw)), 28px); }
+.imx-door-title { font-family: var(--ogcw-display); font-size: clamp(18px, calc(1.35 * var(--vw, 1vw)), 25px); font-weight: 400; line-height: 1.12; letter-spacing: -.012em; text-wrap: balance; }
+.imx-door-wide .imx-door-words { grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: 24px; }
+.imx-door-wide .imx-label { grid-column: 1 / -1; }
+.imx-door-wide .imx-door-title { font-size: clamp(20px, calc(1.65 * var(--vw, 1vw)), 30px); }
+.imx-door .imx-link { margin-top: 6px; }
+.imx-door-wide .imx-link { margin-top: 0; }
+.imx-door:hover .imx-link, .imx-door:focus-visible .imx-link { gap: 12px; border-bottom-color: var(--ogcw-accent); }
+.imx-door:focus-visible { box-shadow: inset 0 0 0 2px var(--ogcw-accent); }
+/* The shop headline trails off: the list carries on inside */
+.imx-door-fade { white-space: nowrap; background: linear-gradient(90deg, var(--imx-ink) 0%, rgb(242 240 234 / .35) 50%, rgb(242 240 234 / 0) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+@keyframes imx-in { from { opacity: 0; } }
+
+/* ---------------------------------------------------------- Computers: everything in the first screen */
+@media (min-width: 1024px) {
+  .imx-grid { grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr); height: clamp(600px, calc(100svh - 122px), 980px); }
+  .imx-lead { min-height: 0; }
+}
+
+/* ---------------------------------------------------------- Tablets and phones: stacked */
+@media (max-width: 1023px) {
+  .imx-lead { grid-template-columns: minmax(0, 1fr); }
+  .imx-poster { order: -1; justify-self: center; width: min(100%, 520px); height: auto; max-height: 76svh; }
+  .imx-poster.is-own { width: 100%; max-height: none; aspect-ratio: 4 / 5; }
+  .imx-lead-words { gap: 18px; padding: 26px 20px 34px; }
+  .imx-lead-title { font-size: clamp(52px, calc(14 * var(--vw, 1vw)), 88px); }
+  .imx-doors { grid-template-rows: auto auto; }
+  .imx-door-wide .imx-door-photo { aspect-ratio: 16 / 9; }
+  .imx-door:not(.imx-door-wide) .imx-door-photo { aspect-ratio: 1; }
+  .imx-door-words { padding: 14px 16px 20px; }
+}
+@media (max-width: 560px) {
+  .imx-door-wide .imx-door-words { grid-template-columns: minmax(0, 1fr); row-gap: 8px; }
+  .imx-door-title { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imx-poster-img, .imx-door-photo img { animation: none; transition: none; }
+  .imx-link { transition: none; }
+}

@@ -4,92 +4,94 @@ import { useSiteText } from "@/lib/site-text";
 import { EditableImage, T } from "./site-text";
 import { CARDS } from "./hero-gallery";
 import tourMaViePoster from "@/assets/hero/tour-ma-vie.webp";
-import partnersImage from "@/assets/hero/ogcw-partners.webp";
 import newsletterImage from "@/assets/hero/ogcw-newsletter.webp";
 
-// Impact grid hero (the default in the hero switcher): the Complex-style
-// front. The lead is Doja Cat's Tour Ma Vie: a short note and a block CTA
-// on the left, the tour poster standing full height on the right (on black,
-// so it never looks squeezed) — and three doors (Newsletter, News, Shop)
-// stand in a column beside it, like secondary covers. The doors keep their
-// texts from the gallery hero, so edits carry across. Admins can change the
-// words and the poster on the page. Entry: the pieces rise in sequence
-// once, held still for reduced motion.
+// Impact grid hero (the default in the hero switcher), rebuilt 21 Oct 2026
+// after Complex and Moncler (owner: "simple, effective… colours, pictures
+// and text all look actually good"). Complex's front: one big lead and a
+// mosaic of covers beside it. Moncler's finish: the pictures run edge to
+// edge with hairline seams and no frames, the words never sit on a picture
+// (they sit on black beside or under it), few of them, in small spaced
+// capitals, a serif headline and thin underlined links.
+//  - The lead: Doja Cat's Tour Ma Vie. The poster's artwork stands the full
+//    height on the right (its own printed frame cropped off), the words on
+//    black to its left.
+//  - Beside it: the OGCW newsletter campaign picture, wide, and under it two
+//    smaller covers, News and Shop (release dates).
+// Every word and picture can still be changed on the page by an admin (the
+// same keys as before). Nothing moves on scroll; the pictures fade in once
+// and push in slowly under the pointer.
 
 // Tour Ma Vie, North American leg: 1 Oct (Detroit) to 1 Dec 2026 (Madison
 // Square Garden), 31 dates (Live for Live Music, mxdwn, Sept 2025)
 const TOUR_URL = "https://dojacat.com";
 
-const DOORS = CARDS.filter((card) => card.id === "subscribe" || card.id === "news" || card.id === "shop");
+const NEWS = CARDS.find((card) => card.id === "news")!;
+const SHOP = CARDS.find((card) => card.id === "shop")!;
 
-// This hero's own words and photos for two doors (the gallery hero keeps its
-// own). The shop door teases the Jordan calendar: the headline fades out
-// from the middle of the second "Jordan" (`fade` is the part that fades), to
-// show the list carries on inside.
-const DOOR_OVERRIDES: Partial<Record<string, { label: string; title: string; cta: string; photo?: string; fade?: string }>> = {
-  shop: {
-    label: "Shop · Release dates",
-    title: "Jordan release dates: the Air Jor",
-    fade: "dan 1 High",
-    cta: "See the drops",
-    photo: partnersImage,
-  },
-  subscribe: { label: "Newsletter", title: "The week in culture, straight to your inbox", cta: "Sign up free", photo: newsletterImage },
-};
+/** A cover: its picture, then its words on black under it, the whole thing one link */
+function Door({ k, photo, alt, label, title, fade, cta, to, hash, wide = false }: {
+  k: string; photo: string; alt: string; label: string; title: string; fade?: string; cta: string; to: "/news" | "/shop/drops" | "/"; hash?: string; wide?: boolean;
+}) {
+  const body = (
+    <>
+      <span className="imx-door-photo">
+        <EditableImage k={k} src={photo} alt={alt} loading="eager" draggable={false} />
+      </span>
+      <span className="imx-door-words">
+        <span className="imx-label"><T k={`${k}.label`}>{label}</T></span>
+        <span className="imx-door-title"><T k={`${k}.title`}>{title}</T>{fade && <span className="imx-door-fade"><T k={`${k}.title-fade`}>{fade}</T></span>}</span>
+        <span className="imx-link"><T k={`${k}.cta`}>{cta}</T> <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></span>
+      </span>
+    </>
+  );
+  const className = `imx-door${wide ? " imx-door-wide" : ""}`;
+  return hash ? <Link to="/" hash={hash} className={className}>{body}</Link> : <Link to={to} className={className}>{body}</Link>;
+}
 
 export function HeroImpact() {
   const site = useSiteText();
+  // The poster's own printed frame is cropped off, unless an admin has put another picture there
+  const ownPoster = Boolean(site.image("hero.tour.poster"));
 
   return (
-    <section className="impact" aria-labelledby="impact-title">
+    <section className="impact imx" aria-labelledby="impact-title">
       <h1 id="impact-title" className="sr-only">OGCW, One Great Culture World</h1>
 
-      {/* The huge OGCW behind the frame */}
-      <span className="impact-watermark" aria-hidden="true">OGCW</span>
-
-      <div className="impact-frame">
-        {/* The lead: Tour Ma Vie, the note on the left and the poster on the right */}
-        <article className="impact-lead impact-tour">
-          <div className="impact-lead-body">
-            <p className="impact-stamp"><T k="hero.tour.stamp">On tour now · Music</T></p>
-            <h2 className="impact-lead-title"><T k="hero.tour.title">Tour Ma Vie</T></h2>
-            <p className="impact-lead-deck"><T k="hero.tour.copy">Doja Cat takes her album Vie around the world. The North American leg opened in Detroit on 1 October and runs 31 nights, ending at Madison Square Garden in New York on 1 December.</T></p>
-            <a href={TOUR_URL} target="_blank" rel="noopener noreferrer" className="impact-lead-cta">
-              <T k="hero.tour.cta">Tour dates & tickets</T>
-              <ArrowUpRight size={18} strokeWidth={2.5} aria-hidden="true" />
-            </a>
+      <div className="imx-grid">
+        {/* The lead: Tour Ma Vie */}
+        <article className="imx-lead">
+          <div className="imx-lead-words">
+            <p className="imx-label imx-lead-label"><T k="hero.tour.stamp">On tour now · Music</T></p>
+            <div className="imx-lead-foot">
+              <h2 className="imx-lead-title"><T k="hero.tour.title">Tour Ma Vie</T></h2>
+              <p className="imx-lead-deck"><T k="hero.tour.copy">Doja Cat takes her album Vie around the world. The North American leg opened in Detroit on 1 October and runs 31 nights, ending at Madison Square Garden in New York on 1 December.</T></p>
+              <a href={TOUR_URL} target="_blank" rel="noopener noreferrer" className="imx-link imx-lead-link">
+                <T k="hero.tour.cta">Tour dates & tickets</T>
+                <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />
+              </a>
+            </div>
           </div>
-          <a href={TOUR_URL} target="_blank" rel="noopener noreferrer" className="impact-poster" tabIndex={-1} aria-hidden="true">
-            <EditableImage k="hero.tour.poster" className="impact-poster-img" src={tourMaViePoster} alt="The Tour Ma Vie poster: the title in red and white over a collage portrait, “concludes in NY city, 1 December”" loading="eager" draggable={false} width={1414} height={2000} />
+          <a href={TOUR_URL} target="_blank" rel="noopener noreferrer" className={`imx-poster${ownPoster ? " is-own" : ""}`} tabIndex={-1} aria-hidden="true">
+            <EditableImage k="hero.tour.poster" className="imx-poster-img" src={tourMaViePoster} alt="The Tour Ma Vie poster: the title in red and white over a collage portrait, “concludes in NY city, 1 December”" loading="eager" draggable={false} width={1414} height={2000} />
           </a>
         </article>
 
-        {/* The three doors beside it */}
-        <div className="impact-doors">
-          {DOORS.map((door) => {
-            const own = DOOR_OVERRIDES[door.id];
-            const key = own ? `hero.impact.${door.id}` : `hero.card.${door.id}`;
-            const photo = own?.photo ? (site.image(key)?.src ?? own.photo) : (site.image(`hero.card.${door.id}`)?.src ?? door.photo);
-            const inner = (
-              <>
-                <span className="impact-door-photo">
-                  <img src={photo} alt="" loading="lazy" />
-                </span>
-                <span className="impact-door-body">
-                  <span className="impact-door-label"><T k={`${key}.label`}>{own?.label ?? door.label}</T></span>
-                  <span className="impact-door-title"><T k={`${key}.title`}>{own?.title ?? door.title}</T>{own?.fade && <span className="impact-door-fade"><T k={`${key}.title-fade`}>{own.fade}</T></span>}</span>
-                  <span className="impact-door-go"><T k={`${key}.cta`}>{own?.cta ?? door.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
-                </span>
-              </>
-            );
-            const className = `impact-door impact-door-${door.id}`;
-            if (door.id === "shop") return <Link key={door.id} to="/shop/drops" className={className}>{inner}</Link>; // "See the drops": the release dates
-            return "to" in door.dest ? (
-              <Link key={door.id} to={door.dest.to} className={className}>{inner}</Link>
-            ) : (
-              <Link key={door.id} to="/" hash={door.dest.hash} className={className}>{inner}</Link>
-            );
-          })}
+        {/* Beside it: the newsletter wide, News and Shop under it */}
+        <div className="imx-doors">
+          <Door
+            k="hero.impact.subscribe"
+            photo={newsletterImage}
+            alt="The OGCW newsletter campaign: a woman in red sunglasses biting a gold-ringed finger, OGCW across the top"
+            label="Newsletter"
+            title="The week in culture, straight to your inbox"
+            cta="Sign up free"
+            to="/"
+            hash="newsletter-title"
+            wide
+          />
+          <Door k="hero.card.news" photo={NEWS.photo} alt={NEWS.alt} label={NEWS.label} title={NEWS.title} cta={NEWS.cta} to="/news" />
+          <Door k="hero.impact.shop" photo={SHOP.photo} alt={SHOP.alt} label="Shop · Release dates" title="Jordan release dates: the Air Jor" fade="dan 1 High" cta="See the drops" to="/shop/drops" />
         </div>
       </div>
     </section>

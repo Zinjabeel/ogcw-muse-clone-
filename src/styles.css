@@ -17,6 +17,7 @@
 @import "./styles/shop-backdrop.css";
 @import "./styles/newsletter-prompt.css";
 @import "./styles/code-slots.css";
+@import "./styles/hero-impact.css";
 
 @custom-variant dark (&:is(.dark *));
 
