@@ -107,54 +107,68 @@ function AppBadge({ store }: { store: "apple" | "google" }) {
   );
 }
 
-// The meadow film under the footer (the owner's Driftbar design, 21 Oct
-// 2026): loaded only when the footer comes near, and left as a still picture
-// for people who turn motion off
-const MEADOW_VIDEO = "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/4d01c727-d9c5-47c8-a778-35a451ffd39f.mp4";
-const MEADOW_STILL = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20261014_121838_c97d0940-f430-4304-8573-4f47ee44f447.png";
+// The wall of stories under the footer: the latest stories' photos in three
+// rows, tilted back like a wall of screens, tinted in the site's colour and
+// drifting slowly sideways. Photos load only when the footer comes near; with
+// motion turned off the wall stands still.
+const WALL_ROWS = 3;
+const WALL_PER_ROW = 8;
 
-function useMeadow() {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [src, setSrc] = useState<string | undefined>(undefined);
+function useNear<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [near, setNear] = useState(false);
   useEffect(() => {
-    const video = ref.current;
-    if (!video || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const el = ref.current;
+    if (!el) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry?.isIntersecting) return;
-      setSrc(MEADOW_VIDEO);
+      setNear(true);
       observer.disconnect();
-    }, { rootMargin: "400px 0px" });
-    observer.observe(video);
+    }, { rootMargin: "600px 0px" });
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  useEffect(() => { if (src) void ref.current?.play().catch(() => {}); }, [src]);
-  return { ref, src };
+  return { ref, near };
 }
 
 const Svg = ({ children }: { children: ReactNode }) => <svg viewBox="0 0 24 24" aria-hidden="true">{children}</svg>;
 
 /**
- * The site footer, after the Driftbar footer the owner picked (21 Oct 2026):
- * a full-height footer, the brand block and the link columns on the pale
- * top, a looping film of a blue-hour meadow (mist, fireflies, first stars)
- * filling the lower half and fading into the page, and a giant frosted-glass
- * OGCW sinking into lavender fog at the bottom. OGCW's own words and links
- * throughout; the chips only say what's true (the story count is live).
+ * The site footer, after the Driftbar footer the owner picked (21 Oct 2026),
+ * in OGCW's own colours: a full-height footer, the brand block and the link
+ * columns at the top; below them a wall of the latest stories' photos, tinted
+ * in the theme's colour and fading into the page; and "One Great Culture
+ * World" in giant frosted glass sinking into a mist of the same colour.
+ * OGCW's own words and links throughout; the chips only say what's true (the
+ * story count is live).
  */
 export function Footer2() {
-  const meadow = useMeadow();
   const stories = useStories();
+  const wall = useNear<HTMLDivElement>();
+  const photos = stories.all.slice(0, WALL_ROWS * WALL_PER_ROW).map((story) => story.photo);
+  const rows = Array.from({ length: WALL_ROWS }, (_, row) => photos.filter((_, index) => index % WALL_ROWS === row));
   return (
     <footer className="site-footer dfoot">
-      <div className="dfoot-stage" aria-hidden="true">
-        <video ref={meadow.ref} className="dfoot-video" src={meadow.src} poster={MEADOW_STILL} muted loop playsInline preload="none" />
+      <div className="dfoot-stage" ref={wall.ref} aria-hidden="true">
+        {wall.near && photos.length > 0 && (
+          <div className="dfoot-wall">
+            {rows.map((row, index) => (
+              <div key={index} className={`dfoot-wall-row dfoot-wall-row-${index}`}>
+                {/* Each row twice, so the drift loops without a seam */}
+                {[...row, ...row].map((photo, i) => (
+                  <span key={i} className="dfoot-tile"><img src={photo.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: photo.crop?.pos ?? "50% 50%" }} /></span>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      <p className="dfoot-wordmark" aria-hidden="true">OGCW</p>
+      <p className="dfoot-wordmark" aria-hidden="true"><span>One Great</span><span>Culture World</span></p>
       <div className="dfoot-fog" aria-hidden="true" />
 
       <div className="dfoot-content">
         <div className="dfoot-brand">
-          <Link to="/" className="dfoot-logo" aria-label="OGCW home"><span className="dfoot-mark" aria-hidden="true" /><T>OGCW</T></Link>
+          <Link to="/" className="dfoot-logo" aria-label="OGCW home"><span className="dfoot-mark" aria-hidden="true" /><T k="footer.logo">One Great Culture World</T></Link>
           <h2 className="dfoot-title"><T k="footer.title">Culture, unfiltered.</T></h2>
           <p className="dfoot-text"><T k="footer.tagline">One Great Culture World. Culture, reported from the inside.</T> <T k="footer.text">Music, gaming, streaming, entertainment and sports, with every source linked.</T></p>
           <Link to="/info/$slug" params={{ slug: "newsletter" }} className="dfoot-cta">

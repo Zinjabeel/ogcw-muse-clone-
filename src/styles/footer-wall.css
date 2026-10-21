@@ -1,11 +1,11 @@
 /* ------------------------------------------------------------------
    The site footer (src/components/ui/footer-2.tsx), after the Driftbar
-   meadow footer the owner picked (21 Oct 2026): one full-height footer,
-   drawn on a 1440 x 672 frame (lengths are design pixels times --u). The
-   pale top holds the brand block and four link columns; a blue-hour meadow
-   film fills the lower half and fades into the page; a giant frosted-glass
-   OGCW sinks into lavender fog. Colours follow the site's theme. Nothing
-   moves on scroll; the only motion is the film and the hovers.
+   footer the owner picked (21 Oct 2026), in OGCW's colours: one full-height
+   footer drawn on a 1440 x 672 frame (lengths are design pixels times --u).
+   The brand block and four link columns at the top; a wall of the latest
+   stories' photos below, tilted back, tinted in the theme's colour and
+   drifting slowly; "One Great Culture World" in giant frosted glass sinking
+   into a mist of the same colour. Nothing moves on scroll.
    ------------------------------------------------------------------ */
 .site-footer.dfoot {
   --u: min(100vw / 1440, 100vh / 672);
@@ -14,7 +14,7 @@
   --df-ink: var(--ogcw-text);
   --df-body: var(--ogcw-text-2);
   --df-muted: color-mix(in srgb, var(--ogcw-text-2) 72%, var(--ogcw-bg));
-  --df-mist: color-mix(in srgb, var(--ogcw-bg) 52%, #c9cbef);
+  --df-mist: color-mix(in srgb, var(--ogcw-bg) 72%, var(--ogcw-accent));
   position: relative;
   height: 100vh; height: 100svh;
   overflow: hidden; isolation: isolate;
@@ -22,26 +22,43 @@
   font-family: var(--ogcw-ui); -webkit-font-smoothing: antialiased;
 }
 
-/* The film, and the haze over it that keeps the words readable */
-.dfoot-stage { position: absolute; inset: 0; z-index: 0; }
-.dfoot-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; transform: translateY(9%); }
+/* The wall of stories, and the haze over it that keeps the words readable */
+.dfoot-stage { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+.dfoot-wall {
+  position: absolute; left: -12%; right: -12%; bottom: -4%; height: 62%;
+  display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: calc(14 * var(--u));
+  transform: perspective(calc(1400 * var(--u))) rotateX(30deg); transform-origin: 50% 100%;
+  /* the far edge melts into the page instead of stopping in a line */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%); mask-image: linear-gradient(to bottom, transparent, #000 45%);
+}
+/* The theme's colour over the photos (they're in black and white underneath) */
+.dfoot-wall::after { content: ""; position: absolute; inset: 0; background: var(--ogcw-accent); mix-blend-mode: color; opacity: .85; pointer-events: none; }
+.dfoot-wall-row { display: flex; gap: calc(14 * var(--u)); width: max-content; padding-right: calc(14 * var(--u)); animation: dfoot-drift 140s linear infinite; }
+.dfoot-wall-row-1 { animation-direction: reverse; animation-duration: 170s; margin-left: calc(-160 * var(--u)); }
+.dfoot-wall-row-2 { animation-duration: 120s; }
+@keyframes dfoot-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.dfoot-tile { flex: none; height: 100%; aspect-ratio: 3 / 2; overflow: hidden; border-radius: calc(10 * var(--u)); background: #111; }
+.dfoot-tile img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.15) brightness(.78); }
+/* Darker at the bottom, so the glass letters read on any theme */
+.dfoot-stage::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgb(10 10 10 / .62), rgb(10 10 10 / .22) 30%, transparent 55%); pointer-events: none; }
 .dfoot-stage::after {
-  content: ""; position: absolute; inset: 0;
-  background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 96%, transparent) 26%, color-mix(in srgb, var(--df-paper) 72%, transparent) 44%, color-mix(in srgb, var(--df-paper) 0%, transparent) 70%);
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 96%, transparent) 30%, color-mix(in srgb, var(--df-paper) 70%, transparent) 46%, color-mix(in srgb, var(--df-paper) 0%, transparent) 72%);
 }
 
-/* The giant frosted-glass OGCW (no outline: the letters' overlaps would show) */
+/* "One Great Culture World" in giant frosted glass (no outline: the letters' overlaps would show) */
 .dfoot-wordmark {
-  position: absolute; left: 50%; bottom: calc(-2 * var(--u)); z-index: 1;
+  position: absolute; left: 50%; bottom: calc(30 * var(--u)); z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
   margin: 0; transform: translateX(-50%);
-  font: 600 calc(360 * var(--u)) / .74 var(--ogcw-display); letter-spacing: .01em; white-space: nowrap;
+  font: 600 calc(176 * var(--u)) / .86 var(--ogcw-display); letter-spacing: -.015em; white-space: nowrap;
   pointer-events: none; user-select: none;
-  color: rgb(232 234 250 / .4);
-  background: linear-gradient(to bottom, rgb(255 255 255 / .78), rgb(214 218 246 / .36) 48%, rgb(255 255 255 / .62));
+  color: rgb(240 240 240 / .4);
+  background: linear-gradient(to bottom, rgb(255 255 255 / .86), color-mix(in srgb, var(--ogcw-accent) 30%, rgb(255 255 255 / .42)) 50%, rgb(255 255 255 / .72));
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 calc(-1 * var(--u)) 0 rgb(255 255 255 / .55)) drop-shadow(0 0 calc(18 * var(--u)) rgb(190 200 255 / .45));
+  filter: drop-shadow(0 calc(-1 * var(--u)) 0 rgb(255 255 255 / .5)) drop-shadow(0 0 calc(18 * var(--u)) color-mix(in srgb, var(--ogcw-accent) 50%, transparent));
 }
-.dfoot-fog { position: absolute; inset: auto 0 0; z-index: 2; height: 17%; pointer-events: none; background: linear-gradient(to top, var(--df-mist) 0%, color-mix(in srgb, var(--df-mist) 60%, transparent) 30%, color-mix(in srgb, var(--df-mist) 0%, transparent) 100%); }
+.dfoot-fog { position: absolute; inset: auto 0 0; z-index: 2; height: 15%; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--df-mist) 85%, transparent) 0%, color-mix(in srgb, var(--df-mist) 45%, transparent) 35%, color-mix(in srgb, var(--df-mist) 0%, transparent) 100%); }
 
 /* The words: the brand block and four link columns */
 .dfoot-content {
@@ -84,14 +101,15 @@
   .site-footer.dfoot { --u: min(100vw / 1040, 100svh / 760); }
   .dfoot-content { grid-template-columns: calc(330 * var(--u)) repeat(4, 1fr); column-gap: calc(16 * var(--u)); width: calc(1040 * var(--u)); padding: calc(60 * var(--u)) calc(40 * var(--u)) 0; }
   .dfoot-text { max-width: calc(310 * var(--u)); }
-  .dfoot-wordmark { bottom: calc(10 * var(--u)); font-size: calc(270 * var(--u)); }
+  .dfoot-wordmark { bottom: calc(30 * var(--u)); font-size: calc(124 * var(--u)); }
 }
 
 /* ---------------------------------------------------------- Phones */
 @media (max-width: 767px) {
   .site-footer.dfoot { --u: 1px; display: flex; flex-direction: column; height: auto; min-height: 100svh; }
-  .dfoot-stage::after { background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 95%, transparent) 50%, color-mix(in srgb, var(--df-paper) 80%, transparent) 68%, color-mix(in srgb, var(--df-paper) 0%, transparent) 90%); }
-  .dfoot-content { grid-template-columns: auto auto; justify-content: space-between; gap: 36px 12px; width: 100%; margin-bottom: max(34vw, 150px); padding: 40px 20px 0; }
+  .dfoot-stage::after { background: linear-gradient(to bottom, var(--df-paper) 0%, color-mix(in srgb, var(--df-paper) 95%, transparent) 60%, color-mix(in srgb, var(--df-paper) 70%, transparent) 74%, color-mix(in srgb, var(--df-paper) 0%, transparent) 88%); }
+  .dfoot-wall { height: 34%; left: -40%; right: -40%; }
+  .dfoot-content { grid-template-columns: auto auto; justify-content: space-between; gap: 36px 12px; width: 100%; margin-bottom: max(52vw, 200px); padding: 40px 20px 0; }
   .dfoot-brand { grid-column: 1 / -1; }
   .dfoot-title { font-size: 21px; }
   .dfoot-text { max-width: 34em; font-size: 14px; }
@@ -105,11 +123,12 @@
   .dfoot-list, .dfoot-col-menu .dfoot-list { gap: 14px; margin-top: 20px; font-size: 13px; letter-spacing: 0; }
   .dfoot-extras { margin-top: 18px; }
   .dfoot-extras .app-badge { height: 36px; }
-  .dfoot-wordmark { bottom: 5vw; font-size: 27vw; }
+  .dfoot-wordmark { bottom: 5vw; font-size: 13.5vw; }
   .dfoot-fog { height: 7%; }
 }
 @media (max-width: 359px) { .dfoot-content { grid-template-columns: 1fr 1fr; } }
 
 @media (prefers-reduced-motion: reduce) {
   .dfoot-cta, .dfoot .footer-link, .dfoot-social { transition: none; }
+  .dfoot-wall-row { animation: none; }
 }

@@ -13,7 +13,7 @@
 @import "./styles/story-designs.css";
 @import "./styles/studio-editor.css";
 @import "./styles/auth-keylight.css";
-@import "./styles/footer-meadow.css";
+@import "./styles/footer-wall.css";
 
 @custom-variant dark (&:is(.dark *));
 
