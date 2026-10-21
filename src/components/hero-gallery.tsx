@@ -1,18 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { EditableImage, T } from "./site-text";
 import { useSiteText } from "@/lib/site-text";
 
-// Gallery hero (the default in the hero switcher): the five doors into OGCW
-// (About, News, Shop, Blog, Subscribe) as cards on a stage. The current card
-// stands in the middle of the screen, larger than the rest, with two smaller
-// cards on each side. Every few seconds the row glides one place and the
-// next card takes the middle; the row loops, so there are always cards on
-// both sides. The whole hero takes the colour of the middle card's photo.
-// Arrows, the arrow keys, a swipe or a click on a side card move it by hand.
-// Autoplay pauses under the pointer, on focus, off screen and on the pause
-// button, and never runs for reduced motion.
+// Gallery hero: the five doors into OGCW (About, News, Shop, Forum,
+// Subscribe), rebuilt 21 Oct 2026 as tall photo panels standing edge to
+// edge across the whole screen, after the expanding galleries of fashion
+// and sports sites. One panel is open wide with its words over the foot of
+// its photo, in a shade of the photo's own colour; the other four stand
+// narrow beside it, dimmed, with their number and name up the side. Every
+// few seconds the next panel opens (the line in the bar underneath shows how
+// long is left). Pointing at a panel, tabbing to it, or tapping it opens it;
+// the open one is the link. The arrows, the arrow keys and the pause button
+// work too. It stops under the pointer, on focus, off screen and while an
+// admin edits, and never runs for reduced motion. Nothing moves on scroll.
 
 export type Card = {
   id: string;
@@ -36,22 +38,9 @@ export const CARDS: Card[] = [
   { id: "subscribe", label: "Newsletter", title: "Subscribe for daily news", copy: "The day’s biggest stories in your inbox every morning. Free, and one tap to leave.", cta: "Subscribe", dest: { hash: "newsletter-title" }, photo: photo("photo-1743184437508-f1b3b793922b"), alt: "Scrolling the news on a phone beside a red coffee cup", tone: "#8f4a44" },
 ];
 
-const DURATION = 5500; // ms per card
+const DURATION = 5500; // ms per panel
+const AIM_MS = 160; // how long the pointer rests on a panel before it opens
 const pad = (n: number) => String(n).padStart(2, "0");
-
-// Where a card sits relative to the middle one: 0 is the middle, -1 and 1
-// its neighbours, -2 and 2 the outer cards
-const offsetOf = (index: number, active: number) => {
-  const n = CARDS.length;
-  const d = (((index - active) % n) + n) % n;
-  return d > n / 2 ? d - n : d;
-};
-// Each position's centre (in card widths from the middle) and size. The
-// neighbours are 80% and the outer cards 64% of the middle card, with a gap
-// of 6% of a card width between them.
-const GAP = 0.06;
-const SCALE = [1, 0.8, 0.64];
-const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]! / 2];
 
 export function CardLink({ dest, className, onClick, tabIndex, children }: { dest: Card["dest"]; className: string; onClick: (event: MouseEvent) => void; tabIndex: number | undefined; children: ReactNode }) {
   if ("to" in dest) return <Link to={dest.to} className={className} onClick={onClick} tabIndex={tabIndex}>{children}</Link>;
@@ -65,9 +54,7 @@ export function HeroGallery() {
   const [hold, setHold] = useState(false);
   const [inView, setInView] = useState(false);
   const [reduce, setReduce] = useState(false);
-  // Where each card was last time, to spot the one that wraps round the back
-  const lastOffsets = useRef<number[]>(CARDS.map((_, index) => offsetOf(index, 0)));
-  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const aim = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -77,7 +64,7 @@ export function HeroGallery() {
     return () => query.removeEventListener("change", update);
   }, []);
 
-  // Only run while the hero is on screen (it is display: none when the cover hero is chosen)
+  // Only run while the hero is on screen (it is display: none unless chosen)
   useEffect(() => {
     const el = section.current;
     if (!el) return;
@@ -85,122 +72,103 @@ export function HeroGallery() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-
-  const offsets = CARDS.map((_, index) => offsetOf(index, active));
-  useEffect(() => { lastOffsets.current = offsets; });
+  useEffect(() => () => window.clearTimeout(aim.current), []);
 
   const go = (step: number) => setActive((value) => (((value + step) % CARDS.length) + CARDS.length) % CARDS.length);
   const site = useSiteText();
-  // Hold still while an admin points at or edits a text, so the card stays put
+  // Hold still while an admin points at or edits a text, so the panel stays open
   const running = !paused && !hold && inView && !reduce && !site.busy;
   const current = CARDS[active]!;
+  const next = CARDS[(active + 1) % CARDS.length]!;
 
-  // Swipe on touch screens (and drag with a mouse): a clear sideways move of 40px or more
-  const onPointerDown = (event: PointerEvent) => { swipe.current = { x: event.clientX, y: event.clientY, moved: false }; };
-  const onPointerUp = (event: PointerEvent) => {
-    const start = swipe.current;
-    if (!start) return;
-    const dx = event.clientX - start.x;
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(event.clientY - start.y)) {
-      start.moved = true;
-      go(dx < 0 ? 1 : -1);
-    }
+  // A panel opens once the pointer rests on it, so sweeping across the row doesn't flick them all open
+  const aimAt = (index: number) => {
+    window.clearTimeout(aim.current);
+    aim.current = window.setTimeout(() => setActive(index), AIM_MS);
   };
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "ArrowRight") { event.preventDefault(); go(1); }
-    if (event.key === "ArrowLeft") { event.preventDefault(); go(-1); }
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = (((active + (event.key === "ArrowRight" ? 1 : -1)) % CARDS.length) + CARDS.length) % CARDS.length;
+    setActive(next);
+    section.current?.querySelectorAll<HTMLElement>(".glx-link")[next]?.focus();
   };
 
   return (
-    <section
-      ref={section}
-      className="gallery"
-      style={{ "--tone": current.tone } as CSSProperties}
-      aria-roledescription="carousel"
-      aria-labelledby="gallery-title"
-    >
+    <section ref={section} className="gallery glx" aria-roledescription="carousel" aria-labelledby="gallery-title">
       <h1 id="gallery-title" className="sr-only">OGCW, One Great Culture World</h1>
 
-      {/* The ambient light: the middle card's photo, blurred, over a wash of its colour */}
-      <div className="gallery-bg" aria-hidden="true">
-        {CARDS.map((card, index) => (
-          // Lazy: while another hero is chosen this one is hidden, and its photos then aren't fetched at all (shown, they load at once)
-          <img key={card.id} src={site.image(`hero.card.${card.id}`)?.src ?? card.photo} alt="" className={index === active ? "is-on" : undefined} loading="lazy" />
-        ))}
-      </div>
-
-      <div className="gallery-stage">
-        <ol
-          className="gallery-cards"
-          onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
-          onPointerLeave={() => setHold(false)}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onFocus={() => setHold(true)}
-          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
-          onKeyDown={onKeyDown}
-        >
-          {CARDS.map((card, index) => {
-            const offset = offsets[index]!;
-            const distance = Math.abs(offset);
-            // A card jumping from one end of the row to the other moves out of sight, with no slide
-            const wraps = Math.abs(offset - (lastOffsets.current[index] ?? offset)) > 2;
-            return (
-              <li
-                key={card.id}
-                className={`gallery-card${wraps ? " is-wrapping" : ""}`}
-                data-pos={distance}
-                style={{ "--x": Math.sign(offset) * X[distance]!, "--s": SCALE[distance], zIndex: 10 - distance } as CSSProperties}
-                aria-roledescription="slide"
-                aria-label={`${index + 1} of ${CARDS.length}: ${card.label}`}
-                aria-current={offset === 0 ? "true" : undefined}
+      <ol
+        className="glx-panels"
+        onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
+        onPointerLeave={() => { setHold(false); window.clearTimeout(aim.current); }}
+        onFocus={() => setHold(true)}
+        onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
+        onKeyDown={onKeyDown}
+      >
+        {CARDS.map((card, index) => {
+          const open = index === active;
+          return (
+            <li
+              key={card.id}
+              className="glx-panel"
+              data-open={open}
+              style={{ "--tone": card.tone } as CSSProperties}
+              aria-roledescription="slide"
+              aria-label={`${index + 1} of ${CARDS.length}: ${card.label}`}
+              aria-current={open ? "true" : undefined}
+              onPointerEnter={(event) => { if (event.pointerType === "mouse" && !open) aimAt(index); }}
+              onPointerLeave={() => window.clearTimeout(aim.current)}
+              // Tabbing to a panel opens it (a click or a tap opens it in onClick, before it can be followed)
+              onFocus={(event) => { if (event.target.matches(":focus-visible")) setActive(index); }}
+            >
+              <CardLink
+                dest={card.dest}
+                className="glx-link"
+                tabIndex={undefined}
+                // A closed panel opens first; the open one is the link
+                onClick={(event) => { if (!open) { event.preventDefault(); setActive(index); } }}
               >
-                <CardLink
-                  dest={card.dest}
-                  className="gallery-card-link"
-                  // Only the middle card is in the tab order; the others are reached with the arrows
-                  tabIndex={offset === 0 ? undefined : -1}
-                  onClick={(event) => {
-                    if (swipe.current?.moved) { event.preventDefault(); swipe.current = null; return; }
-                    // A card on the side comes to the middle first
-                    if (offset !== 0) { event.preventDefault(); go(offset); }
-                  }}
-                >
+                <span className="glx-photo">
                   <EditableImage k={`hero.card.${card.id}`} src={card.photo} alt={card.alt} loading="lazy" draggable={false} />
-                  <span className="gallery-card-body">
-                    <span className="gallery-card-label"><T k={`hero.card.${card.id}.label`}>{card.label}</T></span>
-                    <span className="gallery-card-title"><T k={`hero.card.${card.id}.title`}>{card.title}</T></span>
-                    <span className="gallery-card-copy"><T k={`hero.card.${card.id}.copy`}>{card.copy}</T></span>
-                    <span className="gallery-card-cta"><T k={`hero.card.${card.id}.cta`}>{card.cta}</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" /></span>
-                  </span>
-                </CardLink>
-              </li>
-            );
-          })}
-        </ol>
+                </span>
+                <span className="glx-spine" aria-hidden="true">
+                  <span className="glx-num">{pad(index + 1)}</span>
+                  <span className="glx-spine-label"><T k={`hero.card.${card.id}.label`}>{card.label}</T></span>
+                </span>
+                <span className="glx-body">
+                  <span className="glx-label"><span className="glx-num">{pad(index + 1)}</span><T k={`hero.card.${card.id}.label`}>{card.label}</T></span>
+                  <span className="glx-title"><T k={`hero.card.${card.id}.title`}>{card.title}</T></span>
+                  <span className="glx-copy"><T k={`hero.card.${card.id}.copy`}>{card.copy}</T></span>
+                  <span className="glx-cta"><T k={`hero.card.${card.id}.cta`}>{card.cta}</T> <ArrowRight size={14} strokeWidth={2} aria-hidden="true" /></span>
+                </span>
+              </CardLink>
+            </li>
+          );
+        })}
+      </ol>
 
-        <div className="gallery-foot">
-          <p className="gallery-now" aria-live={running ? "off" : "polite"}><T k={`hero.card.${current.id}.label`}>{current.label}</T></p>
-          <p className="gallery-count">
-            <span className="sr-only">Card </span>
-            <span>{pad(active + 1)}</span>
-            <span className="gallery-line" aria-hidden="true">
-              {!reduce && (
-                <i key={active} style={{ "--dur": `${DURATION}ms` } as CSSProperties} data-run={running} onAnimationEnd={() => go(1)} />
-              )}
-            </span>
-            <span className="sr-only"> of </span>
-            <span>{pad(CARDS.length)}</span>
-          </p>
-          <div className="gallery-controls">
-            <button type="button" aria-label="Previous card" onClick={() => go(-1)}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
-            {!reduce && (
-              <button type="button" aria-label={paused ? "Play" : "Pause"} onClick={() => setPaused((value) => !value)}>
-                {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
-              </button>
-            )}
-            <button type="button" aria-label="Next card" onClick={() => go(1)}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
-          </div>
+      {/* Which panel is open and how long it has left, and the controls */}
+      <div className="glx-foot">
+        <p className="glx-count">
+          <span className="sr-only">Panel </span>
+          <span>{pad(active + 1)}</span>
+          <span className="glx-line" aria-hidden="true">
+            {!reduce && <i key={active} style={{ "--dur": `${DURATION}ms` } as CSSProperties} data-run={running} onAnimationEnd={() => go(1)} />}
+          </span>
+          <span className="sr-only"> of </span>
+          <span>{pad(CARDS.length)}</span>
+        </p>
+        <p className="sr-only" aria-live={running ? "off" : "polite"}><T k={`hero.card.${current.id}.label`}>{current.label}</T></p>
+        <p className="glx-next" aria-hidden="true"><span className="glx-next-tag"><T k="hero.gallery.next">Next</T></span><T k={`hero.card.${next.id}.label`}>{next.label}</T></p>
+        <div className="glx-controls">
+          <button type="button" aria-label="Previous panel" onClick={() => go(-1)}><ChevronLeft size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          {!reduce && (
+            <button type="button" aria-label={paused ? "Play" : "Pause"} onClick={() => setPaused((value) => !value)}>
+              {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
+            </button>
+          )}
+          <button type="button" aria-label="Next panel" onClick={() => go(1)}><ChevronRight size={18} strokeWidth={1.75} aria-hidden="true" /></button>
         </div>
       </div>
     </section>

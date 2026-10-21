@@ -1,0 +1,109 @@
+/* ------------------------------------------------------------------
+   Gallery hero (src/components/hero-gallery.tsx), rebuilt 21 Oct 2026:
+   the five doors as tall photo panels edge to edge, one open wide with its
+   words over the foot of its photo (in a shade of the photo's own colour,
+   --tone), the others narrow and dimmed with their number and name up the
+   side. A bar underneath shows how long the open one has left. The hero
+   keeps its dark colours in every theme. Nothing moves on scroll.
+   The older .gallery-* rules in styles.css no longer match anything.
+   ------------------------------------------------------------------ */
+.gallery.glx {
+  --glx-ink: #f2f0ea;
+  --glx-dim: rgb(242 240 234 / .66);
+  --glx-black: #0b0b0b;
+  --glx-accent: var(--ogcw-accent);
+  --glx-seam: 2px;
+  --glx-pad: clamp(22px, calc(2.8 * var(--vw, 1vw)), 52px);
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; justify-content: stretch; min-height: 0; padding: 0;
+  background: var(--glx-black); color: var(--glx-ink); font-family: var(--ogcw-ui); transition: none;
+}
+:root[data-theme="aurora"] .gallery.glx { --glx-accent: #cfb2ff; }
+
+/* ---------------------------------------------------------- The panels */
+.glx-panels { display: flex; gap: var(--glx-seam); min-height: 0; margin: 0; padding: 0; list-style: none; background: var(--glx-black); }
+.glx-panel { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; transition: flex-grow .9s cubic-bezier(.65, 0, .25, 1); }
+.glx-panel[data-open="true"] { flex-grow: 5.4; }
+.glx-link { position: absolute; inset: 0; display: block; color: var(--glx-ink); outline: none; cursor: pointer; }
+.glx-photo { position: absolute; inset: 0; background: #151515; animation: glx-in 1.1s ease both; }
+.glx-photo img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(.48) saturate(.8); transform: scale(1.08);
+  transition: filter .9s ease, transform 1.4s cubic-bezier(.2, .8, .2, 1);
+}
+.glx-panel[data-open="true"] .glx-photo img { filter: none; transform: scale(1); }
+.glx-panel:not([data-open="true"]):hover .glx-photo img { filter: brightness(.7) saturate(.95); }
+/* The open panel: a shade of its own colour rising from the foot, under the words */
+.glx-link::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity .5s ease;
+  background:
+    linear-gradient(to top, rgb(6 6 6 / .74) 0%, rgb(6 6 6 / .3) 34%, transparent 58%),
+    linear-gradient(to top, color-mix(in srgb, var(--tone) 72%, transparent) 0%, transparent 48%);
+}
+.glx-panel[data-open="true"] .glx-link::after { opacity: 1; transition-duration: .9s; }
+.glx-link:focus-visible { box-shadow: inset 0 0 0 2px var(--glx-accent); }
+
+/* A closed panel: its number at the top, its name up the side */
+.glx-spine {
+  position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 22px 0 28px; transition: opacity .45s ease .4s;
+}
+.glx-panel[data-open="true"] .glx-spine { opacity: 0; transition: opacity .2s ease; }
+.glx-num { font-size: 11px; font-weight: 800; letter-spacing: .16em; font-variant-numeric: tabular-nums; }
+.glx-spine-label { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--ogcw-display); font-size: clamp(22px, calc(1.9 * var(--vw, 1vw)), 34px); line-height: 1; letter-spacing: -.01em; white-space: nowrap; }
+
+/* The open panel's words. A set width, so they never re-wrap while the panel opens; they come in once it has. */
+.glx-body {
+  position: absolute; left: 0; bottom: 0; z-index: 2; display: grid; justify-items: start; gap: 14px;
+  width: min(40rem, calc(54 * var(--vw, 1vw))); padding: var(--glx-pad);
+  opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+}
+.glx-panel[data-open="true"] .glx-body { opacity: 1; transform: none; transition: opacity .7s ease .45s, transform .9s cubic-bezier(.2, .8, .2, 1) .45s; }
+.glx-label { display: flex; align-items: center; gap: 12px; font-size: 11px; font-weight: 800; line-height: 1.2; letter-spacing: .22em; text-transform: uppercase; color: var(--glx-accent); }
+.glx-label .glx-num { color: var(--glx-ink); }
+.glx-title { max-width: 12ch; font-family: var(--ogcw-display); font-size: clamp(40px, calc(4.1 * var(--vw, 1vw)), 78px); font-weight: 400; line-height: .96; letter-spacing: -.03em; text-wrap: balance; }
+.glx-copy { max-width: 30rem; font-family: var(--ogcw-serif); font-size: clamp(15.5px, calc(1.1 * var(--vw, 1vw)), 18px); line-height: 1.5; color: rgb(242 240 234 / .82); }
+.glx-cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; padding-bottom: 5px; border-bottom: 1.5px solid currentColor;
+  font-size: 11.5px; font-weight: 800; line-height: 1; letter-spacing: .18em; text-transform: uppercase; transition: gap .3s ease-in-out, border-color .3s ease-in-out;
+}
+.glx-link:hover .glx-cta, .glx-link:focus-visible .glx-cta { gap: 12px; border-bottom-color: var(--glx-accent); }
+
+/* ---------------------------------------------------------- The bar underneath */
+.glx-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; padding: 12px var(--glx-pad); border-top: 1px solid rgb(255 255 255 / .08); }
+.glx-count { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+.glx-line { position: relative; width: clamp(80px, calc(12 * var(--vw, 1vw)), 200px); height: 2px; overflow: hidden; background: rgb(255 255 255 / .16); }
+.glx-line i { position: absolute; inset: 0; background: var(--glx-accent); transform-origin: left; animation: glx-fill var(--dur) linear both; }
+.glx-line i[data-run="false"] { animation-play-state: paused; }
+.glx-next { display: flex; align-items: baseline; gap: 10px; margin: 0; font-family: var(--ogcw-display); font-size: 17px; }
+.glx-next-tag { font-family: var(--ogcw-ui); font-size: 10.5px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--glx-dim); }
+.glx-controls { display: flex; justify-self: end; gap: 8px; }
+.glx-controls button { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgb(255 255 255 / .22); border-radius: 50%; color: var(--glx-ink); cursor: pointer; transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+.glx-controls button:hover, .glx-controls button:focus-visible { background: var(--glx-accent); border-color: var(--glx-accent); color: #0b0b0b; outline: none; }
+
+@keyframes glx-in { from { opacity: 0; } }
+@keyframes glx-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ---------------------------------------------------------- Sizes */
+@media (min-width: 768px) {
+  .gallery.glx { height: clamp(540px, calc(100svh - 3.5rem), 1000px); }
+}
+@media (min-width: 1024px) {
+  .gallery.glx { height: clamp(600px, calc(100svh - 122px), 1000px); }
+}
+/* Phones: the panels stack, and the open one is tall */
+@media (max-width: 767px) {
+  .glx-panels { flex-direction: column; }
+  .glx-panel { flex: none; height: 74px; transition: height .8s cubic-bezier(.65, 0, .25, 1); }
+  .glx-panel[data-open="true"] { height: min(56svh, 480px); }
+  .glx-spine { flex-direction: row; justify-content: flex-start; gap: 16px; padding: 0 20px; }
+  .glx-spine-label { writing-mode: horizontal-tb; transform: none; font-size: 22px; }
+  .glx-body { width: 100%; padding: 22px 20px 24px; }
+  .glx-title { font-size: clamp(36px, calc(10 * var(--vw, 1vw)), 52px); }
+  .glx-foot { grid-template-columns: minmax(0, 1fr) auto; padding: 12px 20px; }
+  .glx-next { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glx-panel, .glx-photo img, .glx-link::after, .glx-spine, .glx-body, .glx-cta { transition: none !important; }
+  .glx-photo { animation: none; }
+}

@@ -1,0 +1,160 @@
+/* ------------------------------------------------------------------
+   Cover story hero (src/components/hero-cover.tsx), rebuilt 21 Oct 2026
+   after i-D's front page (a portrait filling most of the screen beside a
+   plain column with the masthead big at the top and one cover line at the
+   bottom) and Highsnobiety's (a tiny category line over a big headline).
+   The photo runs edge to edge; the column is the OGCW yellow (each theme's
+   accent) with black words; "Also on OGCW" runs along the bottom on black.
+   The hero keeps these colours in every theme. Nothing moves on scroll.
+   The older .cover-* rules in styles.css no longer match anything.
+   ------------------------------------------------------------------ */
+.cover.cvx {
+  --cvx-band: var(--ogcw-accent);
+  --cvx-on: #0b0b0b;
+  --cvx-ink: #f2f0ea;
+  --cvx-dim: rgb(242 240 234 / .62);
+  --cvx-black: #0b0b0b;
+  --cvx-pad: clamp(22px, calc(2.6 * var(--vw, 1vw)), 48px);
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0;
+  background: var(--cvx-black); color: var(--cvx-ink); font-family: var(--ogcw-ui);
+}
+/* Navy: the cream column with navy words. Aurora: lilac with plum. */
+:root[data-theme="navy"] .cover.cvx { --cvx-on: #0e1a33; }
+:root[data-theme="aurora"] .cover.cvx { --cvx-band: #cfb2ff; --cvx-on: #1d1426; }
+/* The film grain of the old cover goes */
+.cover.cvx::after { content: none; }
+
+.cvx-main { display: grid; min-height: 0; }
+
+/* ---------------------------------------------------------- The photo */
+.cvx-photo { position: relative; min-height: 0; margin: 0; overflow: hidden; background: #000; animation: cvx-in 1.2s ease both; }
+.cvx-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; scale: 1; transition: opacity 1.2s ease, scale 0s 1.2s; }
+.cvx-photo img.is-on { z-index: 1; opacity: 1; scale: 1.05; transition: opacity 1.2s ease, scale 3.6s linear; }
+/* A little shade at the foot, only for the credit */
+.cvx-photo::after { content: ""; position: absolute; inset: auto 0 0; z-index: 2; height: 22%; background: linear-gradient(to top, rgb(0 0 0 / .42), transparent); pointer-events: none; }
+.cvx-credit { position: absolute; left: var(--cvx-pad); bottom: 14px; z-index: 3; margin: 0; font-size: 10.5px; letter-spacing: .04em; color: rgb(255 255 255 / .8); }
+
+/* ---------------------------------------------------------- The cover column */
+.cvx-band {
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 22px; min-width: 0; min-height: 0;
+  padding: var(--cvx-pad); background: var(--cvx-band); color: var(--cvx-on);
+}
+.cvx-band-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.cvx-num { display: flex; align-items: flex-start; gap: 6px; margin: 0; font-family: var(--ogcw-display); font-size: clamp(84px, calc(8.4 * var(--vw, 1vw)), 160px); font-weight: 400; line-height: .78; letter-spacing: -.055em; font-variant-numeric: lining-nums tabular-nums; }
+.cvx-num-now { display: block; animation: cvx-rise .7s cubic-bezier(.2, .8, .2, 1) both; }
+.cvx-num-of { padding-top: .06em; font-family: var(--ogcw-ui); font-size: 13px; font-weight: 700; letter-spacing: .08em; line-height: 1; opacity: .55; }
+.cvx-masthead { display: grid; gap: 6px; justify-items: end; padding-top: 4px; text-align: right; }
+.cvx-tag { margin: 0; font-size: 11px; font-weight: 800; line-height: 1.2; letter-spacing: .24em; text-transform: uppercase; }
+.cvx-date { margin: 0; font-size: 12px; line-height: 1.2; color: color-mix(in srgb, var(--cvx-on) 66%, transparent); }
+
+/* The cover line: the turns stack in one spot and cross-fade */
+.cvx-slides { display: grid; align-content: end; min-height: 0; }
+.cvx-slide { grid-area: 1 / 1; display: grid; justify-items: start; gap: 14px; align-self: end; }
+.cvx-kicker { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; animation: cvx-fade-up .8s .1s cubic-bezier(.2, .8, .2, 1) both; }
+.cvx-kicker::before { content: ""; width: 28px; height: 2px; background: currentColor; }
+.cvx-title {
+  margin: 0; font-family: var(--ogcw-display); font-size: clamp(40px, calc(3.6 * var(--vw, 1vw)), 70px); font-weight: 400; line-height: .98; letter-spacing: -.028em; text-wrap: balance;
+}
+.cvx-title.is-long { font-size: clamp(32px, calc(2.7 * var(--vw, 1vw)), 50px); line-height: 1.03; }
+.cvx-line { display: block; overflow: hidden; padding-bottom: .1em; margin-bottom: -.1em; }
+.cvx-line > span { display: block; animation: cvx-line-in 1s cubic-bezier(.2, .8, .2, 1) both; }
+.cvx-line:nth-child(1) > span { animation-delay: .16s; }
+.cvx-line:nth-child(2) > span { animation-delay: .26s; }
+.cvx-deck {
+  max-width: 32rem; margin: 0; font-family: var(--ogcw-serif); font-size: clamp(15.5px, calc(1.05 * var(--vw, 1vw)), 17.5px); line-height: 1.5; color: color-mix(in srgb, var(--cvx-on) 80%, transparent);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+  animation: cvx-fade-up .8s .38s cubic-bezier(.2, .8, .2, 1) both;
+}
+.cvx-link {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding-bottom: 5px; border-bottom: 1.5px solid currentColor;
+  font-size: 11.5px; font-weight: 800; line-height: 1; letter-spacing: .18em; text-transform: uppercase;
+  transition: gap .3s ease-in-out; animation: cvx-fade-up .8s .46s cubic-bezier(.2, .8, .2, 1) both;
+}
+.cvx-link:hover, .cvx-link:focus-visible { gap: 12px; outline: none; }
+.cvx-link:focus-visible { box-shadow: 0 3px 0 0 currentColor; }
+
+/* A turn: the new words rise quickly, the old ones fade up and away */
+.cvx-slide.is-turn .cvx-kicker { animation-duration: .55s; animation-delay: .04s; }
+.cvx-slide.is-turn .cvx-line > span { animation-duration: .75s; }
+.cvx-slide.is-turn .cvx-line:nth-child(1) > span { animation-delay: .06s; }
+.cvx-slide.is-turn .cvx-line:nth-child(2) > span { animation-delay: .14s; }
+.cvx-slide.is-turn .cvx-deck { animation-duration: .55s; animation-delay: .22s; }
+.cvx-slide.is-turn .cvx-link { animation-duration: .55s; animation-delay: .28s; }
+.cvx-slide.is-leaving { pointer-events: none; animation: cvx-out .55s ease both; }
+.cvx-slide.is-leaving * { animation: none; }
+
+/* One numbered line per cover; the line fills while it is on */
+.cvx-turns { display: flex; align-items: flex-start; gap: 8px; padding-top: 4px; }
+.cvx-turn { display: grid; flex: 1 1 0; gap: 8px; min-width: 0; padding: 8px 0 0; cursor: pointer; text-align: left; color: inherit; }
+.cvx-turn-line { position: relative; display: block; height: 2px; overflow: hidden; background: color-mix(in srgb, var(--cvx-on) 20%, transparent); }
+.cvx-turn[aria-pressed="true"] .cvx-turn-line { background: color-mix(in srgb, var(--cvx-on) 32%, transparent); }
+.cvx-turn i { position: absolute; inset: 0; background: currentColor; transform-origin: left; animation: cvx-fill var(--dur) linear both; }
+.cvx-turn i[data-run="false"] { animation-play-state: paused; }
+.cvx-turn-num { font-size: 10.5px; font-weight: 800; letter-spacing: .12em; font-variant-numeric: tabular-nums; opacity: .5; transition: opacity .2s ease; }
+.cvx-turn[aria-pressed="true"] .cvx-turn-num, .cvx-turn:hover .cvx-turn-num { opacity: 1; }
+.cvx-turn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.cvx-pause { display: grid; flex: none; place-items: center; width: 30px; height: 30px; margin-left: 4px; border: 1.5px solid color-mix(in srgb, var(--cvx-on) 35%, transparent); border-radius: 50%; color: inherit; cursor: pointer; transition: border-color .2s ease, background-color .2s ease, color .2s ease; }
+.cvx-pause:hover, .cvx-pause:focus-visible { background: var(--cvx-on); border-color: var(--cvx-on); color: var(--cvx-band); outline: none; }
+
+/* ---------------------------------------------------------- Also on OGCW */
+.cvx-rail { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 36px; padding: 16px var(--cvx-pad); border-top: 1px solid rgb(255 255 255 / .08); background: var(--cvx-black); animation: cvx-in 1s .4s ease both; }
+.cvx-rail-label { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: var(--cvx-band); }
+.cvx-rail ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 48px; margin: 0; padding: 0; list-style: none; }
+.cvx-rail li { position: relative; min-width: 0; }
+.cvx-rail li + li::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: -24px; width: 1px; background: rgb(255 255 255 / .1); }
+.cvx-rail-swap { animation: cvx-swap .6s cubic-bezier(.2, .8, .2, 1) both; }
+.cvx-rail-item { display: grid; grid-template-columns: 54px minmax(0, 1fr); align-items: center; gap: 14px; color: var(--cvx-ink); outline: none; }
+.cvx-rail-thumb { display: block; aspect-ratio: 1; overflow: hidden; background: #1a1a1a; }
+.cvx-rail-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s ease-in-out; }
+.cvx-rail-item:hover .cvx-rail-thumb img, .cvx-rail-item:focus-visible .cvx-rail-thumb img { transform: scale(1.08); }
+.cvx-rail-text { display: grid; gap: 3px; min-width: 0; }
+.cvx-rail-kicker { overflow: hidden; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; text-overflow: ellipsis; color: var(--cvx-dim); }
+.cvx-rail-kicker[data-live] { color: var(--cvx-band); }
+.cvx-rail-title {
+  font-family: var(--ogcw-serif); font-size: 15.5px; line-height: 1.25;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 1px; text-underline-offset: 3px; transition: text-decoration-color .25s ease;
+}
+.cvx-rail-item:hover .cvx-rail-title, .cvx-rail-item:focus-visible .cvx-rail-title { text-decoration-color: var(--cvx-band); }
+.cvx-rail-meta { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--cvx-dim); }
+
+@keyframes cvx-in { from { opacity: 0; } }
+@keyframes cvx-rise { from { opacity: 0; transform: translateY(18%); } }
+@keyframes cvx-line-in { from { transform: translateY(105%); } }
+@keyframes cvx-fade-up { from { opacity: 0; transform: translateY(12px); } }
+@keyframes cvx-out { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes cvx-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes cvx-swap { from { opacity: 0; transform: translateY(6px); } }
+
+/* ---------------------------------------------------------- Computers: the first screen */
+@media (min-width: 1024px) {
+  .cover.cvx { height: clamp(620px, calc(100svh - 122px), 1000px); }
+  .cvx-main { grid-template-columns: minmax(0, 1.72fr) minmax(400px, 1fr); }
+}
+
+/* ---------------------------------------------------------- Tablets and phones: stacked */
+@media (max-width: 1023px) {
+  .cvx-photo { aspect-ratio: 16 / 11; max-height: 66svh; }
+  .cvx-band { gap: 18px; padding: 22px 20px 24px; }
+  .cvx-num { font-size: clamp(64px, calc(17 * var(--vw, 1vw)), 112px); }
+  /* Room for the longest cover line, so the page under it doesn't jump at each turn */
+  .cvx-slides { min-height: 300px; }
+  .cvx-title { font-size: clamp(36px, calc(8.6 * var(--vw, 1vw)), 58px); }
+  .cvx-title.is-long { font-size: clamp(28px, calc(6.4 * var(--vw, 1vw)), 42px); }
+  .cvx-rail { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 18px 20px 26px; }
+  .cvx-rail ol { gap: 0 32px; }
+  .cvx-rail li + li::before { left: -16px; }
+}
+@media (max-width: 639px) {
+  .cvx-photo { aspect-ratio: 4 / 5; max-height: 64svh; }
+  .cvx-slides { min-height: 330px; }
+  .cvx-rail ol { grid-template-columns: minmax(0, 1fr); }
+  .cvx-rail li { padding-block: 12px; border-top: 1px solid rgb(255 255 255 / .08); }
+  .cvx-rail li + li::before { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cvx-photo img, .cvx-photo img.is-on { scale: 1; transition: opacity .3s ease; }
+  .cvx-photo, .cvx-rail, .cvx-rail-swap, .cvx-num-now, .cvx-slide, .cvx-slide * { animation: none !important; }
+  .cvx-rail-thumb img, .cvx-link { transition: none; }
+}

@@ -18,6 +18,9 @@
 @import "./styles/newsletter-prompt.css";
 @import "./styles/code-slots.css";
 @import "./styles/hero-impact.css";
+@import "./styles/hero-cover.css";
+@import "./styles/hero-gallery.css";
+@import "./styles/hero-gallery-2.css";
 
 @custom-variant dark (&:is(.dark *));
 
