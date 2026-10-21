@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, LogOut } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
-import { signIn, signOut, useUser } from "../lib/auth";
+import { GitHubMark } from "../components/account-button";
+import { enabledProviders, signIn, signInWith, signOut, useUser, type Provider } from "../lib/auth";
 
 // Login for OGCW accounts. Creating an account has its own page (/signup);
 // a forgotten password, /reset-password. The OGCW team logs in at For Work
@@ -26,6 +27,19 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const [providers, setProviders] = useState<Record<Provider, boolean> | null>(null);
+  useEffect(() => { void enabledProviders().then(setProviders); }, []);
+  const withProvider = async (provider: Provider) => {
+    setError("");
+    setBusy(true);
+    try {
+      await signInWith(provider, "/login");
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : "That login didn’t work. Try again.");
+      setBusy(false);
+    }
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -69,8 +83,17 @@ function LoginPage() {
               {!busy && <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
             </button>
           </form>
-          <p className="authx-divider"><span>New to OGCW?</span></p>
-          <Link to="/signup" className="auth-secondary authx-wide">Create an account</Link>
+          {/* Google and GitHub, once they're switched on for reader accounts (Supabase) */}
+          {(providers?.google || providers?.github) && (
+            <>
+              <p className="authx-divider"><span>Or continue with</span></p>
+              <div className="authx-providers">
+                {providers.google && <button type="button" className="authx-provider" disabled={busy} onClick={() => void withProvider("google")}>Continue with Google</button>}
+                {providers.github && <button type="button" className="authx-provider" disabled={busy} onClick={() => void withProvider("github")}><GitHubMark /> Continue with GitHub</button>}
+              </div>
+            </>
+          )}
+          <p className="kl-switch">New to OGCW? <Link to="/signup">Create an account</Link></p>
         </>
       )}
       <p className="authx-foot">Part of the OGCW team? <Link to="/work">For Work</Link></p>

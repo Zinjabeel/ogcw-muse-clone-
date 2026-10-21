@@ -52,6 +52,8 @@ function WorkPage() {
   const [password, setPassword] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [error, setError] = useState("");
+  // Where the message shows: under the admin password, or in the email form
+  const [errorFrom, setErrorFrom] = useState<"password" | "other">("other");
   const [busy, setBusy] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -81,6 +83,7 @@ function WorkPage() {
       setAdminPassword("");
       void navigate({ to: "/admin/$", params: { _splat: "" } });
     } catch (problem) {
+      setErrorFrom("password");
       setError(problem instanceof Error ? problem.message : "That didn’t work. Try again.");
       setBusy(null);
     }
@@ -88,6 +91,7 @@ function WorkPage() {
 
   const withProvider = async (provider: Provider) => {
     setError("");
+    setErrorFrom("other");
     setBusy(provider);
     try {
       await signInWith(provider, "/work");
@@ -99,6 +103,7 @@ function WorkPage() {
   const withEmail = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
+    setErrorFrom("other");
     setBusy("email");
     try {
       await signIn({ email, password });
@@ -153,6 +158,43 @@ function WorkPage() {
         <>
           <h1 className="authx-title">Work login</h1>
           <p className="authx-lede">{search.from === "admin" ? "That page is for the OGCW team. Log in with your work account to continue." : "For the OGCW team."}</p>
+          {/* The admin password first: the quickest way in (src/lib/admin-password.ts) */}
+          <form className="kl-key" onSubmit={withPassword}>
+            <KeyRound className="kl-key-icon" size={20} strokeWidth={1.8} aria-hidden="true" />
+            <input
+              type="password"
+              name="admin-password"
+              aria-label="Admin password"
+              placeholder="Admin password"
+              autoComplete="current-password"
+              inputMode="numeric"
+              value={adminPassword}
+              onChange={(event) => setAdminPassword(event.target.value)}
+              disabled={!!busy}
+            />
+            <span className="kl-pill">Team only</span>
+            <button type="submit" aria-label="Open the studio" disabled={!!busy || !adminPassword}>
+              {busy === "password" ? "…" : <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
+            </button>
+          </form>
+          {error && errorFrom === "password" && <p className="auth-error" role="alert">{error}</p>}
+
+          <p className="authx-divider"><span>Or use your work email</span></p>
+          <form className="auth-form" onSubmit={withEmail} noValidate>
+            <label className="auth-field">
+              <span>Work email</span>
+              <input type="email" name="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </label>
+            <PasswordField label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
+            <Link to="/reset-password" className="authx-forgot">Forgot password?</Link>
+            {error && errorFrom !== "password" && <p className="auth-error" role="alert">{error}</p>}
+            <button type="submit" className="auth-submit authx-wide" disabled={!!busy}>
+              {busy === "email" ? "Logging in…" : "Login"}
+              {busy !== "email" && <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
+            </button>
+          </form>
+
+          <p className="authx-divider"><span>Or continue with</span></p>
           <div className="authx-providers">
             <button type="button" className="authx-provider" disabled={!!busy || providers?.google === false} onClick={() => void withProvider("google")}>
               <GoogleMark /> {busy === "google" ? "Opening Google…" : "Continue with Google"}
@@ -161,39 +203,7 @@ function WorkPage() {
             <button type="button" className="authx-provider" disabled={!!busy} onClick={withGitHub}>
               <GitHubMark /> {busy === "github" ? "Opening GitHub…" : "Continue with GitHub"}
             </button>
-            {/* The admin password: straight into the studio (src/lib/admin-password.ts) */}
-            <form className="authx-provider authx-passcode" onSubmit={withPassword}>
-              <KeyRound size={18} strokeWidth={2} aria-hidden="true" />
-              <input
-                type="password"
-                name="admin-password"
-                aria-label="Admin password"
-                placeholder="Admin password"
-                autoComplete="current-password"
-                inputMode="numeric"
-                value={adminPassword}
-                onChange={(event) => setAdminPassword(event.target.value)}
-                disabled={!!busy}
-              />
-              <button type="submit" aria-label="Open the studio" disabled={!!busy || !adminPassword}>
-                {busy === "password" ? "…" : <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
-              </button>
-            </form>
           </div>
-          <p className="authx-divider"><span>or with email</span></p>
-          <form className="auth-form" onSubmit={withEmail} noValidate>
-            <label className="auth-field">
-              <span>Work email</span>
-              <input type="email" name="email" autoComplete="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </label>
-            <PasswordField label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
-            <Link to="/reset-password" className="authx-forgot">Forgot password?</Link>
-            {error && <p className="auth-error" role="alert">{error}</p>}
-            <button type="submit" className="auth-submit authx-wide" disabled={!!busy}>
-              {busy === "email" ? "Logging in…" : "Login"}
-              {busy !== "email" && <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
-            </button>
-          </form>
           <p className="authx-note"><Lock size={13} strokeWidth={2} aria-hidden="true" /> Only approved OGCW team accounts open the admin dashboard. Any other account logs in as a normal OGCW account.</p>
         </>
       )}

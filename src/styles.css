@@ -12,6 +12,7 @@
 @import "./styles/news.css";
 @import "./styles/story-designs.css";
 @import "./styles/studio-editor.css";
+@import "./styles/auth-keylight.css";
 
 @custom-variant dark (&:is(.dark *));
 
