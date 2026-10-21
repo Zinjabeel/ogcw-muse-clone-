@@ -29,8 +29,14 @@ function readable(error: AuthError): Error {
   switch (code) {
     case "invalid_credentials": return new Error("That email and password don’t match.");
     case "email_not_confirmed": return new Error("Confirm your email first: open the link we sent when you signed up.");
-    case "user_already_exists":
     case "email_exists": return new Error("There’s already an account with this email. Log in instead.");
+    case "user_already_exists": return new Error("There’s already an account with these details. Log in instead.");
+    case "phone_exists": return new Error("There’s already an account with this phone number. Log in instead.");
+    case "otp_expired": return new Error("That code isn’t right, or it has expired. Try again, or send a new code.");
+    case "sms_send_failed": return new Error("We couldn’t send a text to that number. Check it and try again.");
+    case "phone_provider_disabled": return new Error("Text-message codes aren’t switched on yet.");
+    case "over_sms_send_rate_limit": return new Error("Too many codes sent just now. Wait a minute and try again.");
+    case "validation_failed": return new Error("That phone number doesn’t look right. Start with + and your country code.");
     case "weak_password": return new Error("Choose a stronger password: longer, and harder to guess.");
     case "email_address_invalid": return new Error("That email address doesn’t look right.");
     case "signup_disabled": return new Error("New accounts are paused for now. Try again later.");
@@ -59,6 +65,75 @@ export async function signUp(input: { name: string; email: string; password: str
   });
   if (error) throw readable(error);
   return { user: data.session && data.user ? toUser(data.user) : null, confirm: !data.session };
+}
+
+// ---------------------------------------------------------------- Sign-up with a phone code
+// When text-message codes are switched on in Supabase (Authentication →
+// Providers → Phone, with an SMS service such as Twilio), signing up asks
+// for a phone number too: the account is made with the phone and password,
+// Supabase texts a code, and once the code is right the account is logged in
+// and its email is added (Supabase emails a link to confirm it, after which
+// email and password log in as usual). Supabase's codes are 6 digits unless
+// "SMS OTP length" is changed there; the boxes on the page follow CODE_LENGTH.
+
+/** Digits in Supabase's text-message code (its "SMS OTP length" setting, 6 by default) */
+export const CODE_LENGTH = 6;
+
+/** "+44 7700 900123" → "+447700900123"; throws if it isn't a full international number */
+export function normalisePhone(raw: string) {
+  const trimmed = raw.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  const international = trimmed.startsWith("+") || trimmed.startsWith("00");
+  const number = trimmed.startsWith("00") ? digits.slice(2) : digits;
+  if (!international || number.length < 8 || number.length > 15) throw new Error("Add your phone number with + and your country code, e.g. +44 7700 900123.");
+  return `+${number}`;
+}
+
+/** Whether Supabase can send text-message codes (Phone switched on) */
+export async function phoneCodesEnabled() {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY } });
+    const settings = (await response.json()) as { external?: { phone?: boolean } };
+    return Boolean(settings.external?.phone);
+  } catch {
+    return false;
+  }
+}
+
+/** Make the account with the phone number and password; Supabase texts the code */
+export async function signUpWithPhone(input: { name: string; email: string; phone: string; password: string }) {
+  const name = input.name.trim();
+  const email = normaliseEmail(input.email);
+  if (!name) throw new Error("Add your name.");
+  if (name.length > 60) throw new Error("Keep your name under 60 characters.");
+  if (!EMAIL.test(email)) throw new Error("That email address doesn’t look right.");
+  if (input.password.length < 8) throw new Error("Use at least 8 characters for your password.");
+  const phone = normalisePhone(input.phone);
+  const { error } = await getSupabase().auth.signUp({ phone, password: input.password, options: { data: { name } } });
+  if (error) throw readable(error);
+  return { phone, email, name };
+}
+
+/** Text a new code to the same number */
+export async function resendPhoneCode(phone: string) {
+  const { error } = await getSupabase().auth.resend({ type: "sms", phone });
+  if (error) throw readable(error);
+}
+
+/**
+ * Check the code. Right: the account is confirmed and logged in, and its
+ * email is added (Supabase emails a link to confirm it). `emailProblem` says
+ * if the email couldn't be added (already used by another account, say);
+ * the phone account works either way.
+ */
+export async function verifyPhoneCode(input: { phone: string; code: string; email: string }): Promise<{ user: User; emailProblem?: string }> {
+  if (!new RegExp(`^\\d{${CODE_LENGTH}}$`).test(input.code)) throw new Error(`Type all ${CODE_LENGTH} digits of the code.`);
+  const supabase = getSupabase();
+  const { data, error } = await supabase.auth.verifyOtp({ phone: input.phone, token: input.code, type: "sms" });
+  if (error) throw readable(error);
+  if (!data.user) throw new Error("Something went wrong. Try again.");
+  const { data: updated, error: emailError } = await supabase.auth.updateUser({ email: input.email }, { emailRedirectTo: `${window.location.origin}/login` });
+  return { user: toUser(updated.user ?? data.user), ...(emailError ? { emailProblem: readable(emailError).message } : {}) };
 }
 
 /** Sign in with email and password. Throws a readable message if it doesn't work. */

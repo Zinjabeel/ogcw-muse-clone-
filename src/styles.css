@@ -16,6 +16,7 @@
 @import "./styles/footer-wall.css";
 @import "./styles/shop-backdrop.css";
 @import "./styles/newsletter-prompt.css";
+@import "./styles/code-slots.css";
 
 @custom-variant dark (&:is(.dark *));
 
