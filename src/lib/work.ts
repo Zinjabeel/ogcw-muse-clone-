@@ -77,7 +77,12 @@ export async function passwordLogin(password: string) {
   localStorage.setItem(STUDIO_TOKEN_KEY, JSON.stringify({ token: result.token }));
   localStorage.setItem(PASSWORD_LOGIN_KEY, "1");
   answers.clear();
+  accessChanged();
 }
+
+/** Logging in or out without a page load: everything that asked "who is this?" asks again (the site's edit buttons, the menu) */
+const ACCESS_EVENT = "ogcw:access-changed";
+const accessChanged = () => window.dispatchEvent(new Event(ACCESS_EVENT));
 
 /** Logged in here with the admin password (not with GitHub) */
 export function loggedInWithPassword() {
@@ -97,6 +102,7 @@ export function studioLogout() {
     // nothing kept, nothing to remove
   }
   answers.clear();
+  accessChanged();
 }
 
 /**
@@ -152,9 +158,16 @@ export function useWorkAccess() {
     };
     void check();
     const { data } = getSupabase().auth.onAuthStateChange(() => { void check(); });
+    // The admin password (no page load), or a login or logout in another tab
+    const recheck = () => { void check(); };
+    const onStorage = (event: StorageEvent) => { if (event.key === STUDIO_TOKEN_KEY || event.key === PASSWORD_LOGIN_KEY) recheck(); };
+    window.addEventListener(ACCESS_EVENT, recheck);
+    window.addEventListener("storage", onStorage);
     return () => {
       current = false;
       data.subscription.unsubscribe();
+      window.removeEventListener(ACCESS_EVENT, recheck);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
   return access;
