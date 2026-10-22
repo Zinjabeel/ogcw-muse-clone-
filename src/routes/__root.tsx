@@ -105,7 +105,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Apply the visitor’s saved colour theme and hero before first paint */}
-        <script dangerouslySetInnerHTML={{ __html: fitInitScript + themeInitScript + heroInitScript + introInitScript }} />
+        {/* The server writes this page's security nonce onto it (src/server.ts), which the browser then hides */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: fitInitScript + themeInitScript + heroInitScript + introInitScript }} />
         <HeadContent />
       </head>
       <body>
@@ -116,7 +117,21 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// A link from an OGCW email or a Google login that landed on another page
+// (Supabase sends it to the site's main address when the page it was meant
+// for isn't on its list): passed on to /auth/confirm, which reads it
+function useAuthLinkCatcher() {
+  useEffect(() => {
+    if (window.location.pathname.startsWith("/auth/")) return;
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const forUs = query.has("token_hash") || (query.has("code") && window.location.pathname === "/") || hash.has("access_token") || (query.has("error_description") && query.has("error"));
+    if (forUs) window.location.replace(`/auth/confirm${window.location.search}${window.location.hash}`);
+  }, []);
+}
+
 function RootComponent() {
+  useAuthLinkCatcher();
   const { queryClient } = Route.useRouteContext();
   const { stories, layout, ratings, site } = Route.useLoaderData();
 

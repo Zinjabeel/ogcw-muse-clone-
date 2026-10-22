@@ -1,9 +1,8 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { createClient, type SanityClient } from "@sanity/client";
 import { ArrowDown, ArrowUp, Camera, Check, Eye, EyeOff, ImagePlus, Loader2, Maximize2, Move, PenLine, Plus, RotateCcw, Scaling, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { SANITY_API_VERSION, SANITY_DATASET, SANITY_PROJECT_ID } from "@/sanity/env";
+import { adminClient } from "@/lib/admin-sanity";
 import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
@@ -644,16 +643,8 @@ function AddedSection({ id, def }: { id: string; def: LayoutPos }) {
 }
 // ---------------------------------------------------------------- Saving
 
-/** Writing to Sanity as the admin logged in to the studio on this browser */
-export function adminClient(): SanityClient | null {
-  try {
-    const token = JSON.parse(localStorage.getItem(`__studio_auth_token_${SANITY_PROJECT_ID}`) ?? "null")?.token;
-    if (!token) return null;
-    return createClient({ projectId: SANITY_PROJECT_ID, dataset: SANITY_DATASET, apiVersion: SANITY_API_VERSION, token, useCdn: false });
-  } catch {
-    return null;
-  }
-}
+// Writing to Sanity: adminClient() (src/lib/admin-sanity.ts), straight with
+// this browser's studio login, or through the server for an admin account
 
 /** One edit's document in Sanity ("Site edits" in the studio, filed by part of the site) */
 export const editDocId = (key: string) => `siteEdit-${itemKey(key)}`;
@@ -1167,7 +1158,7 @@ export function SiteEditor() {
     const client = adminClient();
     if (!client) {
       setStatus("error");
-      setMessage("Log in with GitHub at For Work on this browser to connect saving, then try again.");
+      setMessage("Log in at For Work on this browser (your admin account and its code, or GitHub) to save, then try again.");
       return;
     }
     setStatus("saving");
@@ -1175,8 +1166,7 @@ export function SiteEditor() {
       const siteChanges = changes.filter((item) => item.kind !== "story");
       const storyChanges = changes.filter((item) => item.kind === "story");
       const next = applyChanges(site.live, site.pending);
-      const me = await client.request<{ name?: string; email?: string }>({ uri: "/users/me" }).catch(() => null);
-      const by = me?.name || me?.email || "OGCW admin";
+      const by = await client.me().catch(() => "OGCW admin");
       const now = new Date().toISOString();
       const tx = client.transaction();
       if (siteChanges.length) {
@@ -1210,7 +1200,7 @@ export function SiteEditor() {
       if (siteChanges.length) {
         // Versions older than 30 days go
         const cutoff = new Date(Date.now() - HISTORY_DAYS * 86_400_000).toISOString();
-        await client.delete({ query: `*[_type == "siteSnapshot" && at < $cutoff]`, params: { cutoff } }).catch(() => {});
+        await client.pruneHistory(cutoff).catch(() => {});
       }
       site.settle(next, storyValues);
       await refreshSiteCache().catch(() => {});
@@ -1235,7 +1225,7 @@ export function SiteEditor() {
     const client = adminClient();
     if (!client) {
       setStatus("error");
-      setMessage("Log in with GitHub at For Work on this browser to connect uploads, then try again.");
+      setMessage("Log in at For Work on this browser (your admin account and its code, or GitHub) to upload, then try again.");
       return;
     }
     if (!file.type.startsWith("image/") && !/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(file.name)) {
@@ -1246,7 +1236,7 @@ export function SiteEditor() {
     setUploading(true);
     try {
       const body = await shrink(file);
-      const asset = await client.assets.upload("image", body, { filename: file.name.replace(/\.(heic|heif)$/i, ".jpg") });
+      const asset = await client.upload(body, file.name.replace(/\.(heic|heif)$/i, ".jpg"));
       const { fit, clear } = photo.current;
       setLook({ src: `${asset.url}?auto=format&w=2000`, assetId: asset._id, alt: photo.alt, ...(fit ? { fit } : {}), ...(clear ? { clear } : {}) });
     } catch {

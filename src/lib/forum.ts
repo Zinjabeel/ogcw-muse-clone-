@@ -1,3 +1,5 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { getSupabase } from "./supabase";
 import type { User } from "./auth";
 
@@ -42,49 +44,56 @@ export async function getThread(id: string): Promise<{ thread: Thread; replies: 
   return thread ? { thread: thread as Thread, replies: (replies ?? []) as Reply[] } : null;
 }
 
-const clean = (text: string) => text.replace(/\s+\n/g, "\n").trim();
+// Posting, deleting and voting happen on the server, as the logged-in reader
+// (src/lib/server/forum.server.ts): the login never leaves the server
+const forumServer = () => import("./server/forum.server");
+const id = z.string().min(1).max(64);
+const parse = <T extends z.ZodTypeAny>(schema: T) => (data: unknown): z.infer<T> => schema.parse(data);
+const startThreadFn = createServerFn({ method: "POST" })
+  .validator(parse(z.object({ room: z.enum(ROOMS.map((room) => room.id) as [RoomId, ...RoomId[]]), title: z.string().max(400), body: z.string().max(12000) })))
+  .handler(async ({ data }) => (await forumServer()).startThread(data));
+const replyFn = createServerFn({ method: "POST" })
+  .validator(parse(z.object({ threadId: id, body: z.string().max(8000) })))
+  .handler(async ({ data }) => (await forumServer()).reply(data));
+const removeFn = createServerFn({ method: "POST" })
+  .validator(parse(z.object({ kind: z.enum(["thread", "reply"]), id })))
+  .handler(async ({ data }) => (await forumServer()).remove(data));
+const voteFn = createServerFn({ method: "POST" })
+  .validator(parse(z.object({ threadId: id })))
+  .handler(async ({ data }) => (await forumServer()).toggleVote(data));
+const myVotesFn = createServerFn({ method: "POST" }).handler(async () => (await forumServer()).myVotes());
 
-export async function startThread(user: User, input: { room: RoomId; title: string; body: string }): Promise<string> {
-  const title = clean(input.title);
-  const body = clean(input.body);
-  if (title.length < 4) throw new Error("Give your thread a title (at least 4 characters).");
-  if (title.length > 140) throw new Error("Keep the title under 140 characters.");
-  if (!body) throw new Error("Write something to start the conversation.");
-  if (body.length > 5000) throw new Error("Keep it under 5,000 characters.");
-  const { data, error } = await getSupabase().from("forum_threads").insert({ room: input.room, title, body, author_id: user.id, author_name: user.name.slice(0, 60) }).select("id").single();
-  if (error) throw new Error(/ogcw/i.test(user.name) ? "Names with “OGCW” in them are kept for the OGCW team. Change your name in your account first." : "Your thread didn’t post. Try again.");
-  return (data as { id: string }).id;
+type Answer = { ok: true } | { ok: false; message: string };
+function unwrap<T extends Answer>(answer: T): Extract<T, { ok: true }> {
+  if (!answer.ok) throw new Error(answer.message);
+  return answer as Extract<T, { ok: true }>;
 }
 
-export async function reply(user: User, threadId: string, text: string) {
-  const body = clean(text);
-  if (!body) throw new Error("Write a reply first.");
-  if (body.length > 3000) throw new Error("Keep replies under 3,000 characters.");
-  const { error } = await getSupabase().from("forum_replies").insert({ thread_id: threadId, body, author_id: user.id, author_name: user.name.slice(0, 60) });
-  if (error) throw new Error(/ogcw/i.test(user.name) ? "Names with “OGCW” in them are kept for the OGCW team." : "Your reply didn’t post. Try again.");
+// `user` is who the page thinks is logged in; the server checks for itself
+export async function startThread(_user: User, input: { room: RoomId; title: string; body: string }): Promise<string> {
+  return unwrap(await startThreadFn({ data: input })).id;
 }
 
-export async function deleteThread(id: string) {
-  const { error } = await getSupabase().from("forum_threads").delete().eq("id", id);
-  if (error) throw new Error("That didn’t delete. Try again.");
+export async function reply(_user: User, threadId: string, text: string) {
+  unwrap(await replyFn({ data: { threadId, body: text } }));
 }
 
-export async function deleteReply(id: string) {
-  const { error } = await getSupabase().from("forum_replies").delete().eq("id", id);
-  if (error) throw new Error("That didn’t delete. Try again.");
+export async function deleteThread(threadId: string) {
+  unwrap(await removeFn({ data: { kind: "thread", id: threadId } }));
+}
+
+export async function deleteReply(replyId: string) {
+  unwrap(await removeFn({ data: { kind: "reply", id: replyId } }));
 }
 
 /** Upvote a thread, or take the upvote back; returns the new score */
 export async function toggleVote(threadId: string): Promise<number> {
-  const { data, error } = await getSupabase().rpc("forum_toggle_vote", { p_thread: threadId });
-  if (error) throw new Error("Log in to vote.");
-  return Number(data);
+  return unwrap(await voteFn({ data: { threadId } })).score;
 }
 
 /** The threads this account has upvoted */
 export async function myVotes(): Promise<Set<string>> {
-  const { data } = await getSupabase().from("forum_votes").select("thread_id");
-  return new Set(((data ?? []) as { thread_id: string }[]).map((row) => row.thread_id));
+  return new Set(await myVotesFn().catch(() => []));
 }
 
 /** "5 min ago", "3 h ago", "2 days ago", then the date */

@@ -130,7 +130,7 @@ export function PasswordField({ label, value, onChange, autoComplete, hint }: { 
     <label className="auth-field">
       <span>{label}</span>
       <span className="auth-password">
-        <input type={shown ? "text" : "password"} name="password" autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} required minLength={8} />
+        <input type={shown ? "text" : "password"} name="password" autoComplete={autoComplete} value={value} onChange={(event) => onChange(event.target.value)} required maxLength={200} />
         <button type="button" className="auth-reveal" aria-label={shown ? "Hide password" : "Show password"} aria-pressed={shown} onClick={() => setShown((open) => !open)}>
           {shown ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
         </button>

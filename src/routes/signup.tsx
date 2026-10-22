@@ -2,7 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, MailCheck, MessageSquareText } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
+import { PasswordStrength, ProviderButtons, Turnstile } from "../components/account-kit";
 import CodeSlots from "../components/code-slots";
+import { checkPassword } from "../lib/password-rules";
 import { CODE_LENGTH, phoneCodesEnabled, resendPhoneCode, signUp, signUpWithPhone, useUser, verifyPhoneCode } from "../lib/auth";
 
 // Create an OGCW account: its own page, away from the login form.
@@ -12,7 +14,10 @@ import { CODE_LENGTH, phoneCodesEnabled, resendPhoneCode, signUp, signUpWithPhon
 // account is made and logged in (with a link emailed to confirm the email
 // address); wrong, and the boxes drain in red to try again. Until they're
 // switched on, it's email only: Supabase sends a link to confirm the address
-// before the first login.
+// before the first login. Since 22 Oct 2026: a strength meter under the
+// password (the server checks the same rules, and leaked-password lists),
+// Google, and the "are you human" check once it's switched on. The answer is
+// the same whether or not the address already has an account.
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -45,6 +50,8 @@ function SignupPage() {
   const [checking, setChecking] = useState(false);
   const [wait, setWait] = useState(0);
   const [done, setDone] = useState<{ email: string; emailProblem?: string } | null>(null);
+  const [captcha, setCaptcha] = useState("");
+  const [round, setRound] = useState(0);
 
   useEffect(() => { void phoneCodesEnabled().then(setWithPhone); }, []);
   // "Send a new code" waits a minute between texts
@@ -61,22 +68,31 @@ function SignupPage() {
       setError("Tick the box to agree to the Terms of Service and Privacy Policy.");
       return;
     }
+    // The same rules as the server, so most problems show at once
+    const report = checkPassword(password, { email, name });
+    if (report.problem) {
+      setError(report.problem);
+      return;
+    }
     setBusy(true);
+    const pass = captcha ? { captcha } : {};
     try {
       if (withPhone) {
-        const made = await signUpWithPhone({ name, email, phone, password });
+        const made = await signUpWithPhone({ name, email, phone, password, ...pass });
         setCodeFor({ phone: made.phone, email: made.email });
         setCodeStatus("idle");
         setCodeMessage("");
         setWait(RESEND_AFTER_S);
       } else {
-        const { confirm } = await signUp({ name, email, password });
+        const { confirm } = await signUp({ name, email, password, ...pass });
         if (confirm) setSentTo(email.trim());
       }
     } catch (problem) {
       setError(problem instanceof Error ? problem.message : "Something went wrong. Try again.");
     } finally {
       setBusy(false);
+      setCaptcha("");
+      setRound((value) => value + 1);
     }
   };
 
@@ -160,7 +176,7 @@ function SignupPage() {
         <>
           <span className="authx-icon"><MailCheck size={22} strokeWidth={1.75} aria-hidden="true" /></span>
           <h1 className="authx-title">Check your email</h1>
-          <p className="authx-lede" role="status">We’ve sent a link to <strong>{sentTo}</strong>. Open it to confirm your address, then log in on any device.</p>
+          <p className="authx-lede" role="status">We’ve sent a link to <strong>{sentTo}</strong>. Open it to confirm your address, then log in on any device. It can take a minute, and may land in your spam folder. (If that address already has an account, we’ve emailed it instead.)</p>
           <Link to="/login" className="auth-secondary authx-wide">Back to login</Link>
         </>
       ) : ready && user ? (
@@ -189,17 +205,20 @@ function SignupPage() {
                 <span className="auth-hint">With your country code. We’ll text you a {CODE_LENGTH}-digit code.</span>
               </label>
             )}
-            <PasswordField label="Password" value={password} onChange={setPassword} autoComplete="new-password" hint="At least 8 characters." />
+            <PasswordField label="Password" value={password} onChange={setPassword} autoComplete="new-password" />
+            <PasswordStrength password={password} email={email} name={name} />
             <label className="authx-check">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
               <span>I agree to the <Link to="/info/$slug" params={{ slug: "terms" }}>Terms of Service</Link> and the <Link to="/info/$slug" params={{ slug: "privacy" }}>Privacy Policy</Link>.</span>
             </label>
+            <Turnstile key={round} onToken={setCaptcha} />
             {error && <p className="auth-error" role="alert">{error}</p>}
             <button type="submit" className="auth-submit authx-wide" disabled={busy}>
               {busy ? "One moment…" : withPhone ? "Text me the code" : "Create account"}
               {!busy && <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />}
             </button>
           </form>
+          <ProviderButtons returnTo="/" label="Or sign up with" onError={setError} />
           <p className="authx-divider"><span>Already have an account?</span></p>
           <Link to="/login" className="auth-secondary authx-wide">Login</Link>
         </>

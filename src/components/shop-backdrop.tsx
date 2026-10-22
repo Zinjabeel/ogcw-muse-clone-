@@ -1,5 +1,6 @@
 import { Palette, X } from "lucide-react";
 import { lazy, Suspense, useEffect, useState } from "react";
+import { storePreference } from "@/lib/consent";
 
 // The shop's background (owner, 21 Oct 2026): React Bits' AeroShards, glass
 // or chrome shards flowing in ribbons, on a fixed layer behind every shop
@@ -48,7 +49,7 @@ function useBackdropChoice() {
   }, []);
   const choose = (next: string) => {
     setId(next);
-    try { localStorage.setItem(KEY, next); } catch { /* not kept */ }
+    storePreference(KEY, next); // remembered only if the reader allows preferences
   };
   return { id, choose };
 }

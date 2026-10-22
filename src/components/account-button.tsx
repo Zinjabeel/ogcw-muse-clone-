@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut, PenSquare, User as UserIcon } from "lucide-react";
+import { LogOut, PenSquare, Settings, User as UserIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useUser } from "@/lib/auth";
 import { useWorkAccess } from "@/lib/work";
 
 // The account button in the header. Logged out: a link to /login. Logged
-// in: the reader's initial, opening a small menu with their name, the admin
-// dashboard (for the OGCW team account only, src/lib/work.ts) and Log out.
+// in: the reader's initial, opening a small menu with their name, their
+// account page (two-step login, password, devices), the admin dashboard (for
+// the OGCW team only, src/lib/work.ts) and Log out.
 
 export function GitHubMark({ size = 18 }: { size?: number }) {
   return (
@@ -48,6 +49,7 @@ export function AccountButton() {
         <div id="account-menu" className="account-menu">
           <p className="account-name">{user.name}</p>
           <p className="account-email">{user.email}</p>
+          <Link to="/account" className="account-item" onClick={() => setOpen(false)}><Settings size={15} aria-hidden="true" /> Your account</Link>
           {admin && (
             <Link to="/admin/$" params={{ _splat: "" }} className="account-item" onClick={() => setOpen(false)}><PenSquare size={15} aria-hidden="true" /> Admin dashboard</Link>
           )}

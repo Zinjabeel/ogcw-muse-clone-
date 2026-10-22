@@ -1,4 +1,5 @@
-import { getSupabase } from "./supabase";
+import { storePreference } from "./consent";
+import { castVote } from "./votes-api";
 
 // Readers rate stories from 1 to 5 stars (the end of every story). Ratings are
 // kept in Supabase (rate_story / story_rating_totals); one per logged-in
@@ -35,11 +36,11 @@ export function myRating(slug: string): number | null {
 
 /** Rate a story (again, to change it) */
 export async function rateStory(slug: string, stars: number) {
-  const { error } = await getSupabase().rpc("rate_story", { p_slug: slug, p_stars: stars, p_voter: voterId() });
-  if (error) throw new Error("Your rating didn’t go through. Try again.");
+  // Through the server: as the logged-in account, if there is one (src/lib/votes-api.ts)
+  await castVote("rate_story", { p_slug: slug, p_stars: stars, p_voter: voterId() }, "Your rating didn’t go through. Try again.");
   try {
     const all = JSON.parse(localStorage.getItem(RATED_KEY) ?? "{}") as Record<string, number>;
-    localStorage.setItem(RATED_KEY, JSON.stringify({ ...all, [slug]: stars }));
+    storePreference(RATED_KEY, JSON.stringify({ ...all, [slug]: stars })); // remembered only if the reader allows preferences
   } catch {
     // storage blocked: the rating still counts, this browser just won't remember it
   }

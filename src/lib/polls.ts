@@ -1,4 +1,6 @@
+import { storePreference } from "./consent";
 import { getSupabase } from "./supabase";
+import { castVote } from "./votes-api";
 
 // Reader polls (the first: favourite brand of the year, under Culture &
 // fashion). One vote per account, or else per browser (the same random id the
@@ -31,9 +33,9 @@ export async function pollTotals(poll: string): Promise<Record<string, number>> 
 }
 
 export async function votePoll(poll: string, choice: string) {
-  const { error } = await getSupabase().rpc("vote_poll", { p_poll: poll, p_choice: choice, p_voter: voterId() });
-  if (error) throw new Error("Your vote didn’t go through. Try again.");
-  try { localStorage.setItem(mineKey(poll), choice); } catch { /* the vote still counts */ }
+  // Through the server: as the logged-in account, if there is one (src/lib/votes-api.ts)
+  await castVote("vote_poll", { p_poll: poll, p_choice: choice, p_voter: voterId() }, "Your vote didn’t go through. Try again.");
+  storePreference(mineKey(poll), choice); // remembered only if the reader allows preferences
 }
 
 /** The choice this browser voted for, if any */

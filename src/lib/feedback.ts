@@ -1,5 +1,6 @@
 import { getSupabase } from "./supabase";
 import { voterId } from "./polls";
+import { castVote } from "./votes-api";
 
 // Reader answers to the yes/no question at the end of each story ("Was this
 // helpful?", "Are you going?"), and the notes people add under it. Both are
@@ -29,21 +30,20 @@ export async function getFeedback({ data }: { data: unknown }): Promise<Feedback
   return toCounts(rows);
 }
 
+// Answers and notes go through the server: as the logged-in account, if there is one (src/lib/votes-api.ts)
 export async function sendFeedback({ data }: { data: { slug: unknown; answer: unknown } }): Promise<FeedbackCounts> {
   if (!isAnswer(data.answer)) throw new Error("The answer is yes or no");
-  const { data: rows, error } = await getSupabase().rpc("story_feedback_answer", { p_slug: storySlug(data.slug), p_answer: data.answer, p_voter: voterId() });
-  if (error) throw new Error("That didn’t go through.");
+  const rows = await castVote("story_feedback_answer", { p_slug: storySlug(data.slug), p_answer: data.answer, p_voter: voterId() }, "That didn’t go through.");
   return toCounts(rows);
 }
 
 export async function sendFeedbackNote({ data }: { data: { slug: unknown; answer: unknown; text: unknown } }) {
   if (typeof data.text !== "string" || !data.text.trim()) throw new Error("The note is empty");
-  const { error } = await getSupabase().rpc("story_feedback_note", {
+  await castVote("story_feedback_note", {
     p_slug: storySlug(data.slug),
     p_answer: isAnswer(data.answer) ? data.answer : null,
     p_text: data.text.trim().slice(0, 1000),
     p_voter: voterId(),
-  });
-  if (error) throw new Error("That didn’t go through.");
+  }, "That didn’t go through.");
   return { ok: true };
 }

@@ -1,0 +1,10 @@
+confirm-signup.html	Confirm your email for OGCW
+invite.html	You’re invited to OGCW
+magic-link.html	Your OGCW login link
+change-email.html	Confirm your new email for OGCW
+reset-password.html	Reset your OGCW password
+reauthentication.html	Your OGCW confirmation code
+password-changed.html	Your OGCW password was changed
+email-changed.html	Your OGCW email address was changed
+mfa-added.html	Two-step login is on for your OGCW account
+mfa-removed.html	Two-step login was turned off on your OGCW account

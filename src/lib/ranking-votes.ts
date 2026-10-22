@@ -1,4 +1,6 @@
+import { storePreference } from "./consent";
 import { getSupabase } from "./supabase";
+import { castVote } from "./votes-api";
 
 // The OGCW 10 vote: readers pick the story they'd put at No. 1. One vote per
 // account, or else per browser (the same random id the star ratings use),
@@ -39,9 +41,9 @@ export async function rankingTotals(round: string): Promise<Record<string, numbe
 }
 
 export async function voteRanking(round: string, slug: string) {
-  const { error } = await getSupabase().rpc("vote_ranking", { p_round: round, p_slug: slug, p_voter: voterId() });
-  if (error) throw new Error("Your vote didn’t go through. Try again.");
-  try { localStorage.setItem(MINE_KEY, JSON.stringify({ round, slug })); } catch { /* the vote still counts */ }
+  // Through the server: as the logged-in account, if there is one (src/lib/votes-api.ts)
+  await castVote("vote_ranking", { p_round: round, p_slug: slug, p_voter: voterId() }, "Your vote didn’t go through. Try again.");
+  storePreference(MINE_KEY, JSON.stringify({ round, slug })); // remembered only if the reader allows preferences
 }
 
 /** The story this browser voted for in this round, if any */

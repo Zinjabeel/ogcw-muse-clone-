@@ -2,7 +2,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { ArrowUpDown, Bold, Check, Eraser, Hand, Highlighter, Loader2, MoveUpRight, Pen, Square, StickyNote, Trash2, Type, Undo2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
-import { adminClient } from "./site-text";
+import { adminClient } from "@/lib/admin-sanity";
 
 // Design notes, for admins: draw and write on any page to show Claude how a
 // part of it should look (how big a card should be, what to move, how a text
@@ -136,8 +136,8 @@ export function DesignNotes() {
     try {
       if (!list.length) await client.delete(docId(path)).catch(() => {});
       else {
-        const me = await client.request<{ name?: string; email?: string }>({ uri: "/users/me" }).catch(() => null);
-        await client.createOrReplace({ _id: docId(path), _type: "designNote", page: path, title: document.title, marks: list, updatedAt: new Date().toISOString(), updatedBy: me?.name || me?.email || "OGCW admin" });
+        const me = await client.me().catch(() => "OGCW admin");
+        await client.createOrReplace({ _id: docId(path), _type: "designNote", page: path, title: document.title, marks: list, updatedAt: new Date().toISOString(), updatedBy: me });
       }
       if (pathRef.current === path) { dirtyRef.current = false; setDirty(false); setStatus("saved"); }
     } catch {

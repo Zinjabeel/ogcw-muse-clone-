@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CultureRouteImport } from './routes/culture'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -27,6 +28,7 @@ import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as AdminSplatRouteImport } from './routes/admin.$'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as ForumIndexRouteImport } from './routes/forum.index'
 import { Route as ForumRoomRouteImport } from './routes/forum.$room'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
@@ -60,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -140,6 +147,11 @@ const WorkRoute = WorkRouteImport.update({
 const AdminSplatRoute = AdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm',
+  path: '/auth/confirm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForumIndexRoute = ForumIndexRouteImport.update({
@@ -266,6 +278,7 @@ const ShopPIdRoute = ShopPIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -282,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -310,6 +324,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -326,6 +341,7 @@ export interface FileRoutesByTo {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -355,6 +371,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -371,6 +388,7 @@ export interface FileRoutesById {
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -401,6 +419,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -417,6 +436,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
     | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
@@ -445,6 +465,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -461,6 +482,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
     | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
@@ -489,6 +511,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -505,6 +528,7 @@ export interface FileRouteTypes {
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
     | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
@@ -534,6 +558,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
   BlogRoute: typeof BlogRoute
   CultureRoute: typeof CultureRoute
   ExploreRoute: typeof ExploreRoute
@@ -550,6 +575,7 @@ export interface RootRouteChildren {
   TrendsRoute: typeof TrendsRoute
   WorkRoute: typeof WorkRoute
   AdminSplatRoute: typeof AdminSplatRoute
+  AuthConfirmRoute: typeof AuthConfirmRoute
   ForumRoomRoute: typeof ForumRoomRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
@@ -590,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -702,6 +735,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/$'
       fullPath: '/admin/$'
       preLoaderRoute: typeof AdminSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/auth/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forum/': {
@@ -878,6 +918,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
   BlogRoute: BlogRoute,
   CultureRoute: CultureRoute,
   ExploreRoute: ExploreRoute,
@@ -894,6 +935,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrendsRoute: TrendsRoute,
   WorkRoute: WorkRoute,
   AdminSplatRoute: AdminSplatRoute,
+  AuthConfirmRoute: AuthConfirmRoute,
   ForumRoomRoute: ForumRoomRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,

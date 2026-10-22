@@ -22,8 +22,9 @@ export type InfoGroup = "Help" | "Company" | "Legal";
 type InfoPage = { kicker: InfoGroup; title: string; label?: string; intro: string; updated?: string; body: ReactNode };
 
 const UPDATED = "30 September 2026";
-// Privacy and cookies changed when reader accounts moved to Supabase
-const ACCOUNTS_UPDATED = "2 October 2026";
+// Privacy and cookies changed when reader accounts moved to Supabase, and
+// again when logins moved to a server cookie with two-step login (22 Oct 2026)
+const ACCOUNTS_UPDATED = "22 October 2026";
 
 const Mail = ({ subject, children }: { subject: string; children: ReactNode }) => <a href={mail(subject)}>{children}</a>;
 const Page = ({ slug, children }: { slug: InfoSlug; children: ReactNode }) => <Link to="/info/$slug" params={{ slug }}>{children}</Link>;
@@ -130,14 +131,31 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
 ];
 
 // Every item OGCW keeps in the browser, for the Cookie Policy
+// Every cookie and browser-storage item OGCW uses (22 Oct 2026): name, type, what it does, how long it stays
 const STORAGE_ITEMS: [string, string, string][] = [
+  ["__Host-ogcw-session", "Strictly necessary (cookie)", "Keeps you logged in to your OGCW account, for up to 30 days from your last visit. Only our server can read it (not the page’s scripts), it’s only sent over a secure connection, and never to other sites. Only there while you’re logged in."],
+  ["__Host-ogcw-pkce", "Strictly necessary (cookie)", "A one-time key while you log in with Google, so the login can’t be swapped on the way back. Lasts 10 minutes at most, deleted as soon as you’re back."],
+  ["__Host-ogcw-recovery", "Strictly necessary (cookie)", "Lets you choose a new password after opening a reset link from your email. Lasts 15 minutes at most, deleted once the password is saved."],
   ["ogcw-consent", "Strictly necessary", "Remembers your cookie choices, so we don’t ask on every visit."],
   ["ogcw-lang", "Strictly necessary", "Remembers your language."],
-  ["sb-dkzjgjerfaxtjyeixpqe-auth-token", "Strictly necessary", "Keeps you signed in to your OGCW account on this device until you sign out. Only there if you sign in."],
+  ["ogcw-voter", "Strictly necessary", "A random number, with no name attached, so your vote in a poll, a ranking or a star rating counts once. Only set when you vote."],
+  ["ogcw-newsletter-asked:(account)", "Strictly necessary", "So we ask about the newsletter only once after you log in."],
+  ["ogcw-auth-next", "Strictly necessary (this visit)", "Where to take you back to after logging in with Google. Gone when you close the tab."],
+  ["ogcw-shop-intro-seen", "Strictly necessary (this visit)", "So the shop’s opening animation plays once a visit, not on every page. Gone when you close the tab."],
+  ["Cloudflare Turnstile", "Security", "On the login, sign-up and password pages only: Cloudflare’s check that you’re a person, not a bot trying passwords. Set by Cloudflare (challenges.cloudflare.com); not used for tracking or adverts."],
   ["ogcw-theme", "Preferences", "Remembers the colour theme you picked (Night, Gold, Navy or Aurora)."],
   ["ogcw-hero", "Preferences", "Remembers which home page hero you picked."],
+  ["ogcw-shop-backdrop", "Preferences", "Remembers the shop background you picked."],
+  ["ogcw-shop-saved", "Preferences", "The shop items you saved for later."],
+  ["ogcw-shop-cart", "Preferences", "What’s in your shop bag."],
   ["ogcw-vote-no1-rapper", "Preferences", "Remembers your vote in the No. 1 rapper poll, so you see the results when you come back."],
+  ["ogcw-poll-(poll)", "Preferences", "Remembers your vote in a reader poll."],
+  ["ogcw-ranking-vote", "Preferences", "Remembers your pick in this week’s OGCW 10 vote."],
+  ["ogcw-rated", "Preferences", "Remembers the stars you gave stories."],
   ["ogcw-answer-(story)", "Preferences", "Remembers your answer to the question at the end of a story."],
+  ["ogcw-404-best-(game)", "Preferences", "Your best score in the games on the “page not found” page."],
+  ["__studio_auth_token_(project)", "OGCW team only", "Keeps an OGCW editor logged in to the studio (set by Sanity, our content system). Readers never get it."],
+  ["ogcw-edit-buttons-off, ogcw-studio-editor, ogcw-copied-design", "OGCW team only", "Editing settings for the OGCW team: whether the edit buttons show, the studio’s view, and a copied story design."],
 ];
 
 // The contact subjects, for the Contact page
@@ -435,7 +453,8 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <thead><tr><th>What</th><th>Why</th><th>Legal basis</th></tr></thead>
           <tbody>
             <tr><td>Technical data your browser sends when you visit, such as your IP address, browser type and the pages you request</td><td>To deliver the site, keep it secure and fix problems. Our hosting provider processes this data for us.</td><td>Our legitimate interest in running a secure website</td></tr>
-            <tr><td>Your name, email address and password, if you create an account</td><td>To let you log in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it. If you log in with Google or GitHub instead, they share your name, email address and username with us, and no password.</td><td>Our agreement with you when you create an account</td></tr>
+            <tr><td>Your name, email address and password, if you create an account</td><td>To let you log in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it. If you log in with Google or GitHub instead, they share your name, email address and username with us, and no password. If you turn on two-step login, a secret shared with your authenticator app is kept with your account.</td><td>Our agreement with you when you create an account</td></tr>
+            <tr><td>Login protection: your IP address and the email you try to log in with, counted for up to two hours; on the login pages, Cloudflare’s check that you’re a person</td><td>To stop people guessing passwords. We count tries per IP address and per account, in a scrambled form, and the counts are cleared away once they run out. New passwords are checked against Have I Been Pwned’s list of leaked passwords: only the first 5 characters of a scrambled fingerprint of the password are sent, never the password.</td><td>Our legitimate interest in keeping accounts safe</td></tr>
             <tr><td>Your answers to polls and to the questions at the end of stories</td><td>To count them and show the results. They are counted without your name.</td><td>Our legitimate interest in running polls you choose to take part in</td></tr>
             <tr><td>Notes you write under a story</td><td>To read your feedback. Notes are stored with the story and the time, and never published.</td><td>Our legitimate interest in improving our reporting</td></tr>
             <tr><td>Your email address, if you sign up for the newsletter</td><td>To send you the newsletter once it launches. It is kept by Supabase, on servers in the EU (Frankfurt), and is never shown on the site.</td><td>Your consent, which you can withdraw at any time</td></tr>
@@ -480,12 +499,12 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             {STORAGE_ITEMS.map(([name, type, purpose]) => <tr key={name}><td><code>{name}</code></td><td>{type}</td><td>{purpose}</td></tr>)}
           </tbody>
         </table>
-        <p>All of these are stored in your browser only, on this device, and stay until you clear them or change your choices. Items marked Preferences are only stored if you allow them.</p>
+        <p>The three login cookies are only ever sent to OGCW’s own server. Everything else stays in your browser, on this device, until you clear it or change your choices. Items marked Preferences are only stored if you allow them.</p>
         <h2>What we don’t use</h2>
         <ul className="info-list">
           <li>No analytics cookies: we don’t measure your visits with cookies.</li>
           <li>No advertising or tracking cookies.</li>
-          <li>No third-party cookies set by us. Images from YouTube, Spotify and Unsplash load from their servers, but we don’t embed their players or trackers.</li>
+          <li>No third-party cookies for tracking. Cloudflare’s security check runs only on the login, sign-up and password pages. Images from YouTube, Spotify and Unsplash load from their servers, and videos play from YouTube’s privacy-enhanced (no-cookie) player only when you press play.</li>
         </ul>
         <h2>Changing your choices</h2>
         <p>You can change your mind at any time. Turning Preferences off removes the preference items stored before.</p>

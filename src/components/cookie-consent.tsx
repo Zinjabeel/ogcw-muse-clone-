@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BarChart3, ChevronRight, CookieIcon, Globe, Palette, Shield, Target } from "lucide-react";
+import { BarChart3, ChevronRight, CookieIcon, Globe, Palette, Shield, ShieldCheck, Target } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { readConsent, saveConsent } from "@/lib/consent";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,9 @@ import { T } from "./site-text";
 // Cookie consent, in the layout of 21st.dev's "cookie-consent" (bankkroll):
 // a card bottom left with Accept All and Customize, and a Manage Cookies
 // dialog with a switch per category. OGCW keeps only what it needs: the
-// essentials (this choice, the language) and, if the reader allows it,
-// preferences (colour theme, hero, votes and answers). There are no
+// essentials (the login cookie, this choice, the language, the voter
+// number), the security check on the login pages and, if the reader allows
+// it, preferences (theme, hero, shop, votes and answers). There are no
 // analytics or advertising cookies, so those are shown as not used rather
 // than offered (src/lib/consent.ts keeps the choice). "Cookie settings" in
 // the footer and the menu opens the dialog again.
@@ -23,9 +24,11 @@ export const LANGUAGES = [{ code: "en", name: "English", native: "English" }] as
 
 type Category = { id: string; name: string; description: string; icon: ReactNode; essential?: boolean; unused?: boolean };
 
+// What each category holds, in plain words (the Cookie Policy names every item)
 const CATEGORIES: Category[] = [
-  { id: "essential", name: "Essential cookies", description: "Remember this choice and your language. The site needs these to work, so they can’t be turned off.", icon: <Shield className="h-4 w-4" />, essential: true },
-  { id: "preferences", name: "Preferences", description: "Your colour theme, your choice of home page hero, and the votes and answers you’ve given, so you see the results when you come back.", icon: <Palette className="h-4 w-4" /> },
+  { id: "essential", name: "Essential cookies", description: "Keep you logged in (a secure cookie only our server can read), protect your login while you sign in with Google or reset your password, remember this choice and your language, make each vote count once, and ask about the newsletter only once. The site needs these to work, so they can’t be turned off.", icon: <Shield className="h-4 w-4" />, essential: true },
+  { id: "security", name: "Security check", description: "On the login, sign-up and password pages, Cloudflare Turnstile checks you’re a person and not a bot trying passwords. It isn’t used for tracking or adverts.", icon: <ShieldCheck className="h-4 w-4" />, essential: true },
+  { id: "preferences", name: "Preferences", description: "Your colour theme, home page hero and shop background, the shop items you save and your bag, your votes, answers and star ratings (so you see the results when you come back), and your best scores in the 404 page’s games.", icon: <Palette className="h-4 w-4" /> },
   { id: "analytics", name: "Analytics", description: "Not used. OGCW doesn’t measure your visits with analytics cookies.", icon: <BarChart3 className="h-4 w-4" />, unused: true },
   { id: "marketing", name: "Marketing", description: "Not used. OGCW doesn’t use advertising or tracking cookies.", icon: <Target className="h-4 w-4" />, unused: true },
 ];
@@ -94,7 +97,7 @@ function CookieBanner({ leaving, onAcceptAll, onCustomize }: { leaving: boolean;
         </div>
         <div className="px-6 pb-4">
           <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-            <T k="cookies.copy">We use a few small cookies to make the site work and, if you allow it, to remember your preferences. No tracking, no ads.</T>
+            <T k="cookies.copy">We use a few small cookies to keep you logged in safely and make the site work and, if you allow it, to remember your preferences. No tracking, no ads.</T>
           </p>
           <Link to="/info/$slug" params={{ slug: "cookies" }} className="group inline-flex items-center text-xs font-medium text-primary transition-colors hover:underline">
             <T k="cookies.policy">Cookie Policy</T>

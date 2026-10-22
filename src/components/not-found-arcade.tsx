@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Play, RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
+import { storePreference } from "@/lib/consent";
 import { GAMES, H, W, YELLOW, type Game } from "./arcade-games";
 import { T } from "./site-text";
 
@@ -17,9 +18,8 @@ const bestKey = (id: string) => `ogcw-404-best-${id}`;
 const readBest = (id: string) => {
   try { return Number(localStorage.getItem(bestKey(id))) || 0; } catch { return 0; }
 };
-const saveBest = (id: string, score: number) => {
-  try { localStorage.setItem(bestKey(id), String(score)); } catch { /* private window: the best just isn't kept */ }
-};
+// Kept only if the reader allows preferences (the cookie settings)
+const saveBest = (id: string, score: number) => storePreference(bestKey(id), String(score));
 
 /** A crisp canvas at the screen's pixel density, drawn in game units */
 function setup(canvas: HTMLCanvasElement) {
