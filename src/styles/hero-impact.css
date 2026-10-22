@@ -44,6 +44,10 @@
 }
 @media (min-width: 1024px) {
   .cxi-grid { height: clamp(600px, calc(100svh - 122px), 1000px); }
-  /* Three cards are narrower than Gallery 2's two: a little less room at the sides, everything else the same */
+  /* Three cards are narrower than Gallery 2's two: a little less room at the
+     sides (the controls move in with the words), and headlines a step smaller
+     so a longer story's headline isn't cut short; everything else the same */
   .cxi .cxh-content { padding: 16px 44px 80px 44px; }
+  .cxi .cxh-controls { right: 44px; }
+  .cxi .cxh-title { font-size: 38px; line-height: 44px; letter-spacing: -.8px; -webkit-line-clamp: 4; }
 }

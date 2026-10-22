@@ -29,10 +29,16 @@ const RING = 2 * Math.PI * 13;
 
 export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
 
-/** One Complex card: a slideshow (with dots and controls), or a single slide (none). Also used by the Impact grid (hero-impact.tsx). */
-export function Slideshow({ label, slides }: { label: string; slides: Slide[] }) {
+/**
+ * One Complex card: a slideshow (with dots and controls), or a single slide
+ * (none). Also used by the Impact grid (hero-impact.tsx). `lead` starts the
+ * first slide's time part-way through, so cards side by side don't all turn
+ * at the same moment.
+ */
+export function Slideshow({ label, slides, lead = 0 }: { label: string; slides: Slide[]; lead?: number }) {
   const box = useRef<HTMLElement>(null);
   const [index, setIndex] = useState(0);
+  const [moved, setMoved] = useState(false);
   const [paused, setPaused] = useState(false);
   const [hold, setHold] = useState(false);
   const [inView, setInView] = useState(false);
@@ -50,14 +56,24 @@ export function Slideshow({ label, slides }: { label: string; slides: Slide[] })
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const observer = new IntersectionObserver(([entry]) => setInView(!!entry?.isIntersecting), { threshold: 0.35 });
+    const observer = new IntersectionObserver(([entry]) => {
+      setInView(!!entry?.isIntersecting);
+      // Hidden (another hero chosen): back to the first slide, so the cards start apart again when it's shown
+      if (entry && !entry.isIntersecting && entry.boundingClientRect.width === 0) {
+        setIndex(0);
+        setMoved(false);
+      }
+    }, { threshold: 0.35 });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
   useEffect(() => { if (index >= slides.length) setIndex(0); }, [index, slides.length]);
 
   const count = slides.length;
-  const go = (step: number) => setIndex((value) => (((value + step) % count) + count) % count);
+  const go = (step: number) => {
+    setMoved(true);
+    setIndex((value) => (((value + step) % count) + count) % count);
+  };
   const running = !paused && !hold && inView && !reduce && !busy && count > 1;
 
   return (
@@ -99,7 +115,7 @@ export function Slideshow({ label, slides }: { label: string; slides: Slide[] })
         <>
           <div className="cxh-dots" role="group" aria-label={`${label}: choose a slide`}>
             {slides.map((slide, i) => (
-              <button key={slide.key} type="button" className="cxh-dot" data-on={i === index} aria-label={`Go to slide ${i + 1}`} aria-current={i === index ? "true" : undefined} onClick={() => setIndex(i)} />
+              <button key={slide.key} type="button" className="cxh-dot" data-on={i === index} aria-label={`Go to slide ${i + 1}`} aria-current={i === index ? "true" : undefined} onClick={() => { setMoved(true); setIndex(i); }} />
             ))}
           </div>
           <div className="cxh-controls">
@@ -113,7 +129,7 @@ export function Slideshow({ label, slides }: { label: string; slides: Slide[] })
                     strokeDasharray={RING}
                     className="cxh-ring-time"
                     data-run={running}
-                    style={{ "--ring": RING, "--dur": `${SLIDE_MS}ms` } as CSSProperties}
+                    style={{ "--ring": RING, "--dur": `${SLIDE_MS}ms`, ...(moved ? {} : { animationDelay: `-${lead}ms` }) } as CSSProperties}
                     onAnimationEnd={() => go(1)}
                   />
                 </svg>
@@ -167,7 +183,7 @@ export function HeroGallery2() {
       <h1 id="g2-title" className="sr-only"><T>OGCW, One Great Culture World</T></h1>
       <div className="cxh-grid">
         {storySlides.length > 0 && <Slideshow label="Top stories" slides={storySlides} />}
-        <Slideshow label="Explore OGCW" slides={doorSlides} />
+        <Slideshow label="Explore OGCW" slides={doorSlides} lead={3000} />
       </div>
     </section>
   );

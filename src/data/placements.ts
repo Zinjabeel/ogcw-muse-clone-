@@ -30,7 +30,7 @@ export const SLOTS = [
   // (The hero's stories take turns, so they may also show further down the page)
   { id: "hero-cover", area: "Hero", name: "Cover stories", note: "Take turns as the big story in the Cover hero, 3 seconds each", max: 6, defaults: ["taylor-swift-the-life-of-a-showgirl-the-encore", "vmas-2026-winners", "bts-arirang-world-tour-latin-america", "paris-fashion-week-ss27", "gta-vi-countdown", "z-event-2026-final-edition"], list: true },
   { id: "hero-cover-rail", area: "Hero", name: "Also on OGCW", note: "Take turns in the three places under the cover story", max: 8, defaults: ["gta-vi-countdown", "z-event-2026-final-edition", "emmys-2026-winners", "tokyo-game-show-2026-typhoon", "kai-cenat-ishowspeed-minecraft-marathon", "latin-grammys-2026-nominations", "blizzcon-2026-diablo-v-starcraft", "avengers-endgame-encore-box-office"], list: true },
-  { id: "hero-top", area: "Hero", name: "Top stories", note: "The stories that take turns in the Gallery 2 hero", max: 3, defaults: ["gta-vi-countdown", "paris-fashion-week-ss27", "taylor-swift-the-life-of-a-showgirl-the-encore"], list: true },
+  { id: "hero-top", area: "Hero", name: "Top stories", note: "The stories that take turns in the Gallery 2 hero; the first two also follow Today’s news in the Impact grid’s News card", max: 3, defaults: ["gta-vi-countdown", "paris-fashion-week-ss27", "taylor-swift-the-life-of-a-showgirl-the-encore"], list: true },
 
   // The Wire, the first band under the hero
   { id: "front-lead", area: "The Wire", name: "Main story", note: "The big story at the top of the front page", max: 1, defaults: ["iphone-duo-sells-out-deliveries-january-2027"] },
