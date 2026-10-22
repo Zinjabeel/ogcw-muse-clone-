@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, KeyRound, LayoutDashboard, LogOut, MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
-import { CodeBoxes, CodeStep, PasswordStrength, TwoStepOn, TwoStepSetup } from "../components/account-kit";
+import { CodeBoxes, CodeStep, PasswordStrength, Turnstile, TwoStepOn, TwoStepSetup } from "../components/account-kit";
 import { checkPassword } from "../lib/password-rules";
 import { AccountError, changePassword, setNewPassword, signOut, stopTwoStep, useAccount } from "../lib/auth";
 
@@ -120,6 +120,8 @@ function PasswordCard({ hasPassword, email, name, onSaved }: { hasPassword: bool
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [captcha, setCaptcha] = useState("");
+  const [round, setRound] = useState(0);
 
   const save = async (event: FormEvent) => {
     event.preventDefault();
@@ -131,7 +133,7 @@ function PasswordCard({ hasPassword, email, name, onSaved }: { hasPassword: bool
     }
     setBusy(true);
     try {
-      if (hasPassword) await changePassword(current, password);
+      if (hasPassword) await changePassword(current, password, captcha || undefined);
       else await setNewPassword(password);
       setCurrent("");
       setPassword("");
@@ -140,6 +142,8 @@ function PasswordCard({ hasPassword, email, name, onSaved }: { hasPassword: bool
       setError(problem instanceof AccountError || problem instanceof Error ? problem.message : "Something went wrong. Try again.");
     } finally {
       setBusy(false);
+      setCaptcha("");
+      setRound((value) => value + 1);
     }
   };
 
@@ -152,6 +156,7 @@ function PasswordCard({ hasPassword, email, name, onSaved }: { hasPassword: bool
         {hasPassword && <PasswordField label="Current password" value={current} onChange={setCurrent} autoComplete="current-password" />}
         <PasswordField label="New password" value={password} onChange={setPassword} autoComplete="new-password" />
         <PasswordStrength password={password} email={email} name={name} />
+        {hasPassword && <Turnstile key={round} onToken={setCaptcha} />}
         {error && <p className="auth-error" role="alert">{error}</p>}
         <button type="submit" className="auth-submit authx-wide" disabled={busy}>{busy ? "Saving…" : "Save the new password"}</button>
       </form>

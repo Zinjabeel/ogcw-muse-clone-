@@ -68,7 +68,7 @@ export const setPasswordFn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => (await impl()).setPassword(data));
 
 export const changePasswordFn = createServerFn({ method: "POST" })
-  .validator(parse(z.object({ current: password, password })))
+  .validator(parse(z.object({ current: password, password, captcha })))
   .handler(async ({ data }) => (await impl()).changePassword(data));
 
 export const twoStepStartFn = createServerFn({ method: "POST" }).handler(async () => (await impl()).twoStepStart());

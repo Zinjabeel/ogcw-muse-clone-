@@ -267,7 +267,7 @@ export async function setPassword(input: { password: string }): Promise<Done | F
 }
 
 /** Change the password while logged in: the current one is checked first */
-export async function changePassword(input: { current: string; password: string }): Promise<Done | Fail> {
+export async function changePassword(input: { current: string; password: string; captcha?: string | undefined }): Promise<Done | Fail> {
   const open = await openSession();
   if (!open) return fail(LOGIN_RAN_OUT);
   const user = open.session.user;
@@ -276,7 +276,8 @@ export async function changePassword(input: { current: string; password: string 
   if (account.hasPassword) {
     if (await blocked(LIMITS.passwordCheck, user.id)) return fail(TOO_MANY);
     const check = supabaseClient();
-    const { data, error } = await check.auth.signInWithPassword({ email: user.email ?? "", password: input.current });
+    // (a login, so it needs the "are you human" pass too once that's switched on)
+    const { data, error } = await check.auth.signInWithPassword({ email: user.email ?? "", password: input.current, options: withCaptcha(input.captcha) });
     if (error || !data.session) {
       await count(LIMITS.passwordCheck, user.id);
       return fail("Your current password isn’t right.");

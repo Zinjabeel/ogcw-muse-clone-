@@ -4,6 +4,7 @@ import {
   signUpFn, signUpPhoneFn, startOAuthFn, twoStepConfirmFn, twoStepStartFn, twoStepStopFn, verifyCodeFn, verifyPhoneFn,
 } from "./account-api";
 import { SIGNED_OUT, type AccountState, type AccountUser } from "./account-types";
+import { SANITY_PROJECT_ID } from "@/sanity/env";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "./supabase";
 
 // OGCW accounts, on the page: create an account (/signup), log in (/login,
@@ -70,6 +71,8 @@ async function moveOldLogin() {
     localStorage.removeItem(OLD_KEY);
     localStorage.removeItem("ogcw-accounts");
     localStorage.removeItem("ogcw-session");
+    // The studio key the old 6-digit admin password handed out (a shared key, not a person's login) goes too
+    if (localStorage.getItem("ogcw-admin-password-login") === "1") localStorage.removeItem(`__studio_auth_token_${SANITY_PROJECT_ID}`);
     localStorage.removeItem("ogcw-admin-password-login");
   } catch {
     return;
@@ -243,8 +246,8 @@ export async function setNewPassword(password: string) {
   await refreshAccount();
 }
 /** Change the password while logged in (the current one first) */
-export async function changePassword(current: string, password: string) {
-  unwrap(await changePasswordFn({ data: { current, password } }));
+export async function changePassword(current: string, password: string, captcha?: string) {
+  unwrap(await changePasswordFn({ data: { current, password, ...(captcha ? { captcha } : {}) } }));
   await refreshAccount();
 }
 
