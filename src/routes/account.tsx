@@ -13,7 +13,7 @@ import { AccountError, changePassword, setNewPassword, signOut, stopTwoStep, use
 // admin access is unlocked: it needs two-step login on and its code given.
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [{ title: "Your account — OGCW" }, { name: "robots", content: "noindex, nofollow" }] }),
+  head: () => ({ meta: [{ title: "Your account — OGCW" }, { name: "description", content: "Your OGCW account: two-step login, your password and the devices you’re logged in on." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AccountPage,
 });
 

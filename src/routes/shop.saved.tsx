@@ -7,7 +7,7 @@ import { T } from "@/components/site-text";
 // Saved: the products hearted in this browser (kept here only if the reader
 // allows preferences in the cookie panel; otherwise just for this visit)
 export const Route = createFileRoute("/shop/saved")({
-  head: () => ({ meta: [{ title: "Saved — OGCW Shop" }] }),
+  head: () => ({ meta: [{ title: "Saved — OGCW Shop" }, { name: "description", content: "The OGCW Shop pieces you saved for later." }, { name: "robots", content: "noindex" }] }),
   component: Saved,
 });
 

@@ -1,0 +1,27 @@
+/* ------------------------------------------------------------------
+   Fixes from the site-wide check (22 Oct 2026). This file is imported
+   before styles.css's own rules, so its selectors are a step more specific
+   than the rules they correct.
+   ------------------------------------------------------------------ */
+
+/* Phones: the header's four buttons (hero, colours, search, account) were
+   wider than the screen beside the logo, so the whole page scrolled
+   sideways. The side columns now take only the room they need, and the
+   buttons are a little smaller and closer together. */
+@media (max-width: 559px) {
+  .site-header-row { grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; padding-inline: 12px; }
+  .site-header-row > :last-child { gap: 6px; }
+  .site-header .icon-button { width: 34px; height: 34px; }
+  .site-header .site-header-row .site-logo { font-size: 1.25rem; }
+}
+/* A story's questions: the "+" turns into an "×" when a question is open,
+   and turned, its corners stuck out past the edge of a phone screen (the page
+   then scrolled sideways by 2px); it gets a little room. A long word (a name,
+   a web address) breaks onto the next line rather than widening the page. */
+.og-faq details > summary { padding-right: 8px; overflow-wrap: anywhere; }
+.og-prose, .info-prose { overflow-wrap: break-word; }
+
+@media (max-width: 359px) {
+  .site-header-row > :last-child { gap: 4px; }
+  .site-header .icon-button { width: 32px; height: 32px; }
+}

@@ -14,7 +14,7 @@ import { T } from "@/components/site-text";
 // many pieces you've opened, the promo code to copy, and what each shop
 // promises. When every piece is open, the page says you're done.
 export const Route = createFileRoute("/shop/checkout")({
-  head: () => ({ meta: [{ title: "Checkout: OGCW Shop" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Checkout: OGCW Shop" }, { name: "description", content: "Check out what’s in your OGCW Shop bag." }, { name: "robots", content: "noindex" }] }),
   component: Checkout,
 });
 

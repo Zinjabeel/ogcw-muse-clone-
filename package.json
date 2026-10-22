@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "check": "node scripts/check-pages.mjs"
+    "check": "node scripts/check-pages.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "emails": "node scripts/build-emails.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

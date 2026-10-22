@@ -22,6 +22,7 @@
 @import "./styles/hero-gallery.css";
 @import "./styles/hero-gallery-2.css";
 @import "./styles/account-security.css";
+@import "./styles/site-fixes.css";
 
 @custom-variant dark (&:is(.dark *));
 

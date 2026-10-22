@@ -12,7 +12,7 @@ import { T } from "@/components/site-text";
 // beside it the room, more threads from the room and the house rules.
 // Readers can delete their own posts.
 export const Route = createFileRoute("/forum/t/$id")({
-  head: () => ({ meta: [{ title: "Thread — OGCW Forum" }] }),
+  head: () => ({ meta: [{ title: "Thread — OGCW Forum" }, { name: "description", content: "A conversation in the OGCW Forum, where readers argue about music, games, sneakers, sports, fashion and streaming." }] }),
   component: ThreadPage,
 });
 

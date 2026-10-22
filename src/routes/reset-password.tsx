@@ -18,6 +18,7 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       { title: "Reset your password — OGCW" },
+      { name: "description", content: "Forgot your OGCW password? Get a link by email to choose a new one." },
       { name: "robots", content: "noindex" },
     ],
   }),
