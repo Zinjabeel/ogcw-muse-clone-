@@ -27,9 +27,10 @@ import { useSiteText } from "@/lib/site-text";
 const SLIDE_MS = 6000;
 const RING = 2 * Math.PI * 13;
 
-type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
+export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
 
-function Slideshow({ label, slides }: { label: string; slides: Slide[] }) {
+/** One Complex card: a slideshow (with dots and controls), or a single slide (none). Also used by the Impact grid (hero-impact.tsx). */
+export function Slideshow({ label, slides }: { label: string; slides: Slide[] }) {
   const box = useRef<HTMLElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
