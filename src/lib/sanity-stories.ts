@@ -52,8 +52,10 @@ const toSite = (doc: SiteDoc): SiteContent => {
           cw: num(p.cw, 10, 200), pt: num(p.pt, 0, 2000), pb: num(p.pb, 0, 2000),
           bg: colour(p.bg), bg2: colour(p.bg2), split: p.split === "x" || p.split === "y" ? p.split : undefined, at: num(p.at, 0, 100), bw: num(p.bw, 1, 100), bh: num(p.bh, 1, 100),
           hide: p.hide === true ? true : undefined, order: num(p.order, -100, 1000),
-          kind: p.kind === "text" || p.kind === "image" || p.kind === "textimage" || p.kind === "band" ? p.kind : undefined,
-          after: typeof p.after === "string" && p.after.length <= 300 ? p.after : undefined, cols: num(p.cols, 1, 3), band: num(p.band, 10, 2000),
+          kind: p.kind === "text" || p.kind === "image" || p.kind === "textimage" || p.kind === "band" || p.kind === "stories" ? p.kind : undefined,
+          after: typeof p.after === "string" && p.after.length <= 300 ? p.after : undefined, cols: num(p.cols, 1, 4), band: num(p.band, 10, 2000),
+          // Story cards chosen by hand: their web addresses
+          stories: Array.isArray(p.stories) ? p.stories.filter((slug): slug is string => typeof slug === "string" && /^[a-z0-9-]{1,120}$/.test(slug)).slice(0, 24) : undefined,
         };
         for (const [name, value] of Object.entries(extra)) if (value !== undefined) (out as Record<string, unknown>)[name] = value;
         return out;

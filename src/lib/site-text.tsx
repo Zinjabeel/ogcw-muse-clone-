@@ -24,8 +24,8 @@ export type SiteCrop = { x: number; y: number; zoom: number };
  * automatically around the middle)
  */
 export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop };
-/** What an admin can add as a new section: words, a picture, both, or a band of colour */
-export type SectionKind = "text" | "image" | "textimage" | "band";
+/** What an admin can add as a new section: words, a picture, both, a band of colour, or story cards chosen by hand */
+export type SectionKind = "text" | "image" | "textimage" | "band" | "stories";
 /**
  * A move: x and y in page pixels from where it usually sits, s its size (1 = usual).
  * A whole section ("sec:" things) keeps x 0, y 0, s 1 and is styled instead:
@@ -36,14 +36,15 @@ export type SectionKind = "text" | "image" | "textimage" | "band";
  *    covers, bw and bh in % (centred)
  *  - hide: hidden for visitors; order: its place among the parts beside it
  * A section an admin added ("blk:" things) also has kind, after (the
- * section it follows), cols (1 to 3) and, for a colour band, band (its height).
+ * section it follows), cols (1 to 3; 1 to 4 for stories), for a colour band,
+ * band (its height), and for story cards, stories (their web addresses, in order).
  */
 export type LayoutPos = {
   x: number; y: number; s: number;
   cw?: number; pt?: number; pb?: number;
   bg?: string; bg2?: string; split?: "x" | "y"; at?: number; bw?: number; bh?: number;
   hide?: boolean; order?: number;
-  kind?: SectionKind; after?: string; cols?: number; band?: number;
+  kind?: SectionKind; after?: string; cols?: number; band?: number; stories?: string[];
 };
 export type SiteLayout = { d?: LayoutPos; m?: LayoutPos };
 /** Where an edit is from: the part of the site, the page and the usual wording */

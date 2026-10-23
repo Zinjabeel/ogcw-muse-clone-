@@ -1,12 +1,14 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowDown, ArrowUp, Camera, Check, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, Move, PenLine, Plus, RotateCcw, Scaling, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { ArrowDown, ArrowLeft, ArrowUp, Camera, Check, ClipboardPaste, Copy, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, MousePointerClick, Move, PenLine, Plus, RefreshCw, RotateCcw, Scaling, Search, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { adminClient, studioToken } from "@/lib/admin-sanity";
 import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteCrop, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
+import { useStories } from "@/lib/stories";
 import { useWorkAccess } from "@/lib/work";
+import { StoryCard } from "./broadsheet";
 import { DesignNotes } from "./design-notes";
 
 // Editing the site on the page, for admins (src/lib/site-text.tsx).
@@ -207,7 +209,7 @@ export function EditableImage({ k, src, alt, className, ...rest }: ImgHTMLAttrib
 
 const BP_QUERY = "(min-width: 1024px)";
 const bpNow = (): "d" | "m" => (window.matchMedia(BP_QUERY).matches ? "d" : "m");
-const SITE_UI = ".site-edit, .site-photo-menu, .site-savebar, .site-edit-btn, .site-lay-handle, .site-sec-pill, .site-sec-bar, .site-sec-handle, .dn-layer, .dn-bar";
+const SITE_UI = ".site-edit, .site-blk-ui, .site-photo-menu, .site-savebar, .site-edit-btn, .site-lay-handle, .site-sec-pill, .site-sec-bar, .site-sec-handle, .dn-layer, .dn-bar";
 
 /** A picture's box: the picture, or the wrappers around it that are the same size */
 function frameOf(img: HTMLElement): HTMLElement {
@@ -689,8 +691,144 @@ function AddedPicture({ k }: { k: string }) {
   if (!site.image(k) && !site.editing) return null;
   return <EditableImage k={k} src={EMPTY_PICTURE} alt="" className="site-block-img" loading="lazy" />;
 }
+/** A story's web address from a link to it (/news/<slug>), if it is one */
+function slugOfLink(link: Element | null): string | null {
+  const href = link?.getAttribute("href");
+  if (!href) return null;
+  try {
+    const match = new URL(href, window.location.href).pathname.match(/^\/news\/([a-z0-9-]{1,120})\/?$/);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Story cards chosen by hand (a pasted section, or "Stories" added): the
+ * site's own story card, in one to four columns. An admin changes, removes
+ * and adds stories on the page: by searching, or by clicking any story
+ * anywhere on the page.
+ */
+function AddedStories({ id, def }: { id: string; def: LayoutPos }) {
+  const site = useSiteText();
+  const stories = useStories();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const [picking, setPicking] = useState<{ at: number } | null>(null); // at: the card to change, or -1 for a new one
+  const [clicking, setClicking] = useState(false);
+  const [query, setQuery] = useState("");
+  const slugs = useMemo(() => def.stories ?? [], [def.stories]);
+  const shown = slugs.flatMap((slug) => { const story = stories.get(slug); return story ? [story] : []; });
+  const cols = Math.min(4, Math.max(1, Math.round(def.cols ?? 3)));
+
+  const setSlugs = useCallback((next: string[]) => {
+    const base = site.layout(`blk:${id}`);
+    if (!base) return;
+    const out: SiteLayout = {};
+    for (const at of ["d", "m"] as const) if (base[at]) out[at] = { ...base[at]!, stories: next.slice(0, 24) };
+    site.change(layoutKey(pathname, `blk:${id}`), "layout", out, { section: pageSection(pathname), page: pathname });
+  }, [site, id, pathname]);
+  const put = useCallback((slug: string, at: number) => {
+    // A new one goes at the end; a changed one takes the card's place (and leaves any other place it had)
+    if (at < 0 || at >= slugs.length) { if (!slugs.includes(slug)) setSlugs([...slugs, slug]); return; }
+    setSlugs(slugs.map((item, index) => (index === at ? slug : item)).filter((item, index) => item !== slug || index === at));
+  }, [slugs, setSlugs]);
+
+  // "Click a story on the page": the next story clicked anywhere goes in, instead of opening
+  useEffect(() => {
+    if (!clicking || !picking) return;
+    document.body.dataset["sitePicking"] = "";
+    const onClick = (event: MouseEvent) => {
+      const from = event.target as Element | null;
+      if (from?.closest?.(".site-blk-ui")) return;
+      const slug = slugOfLink(from?.closest?.("a[href]") ?? null);
+      event.preventDefault();
+      event.stopPropagation();
+      if (!slug) return;
+      put(slug, picking.at);
+      // Adding: carry on picking more; changing one: done
+      if (picking.at >= 0) { setClicking(false); setPicking(null); }
+    };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setClicking(false); setPicking(null); } };
+    window.addEventListener("click", onClick, true);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      delete document.body.dataset["sitePicking"];
+      window.removeEventListener("click", onClick, true);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [clicking, picking, put]);
+
+  const found = useMemo(() => {
+    const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const list = words.length ? stories.all.filter((story) => { const hay = `${story.title} ${story.kicker} ${story.deck}`.toLowerCase(); return words.every((word) => hay.includes(word)); }) : stories.all;
+    return list.slice(0, 40);
+  }, [query, stories.all]);
+
+  if (!shown.length && !site.editing) return null;
+  return (
+    <div className="site-block-wrap site-block-stories">
+      <AddedText k={`blk.${id}.0.h`} as="h2" usual="Your heading" />
+      <div className="site-stories-grid" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+        {shown.map((story, index) => (
+          <div key={story.slug} className="site-stories-item">
+            <StoryCard story={story} photoClass="bs-photo-more" />
+            {site.editing && (
+              <div className="site-blk-ui site-stories-tools">
+                <button type="button" onClick={() => { setPicking({ at: index }); setClicking(false); setQuery(""); }}><RefreshCw size={13} aria-hidden="true" /> Change</button>
+                {index > 0 && <button type="button" aria-label="Move left" onClick={() => { const next = [...slugs]; [next[index - 1], next[index]] = [next[index]!, next[index - 1]!]; setSlugs(next); }}><ArrowLeft size={13} aria-hidden="true" /></button>}
+                <button type="button" aria-label="Take this story out" onClick={() => setSlugs(slugs.filter((slug) => slug !== story.slug))}><X size={13} aria-hidden="true" /></button>
+              </div>
+            )}
+          </div>
+        ))}
+        {site.editing && (
+          <button type="button" className="site-blk-ui site-stories-add" onClick={() => { setPicking({ at: -1 }); setClicking(false); setQuery(""); }}>
+            <Plus size={18} aria-hidden="true" /> Add stories
+          </button>
+        )}
+      </div>
+
+      {picking && site.editing && (clicking ? (
+        <div className="site-blk-ui site-stories-clickbar" role="status">
+          <MousePointerClick size={15} aria-hidden="true" />
+          {picking.at >= 0 ? "Click the story to put here, anywhere on the page" : "Click stories anywhere on the page to add them"}
+          <button type="button" onClick={() => { setClicking(false); setPicking(null); }}><Check size={14} aria-hidden="true" /> Done</button>
+        </div>
+      ) : (
+        <div className="site-blk-ui site-stories-picker" role="dialog" aria-label={picking.at >= 0 ? "Change this story" : "Add stories"}>
+          <header>
+            <p>{picking.at >= 0 ? "Change this story" : "Add stories"}<small>{slugs.length} in this section</small></p>
+            <button type="button" aria-label="Close" onClick={() => setPicking(null)}><X size={16} aria-hidden="true" /></button>
+          </header>
+          <button type="button" className="is-main" onClick={() => setClicking(true)}><MousePointerClick size={15} aria-hidden="true" /> Click stories on the page</button>
+          <label className="site-stories-search">
+            <Search size={14} aria-hidden="true" />
+            <input type="search" value={query} placeholder="Search every story" autoFocus onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.stopPropagation()} />
+          </label>
+          <ul>
+            {found.map((story) => {
+              const inIt = slugs.includes(story.slug);
+              return (
+                <li key={story.slug}>
+                  <button type="button" aria-pressed={inIt} onClick={() => { if (picking.at < 0 && inIt) setSlugs(slugs.filter((slug) => slug !== story.slug)); else { put(story.slug, picking.at); if (picking.at >= 0) setPicking(null); } }}>
+                    <img src={story.photo.src} alt="" loading="lazy" />
+                    <span><small>{story.kicker}</small>{story.title}</span>
+                    {inIt && <Check size={15} aria-hidden="true" />}
+                  </button>
+                </li>
+              );
+            })}
+            {!found.length && <li className="site-stories-none">No story has those words.</li>}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AddedSection({ id, def }: { id: string; def: LayoutPos }) {
   const cols = Math.min(3, Math.max(1, Math.round(def.cols ?? 1)));
+  if (def.kind === "stories") return <AddedStories id={id} def={def} />;
   if (def.kind === "band") return <div className="site-block-wrap site-block-band" style={{ minHeight: def.band ?? 160 }} />;
   return (
     <div className="site-block-wrap" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
@@ -819,6 +957,24 @@ const SECTION_COLOURS: [string, string][] = [["White", "#FFFFFF"], ["Off-white",
 
 const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
 
+/** A copied section, kept on this browser until something else is copied (parts: "<column>.h", ".p", ".img") */
+type SectionCopy = { name: string; from: string; def: LayoutPos; look: Partial<LayoutPos>; texts: Record<string, string>; images: Record<string, SiteImage> };
+const COPY_KEY = "ogcw-section-copy";
+function readCopy(): SectionCopy | null {
+  try {
+    const copy = JSON.parse(localStorage.getItem(COPY_KEY) ?? "null") as SectionCopy | null;
+    return copy && typeof copy.name === "string" && copy.def?.kind ? copy : null;
+  } catch {
+    return null;
+  }
+}
+/** "rgb(13, 13, 13)" → "#0d0d0d" (nothing for a see-through colour) */
+function toHex(colour: string): string | undefined {
+  const match = colour.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
+  if (!match || (match[4] !== undefined && Number(match[4]) < 0.9)) return undefined;
+  return `#${[match[1], match[2], match[3]].map((part) => Number(part).toString(16).padStart(2, "0")).join("")}`;
+}
+
 /** Photos from phones are big: anything over 2400 px or 3 MB is made smaller before it goes up */
 async function shrink(file: File): Promise<Blob> {
   if (file.type === "image/gif" || file.type === "image/svg+xml") return file;
@@ -857,6 +1013,14 @@ export function SiteEditor() {
     try { localStorage.setItem("ogcw-crop-mode", mode); } catch { /* private window */ }
   };
   const [cropping, setCropping] = useState(false);
+  // A copied section, ready to paste (also from another tab)
+  const [copied, setCopied] = useState<SectionCopy | null>(null);
+  useEffect(() => {
+    setCopied(readCopy());
+    const onStorage = (event: StorageEvent) => { if (event.key === COPY_KEY) setCopied(readCopy()); };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   const cropDrag = useRef<{ x: number; y: number; start: SiteCrop; w: number; h: number } | null>(null);
   const [cropDraft, setCropDraft] = useState<SiteCrop | null>(null);
   useEffect(() => { if (!photo) { setCropping(false); setCropDraft(null); } }, [photo]);
@@ -968,7 +1132,8 @@ export function SiteEditor() {
     let fingers = false;
     const onDown = (event: PointerEvent) => { fingers = event.pointerType !== "mouse"; };
     const onClick = (event: MouseEvent) => {
-      if (!fingers || targetRef.current?.typing) return;
+      // Choosing stories by clicking them (AddedStories): those clicks are theirs
+      if (!fingers || targetRef.current?.typing || document.body.dataset["sitePicking"] !== undefined) return;
       const from = event.target as Element | null;
       if (from?.closest?.(SITE_UI)) return;
       const text = from?.closest?.("[data-edit]") as HTMLElement | null;
@@ -1212,7 +1377,7 @@ export function SiteEditor() {
     if (!current) return;
     settleDraft();
     const id = Date.now().toString(36);
-    const def: LayoutPos = { x: 0, y: 0, s: 1, kind, after: current.thing, cols: 1, ...(kind === "band" ? { band: 160 } : {}) };
+    const def: LayoutPos = { x: 0, y: 0, s: 1, kind, after: current.thing, cols: kind === "stories" ? 3 : 1, ...(kind === "band" ? { band: 160 } : {}), ...(kind === "stories" ? { stories: [] } : {}) };
     site.change(layoutKey(pathname, `blk:${id}`), "layout", { d: def, m: def }, secMeta());
     let tries = 0;
     const open = () => {
@@ -1235,6 +1400,82 @@ export function SiteEditor() {
     site.change(layoutKey(pathname, `blk:${id}`), "layout", null, secMeta());
     if (site.layout(`sec:#blk-${id}`)) site.change(layoutKey(pathname, `sec:#blk-${id}`), "layout", null, secMeta());
     setSizing(null);
+  };
+  /**
+   * Copy a section, to paste below any section on any page. An added section
+   * is copied whole (its words, pictures and colours); any other section
+   * becomes story cards with the same stories (or its heading, words and
+   * first picture, if it has no stories), which can then be changed one by one.
+   */
+  const copySection = () => {
+    const current = sizingRef.current;
+    if (!current) return;
+    settleDraft();
+    const { el, thing } = current;
+    const texts: Record<string, string> = {};
+    const images: Record<string, SiteImage> = {};
+    let def: LayoutPos;
+    const addedId = el.classList.contains("site-block") ? el.dataset["blk"] : undefined;
+    const added = addedId ? site.layout(`blk:${addedId}`)?.d : undefined;
+    if (addedId && added) {
+      const { after: _after, ...rest } = added;
+      def = rest;
+      for (let column = 0; column < 4; column += 1) {
+        for (const part of ["h", "p"]) { const value = site.text(`blk.${addedId}.${column}.${part}`); if (value) texts[`${column}.${part}`] = value; }
+        const picture = site.image(`blk.${addedId}.${column}.img`);
+        if (picture) images[`${column}.img`] = picture;
+      }
+    } else {
+      const slugs = [...new Set([...el.querySelectorAll("a[href]")].flatMap((link) => slugOfLink(link) ?? []))].slice(0, 24);
+      const heading = el.querySelector("h1, h2, h3")?.textContent?.replace(/\s+/g, " ").trim().slice(0, 140);
+      if (heading) texts["0.h"] = heading;
+      if (slugs.length) {
+        def = { x: 0, y: 0, s: 1, kind: "stories", cols: Math.min(4, slugs.length), stories: slugs };
+      } else {
+        def = { x: 0, y: 0, s: 1, kind: "textimage", cols: 1 };
+        const words = el.querySelector("p")?.textContent?.replace(/\s+/g, " ").trim().slice(0, 600);
+        if (words) texts["0.p"] = words;
+        const picture = [...el.querySelectorAll("img")].find((img) => img.getBoundingClientRect().width > 60);
+        const src = picture?.currentSrc || picture?.getAttribute("src");
+        if (src && /^(https:\/\/|\/)/.test(src)) images["0.img"] = { src: new URL(src, window.location.href).href.replace(window.location.origin, ""), alt: picture?.alt ?? "" };
+      }
+    }
+    // Its colours and spacing come along
+    const live = site.layout(thing)?.d;
+    const look: Partial<LayoutPos> = {};
+    if (live) for (const name of ["cw", "pt", "pb", "bg", "bg2", "split", "at", "bw", "bh"] as const) if (live[name] !== undefined) (look as Record<string, unknown>)[name] = live[name];
+    if (!look.bg) { const hex = toHex(getComputedStyle(el).backgroundColor); if (hex) look.bg = hex; }
+    const name = el.querySelector("h1, h2, h3")?.textContent?.replace(/\s+/g, " ").trim().slice(0, 48) || "A section";
+    const copy: SectionCopy = { name, from: pathname, def, look, texts, images };
+    setCopied(copy);
+    try { localStorage.setItem(COPY_KEY, JSON.stringify(copy)); } catch { /* private window: this tab still has it */ }
+    setStatus("saved");
+    setMessage(`Copied “${name}”. Open “Edit section” on any section, on any page, and press Paste below.`);
+    window.setTimeout(() => setStatus((value) => (value === "saved" ? "idle" : value)), 4000);
+  };
+  /** Puts the copied section right after this one (a new section of its own: the copy can be changed without touching the first) */
+  const pasteSection = () => {
+    const current = sizingRef.current;
+    if (!current || !copied) return;
+    settleDraft();
+    const id = Date.now().toString(36);
+    const meta = secMeta();
+    const def: LayoutPos = { ...copied.def, x: 0, y: 0, s: 1, after: current.thing };
+    site.change(layoutKey(pathname, `blk:${id}`), "layout", { d: def, m: def }, meta);
+    if (Object.keys(copied.look).length) {
+      const look = { x: 0, y: 0, s: 1, ...copied.look } as LayoutPos;
+      site.change(layoutKey(pathname, `sec:#blk-${id}`), "layout", { d: look, m: look }, meta);
+    }
+    const partMeta = { section: "Added sections", page: pathname };
+    for (const [part, value] of Object.entries(copied.texts)) site.change(`blk.${id}.${part}`, "text", value, partMeta);
+    for (const [part, value] of Object.entries(copied.images)) site.change(`blk.${id}.${part}`, "image", value, partMeta);
+    let tries = 0;
+    const open = () => {
+      const host = document.getElementById(`blk-${id}`);
+      if (host) { host.scrollIntoView({ block: "center", behavior: "smooth" }); window.setTimeout(() => startSizing(host), 450); }
+      else if ((tries += 1) < 20) window.setTimeout(open, 150);
+    };
+    window.setTimeout(open, 150);
   };
   const resetSection = () => {
     const current = sizingRef.current;
@@ -1509,18 +1750,18 @@ export function SiteEditor() {
                 <section className="site-sec-group" aria-label="Your section">
                   <h3>Your section</h3>
                   <div className="site-sec-seg" role="group" aria-label="What it shows">
-                    {([["text", "Words"], ["image", "Picture"], ["textimage", "Both"], ["band", "Colour band"]] as const).map(([kind, label]) => (
-                      <button key={kind} type="button" aria-pressed={added.kind === kind} onClick={() => changeAdded(addedId, { kind })}>{label}</button>
+                    {([["text", "Words"], ["image", "Picture"], ["textimage", "Both"], ["stories", "Stories"], ["band", "Colour band"]] as const).map(([kind, label]) => (
+                      <button key={kind} type="button" aria-pressed={added.kind === kind} onClick={() => changeAdded(addedId, kind === "stories" ? { kind, cols: Math.max(added.cols ?? 1, 3) } : { kind, cols: Math.min(added.cols ?? 1, 3) })}>{label}</button>
                     ))}
                   </div>
                   {added.kind !== "band" ? (
                     <div className="site-sec-seg" role="group" aria-label="Columns">
-                      {[1, 2, 3].map((cols) => <button key={cols} type="button" aria-pressed={(added.cols ?? 1) === cols} onClick={() => changeAdded(addedId, { cols })}>{cols} {cols === 1 ? "column" : "columns"}</button>)}
+                      {(added.kind === "stories" ? [1, 2, 3, 4] : [1, 2, 3]).map((cols) => <button key={cols} type="button" aria-pressed={(added.cols ?? 1) === cols} onClick={() => changeAdded(addedId, { cols })}>{cols} {cols === 1 ? "column" : "columns"}</button>)}
                     </div>
                   ) : (
                     slider("Band height", added.band ?? 160, 20, 800, "px", (n) => changeAdded(addedId, { band: n }))
                   )}
-                  <p className="site-sec-note">Point at its words or picture and press Edit or Change photo to fill it in.</p>
+                  <p className="site-sec-note">{added.kind === "stories" ? "Press Change on a card, or Add stories, then search or click any story on the page." : "Point at its words or picture and press Edit or Change photo to fill it in."}</p>
                   <button type="button" className="site-sec-danger" onClick={() => deleteAdded(addedId)}><Trash2 size={14} aria-hidden="true" /> Delete this section</button>
                 </section>
               )}
@@ -1538,8 +1779,15 @@ export function SiteEditor() {
                   <button type="button" onClick={() => addSection("text")}><Plus size={14} aria-hidden="true" /> Words</button>
                   <button type="button" onClick={() => addSection("image")}><Plus size={14} aria-hidden="true" /> Picture</button>
                   <button type="button" onClick={() => addSection("textimage")}><Plus size={14} aria-hidden="true" /> Both</button>
+                  <button type="button" onClick={() => addSection("stories")}><Plus size={14} aria-hidden="true" /> Stories</button>
                   <button type="button" onClick={() => addSection("band")}><Plus size={14} aria-hidden="true" /> Colour band</button>
                 </div>
+                <p className="site-sec-note">Copy and paste</p>
+                <div className="site-sec-row">
+                  <button type="button" onClick={copySection} title="Copy this section, to paste below any section on any page"><Copy size={14} aria-hidden="true" /> Copy this section</button>
+                  {copied && <button type="button" onClick={pasteSection} title={`Paste “${copied.name}” below this section`}><ClipboardPaste size={14} aria-hidden="true" /> Paste below</button>}
+                </div>
+                {copied && <p className="site-sec-note">Copied: “{copied.name}”</p>}
               </section>
 
               <footer className="site-sec-foot">

@@ -26,6 +26,7 @@ const SECTION_FIELDS = [
   defineField({ name: "after", title: "Comes after", type: "string" }),
   defineField({ name: "cols", title: "Columns", type: "number" }),
   defineField({ name: "band", title: "Band height (px)", type: "number" }),
+  defineField({ name: "stories", title: "Stories in it (web addresses, in order)", type: "array", of: [defineArrayMember({ type: "string" })] }),
 ];
 
 // A video in a photo's place, and a crop by hand (the site editor's photo menu, 23 Oct 2026)
