@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, LayoutDashboard, Lock, LogOut, ShieldCheck } from "lucide-react";
+import { ArrowRight, Eye, LayoutDashboard, Lock, LogOut, ShieldCheck } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { AuthLayout, PasswordField } from "../components/auth-layout";
 import { GitHubMark } from "../components/account-button";
@@ -141,7 +141,7 @@ function WorkPage() {
           <p className="authx-note"><Lock size={13} strokeWidth={2} aria-hidden="true" /> Admin access needs an approved OGCW team account and the 6-digit code from its authenticator app. Any other account logs in as a normal OGCW account.</p>
         </>
       )}
-      <p className="authx-foot">Not on the team? <Link to="/login">Reader login</Link></p>
+      <div className="authx-actions" style={{ marginTop: 22 }}>\n        <Link to="/cms-demo" className="auth-secondary authx-wide" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>\n          <Eye size={16} /> Enter Demo CMS\n        </Link>\n        <p className="authx-note">Explore a safe interactive preview. Changes are temporary and never saved.</p>\n      </div>\n      <p className="authx-foot">Not on the team? <Link to="/login">Reader login</Link></p>
     </AuthLayout>
   );
 }
