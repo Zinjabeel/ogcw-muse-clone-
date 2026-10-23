@@ -1,0 +1,159 @@
+/* ------------------------------------------------------------------
+   Explore (src/routes/explore.tsx), redesigned 23 Oct 2026 after WIRED:
+   a printed magazine on the web. Square corners everywhere, hairlines
+   instead of shadows, one heavy rule over each section, the serif for
+   stories and numbers (weight 400) and Inter for labels and buttons. The
+   colours are the site theme's own (ink = --ogcw-text, canvas = --ogcw-bg),
+   so it reads right in every theme. Nothing moves on scroll.
+   ------------------------------------------------------------------ */
+.wx {
+  --wx-pad: clamp(16px, 4vw, 56px);
+  --wx-max: 1400px;
+  --wx-ink: var(--ogcw-text);
+  --wx-soft: var(--ogcw-text-2);
+  --wx-line: var(--ogcw-border);
+  background: var(--ogcw-bg);
+  color: var(--wx-ink);
+  padding-bottom: 72px;
+}
+.wx a { color: inherit; text-decoration: none; }
+.wx-eyebrow { display: block; margin: 0; font: 700 12px/16px var(--ogcw-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--wx-ink); }
+.wx-deck { display: block; margin: 0; font: 400 16px/24px var(--ogcw-serif); color: var(--wx-soft); }
+
+/* The masthead band */
+.wx-mast { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px 24px; max-width: var(--wx-max); margin: 0 auto; padding: 14px var(--wx-pad); border-bottom: 1px solid var(--wx-ink); }
+.wx-mast p { margin: 0; }
+.wx-mast-name { font: 700 13px/18px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; }
+.wx-mast-copy { font: 400 15px/20px var(--ogcw-serif); color: var(--wx-soft); }
+.wx-mast-date { font: 400 12px/18px var(--ogcw-ui); letter-spacing: .04em; color: var(--wx-soft); }
+
+/* ---------------------------------------------------------- The cover, with its countdown */
+.wx-cover { position: relative; display: grid; max-width: var(--wx-max); margin: 0 auto; padding: 32px var(--wx-pad) 48px; }
+.wx-cover-slide { grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; opacity: 0; visibility: hidden; transition: opacity .5s, visibility 0s .5s; }
+.wx-cover-slide[data-on="true"] { opacity: 1; visibility: visible; transition: opacity .5s; }
+.wx-cover-text { display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; }
+.wx-cover-title { margin: 0; font: 400 clamp(44px, calc(5.4 * var(--vw, 1vw)), 76px)/.98 var(--ogcw-display); letter-spacing: -.02em; text-wrap: balance; }
+.wx-cover-title a:hover, .wx-cover-title a:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.wx-cover-deck { margin: 0; max-width: 46ch; font: 400 19px/28px var(--ogcw-serif); color: var(--wx-soft); }
+.wx-cover-date { margin: 0; font: 700 14px/18px var(--ogcw-ui); letter-spacing: .04em; }
+.wx-cover-media { position: relative; order: -1; }
+.wx-cover-photo { display: block; overflow: hidden; aspect-ratio: 16 / 10; background: var(--ogcw-surface); }
+.wx-cover-photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.wx-cover-media:hover .wx-cover-photo img { transform: scale(1.03); }
+.wx-dots.cxh-dots { bottom: 20px; }
+
+/* The countdown: four cells under a heavy rule, the numbers in the serif */
+.wx-count { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 8px; border-top: 3px solid var(--wx-ink); border-bottom: 1px solid var(--wx-line); }
+.wx-count-cell { display: grid; gap: 2px; padding: 12px 0 14px 14px; border-left: 1px solid var(--wx-line); }
+.wx-count-cell:first-child { padding-left: 0; border-left: 0; }
+.wx-count-no { font: 400 clamp(38px, calc(4 * var(--vw, 1vw)), 64px)/1 var(--ogcw-display); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.wx-count-label { font: 700 11px/14px var(--ogcw-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--wx-soft); }
+.wx-count-now { grid-column: 1 / -1; margin: 0; padding: 14px 0; font: 400 48px/1 var(--ogcw-display); }
+
+/* Square buttons: ink, or outlined */
+.wx-cover-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.wx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 12px 20px; border: 1px solid var(--wx-ink); border-radius: 0; background: var(--wx-ink); color: var(--ogcw-bg) !important; font: 700 15px/20px var(--ogcw-ui); letter-spacing: .02em; white-space: nowrap; cursor: pointer; transition: opacity .15s; }
+.wx-btn:hover { opacity: .85; }
+.wx-btn.is-outline { background: transparent; color: var(--wx-ink) !important; }
+.wx-btn.is-outline:hover { background: var(--ogcw-surface); opacity: 1; }
+.wx-btn:focus-visible { outline: 2px solid var(--wx-ink); outline-offset: 3px; }
+
+/* The hero's controls, on a black square so they read on the white page */
+.cxh-controls.wx-controls { position: static; justify-content: flex-start; width: max-content; margin-top: 16px; padding: 4px; background: #0d0d0d; }
+
+/* ---------------------------------------------------------- Bands and their heads */
+.wx-band { max-width: var(--wx-max); margin: 0 auto; padding: 40px var(--wx-pad) 8px; }
+.wx-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; margin-bottom: 24px; padding-top: 14px; border-top: 4px solid var(--wx-ink); }
+.wx-h2 { margin: 0; font: 400 clamp(32px, calc(3.2 * var(--vw, 1vw)), 48px)/1.05 var(--ogcw-display); letter-spacing: -.015em; }
+.wx-head-copy { margin: 0; max-width: 52ch; font: 400 15px/22px var(--ogcw-serif); color: var(--wx-soft); }
+
+/* Search: a square box with an ink border */
+.wx-search-band { padding-top: 8px; }
+.wx-search { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 8px 0 18px; border: 1px solid var(--wx-ink); }
+.wx-search > svg { flex: none; color: var(--wx-soft); }
+.wx-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--wx-ink); font: 400 clamp(16px, calc(1.5 * var(--vw, 1vw)), 20px)/1.2 var(--ogcw-serif); }
+.wx-search input::placeholder { color: var(--wx-soft); }
+.wx-search input::-webkit-search-cancel-button { display: none; }
+.wx-search:focus-within { outline: 2px solid var(--wx-ink); outline-offset: 2px; }
+.wx-hits { margin-top: 20px; }
+.wx-hits ul { margin: 10px 0 0; padding: 0; list-style: none; }
+.wx-hit { display: grid; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--wx-line); }
+.wx-hit-link { font: 400 22px/1.2 var(--ogcw-display); }
+.wx-hit-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.wx-hit-sub { font: 400 13px/18px var(--ogcw-ui); color: var(--wx-soft); }
+
+/* ---------------------------------------------------------- The magazine grid */
+.wx-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.wx-photo { display: block; overflow: hidden; aspect-ratio: 4 / 3; margin-bottom: 14px; background: var(--ogcw-surface); }
+.wx-photo.is-wide { aspect-ratio: 16 / 10; }
+.wx-photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.wx-lead:hover .wx-photo img, .wx-card:hover .wx-photo img, .wx-list:hover .wx-photo img { transform: scale(1.03); }
+.wx-lead, .wx-card { display: grid; align-content: start; gap: 8px; }
+.wx-lead-title { display: block; font: 400 clamp(30px, calc(2.8 * var(--vw, 1vw)), 42px)/1.06 var(--ogcw-display); letter-spacing: -.015em; text-wrap: balance; }
+.wx-card-title { display: block; font: 400 22px/1.18 var(--ogcw-display); text-wrap: balance; }
+.wx-lead:hover .wx-lead-title, .wx-card:hover .wx-card-title, .wx-row:hover .wx-row-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.wx-two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.wx-rail-head { margin: 0 0 4px; padding-bottom: 10px; border-bottom: 1px solid var(--wx-ink); font: 700 12px/16px var(--ogcw-ui); letter-spacing: .12em; text-transform: uppercase; }
+.wx-rail ol, .wx-list-items { margin: 0; padding: 0; list-style: none; }
+.wx-row { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 16px 0; border-bottom: 1px solid var(--wx-line); }
+.wx-row-no { font: 400 28px/1 var(--ogcw-display); color: var(--wx-soft); font-variant-numeric: tabular-nums; }
+.wx-row-title { display: block; margin-top: 4px; font: 400 18px/1.25 var(--ogcw-display); }
+.wx-row.is-small { grid-template-columns: 26px minmax(0, 1fr); padding: 12px 0; }
+.wx-row.is-small .wx-row-no { font-size: 20px; }
+.wx-row.is-small .wx-row-title { margin-top: 0; font-size: 16px; }
+
+/* ---------------------------------------------------------- The calendar */
+.wx-cal { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--wx-ink); }
+.wx-cal-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 4px 20px; align-items: start; padding: 18px 0; border-bottom: 1px solid var(--wx-line); }
+.wx-cal-row.is-link:hover { background: var(--ogcw-surface); }
+.wx-cal-row.is-link:hover .wx-cal-title { text-decoration: underline; text-underline-offset: 4px; }
+.wx-cal-date { display: grid; justify-items: start; }
+.wx-cal-day { font: 400 38px/1 var(--ogcw-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wx-cal-mon { margin-top: 4px; font: 700 12px/16px var(--ogcw-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--wx-soft); }
+.wx-cal-text { display: grid; gap: 4px; }
+.wx-cal-title { font: 400 22px/1.2 var(--ogcw-display); }
+.wx-cal-detail { font: 400 15px/22px var(--ogcw-serif); color: var(--wx-soft); }
+.wx-cal-when { grid-column: 2; display: inline-flex; align-items: center; gap: 6px; font: 700 13px/18px var(--ogcw-ui); letter-spacing: .02em; }
+
+/* ---------------------------------------------------------- Reading lists */
+.wx-lists { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+.wx-list { display: grid; align-content: start; gap: 8px; }
+.wx-list-title { margin: 4px 0 0; font: 400 28px/1.1 var(--ogcw-display); letter-spacing: -.01em; }
+.wx-list-items { margin-top: 8px; border-top: 1px solid var(--wx-ink); }
+
+/* ---------------------------------------------------------- Everything on OGCW */
+.wx-dir { display: grid; grid-template-columns: minmax(0, 1fr); margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--wx-ink); }
+.wx-dir-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px; padding: 20px 0; border-bottom: 1px solid var(--wx-line); }
+.wx-dir-name { font: 400 32px/1.05 var(--ogcw-display); letter-spacing: -.01em; }
+.wx-dir-note { grid-column: 1; font: 400 13px/18px var(--ogcw-ui); color: var(--wx-soft); }
+.wx-dir-link svg { grid-column: 2; grid-row: 1 / 3; transition: transform .2s; }
+.wx-dir-link:hover .wx-dir-name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+.wx-dir-link:hover svg { transform: translateX(4px); }
+.wx a:focus-visible { outline: 2px solid var(--wx-ink); outline-offset: 3px; }
+
+/* ---------------------------------------------------------- Sizes */
+@media (min-width: 768px) {
+  .wx-mast { grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; }
+  .wx-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wx-lists { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wx-dir { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; }
+  .wx-cal-row { grid-template-columns: 96px minmax(0, 1fr) 150px; }
+  .wx-cal-when { grid-column: 3; justify-content: flex-end; padding-top: 6px; }
+}
+@media (min-width: 1024px) {
+  .wx-cover { padding-top: 40px; padding-bottom: 56px; }
+  .wx-cover-slide { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: end; }
+  .wx-cover-media { order: 0; }
+  /* The controls sit on the photo's foot, like the home hero's */
+  .cxh-controls.wx-controls { position: absolute; right: calc(var(--wx-pad) + 16px); bottom: calc(56px + 16px); margin: 0; }
+  .wx-grid { grid-template-columns: minmax(0, 6fr) minmax(0, 3fr) minmax(0, 3fr); gap: 0; }
+  .wx-grid > * + * { padding-left: 28px; margin-left: 28px; border-left: 1px solid var(--wx-line); }
+  .wx-two { grid-template-columns: minmax(0, 1fr); }
+  .wx-lists { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+  .wx-list + .wx-list { padding-left: 28px; margin-left: 28px; border-left: 1px solid var(--wx-line); }
+  .wx-dir { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 32px; }
+  .wx-band { padding-top: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wx-cover-slide, .wx-photo img, .wx-cover-photo img, .wx-dir-link svg { transition: none; }
+}
