@@ -220,8 +220,11 @@
 
 /* Redrawn 23 Oct 2026 (owner's sketch): the content uses the page's full
    width on the black, not a column boxed inside it */
-.fx-watch .fx-wrap { width: calc(100% - 32px); max-width: 1880px; }
-@media (min-width: 1024px) { .fx-watch .fx-wrap { width: calc(100% - clamp(48px, 6vw, 112px)); } }
+/* The band was redrawn to fill the black (owner's sketch, 23 Oct), so a
+   content width saved for the old narrow design ("Edit section", 43%) no
+   longer squeezes it: the videos and titles need the room */
+.fx-watch .fx-wrap { width: calc(100% - 32px) !important; max-width: 1880px !important; }
+@media (min-width: 1024px) { .fx-watch .fx-wrap { width: calc(100% - clamp(48px, 6vw, 112px)) !important; } }
 .fx-watch .fx-head { align-items: flex-end; border-bottom-width: 1px; border-color: rgb(255 255 255 / .35); }
 /* The playing video's name, up in the heading row */
 .fx-watch-now { display: grid; gap: 6px; max-width: 46ch; text-align: right; justify-items: end; }
