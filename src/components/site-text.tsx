@@ -1,6 +1,6 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowUp, Camera, Check, ClipboardPaste, Copy, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, MousePointerClick, Move, PenLine, Plus, RefreshCw, RotateCcw, Scaling, Search, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { ArrowDown, ArrowLeft, ArrowUp, Camera, Check, ClipboardPaste, Copy, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, MousePointerClick, Move, PenLine, Play, Plus, RefreshCw, Repeat, RotateCcw, Scaling, Scissors, Search, SkipBack, SkipForward, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { adminClient, studioToken } from "@/lib/admin-sanity";
 import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteCrop, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
@@ -324,7 +324,35 @@ function cropPicture(img: HTMLImageElement, crop: SiteCrop | undefined) {
   }
 }
 
-/** The video put in a picture's place: it plays over the picture, muted and on a loop */
+/** A video's trim, from its data-trim ("start|end|once") */
+const trimOf = (video: HTMLVideoElement) => {
+  const [start = "0", end = "", once = "0"] = (video.dataset["trim"] ?? "").split("|");
+  return { start: Number(start) || 0, end: end ? Number(end) : null, once: once === "1" };
+};
+/**
+ * Plays only the chosen part of a video: from its start to its end, then
+ * back to the start (or, played once, it stops on the end's frame)
+ */
+function playTrimmed(video: HTMLVideoElement) {
+  video.loop = false;
+  const atEnd = () => {
+    const { start, once } = trimOf(video);
+    if (once) { video.pause(); return; }
+    video.currentTime = start;
+    void video.play().catch(() => {});
+  };
+  video.addEventListener("loadedmetadata", () => {
+    const { start } = trimOf(video);
+    if (start && start < video.duration) video.currentTime = start;
+  });
+  video.addEventListener("timeupdate", () => {
+    const { end } = trimOf(video);
+    if (end !== null && video.currentTime >= end) atEnd();
+  });
+  video.addEventListener("ended", atEnd);
+}
+
+/** The video put in a picture's place: it plays over the picture, muted, on a loop (or once) */
 const videoOf = (img: HTMLImageElement) => (img.nextElementSibling instanceof HTMLVideoElement && img.nextElementSibling.classList.contains("site-video") ? img.nextElementSibling : null);
 function videoOver(img: HTMLImageElement, picture: SiteImage | undefined) {
   let video = videoOf(img);
@@ -340,13 +368,20 @@ function videoOver(img: HTMLImageElement, picture: SiteImage | undefined) {
     video = document.createElement("video");
     video.className = "site-video";
     video.muted = true;
-    video.loop = true;
     video.autoplay = true;
     video.playsInline = true;
     video.setAttribute("aria-hidden", "true");
+    playTrimmed(video);
     img.after(video);
   }
+  // The part that plays, how, and how fast (read by playTrimmed)
+  const trim = `${picture.videoStart ?? 0}|${picture.videoEnd ?? ""}|${picture.videoOnce ? 1 : 0}`;
+  const retrim = video.dataset["trim"] !== trim;
+  video.dataset["trim"] = trim;
+  video.playbackRate = picture.videoRate ?? 1;
+  video.defaultPlaybackRate = picture.videoRate ?? 1;
   if (video.getAttribute("src") !== picture.video) { video.src = picture.video; void video.play().catch(() => {}); }
+  else if (retrim && video.readyState >= 1) { video.currentTime = picture.videoStart ?? 0; void video.play().catch(() => {}); }
   // It covers exactly the picture's box
   if (getComputedStyle(parent).position === "static") { parent.style.position = "relative"; parent.dataset["videoPlaced"] = ""; }
   video.poster = picture.src;
@@ -878,7 +913,14 @@ function editDoc(key: string, kind: "text" | "image" | "layout", value: string |
 }
 /** A replacement's video and its crop by hand, as kept in Sanity */
 const mediaExtras = (image: SiteImage) => ({
-  ...(image.video ? { video: image.video, ...(image.videoAssetId ? { videoFile: { _type: "file", asset: { _type: "reference", _ref: image.videoAssetId } } } : {}) } : {}),
+  ...(image.video ? {
+    video: image.video,
+    ...(image.videoAssetId ? { videoFile: { _type: "file", asset: { _type: "reference", _ref: image.videoAssetId } } } : {}),
+    ...(image.videoStart ? { videoStart: image.videoStart } : {}),
+    ...(image.videoEnd ? { videoEnd: image.videoEnd } : {}),
+    ...(image.videoOnce ? { videoOnce: true } : {}),
+    ...(image.videoRate && image.videoRate !== 1 ? { videoRate: image.videoRate } : {}),
+  } : {}),
   ...(image.crop ? { crop: { x: image.crop.x, y: image.crop.y, zoom: image.crop.zoom } } : {}),
 });
 const editKind = (content: SiteContent, key: string): "text" | "image" | "layout" => (key in content.texts ? "text" : key in content.images ? "image" : "layout");
@@ -956,6 +998,88 @@ type SecDrag = { mode: "w" | "wl" | "h"; x: number; y: number; cw: number; pb: n
 const SECTION_COLOURS: [string, string][] = [["White", "#FFFFFF"], ["Off-white", "#F4F4F2"], ["Light grey", "#E7E7E5"], ["Charcoal", "#303030"], ["Black", "#0D0D0D"], ["Yellow", "#FFE600"], ["Gold", "#86600E"]];
 
 const isTouch = () => window.matchMedia("(pointer: coarse)").matches;
+
+/** 75.3 → "1:15.3" */
+const clock = (seconds: number) => `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(1).padStart(4, "0")}`;
+const RATES = [0.5, 1, 1.5, 2];
+
+/**
+ * Trimming a video in a photo's place: where it starts and ends (drag the
+ * two handles, or play it and press "Start here" / "End here"), whether it
+ * loops or plays once, and its speed. The preview plays just that part.
+ */
+function VideoTrim({ look, onKeep }: { look: SiteImage; onKeep: (next: SiteImage) => void }) {
+  const preview = useRef<HTMLVideoElement>(null);
+  const [duration, setDuration] = useState(0);
+  const [range, setRange] = useState<[number, number] | null>(null);
+  const [now, setNow] = useState(0);
+  const start = range?.[0] ?? look.videoStart ?? 0;
+  const end = range?.[1] ?? look.videoEnd ?? duration;
+  // The preview plays the part chosen so far
+  useEffect(() => {
+    const video = preview.current;
+    if (!video) return;
+    video.dataset["trim"] = `${start}|${end && end < duration ? end : ""}|${look.videoOnce ? 1 : 0}`;
+    video.playbackRate = look.videoRate ?? 1;
+    if (video.currentTime < start || (end && video.currentTime > end)) video.currentTime = start;
+  }, [start, end, duration, look.videoOnce, look.videoRate]);
+  useEffect(() => { const video = preview.current; if (video) playTrimmed(video); }, []);
+
+  const keep = (next: Partial<SiteImage>) => {
+    const merged = { ...look, ...next };
+    // The whole video: no trim kept
+    if (!merged.videoStart || merged.videoStart <= 0) delete merged.videoStart;
+    if (!merged.videoEnd || (duration && merged.videoEnd >= duration - 0.05)) delete merged.videoEnd;
+    if (!merged.videoOnce) delete merged.videoOnce;
+    if (!merged.videoRate || merged.videoRate === 1) delete merged.videoRate;
+    onKeep(merged);
+  };
+  const settle = () => { if (range) { keep({ videoStart: range[0], videoEnd: range[1] }); setRange(null); } };
+  const max = duration || Math.max(end, 1);
+  const step = 0.1;
+  const round = (n: number) => Math.round(n * 10) / 10;
+
+  return (
+    <div className="site-trim">
+      <p className="site-trim-head"><Scissors size={13} aria-hidden="true" /> Video length<b>{clock(start)} – {clock(end || 0)} · {round(Math.max(0, (end || 0) - start)).toFixed(1)} s</b></p>
+      <video
+        ref={preview}
+        className="site-trim-video"
+        src={look.video}
+        poster={look.src}
+        muted
+        autoPlay
+        playsInline
+        onLoadedMetadata={(event) => setDuration(round(event.currentTarget.duration || 0))}
+        onTimeUpdate={(event) => setNow(event.currentTarget.currentTime)}
+        onClick={(event) => { const video = event.currentTarget; if (video.paused) void video.play(); else video.pause(); }}
+        title="Click to pause or play"
+      />
+      <div className="site-trim-bar" style={{ "--a": `${(start / max) * 100}%`, "--b": `${((end || max) / max) * 100}%`, "--now": `${(now / max) * 100}%` } as CSSProperties}>
+        <span className="site-trim-fill" aria-hidden="true" />
+        <span className="site-trim-now" aria-hidden="true" />
+        <input type="range" min={0} max={max} step={step} value={start} aria-label="Where the video starts" aria-valuetext={clock(start)}
+          onChange={(event) => setRange([Math.min(Number(event.target.value), round((end || max) - 0.5)), end || max])} onPointerUp={settle} onKeyUp={settle} />
+        <input type="range" min={0} max={max} step={step} value={end || max} aria-label="Where the video ends" aria-valuetext={clock(end || max)}
+          onChange={(event) => setRange([start, Math.max(Number(event.target.value), round(start + 0.5))])} onPointerUp={settle} onKeyUp={settle} />
+      </div>
+      <div className="site-photo-opts">
+        <button type="button" onClick={() => keep({ videoStart: round(Math.min(now, (end || max) - 0.5)), videoEnd: end || max })}><SkipBack size={13} aria-hidden="true" /> Start here</button>
+        <button type="button" onClick={() => keep({ videoStart: start, videoEnd: round(Math.max(now, start + 0.5)) })}><SkipForward size={13} aria-hidden="true" /> End here</button>
+      </div>
+      <div className="site-photo-opts" role="group" aria-label="How it plays">
+        <button type="button" aria-pressed={!look.videoOnce} onClick={() => keep({ videoOnce: false })}><Repeat size={13} aria-hidden="true" /> On a loop</button>
+        <button type="button" aria-pressed={!!look.videoOnce} onClick={() => keep({ videoOnce: true })}><Play size={13} aria-hidden="true" /> Play once</button>
+      </div>
+      <div className="site-photo-opts site-trim-rates" role="group" aria-label="Speed">
+        {RATES.map((rate) => <button key={rate} type="button" aria-pressed={(look.videoRate ?? 1) === rate} onClick={() => keep({ videoRate: rate })}>{rate}×</button>)}
+      </div>
+      {(look.videoStart || look.videoEnd || look.videoOnce || (look.videoRate && look.videoRate !== 1)) && (
+        <button type="button" onClick={() => { const { videoStart: _s, videoEnd: _e, videoOnce: _o, videoRate: _r, ...rest } = look; onKeep(rest); }}><RotateCcw size={15} aria-hidden="true" /> The whole video, as it was</button>
+      )}
+    </div>
+  );
+}
 
 /** A copied section, kept on this browser until something else is copied (parts: "<column>.h", ".p", ".img") */
 type SectionCopy = { name: string; from: string; def: LayoutPos; look: Partial<LayoutPos>; texts: Record<string, string>; images: Record<string, SiteImage> };
@@ -1902,7 +2026,10 @@ export function SiteEditor() {
           )}
           {!touch && <span className="site-photo-drop">or drop a picture or a video here</span>}
           {photo.current.video ? (
-            <button type="button" onClick={() => { const { video: _video, videoAssetId: _asset, ...still } = photo.current; setLook(still); }}><Film size={15} aria-hidden="true" /> Remove the video (keep the photo)</button>
+            <>
+              <VideoTrim key={photo.current.video} look={photo.current} onKeep={setLook} />
+              <button type="button" onClick={() => { const { video: _video, videoAssetId: _asset, videoStart: _s, videoEnd: _e, videoOnce: _o, videoRate: _r, ...still } = photo.current; setLook(still); }}><Film size={15} aria-hidden="true" /> Remove the video (keep the photo)</button>
+            </>
           ) : (
             <span className="site-photo-drop"><Film size={12} aria-hidden="true" /> Videos (MP4, MOV, WebM) play here muted, on a loop</span>
           )}

@@ -21,9 +21,11 @@ export type SiteCrop = { x: number; y: number; zoom: number };
  * fit: "contain" shows the whole picture instead of filling its frame; clear:
  * no dimming or dark overlay on it; video: a video plays in the photo's place
  * (muted, looping); crop: cropped by hand (without it, the site crops
- * automatically around the middle)
+ * automatically around the middle); videoStart and videoEnd: the part of
+ * the video that plays (seconds); videoOnce: it plays once and stops on its
+ * last frame instead of looping; videoRate: its speed (1 = usual)
  */
-export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop };
+export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop; videoStart?: number; videoEnd?: number; videoOnce?: boolean; videoRate?: number };
 /** What an admin can add as a new section: words, a picture, both, a band of colour, or story cards chosen by hand */
 export type SectionKind = "text" | "image" | "textimage" | "band" | "stories";
 /**

@@ -33,6 +33,10 @@ const SECTION_FIELDS = [
 const MEDIA_FIELDS = [
   defineField({ name: "videoFile", title: "Video (plays in the photo’s place, muted, on a loop)", type: "file", options: { accept: "video/*" } }),
   defineField({ name: "video", title: "…or a video link", type: "url" }),
+  defineField({ name: "videoStart", title: "Video starts at (seconds)", type: "number" }),
+  defineField({ name: "videoEnd", title: "Video ends at (seconds)", type: "number" }),
+  defineField({ name: "videoOnce", title: "Play once (no loop)", type: "boolean" }),
+  defineField({ name: "videoRate", title: "Video speed (1 = usual)", type: "number" }),
   defineField({
     name: "crop",
     title: "Cropped by hand",
