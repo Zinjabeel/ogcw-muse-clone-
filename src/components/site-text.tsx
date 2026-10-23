@@ -190,12 +190,22 @@ function Editable({ thing, layout, value, display, changed, max, hint, onCommit 
   );
 }
 
+/**
+ * A saved address that is one of the site's own pictures ("/assets/…", or
+ * "/src/assets/…" while developing), kept by an edit that only restyled the
+ * picture (its crop, fit, finish) without uploading a new one. Those
+ * addresses change with every build, so the picture the page ships with is
+ * shown instead, with the edit's styling (deploy check, 23 Oct 2026: the Tour
+ * Ma Vie poster pointed at a development address and was missing).
+ */
+const ownPicture = (src: string | undefined) => !!src && src.startsWith("/") && !src.startsWith("//");
+
 /** A photo from the site: its usual one, or the one an admin put in its place */
 export function EditableImage({ k, src, alt, className, ...rest }: ImgHTMLAttributes<HTMLImageElement> & { k: string; src: string; alt: string }) {
   const site = useSiteText();
   const section = useSection();
   const swap = site.image(k);
-  const shown = { ...rest, src: swap?.src ?? src, alt: swap?.alt ?? alt, style: swap?.fit === "contain" ? { ...rest.style, objectFit: "contain" as const } : rest.style };
+  const shown = { ...rest, src: swap && !ownPicture(swap.src) ? swap.src : src, alt: swap?.alt ?? alt, style: swap?.fit === "contain" ? { ...rest.style, objectFit: "contain" as const } : rest.style };
   if (!site.editing) return <img {...shown} className={className} data-img-key={k} />;
   return <img {...shown} className={`${className ?? ""} site-img${swap ? " is-changed" : ""}`} data-img-key={k} data-edit-img={k} data-edit-section={section ?? undefined} data-usual={src} data-swapped={swap ? "" : undefined} />;
 }
@@ -267,6 +277,8 @@ function showPicture(img: HTMLImageElement, picture: SiteImage | undefined, own:
     delete data["origSrcset"];
   }
   if (!own) {
+    // Restyled only (no new picture): the page keeps its own picture, with the styling
+    if (picture && ownPicture(picture.src)) picture = { ...picture, src: data["origSrc"] ?? img.getAttribute("src") ?? picture.src };
     if (picture) {
       if (data["swapSrc"] === undefined) {
         data["origSrc"] = img.getAttribute("src") ?? "";
