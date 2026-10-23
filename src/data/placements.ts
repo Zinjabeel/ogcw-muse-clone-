@@ -23,7 +23,33 @@ export type SlotDef = {
   section?: SectionId;
   /** A list used around the site rather than a spot on the front page: it may repeat stories shown elsewhere */
   list?: boolean;
+  /** Fills itself (after any stories placed by hand) with the week's most important culture news, instead of fixed usual stories */
+  auto?: boolean;
 };
+
+// "This week" fills itself (owner, 23 Oct 2026: "always import the most
+// important culture news such as hip-hop"): the newest stories, ranked so
+// music (hip-hop and rap first), then entertainment, fashion and sneakers
+// come before games, tech and sport, and a story loses its place as it ages.
+// Certified stories (fact-checked by OGCW) get a little lift.
+const HIP_HOP = /\b(rap|rapper|rappers|hip[- ]?hop|drill|grime|drake|kendrick|travis scott|kanye|\bye\b|nicki|cardi|eminem|lil |future|j\. ?cole|21 savage|doechii|central cee|skepta|tyler|asap|a\$ap|playboi|metro boomin|gucci mane|megan thee|glorilla|sexyy|ice spice|lil baby|young thug|nas|jay-?z|50 cent|snoop|outkast|wale|rick ross|bet awards|album)\b/i;
+const CULTURE = /\b(fashion|runway|sneaker|sneakers|nike|jordan|adidas|supreme|collab|tour|grammy|vmas|award|awards|festival|merch|streetwear|album|single|chart|billboard)\b/i;
+const SECTION_WEIGHT: Record<string, number> = { music: 4, culture: 3, streaming: 1.5, sports: 1, games: 0.5 };
+
+type Rankable = { slug: string; section?: string; kicker?: string; title?: string; deck?: string; date?: string; updated?: string; certified?: boolean };
+/** The stories ranked for "This week": culture-first, newest first among equals */
+export function cultureRanking<T extends { slug: string }>(all: T[]): T[] {
+  const list = all as unknown as Rankable[];
+  const time = (story: Rankable) => Date.parse(story.updated ?? story.date ?? "") || 0;
+  // "Now" is the newest story, so the server and the browser agree
+  const now = Math.max(...list.map(time), 0);
+  const score = (story: Rankable) => {
+    const words = `${story.kicker ?? ""} ${story.title ?? ""} ${story.deck ?? ""}`;
+    const age = Math.max(0, (now - time(story)) / 86_400_000);
+    return (SECTION_WEIGHT[story.section ?? ""] ?? 0) + (HIP_HOP.test(words) ? 3 : 0) + (CULTURE.test(words) ? 1 : 0) + (story.certified ? 0.5 : 0) + Math.max(0, 10 - age) * 0.7;
+  };
+  return list.map((story, index) => ({ story, index, value: score(story) })).sort((a, b) => b.value - a.value || a.index - b.index).map((item) => item.story) as unknown as T[];
+}
 
 export const SLOTS = [
   // The hero: the visitor's choice of three; Gallery shows no stories
@@ -40,12 +66,12 @@ export const SLOTS = [
   { id: "explore-more", area: "The Wire", name: "More stories", note: "A row of five stories in Explore, under the four desks", max: 5, defaults: ["brewers-sweep-dodgers-world-series-first-since-1982", "soulja-boy-2028-president", "marsha-blackburn-ai-video-kendrick-lamar-not-like-us", "drake-habibti-fomo-18th-rnb-hip-hop-number-one-record", "premier-league-weekend-october-17-2026"] },
 
   // The week
-  { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left", max: 1, defaults: ["gta-vi-launch-trailer-justice-flower-in-a-hurricane"] },
-  { id: "week-thread", area: "The week", name: "Under the lead", note: "Three small stories under the lead", max: 3, defaults: ["sony-playstation-discs-end-2028-backlash", "eminem-new-album-50-cent-street-fighter", "meta-new-mexico-40-billion-penalty"] },
-  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos", max: 2, defaults: ["man-united-worst-start-40-years-carrick-martinez", "barcelona-ten-straight-wins-yamal-galatasaray-psg"] },
-  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column", max: 1, defaults: ["tottenham-bottom-de-zerbi-300-million"] },
-  { id: "week-brief", area: "The week", name: "In brief", note: "Five short items, numbered", max: 5, defaults: ["ps6-what-sony-has-actually-said", "xbox-game-pass-october-2026-battlefield-6", "fortnite-yeat-real-lyfe-item-shop", "tiktok-eu-gatekeeper-court-adviser-opinion", "spotify-audiobooks-180-markets-q3-2026"] },
-  { id: "week-cluster", area: "The week", name: "Big news", note: "Three places, each fading between two stories every few seconds", max: 6, defaults: ["instagram-ai-generated-profile-label-ai-songs-dms", "call-of-duty-modern-warfare-4-launch-october-23", "travis-scott-alright-sample-lawsuit-dropped", "nicki-minaj-x-takeover-next-album-nothing", "salah-trabzonspor-first-european-goal-egypt-row", "apple-homeview-apple-tv-homepod-mini-2-october-2026"] },
+  { id: "week-lead", area: "The week", name: "Lead story", note: "The big story on the left. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 1, defaults: ["gta-vi-launch-trailer-justice-flower-in-a-hurricane"] },
+  { id: "week-thread", area: "The week", name: "Under the lead", note: "Three small stories under the lead. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 3, defaults: ["sony-playstation-discs-end-2028-backlash", "eminem-new-album-50-cent-street-fighter", "meta-new-mexico-40-billion-penalty"] },
+  { id: "week-middle", area: "The week", name: "Middle column", note: "Two stories with photos. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 2, defaults: ["man-united-worst-start-40-years-carrick-martinez", "barcelona-ten-straight-wins-yamal-galatasaray-psg"] },
+  { id: "week-connected", area: "The week", name: "Connected story", note: "Linked under the first story in the middle column. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 1, defaults: ["tottenham-bottom-de-zerbi-300-million"] },
+  { id: "week-brief", area: "The week", name: "In brief", note: "Five short items, numbered. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 5, defaults: ["ps6-what-sony-has-actually-said", "xbox-game-pass-october-2026-battlefield-6", "fortnite-yeat-real-lyfe-item-shop", "tiktok-eu-gatekeeper-court-adviser-opinion", "spotify-audiobooks-180-markets-q3-2026"] },
+  { id: "week-cluster", area: "The week", name: "Big news", note: "Three places, each fading between two stories every few seconds. Fills itself with the week's top culture news (hip-hop first) unless you place stories here", auto: true, max: 6, defaults: ["instagram-ai-generated-profile-label-ai-songs-dms", "call-of-duty-modern-warfare-4-launch-october-23", "travis-scott-alright-sample-lawsuit-dropped", "nicki-minaj-x-takeover-next-album-nothing", "salah-trabzonspor-first-european-goal-egypt-row", "apple-homeview-apple-tv-homepod-mini-2-october-2026"] },
 
   // The rap desk
   { id: "rap-spotlight", area: "Rap desk", name: "Spotlight", note: "The big story on the rap desk", max: 1, defaults: ["doechii-bombs-swamp-sessions-debut-album"], section: "music" },
@@ -102,8 +128,9 @@ export function resolveSlots<T extends { slug: string }>(all: T[], layout: Front
   const onFront = new Set<string>();
   // The stories placed in or usual for every spot: an empty place is filled
   // with others first, so a story doesn't show twice on the page
-  const usual = new Set((SLOTS as readonly SlotDef[]).flatMap((slot) => (slot.list ? [] : [...(layout.slots[slot.id as SlotId] ?? []), ...slot.defaults])));
+  const usual = new Set((SLOTS as readonly SlotDef[]).flatMap((slot) => (slot.list ? [] : [...(layout.slots[slot.id as SlotId] ?? []), ...(slot.auto ? [] : slot.defaults)])));
   const result = {} as Record<SlotId, T[]>;
+  let ranked: T[] | null = null;
   for (const slot of SLOTS as readonly SlotDef[]) {
     const placed = layout.slots[slot.id as SlotId] ?? [];
     const shown: T[] = [];
@@ -114,7 +141,15 @@ export function resolveSlots<T extends { slug: string }>(all: T[], layout: Front
       shown.push(story);
     };
     placed.forEach((slug) => take(slug, true));
-    slot.defaults.forEach((slug) => take(slug, false));
+    if (slot.auto) {
+      // The week's most important culture news, not already on the front page
+      ranked ??= cultureRanking(all);
+      for (const story of ranked) {
+        if (shown.length >= slot.max) break;
+        if (!onFront.has(story.slug) && !usual.has(story.slug)) take(story.slug, false);
+      }
+    }
+    slot.defaults.forEach((slug) => { if (!slot.auto) take(slug, false); });
     // Still room: the newest stories not already on the front page (nor
     // waiting to be, in a spot further down), then any not already on it
     for (const pass of [true, false]) {
