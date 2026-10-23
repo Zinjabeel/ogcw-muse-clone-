@@ -1,34 +1,31 @@
 # Putting OGCW on Vercel
 
-Written 23 Oct 2026. The code is ready on the branch **`vercel-deploy`**. These
-are the steps only you can do, because they need your accounts. Do them in order.
+Written 23 Oct 2026, updated the same evening. The code is ready on **`main`**
+of **`ogcw-muse`**, which is now the main website's repo (the rebuilt site from
+`ogcw-muse-clone-` was moved into it; the old live code is kept on the branch
+`live-backup-2026-10-23`). The clone repo holds the same code. These are the
+steps only you can do, because they need your accounts. Do them in order.
 
 What the code does for Vercel: when Vercel builds the site, it builds the
 server for Vercel (Nitro's `vercel` preset) instead of Cloudflare. Everywhere
-else, Lovable included, nothing changes.
+else, Lovable included, nothing changes. It also has the TanStack Start
+security update (1.168.61) that Vercel asks for (GHSA-qx66-fv34-fjm8).
+
+**Already made a Vercel project from `ogcw-muse-clone-`?** It works as it is
+(same code), but to build from the main repo from now on: your project →
+**Settings → Git → Disconnect**, then **Connect Git Repository → ogcw-muse**.
+Your settings and environment variables stay.
 
 ---
-
-## 0. Get the code onto `main` (or deploy the branch)
-
-Vercel puts your **main** branch live. The Vercel settings are on the branch
-`vercel-deploy`, which is **not merged** yet.
-
-- **Easiest:** tell Claude "merge vercel-deploy into main". The changes are small
-  and don't change how the site looks or works. Commits on main also show up in
-  Lovable.
-- **Or** test the branch first: after step 1, Vercel shows a **Preview** for the
-  branch (see step 1.8).
 
 ## 1. Make the Vercel project (5 minutes)
 
 1. Go to **vercel.com** → **Sign Up** (or Log In) → **Continue with GitHub**, as
    **Zinjabeel**.
 2. On the dashboard: **Add New…** (top right) → **Project**.
-3. Under **Import Git Repository**, find **ogcw-muse-clone-** → **Import**.
+3. Under **Import Git Repository**, find **ogcw-muse** → **Import**.
    - If it isn't listed: **Adjust GitHub App Permissions** → choose Zinjabeel →
-     **Only select repositories** → add `ogcw-muse-clone-` → **Save**, then back to Vercel.
-   - Do **not** import `ogcw-muse` (the live site's repo).
+     **Only select repositories** → add `ogcw-muse` → **Save**, then back to Vercel.
 4. **Configure Project** screen:
 
    | Setting | Value |
@@ -44,9 +41,11 @@ Vercel puts your **main** branch live. The Vercel settings are on the branch
 6. Press **Deploy**. The first build takes a few minutes.
 7. When it says **Congratulations**, press **Continue to Dashboard**. Your address
    is under **Domains**, e.g. `https://ogcw.vercel.app`.
-8. To try the branch before merging: **Deployments** tab → **⋯ / Create
-   Deployment** → type the branch `vercel-deploy` → **Create**. Its address is
-   shown when it's done.
+8. If Vercel says the deployment is **blocked by a vulnerability**: make sure it
+   built the newest commit on `main`, which has the fix. Under **Deployments**,
+   the top one should show the commit "OGCW: the rebuilt site…" or a newer one.
+   If it shows an older commit: **Create Deployment** → branch `main` → **Create**.
+   Never switch off Vercel's protection to get past it.
 
 **Node.js version:** the site was tested on Node 24. If a build ever complains,
 go to **Settings → Build and Deployment → Node.js Version → 24.x** (22.x also works).
@@ -112,6 +111,10 @@ On your Vercel address:
 7. In Vercel: your project → **Logs**. Nothing red while you click around.
 
 ## 5. Move ogcultureworld.com to Vercel (when step 4 is all good)
+
+`ogcw-muse` is also connected to Lovable, which now shows this same code. If
+the domain is connected in Lovable (**Project → Settings → Domains**), remove
+it there first, so only Vercel serves ogcultureworld.com.
 
 1. Vercel → your project → **Settings → Domains** → **Add** → `ogcultureworld.com`.
    Also add `www.ogcultureworld.com` and choose to redirect one to the other.
