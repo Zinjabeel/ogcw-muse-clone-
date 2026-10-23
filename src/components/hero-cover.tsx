@@ -155,9 +155,8 @@ export function HeroCover() {
       className="cover cvx"
       aria-labelledby="cover-title"
       aria-roledescription="carousel"
-      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
-      onPointerLeave={() => setHold(false)}
-      onFocus={() => setHold(true)}
+      // Keeps playing under the mouse (owner, 23 Oct 2026); only keyboard focus holds it still
+      onFocus={(event) => { if (event.target.matches(":focus-visible")) setHold(true); }}
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
     >
       <div className="cvx-main">

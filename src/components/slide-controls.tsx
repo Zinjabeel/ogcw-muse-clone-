@@ -7,8 +7,10 @@ import { useSiteText } from "@/lib/site-text";
 // heroes (hero-gallery-2.tsx) and the Trends page's pictures (owner, 23 Oct
 // 2026: "a slideshow arrow with a pause button exactly like the hero
 // section, for all pictures in the whole page, and make the pictures fade").
-// A slideshow runs only while on screen, stops under the pointer, on focus
-// and while an admin edits, and never runs for reduced motion. The look is
+// A slideshow runs only while on screen, keeps running under the mouse and
+// after a click on its arrows (owner, 23 Oct 2026: "it keeps playing"),
+// stops for someone moving through it with the keyboard and while an admin
+// edits, and never runs for reduced motion. The look is
 // in src/styles/hero-gallery-2.css (.cxh-controls); the photos cross-fade
 // with .slide-fade (data-on="true" is the one showing).
 
@@ -66,9 +68,8 @@ export function useSlides(count: number, { lead = 0, ms = SLIDE_MS }: { lead?: n
   const running = !paused && !hold && inView && !reduce && !busy && count > 1;
   const box = {
     ref: setEl,
-    onPointerEnter: (event: { pointerType: string }) => { if (event.pointerType === "mouse") setHold(true); },
-    onPointerLeave: () => setHold(false),
-    onFocus: () => setHold(true),
+    // Only keyboard focus holds it still (a mouse click on an arrow doesn't)
+    onFocus: (event: { target: EventTarget }) => { if (event.target instanceof Element && event.target.matches(":focus-visible")) setHold(true); },
     onBlur: (event: { currentTarget: EventTarget & Element; relatedTarget: EventTarget | null }) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); },
   };
   return { index, count, go, show, running, paused, setPaused, reduce, moved, lead, ms, box };

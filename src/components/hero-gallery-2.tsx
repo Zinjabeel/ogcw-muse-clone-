@@ -21,8 +21,8 @@ import { SlideControls, SlideDots, useSlides } from "./slide-controls";
 // Complex shows one such slideshow across the page; here there are two,
 // side by side: the top stories on the left (chosen in the studio, slot
 // "hero-top"), OGCW's own doors on the right (Shop, Newsletter, Forum,
-// About). Each runs on its own and stops under the pointer, on focus, off
-// screen and while an admin edits; nothing runs for reduced motion.
+// About). Each runs on its own, also under the mouse, and stops for keyboard
+// focus, off screen and while an admin edits; nothing runs for reduced motion.
 
 export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
 

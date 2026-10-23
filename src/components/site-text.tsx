@@ -247,6 +247,20 @@ function findImage(thing: string): HTMLImageElement | undefined {
   return [...document.images].filter((item) => !item.dataset["imgKey"] && normSrc(srcOf(item)) === src)[Number(n)];
 }
 
+/**
+ * A picture you can see: in a slideshow the photos sit on top of each other
+ * and only the one showing is at full strength, so faded-out ones are not
+ */
+function shownPicture(el: Element) {
+  let opacity = 1;
+  for (let node: Element | null = el; node && node !== document.body; node = node.parentElement) {
+    const style = getComputedStyle(node);
+    if (style.visibility === "hidden" || style.display === "none") return false;
+    opacity *= Number(style.opacity);
+  }
+  return opacity > 0.5;
+}
+
 /** True once React has taken over an element from the server's HTML (it keeps its own links on it) */
 const hydrated = (el: Element) => Object.keys(el).some((name) => name.startsWith("__reactFiber$") || name.startsWith("__reactProps$"));
 
@@ -1305,8 +1319,11 @@ export function SiteEditor() {
     try { if (next) localStorage.removeItem(OFF_KEY); else localStorage.setItem(OFF_KEY, "1"); } catch { /* storage blocked */ }
   };
 
-  // While pointing at, typing in or sizing something, the moving parts hold still
-  useEffect(() => { setBusy(!!target || !!photo || !!sizing); }, [target, photo, sizing, setBusy]);
+  // Moving parts (slideshows) hold still only while something is really being
+  // edited: typing, dragging, the photo menu or a section's panel open. Just
+  // pointing at a picture lets them keep playing (owner, 23 Oct 2026); the
+  // Edit buttons follow the slide that's showing (below).
+  useEffect(() => { setBusy(!!target?.typing || dragging || !!photo || !!sizing); }, [target, dragging, photo, sizing, setBusy]);
   useEffect(() => {
     document.documentElement.classList.toggle("site-editing", editing);
     return () => document.documentElement.classList.remove("site-editing");
@@ -1321,7 +1338,7 @@ export function SiteEditor() {
       window.clearTimeout(hideTimer.current);
       hideTimer.current = undefined;
       const current = targetRef.current;
-      if (current?.el === el) return;
+      if (current?.el === el && current.img === img) return;
       const thing = img ? thingOfImage(img) : el.dataset["lay"] ?? "";
       setTarget({ el, kind, rect: el.getBoundingClientRect(), typing: false, thing, ...(img ? { img } : {}) });
     };
@@ -1329,31 +1346,30 @@ export function SiteEditor() {
       if (hideTimer.current !== undefined) return;
       hideTimer.current = window.setTimeout(() => { hideTimer.current = undefined; setTarget((current) => (current?.typing ? current : null)); }, 450);
     };
-    // The picture you can see there: in a slideshow the photos sit on top of
-    // each other and only the one showing is at full strength, so faded-out
-    // ones underneath (or on top) are skipped
-    const seen = (el: Element) => {
-      let opacity = 1;
-      for (let node: Element | null = el; node && node !== document.body; node = node.parentElement) {
-        const style = getComputedStyle(node);
-        if (style.visibility === "hidden") return false;
-        opacity *= Number(style.opacity);
-      }
-      return opacity > 0.5;
-    };
     const imageAt = (x: number, y: number) => {
       const images = document.elementsFromPoint(x, y).filter((el): el is HTMLImageElement => el instanceof HTMLImageElement && !el.closest(SITE_UI) && el.getBoundingClientRect().width >= 24);
-      return images.find(seen) ?? images[0];
+      return images.find(shownPicture) ?? images[0];
     };
     const noteSection = (from: Element | null) => {
       if (sizingRef.current) return;
       const el = sectionOf(from);
       setSection((current) => (el ? (current?.el === el ? current : { el, rect: el.getBoundingClientRect() }) : null));
     };
+    // Where the mouse last was, so the buttons follow a slideshow turning under it
+    let last: { x: number; y: number } | null = null;
+    const onTurn = () => {
+      const current = targetRef.current;
+      if (!last || !current?.img || current.typing || drag.current || secDrag.current) return;
+      const img = imageAt(last.x, last.y);
+      if (img && img !== current.img) show(frameOf(img), "image", img);
+    };
+    const turns = new MutationObserver(() => window.setTimeout(onTurn, 260));
+    turns.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["data-on"] });
     const onMove = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || targetRef.current?.typing || drag.current || secDrag.current) return;
       cancelAnimationFrame(frame);
       const { clientX: x, clientY: y } = event;
+      last = { x, y };
       const from = event.target as Element | null;
       frame = requestAnimationFrame(() => {
         if (from?.closest?.(".site-edit-btn, .site-photo-menu, .site-savebar, .site-edit, .site-lay-handle, .site-sec-pill, .site-sec-bar, .site-sec-handle")) return void window.clearTimeout(hideTimer.current);
@@ -1404,6 +1420,7 @@ export function SiteEditor() {
     window.addEventListener(END_EVENT, onEnd);
     return () => {
       cancelAnimationFrame(frame);
+      turns.disconnect();
       window.clearTimeout(hideTimer.current);
       hideTimer.current = undefined;
       window.removeEventListener("pointermove", onMove);
@@ -1420,8 +1437,10 @@ export function SiteEditor() {
     const current = targetRef.current;
     if (!current) return;
     if (current.kind === "image") {
-      const img = current.img;
+      let img = current.img;
       if (!img) return;
+      // A slideshow may have turned since the pointer came: the picture showing now
+      if (!shownPicture(img)) img = [...current.el.querySelectorAll("img")].find(shownPicture) ?? img;
       const own = img.dataset["editImg"];
       if (own !== undefined) {
         // A photo with its own name (the hero's)
