@@ -411,7 +411,8 @@ function videoOver(img: HTMLImageElement, picture: SiteImage | undefined) {
   else if (retrim && video.readyState >= 1) { video.currentTime = picture.videoStart ?? 0; void video.play().catch(() => {}); }
   // It covers exactly the picture's box
   if (getComputedStyle(parent).position === "static") { parent.style.position = "relative"; parent.dataset["videoPlaced"] = ""; }
-  video.poster = picture.src;
+  // Its still: the picture on the page (a saved address of the site's own picture changes with every build)
+  video.poster = ownPicture(picture.src) ? img.currentSrc || img.getAttribute("src") || "" : picture.src;
   video.style.top = `${img.offsetTop}px`;
   video.style.left = `${img.offsetLeft}px`;
   video.style.width = `${img.offsetWidth}px`;
@@ -1456,14 +1457,17 @@ export function SiteEditor() {
       const own = img.dataset["editImg"];
       if (own !== undefined) {
         // A photo with its own name (the hero's)
-        const swap = site.image(own);
+        const saved = site.image(own);
         const usual = img.dataset["usual"] ?? "";
+        // A restyle of the site's own picture shows that picture (its saved address may be from another build)
+        const swap = saved && ownPicture(saved.src) ? { ...saved, src: usual } : saved;
         setPhoto({ k: own, img, rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: (img.dataset["editSection"] as SiteSection | undefined) ?? null, usual, current: swap ?? { src: usual, alt: img.alt } });
       } else {
         // Any other picture: replaced wherever it's used
         const raw = srcOf(img) ?? "";
         const usual = normSrc(raw);
-        const swap = site.pictures[usual];
+        const saved = site.pictures[usual];
+        const swap = saved && ownPicture(saved.src) ? { ...saved, src: raw } : saved;
         setPhoto({ k: pictureKey(usual), img, rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: null, usual, current: swap ?? { src: raw, alt: img.alt } });
       }
       setTarget(null);

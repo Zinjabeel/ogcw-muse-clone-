@@ -6,7 +6,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -24,7 +24,9 @@ import { CardHover } from "../components/card-hover";
 import { SiteIntro, introInitScript } from "../components/site-intro";
 import { fitInitScript } from "../lib/laptop-fit";
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error: thrown, reset }: { error: unknown; reset: () => void }) {
+  // TanStack Start 1.168.60+ hands over whatever was thrown, not always an Error
+  const error = useMemo(() => (thrown instanceof Error ? thrown : new Error(String(thrown))), [thrown]);
   console.error(error);
   const router = useRouter();
   useEffect(() => {
