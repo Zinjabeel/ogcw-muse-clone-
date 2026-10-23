@@ -31,7 +31,7 @@ const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
 export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
 
-type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null; fit?: string | null; clear?: boolean | null; video?: string | null; videoAssetId?: string | null; videoStart?: number | null; videoEnd?: number | null; videoOnce?: boolean | null; videoRate?: number | null; crop?: { x?: number; y?: number; zoom?: number } | null };
+type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null; fit?: string | null; clear?: boolean | null; video?: string | null; videoAssetId?: string | null; videoStart?: number | null; videoEnd?: number | null; videoOnce?: boolean | null; videoRate?: number | null; tone?: { b?: number; c?: number; s?: number; g?: number } | null; crop?: { x?: number; y?: number; zoom?: number } | null };
 const num = (value: unknown, min: number, max: number) => (typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : undefined);
 // Each edit is its own "Site edit" document; edits saved before that are
 // still in the old single "Site texts" document until the next save moves them
@@ -55,6 +55,8 @@ const toSite = (doc: SiteDoc): SiteContent => {
           kind: p.kind === "text" || p.kind === "image" || p.kind === "textimage" || p.kind === "band" || p.kind === "stories" ? p.kind : undefined,
           after: typeof p.after === "string" && p.after.length <= 300 ? p.after : undefined, cols: num(p.cols, 1, 4), band: num(p.band, 10, 2000),
           // Story cards chosen by hand: their web addresses
+          // A card's size, and the one picture a collage shows
+          w: num(p.w, 40, 4000), h: num(p.h, 20, 4000), ih: num(p.ih, 20, 4000), one: num(p.one, 0, 50),
           stories: Array.isArray(p.stories) ? p.stories.filter((slug): slug is string => typeof slug === "string" && /^[a-z0-9-]{1,120}$/.test(slug)).slice(0, 24) : undefined,
         };
         for (const [name, value] of Object.entries(extra)) if (value !== undefined) (out as Record<string, unknown>)[name] = value;
@@ -76,6 +78,8 @@ const toSite = (doc: SiteDoc): SiteContent => {
           ...(item.videoOnce ? { videoOnce: true } : {}),
           ...(num(item.videoRate, 0.25, 4) && item.videoRate !== 1 ? { videoRate: num(item.videoRate, 0.25, 4)! } : {}),
         } : {}),
+        // Its finish: brightness, contrast, colour, black and white
+        ...(item.tone ? { tone: Object.fromEntries((["b", "c", "s", "g"] as const).flatMap((key) => { const value = num(item.tone?.[key], 0, 300); return value === undefined ? [] : [[key, value]]; })) } : {}),
         ...(item.crop && num(item.crop.x, 0, 100) !== undefined && num(item.crop.y, 0, 100) !== undefined ? { crop: { x: num(item.crop.x, 0, 100)!, y: num(item.crop.y, 0, 100)!, zoom: num(item.crop.zoom, 1, 4) ?? 1 } } : {}) };
     } else {
       if (typeof item.value !== "string" || !item.value.trim()) return;
@@ -131,7 +135,7 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
     const ratings = ratingTotals();
     const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
       "site": {
-        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, fit, clear, crop, "video": coalesce(videoFile.asset->url, video), videoStart, videoEnd, videoOnce, videoRate, "videoAssetId": videoFile.asset._ref, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
+        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, fit, clear, crop, "video": coalesce(videoFile.asset->url, video), videoStart, videoEnd, videoOnce, videoRate, tone, "videoAssetId": videoFile.asset._ref, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
         "legacy": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } }
       },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },

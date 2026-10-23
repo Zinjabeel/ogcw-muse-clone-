@@ -25,7 +25,15 @@ export type SiteCrop = { x: number; y: number; zoom: number };
  * the video that plays (seconds); videoOnce: it plays once and stops on its
  * last frame instead of looping; videoRate: its speed (1 = usual)
  */
-export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop; videoStart?: number; videoEnd?: number; videoOnce?: boolean; videoRate?: number };
+export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop; videoStart?: number; videoEnd?: number; videoOnce?: boolean; videoRate?: number; tone?: SiteTone };
+/** A photo's finish, in %: brightness, contrast and colour (100 = as it is), black and white (0 = none) */
+export type SiteTone = { b?: number; c?: number; s?: number; g?: number };
+/** The CSS filter for a finish ("" when it's as it is) */
+export const toneFilter = (tone: SiteTone | undefined) => {
+  if (!tone) return "";
+  const parts = [tone.b !== undefined && tone.b !== 100 ? `brightness(${tone.b}%)` : "", tone.c !== undefined && tone.c !== 100 ? `contrast(${tone.c}%)` : "", tone.s !== undefined && tone.s !== 100 ? `saturate(${tone.s}%)` : "", tone.g ? `grayscale(${tone.g}%)` : ""];
+  return parts.filter(Boolean).join(" ");
+};
 /** What an admin can add as a new section: words, a picture, both, a band of colour, or story cards chosen by hand */
 export type SectionKind = "text" | "image" | "textimage" | "band" | "stories";
 /**
@@ -47,11 +55,15 @@ export type LayoutPos = {
   bg?: string; bg2?: string; split?: "x" | "y"; at?: number; bw?: number; bh?: number;
   hide?: boolean; order?: number;
   kind?: SectionKind; after?: string; cols?: number; band?: number; stories?: string[];
+  /** A whole card ("card:" things): its width and height, and its picture's height, in page pixels */
+  w?: number; h?: number; ih?: number;
+  /** A collage ("grp:" things): only this one of its pictures shows, filling it */
+  one?: number;
 };
 export type SiteLayout = { d?: LayoutPos; m?: LayoutPos };
 /** Where an edit is from: the part of the site, the page and the usual wording */
 export type EditMeta = { section?: string; page?: string; usual?: string; /** still in the old single "Site texts" document */ legacy?: boolean };
-/** layouts: "<page>|<thing>", the thing being "t:<text>", "s:<story field>", "i:<photo>", "src:<picture>#<n>" or "sec:<section>" */
+/** layouts: "<page>|<thing>", the thing being "t:<text>", "s:<story field>", "i:<photo>", "src:<picture>#<n>", "sec:<section>", "card:<picture>" (the card around it) or "grp:<picture>" (the collage it's in) */
 export type SiteContent = { texts: Record<string, string>; images: Record<string, SiteImage>; layouts: Record<string, SiteLayout>; meta: Record<string, EditMeta> };
 export const EMPTY_SITE: SiteContent = { texts: {}, images: {}, layouts: {}, meta: {} };
 
@@ -101,10 +113,19 @@ type Editor = {
   pending: Pending[];
   change: (key: string, kind: EditKind, value: Pending["value"], meta?: EditMeta) => void;
   undo: () => void;
+  /** Takes back every unsaved change to one thing (not only the last change) */
+  revert: (key: string) => void;
   discard: () => void;
+  /** Unsaved changes kept on this browser from before a reload or a closed tab, to bring back */
+  stored: number;
+  restore: () => void;
+  forget: () => void;
   /** After a save: the saved changes stay on screen until the site's copy catches up */
   settle: (saved: SiteContent, stories: Map<string, string>) => void;
 };
+
+const DRAFT_KEY = "ogcw-site-draft";
+const TAB_KEY = "ogcw-tab";
 
 const SiteTextContext = createContext<Editor>({
   text: () => undefined,
@@ -121,7 +142,11 @@ const SiteTextContext = createContext<Editor>({
   pending: [],
   change: () => {},
   undo: () => {},
+  revert: () => {},
   discard: () => {},
+  stored: 0,
+  restore: () => {},
+  forget: () => {},
   settle: () => {},
 });
 
@@ -195,15 +220,72 @@ export function SiteTextProvider({ content, children }: { content: SiteContent; 
     setPending((list) => [...list, meta ? { key, kind, value, meta } : { key, kind, value }]);
   }, []);
   const undo = useCallback(() => setPending((list) => list.slice(0, -1)), []);
+  const revert = useCallback((key: string) => setPending((list) => list.filter((item) => item.key !== key)), []);
   const discard = useCallback(() => setPending([]), []);
+
+  // Unsaved changes are kept on this browser as they're made, so a reload,
+  // a crash or a closed tab doesn't lose them. Each tab keeps its own copy
+  // (and touches it every 30 seconds while it's open), so tabs open side by
+  // side never take each other's; what's offered back is this tab's own copy
+  // after a reload, or the copy of a tab that's been closed.
+  const [draft, setDraft] = useState<{ keys: string[]; pending: Pending[] } | null>(null);
+  const tab = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    try {
+      let id = sessionStorage.getItem(TAB_KEY);
+      if (!id) { id = Math.random().toString(36).slice(2, 10); sessionStorage.setItem(TAB_KEY, id); }
+      return id;
+    } catch { return Math.random().toString(36).slice(2, 10); }
+  }, []);
+  useEffect(() => {
+    try {
+      const own = `${DRAFT_KEY}:${tab}`;
+      const found: { keys: string[]; pending: Pending[] } = { keys: [], pending: [] };
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith(DRAFT_KEY)) continue;
+        const kept = JSON.parse(localStorage.getItem(key) ?? "null") as { at?: string; pending?: Pending[] } | null;
+        if (!Array.isArray(kept?.pending) || !kept.pending.length) continue;
+        // Another tab's copy only once that tab has stopped touching it (closed)
+        const stale = Date.now() - Date.parse(kept.at ?? "") > 90_000;
+        if (key === own || stale) { found.keys.push(key); found.pending.push(...kept.pending); }
+      }
+      if (found.pending.length) setDraft(found);
+    } catch { /* nothing kept */ }
+  }, [tab]);
+  useEffect(() => {
+    if (!tab) return;
+    const own = `${DRAFT_KEY}:${tab}`;
+    const write = () => {
+      try {
+        if (pending.length) localStorage.setItem(own, JSON.stringify({ at: new Date().toISOString(), pending }));
+        else if (!draft?.keys.includes(own)) localStorage.removeItem(own);
+      } catch { /* private window */ }
+    };
+    write();
+    if (!pending.length) return;
+    const beat = window.setInterval(write, 30_000);
+    return () => window.clearInterval(beat);
+  }, [pending, draft, tab]);
+  const clearDraft = (keys: string[]) => { try { for (const key of keys) if (key !== `${DRAFT_KEY}:${tab}`) localStorage.removeItem(key); } catch { /* private window */ } };
+  const restore = useCallback(() => {
+    if (draft) { setPending((list) => [...draft.pending, ...list]); clearDraft(draft.keys); }
+    setDraft(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
+  const forget = useCallback(() => {
+    if (draft) { clearDraft(draft.keys); try { if (!pending.length) localStorage.removeItem(`${DRAFT_KEY}:${tab}`); } catch { /* private window */ } }
+    setDraft(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, pending.length, tab]);
   const settle = useCallback((next: SiteContent, stories: Map<string, string>) => {
     setSaved({ content: next, stories, over: content });
     setPending([]);
   }, [content]);
 
   const value = useMemo<Editor>(
-    () => ({ text, image, pictures, story, layout, pageLayouts, live, editing, setEditing, busy, setBusy, pending, change, undo, discard, settle }),
-    [text, image, pictures, story, layout, pageLayouts, live, editing, busy, pending, change, undo, discard, settle],
+    () => ({ text, image, pictures, story, layout, pageLayouts, live, editing, setEditing, busy, setBusy, pending, change, undo, revert, discard, stored: draft?.pending.length ?? 0, restore, forget, settle }),
+    [text, image, pictures, story, layout, pageLayouts, live, editing, busy, pending, change, undo, revert, discard, draft, restore, forget, settle],
   );
   return <SiteTextContext.Provider value={value}>{children}</SiteTextContext.Provider>;
 }

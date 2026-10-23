@@ -1,9 +1,9 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowUp, Camera, Check, ClipboardPaste, Copy, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, MousePointerClick, Move, PenLine, Play, Plus, RefreshCw, Repeat, RotateCcw, Scaling, Scissors, Search, SkipBack, SkipForward, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Camera, Check, ChevronUp, ClipboardPaste, Command, Copy, Crop, Eye, EyeOff, Film, History, ImagePlus, LayoutGrid, Loader2, Maximize2, MousePointerClick, Move, PenLine, Play, Plus, RefreshCw, Repeat, RotateCcw, Scaling, Scissors, Search, SkipBack, SkipForward, SlidersHorizontal, Sparkles, Sun, Trash2, Type, Undo2, Upload, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { adminClient, studioToken } from "@/lib/admin-sanity";
-import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteCrop, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
+import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteCrop, type SiteImage, type SiteLayout, type SiteTone, type StoryField, toneFilter } from "@/lib/site-text";
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
 import { useStories } from "@/lib/stories";
@@ -209,7 +209,7 @@ export function EditableImage({ k, src, alt, className, ...rest }: ImgHTMLAttrib
 
 const BP_QUERY = "(min-width: 1024px)";
 const bpNow = (): "d" | "m" => (window.matchMedia(BP_QUERY).matches ? "d" : "m");
-const SITE_UI = ".site-edit, .site-blk-ui, .site-photo-menu, .site-savebar, .site-edit-btn, .site-lay-handle, .site-sec-pill, .site-sec-bar, .site-sec-handle, .dn-layer, .dn-bar";
+const SITE_UI = ".site-edit, .site-blk-ui, .site-cmd-glass, .site-changes, .site-photo-menu, .site-savebar, .site-edit-btn, .site-lay-handle, .site-sec-pill, .site-sec-bar, .site-sec-handle, .dn-layer, .dn-bar";
 
 /** A picture's box: the picture, or the wrappers around it that are the same size */
 function frameOf(img: HTMLElement): HTMLElement {
@@ -285,6 +285,7 @@ function showPicture(img: HTMLImageElement, picture: SiteImage | undefined, own:
     img.style.objectFit = picture?.fit === "contain" ? "contain" : picture ? "cover" : "";
   }
   cropPicture(img, picture?.crop);
+  tonePicture(img, picture?.tone);
   videoOver(img, picture);
   // Clear: the picture at full strength, without the dark wash over it (a
   // hidden picture, e.g. in the closed menu, has no box to clear around it)
@@ -393,6 +394,20 @@ function videoOver(img: HTMLImageElement, picture: SiteImage | undefined) {
   video.style.objectPosition = picture.crop ? `${picture.crop.x}% ${picture.crop.y}%` : "";
   video.style.transform = picture.crop && picture.crop.zoom !== 1 ? `scale(${picture.crop.zoom})` : "";
   video.style.transformOrigin = picture.crop ? `${picture.crop.x}% ${picture.crop.y}%` : "";
+  video.style.filter = toneFilter(picture.tone);
+}
+
+/** A photo's finish (brightness, contrast, colour, black and white); none: back to the page's own */
+function tonePicture(img: HTMLImageElement, tone: SiteTone | undefined) {
+  const data = img.dataset;
+  const filter = toneFilter(tone);
+  if (filter) {
+    if (data["origFilter"] === undefined) data["origFilter"] = img.style.filter;
+    img.style.filter = filter;
+  } else if (data["origFilter"] !== undefined) {
+    img.style.filter = data["origFilter"];
+    delete data["origFilter"];
+  }
 }
 
 // ---------------------------------------------------------------- Sections
@@ -555,6 +570,76 @@ function placeInline(el: HTMLElement, pos: LayoutPos | undefined) {
   el.style.transformOrigin = "0 0";
 }
 
+// ---------------------------------------------------------------- Cards and collages
+// A picture's card: the story card, tile or link it sits in with its words
+// (owner, 23 Oct 2026: "when I change the image size I also want to change
+// the length, width and size of the whole card"). Its width, height and its
+// picture's height are kept as a "card:<picture>" layout. A collage: pictures
+// side by side with no words between them (the Top 10 lists' four faces);
+// "grp:<first picture>" keeps which one picture shows instead, filling it.
+
+/** The card a picture sits in, if it's in one */
+export function cardOf(img: HTMLImageElement): HTMLElement | null {
+  const frame = frameOf(img);
+  for (let el = frame.parentElement, depth = 0; el && depth < 6 && !/^(BODY|MAIN|SECTION|HEADER|FOOTER)$/.test(el.tagName); el = el.parentElement, depth += 1) {
+    const words = (el.textContent ?? "").replace(/\s+/g, "").length;
+    const card = /^(A|ARTICLE|LI|FIGURE)$/.test(el.tagName) || [...el.classList].some((name) => /card|tile|pick|item|story/.test(name));
+    if (card && words > 0 && el.getBoundingClientRect().width < window.innerWidth * 0.9) return el;
+  }
+  return null;
+}
+/** The collage a picture is in (two or more pictures and no words), and which of its parts holds the picture */
+export function groupOf(img: HTMLImageElement): { el: HTMLElement; parts: HTMLElement[]; index: number } | null {
+  for (let el = img.parentElement, depth = 0; el && depth < 3; el = el.parentElement, depth += 1) {
+    const parts = [...el.children].filter((child): child is HTMLElement => child instanceof HTMLElement && !!child.querySelector("img") || child instanceof HTMLImageElement);
+    if (parts.length >= 2 && !(el.textContent ?? "").trim() && parts.length === el.children.length) {
+      const index = parts.findIndex((part) => part === img || part.contains(img));
+      if (index >= 0) return { el, parts, index };
+    }
+  }
+  return null;
+}
+const firstImg = (el: HTMLElement) => (el instanceof HTMLImageElement ? el : el.querySelector("img"));
+/** The size a card was given (none: back to how it was) */
+function sizeCard(card: HTMLElement, img: HTMLImageElement, pos: LayoutPos | undefined) {
+  const frame = frameOf(img);
+  const picture = frame === card ? img : frame;
+  untouch(card);
+  untouch(picture);
+  if (picture !== img) untouch(img);
+  if (!pos) return;
+  if (pos.w) { touch(card, "width", `${pos.w}px`); touch(card, "max-width", "none"); touch(card, "flex", "none"); touch(card, "justify-self", "start"); }
+  if (pos.h) touch(card, "min-height", `${pos.h}px`);
+  if (pos.ih) {
+    touch(picture, "height", `${pos.ih}px`);
+    touch(picture, "aspect-ratio", "auto");
+    if (picture !== img) { touch(img, "height", "100%"); touch(img, "width", "100%"); touch(img, "object-fit", "cover"); }
+    else touch(img, "object-fit", "cover");
+  }
+}
+/** A collage showing only one of its pictures, filling it (none: all of them again) */
+function pickOne(group: HTMLElement, parts: HTMLElement[], one: number | undefined) {
+  untouch(group);
+  for (const part of parts) { untouch(part); const img = firstImg(part); if (img && img !== part) untouch(img); }
+  if (one === undefined || !parts[one]) return;
+  if (getComputedStyle(group).position === "static") touch(group, "position", "relative");
+  parts.forEach((part, index) => {
+    if (index !== one) { touch(part, "display", "none"); return; }
+    for (const [prop, value] of [["position", "absolute"], ["inset", "0"], ["width", "100%"], ["height", "100%"], ["transform", "none"], ["rotate", "none"], ["translate", "none"], ["margin", "0"], ["z-index", "1"], ["clip-path", "none"], ["border-radius", "0"]] as const) touch(part, prop, value);
+    const img = firstImg(part);
+    if (img && img !== part) { touch(img, "width", "100%"); touch(img, "height", "100%"); touch(img, "object-fit", "cover"); }
+  });
+}
+function findCard(thing: string) {
+  const img = findImage(thing.slice(5));
+  const card = img ? cardOf(img) : null;
+  return img && card ? { img, card } : null;
+}
+function findGroup(thing: string) {
+  const img = findImage(thing.slice(4));
+  return img ? groupOf(img) : null;
+}
+
 /** Puts this page's moved pictures, section looks, added sections and replaced pictures in place, for everyone */
 export function SiteLayouts() {
   const { pageLayouts, pictures, image, editing } = useSiteText();
@@ -611,6 +696,10 @@ export function SiteLayouts() {
   useEffect(() => {
     const things = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("i:") || thing.startsWith("src:"));
     const sections = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("sec:"));
+    const cards = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("card:"));
+    const groups = Object.entries(pageLayouts).filter(([thing]) => thing.startsWith("grp:"));
+    const sized = new Map<HTMLElement, HTMLImageElement>();
+    const picked = new Map<HTMLElement, HTMLElement[]>();
     const placed = new Set<HTMLElement>();
     const looked = new Set<HTMLElement>();
     const stacked = new Set<HTMLElement>();
@@ -650,6 +739,27 @@ export function SiteLayouts() {
       for (const el of placed) if (!seen.has(el)) placeInline(el, undefined);
       placed.clear();
       for (const el of seen) placed.add(el);
+      // Cards sized, and collages showing one picture
+      const nowCards = new Map<HTMLElement, HTMLImageElement>();
+      for (const [thing, layout] of cards) {
+        const found = findCard(thing);
+        if (!found || !ready(found.card)) continue;
+        nowCards.set(found.card, found.img);
+        sizeCard(found.card, found.img, layout[bp] ?? layout.d ?? layout.m);
+      }
+      for (const [card, img] of sized) if (!nowCards.has(card)) sizeCard(card, img, undefined);
+      sized.clear();
+      for (const [card, img] of nowCards) sized.set(card, img);
+      const nowGroups = new Map<HTMLElement, HTMLElement[]>();
+      for (const [thing, layout] of groups) {
+        const found = findGroup(thing);
+        if (!found || !ready(found.el)) continue;
+        nowGroups.set(found.el, found.parts);
+        pickOne(found.el, found.parts, (layout.d ?? layout.m)?.one);
+      }
+      for (const [group, parts] of picked) if (!nowGroups.has(group)) pickOne(group, parts, undefined);
+      picked.clear();
+      for (const [group, parts] of nowGroups) picked.set(group, parts);
       // Sections: their look, and the parts that hold reordered sections laid out as columns
       const seenSections = new Set<HTMLElement>();
       const seenStacks = new Set<HTMLElement>();
@@ -693,6 +803,8 @@ export function SiteLayouts() {
       media.removeEventListener("change", apply);
       window.removeEventListener("resize", resized);
       for (const el of placed) placeInline(el, undefined);
+      for (const [card, img] of sized) sizeCard(card, img, undefined);
+      for (const [group, parts] of picked) pickOne(group, parts, undefined);
       for (const el of looked) lookSection(el, undefined, editing);
       for (const el of stacked) stackParent(el, false);
       for (const img of swapped) showPicture(img, undefined, !!img.dataset["imgKey"]);
@@ -922,6 +1034,7 @@ const mediaExtras = (image: SiteImage) => ({
     ...(image.videoRate && image.videoRate !== 1 ? { videoRate: image.videoRate } : {}),
   } : {}),
   ...(image.crop ? { crop: { x: image.crop.x, y: image.crop.y, zoom: image.crop.zoom } } : {}),
+  ...(toneFilter(image.tone) ? { tone: { ...image.tone } } : {}),
 });
 const editKind = (content: SiteContent, key: string): "text" | "image" | "layout" => (key in content.texts ? "text" : key in content.images ? "image" : "layout");
 
@@ -988,7 +1101,7 @@ function describe(changes: Pending[]) {
 type Target = { el: HTMLElement; kind: "text" | "image"; rect: DOMRect; typing: boolean; thing: string; img?: HTMLImageElement };
 type Drag = { mode: "move" | "size"; el: HTMLElement; thing: string; text: boolean; x: number; y: number; pos: LayoutPos; base: SiteLayout | undefined; zoom: number; w: number; bp: "d" | "m"; next?: LayoutPos };
 /** The photo being changed: its edit's name, where it is, and what it shows now */
-type PhotoTarget = { k: string; rect: DOMRect; swapped: boolean; alt: string; section: SiteSection | null; usual: string; current: SiteImage };
+type PhotoTarget = { k: string; img?: HTMLImageElement; rect: DOMRect; swapped: boolean; alt: string; section: SiteSection | null; usual: string; current: SiteImage };
 /** The section being sized, and the drag on one of its edges */
 type Sizing = { el: HTMLElement; thing: string; rect: DOMRect };
 /** A change to a section's look: a field set to undefined is taken off */
@@ -1147,6 +1260,7 @@ export function SiteEditor() {
   }, []);
   const cropDrag = useRef<{ x: number; y: number; start: SiteCrop; w: number; h: number } | null>(null);
   const [cropDraft, setCropDraft] = useState<SiteCrop | null>(null);
+  const [toneDraft, setToneDraft] = useState<SiteTone | null>(null);
   useEffect(() => { if (!photo) { setCropping(false); setCropDraft(null); } }, [photo]);
   const [target, setTarget] = useState<Target | null>(null);
   const [section, setSection] = useState<{ el: HTMLElement; rect: DOMRect } | null>(null);
@@ -1310,13 +1424,13 @@ export function SiteEditor() {
         // A photo with its own name (the hero's)
         const swap = site.image(own);
         const usual = img.dataset["usual"] ?? "";
-        setPhoto({ k: own, rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: (img.dataset["editSection"] as SiteSection | undefined) ?? null, usual, current: swap ?? { src: usual, alt: img.alt } });
+        setPhoto({ k: own, img, rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: (img.dataset["editSection"] as SiteSection | undefined) ?? null, usual, current: swap ?? { src: usual, alt: img.alt } });
       } else {
         // Any other picture: replaced wherever it's used
         const raw = srcOf(img) ?? "";
         const usual = normSrc(raw);
         const swap = site.pictures[usual];
-        setPhoto({ k: pictureKey(usual), rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: null, usual, current: swap ?? { src: raw, alt: img.alt } });
+        setPhoto({ k: pictureKey(usual), img, rect: img.getBoundingClientRect(), swapped: !!swap, alt: img.alt, section: null, usual, current: swap ?? { src: raw, alt: img.alt } });
       }
       setTarget(null);
       return;
@@ -1380,6 +1494,80 @@ export function SiteEditor() {
     if (current.kind === "text") placeInline(current.el, undefined);
     site.change(layoutKey(pathname, current.thing), "layout", rest.d || rest.m ? rest : null, { section: pageSection(pathname), page: pathname });
     requestAnimationFrame(() => setTarget((t) => (t ? { ...t, rect: t.el.getBoundingClientRect() } : t)));
+  };
+
+  // ------------------------------------------------ A picture's whole card, and its collage
+  // The card's corner handle (and the sliders in the photo menu) size the
+  // whole card: its width, its height and its picture's height. Kept for
+  // computers or phones, depending on the screen now, like moves.
+  const cardDrag = useRef<{ card: HTMLElement; img: HTMLImageElement; thing: string; x: number; y: number; w: number; h: number; zoom: number; base: SiteLayout | undefined; bp: "d" | "m"; next?: LayoutPos } | null>(null);
+  const cardDraftRef = useRef<Partial<LayoutPos>>({});
+  const [, setCardTick] = useState(0);
+  const cardLook = (img: HTMLImageElement) => {
+    const thing = `card:${thingOfImage(img)}`;
+    const card = cardOf(img);
+    const frame = frameOf(img);
+    const picture = card && frame === card ? img : frame;
+    const pos = site.layout(thing)?.[bpNow()];
+    return { thing, card, pos, w: pos?.w ?? card?.offsetWidth ?? 0, h: pos?.h ?? card?.offsetHeight ?? 0, ih: pos?.ih ?? picture.offsetHeight };
+  };
+  const keepCard = (thing: string, pos: LayoutPos | null) => {
+    const bp = bpNow();
+    const base = { ...(site.layout(thing) ?? {}) };
+    if (pos) base[bp] = pos;
+    else delete base[bp];
+    site.change(layoutKey(pathname, thing), "layout", base.d || base.m ? base : null, { section: pageSection(pathname), page: pathname });
+    requestAnimationFrame(() => setTarget((t) => (t ? { ...t, rect: t.el.getBoundingClientRect() } : t)));
+  };
+  /** A slider moved: shown at once, put in the changes when let go */
+  const nudgeCard = (img: HTMLImageElement, patch: Partial<LayoutPos>, keep = false) => {
+    const look = cardLook(img);
+    if (!look.card) return;
+    cardDraftRef.current = { ...cardDraftRef.current, ...patch };
+    const pos: LayoutPos = { x: 0, y: 0, s: 1, ...(look.pos ?? {}), ...cardDraftRef.current };
+    sizeCard(look.card, img, pos);
+    setCardTick((n) => n + 1);
+    if (keep) { cardDraftRef.current = {}; keepCard(look.thing, pos); }
+  };
+  const settleCard = (img: HTMLImageElement) => { if (Object.keys(cardDraftRef.current).length) nudgeCard(img, {}, true); };
+  const startCardDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const img = targetRef.current?.img;
+    if (!img || event.button > 0) return;
+    const look = cardLook(img);
+    if (!look.card) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const zoom = look.card.getBoundingClientRect().width / (look.card.offsetWidth || 1) || 1;
+    cardDrag.current = { card: look.card, img, thing: look.thing, x: event.clientX, y: event.clientY, w: look.card.offsetWidth, h: look.card.offsetHeight, zoom, base: site.layout(look.thing), bp: bpNow() };
+    setDragging(true);
+  };
+  const moveCardDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const d = cardDrag.current;
+    if (!d) return;
+    const w = Math.max(80, Math.round(d.w + (event.clientX - d.x) / d.zoom));
+    const h = Math.max(60, Math.round(d.h + (event.clientY - d.y) / d.zoom));
+    d.next = { x: 0, y: 0, s: 1, ...(d.base?.[d.bp] ?? {}), w, h };
+    sizeCard(d.card, d.img, d.next);
+    setTarget((current) => (current ? { ...current, rect: current.el.getBoundingClientRect() } : current));
+  };
+  const endCardDrag = () => {
+    const d = cardDrag.current;
+    cardDrag.current = null;
+    setDragging(false);
+    if (d?.next) keepCard(d.thing, d.next);
+  };
+  /** A collage: all its pictures, or only one of them filling it */
+  const collageOf = (img: HTMLImageElement) => {
+    const group = groupOf(img);
+    const first = group ? firstImg(group.parts[0]!) : null;
+    return group && first ? { group, thing: `grp:${thingOfImage(first)}` } : null;
+  };
+  const pickCollage = (img: HTMLImageElement, only: boolean) => {
+    const found = collageOf(img);
+    if (!found) return;
+    const pos: LayoutPos = { x: 0, y: 0, s: 1, one: found.group.index };
+    site.change(layoutKey(pathname, found.thing), "layout", only ? { d: pos, m: pos } : null, { section: pageSection(pathname), page: pathname });
   };
 
   // ------------------------------------------------ Editing a section
@@ -1619,10 +1807,85 @@ export function SiteEditor() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [site.pending.length]);
 
+  // ------------------------------------------------ Command bar and shortcuts
+  // Ctrl+K (⌘K on a Mac) opens the command bar: find any text on this page and
+  // jump straight to editing it, go to another page, or run any action. Also:
+  // Ctrl+S saves, Ctrl+Z takes back the last change, Ctrl+E turns the edit
+  // buttons on or off, Esc closes what's open.
+  const [palette, setPalette] = useState(false);
+  const [paletteQuery, setPaletteQuery] = useState("");
+  const [paletteAt, setPaletteAt] = useState(0);
+  const [changesOpen, setChangesOpen] = useState(false);
+  const keys = useRef<{ save: () => void; toggle: () => void }>({ save: () => {}, toggle: () => {} });
+  useEffect(() => {
+    if (!admin) return;
+    const typing = (el: EventTarget | null) => el instanceof HTMLElement && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable);
+    const onKey = (event: KeyboardEvent) => {
+      const mod = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+      if (mod && key === "k") { event.preventDefault(); setPalette((open) => !open); setPaletteQuery(""); setPaletteAt(0); return; }
+      if (mod && key === "s" && site.pending.length) { event.preventDefault(); keys.current.save(); return; }
+      if (mod && key === "e") { event.preventDefault(); keys.current.toggle(); return; }
+      if (mod && key === "z" && !event.shiftKey && !typing(event.target) && site.pending.length) { event.preventDefault(); site.undo(); return; }
+      if (key === "escape") { setPalette(false); setChangesOpen(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [admin, site]);
+
   if (!admin) return null;
 
   const changes = lastChanges(site.pending);
   const count = changes.length;
+
+  /** Jumps to a text on the page and starts editing it */
+  const editText = (el: HTMLElement) => {
+    if (!editing) setEditing(true);
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    window.setTimeout(() => {
+      const next: Target = { el, kind: "text", rect: el.getBoundingClientRect(), typing: true, thing: el.dataset["lay"] ?? "" };
+      targetRef.current = next;
+      setTarget(next);
+      el.dispatchEvent(new Event(START_EVENT));
+    }, 450);
+  };
+  /** Everything the command bar can do right now, best matches first */
+  const commands = (() => {
+    if (!palette) return [];
+    const q = paletteQuery.trim().toLowerCase();
+    type Command = { id: string; group: string; label: string; hint?: string; run: () => void };
+    const list: Command[] = [
+      ...(count ? [{ id: "save", group: "Actions", label: `Save ${count} ${count === 1 ? "change" : "changes"}`, hint: "Ctrl S", run: () => void save() }] : []),
+      ...(count ? [{ id: "changes", group: "Actions", label: "See unsaved changes", run: () => setChangesOpen(true) }] : []),
+      ...(count ? [{ id: "undo", group: "Actions", label: "Take back the last change", hint: "Ctrl Z", run: () => site.undo() }] : []),
+      ...(site.stored ? [{ id: "restore", group: "Actions", label: `Bring back ${site.stored} unsaved ${site.stored === 1 ? "change" : "changes"} from before`, run: () => site.restore() }] : []),
+      { id: "toggle", group: "Actions", label: editing ? "Hide the edit buttons" : "Show the edit buttons", hint: "Ctrl E", run: toggle },
+      { id: "section", group: "Actions", label: "Edit the section in the middle of the screen", run: () => { const el = sectionOf(document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)); if (el) { if (!editing) setEditing(true); startSizing(el); } } },
+      ...(count ? [{ id: "discard", group: "Actions", label: "Throw away all unsaved changes", run: () => site.discard() }] : []),
+      { id: "studio", group: "Go to", label: "The studio (stories, front page, history)", run: () => { window.location.href = "/admin"; } },
+      ...([["/", "Front page"], ["/news", "News"], ["/music", "Music"], ["/games", "Games"], ["/culture", "Culture"], ["/sports", "Sports"], ["/originals", "Originals"], ["/shop", "Shop"], ["/forum", "Forum"], ["/explore", "Explore"], ["/trends", "Trends"], ["/about", "About"]] as const)
+        .filter(([to]) => to !== pathname)
+        .map(([to, name]) => ({ id: `go${to}`, group: "Go to", label: name, run: () => void router.navigate({ to }) })),
+    ];
+    // Words on this page
+    if (q.length >= 2) {
+      const seen = new Set<string>();
+      for (const el of document.querySelectorAll<HTMLElement>("[data-edit]")) {
+        const words = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+        if (!words || seen.has(words) || !words.toLowerCase().includes(q) || el.closest(SITE_UI) || !el.getClientRects().length) continue;
+        seen.add(words);
+        list.push({ id: `t${seen.size}`, group: "Edit on this page", label: words.length > 90 ? `${words.slice(0, 88)}…` : words, run: () => editText(el) });
+        if (seen.size >= 12) break;
+      }
+    }
+    return q ? list.filter((item) => item.group === "Edit on this page" || item.label.toLowerCase().includes(q)) : list;
+  })();
+  const runCommand = (index: number) => {
+    const command = commands[index];
+    if (!command) return;
+    setPalette(false);
+    command.run();
+  };
 
   const save = async () => {
     const client = adminClient();
@@ -1758,6 +2021,29 @@ export function SiteEditor() {
     setCropDraft(null);
     setLook({ ...photo.current, crop: next });
   };
+  /** The photo's finish while a slider moves: on the page at once, put in the changes when let go */
+  const toneNow = (): SiteTone => toneDraft ?? photo?.current.tone ?? {};
+  const showTone = (patch: SiteTone) => {
+    if (!photo) return;
+    const next = { ...toneNow(), ...patch };
+    setToneDraft(next);
+    for (const img of document.images) {
+      if (img.closest(SITE_UI)) continue;
+      const key = img.dataset["imgKey"];
+      if (key ? key === photo.k : pictureKey(normSrc(srcOf(img))) === photo.k) tonePicture(img, next);
+    }
+  };
+  const keepTone = (next?: SiteTone) => {
+    if (!photo) return;
+    const tone = next ?? toneDraft;
+    setToneDraft(null);
+    if (!tone) return;
+    const { tone: _old, ...rest } = photo.current;
+    setLook(toneFilter(tone) ? { ...rest, tone } : rest);
+  };
+
+  // The shortcuts reach the latest save and toggle
+  keys.current = { save: () => void save(), toggle };
 
   // The Edit button: just above the text's top right corner (below it near the top of the screen)
   const button = target && !target.typing && (() => {
@@ -1777,9 +2063,13 @@ export function SiteEditor() {
   return (
     <>
       <div className={`site-edit ${editing ? "is-on" : ""}`}>
+        <span className="site-edit-brand" aria-hidden="true"><i />OGCW CMS<b>{editing ? "live edit" : "standby"}</b></span>
         <button type="button" className="site-edit-toggle" aria-pressed={editing} onClick={toggle}>
           {editing ? <Eye size={15} aria-hidden="true" /> : <PenLine size={15} aria-hidden="true" />}
           {editing ? "Hide edit buttons" : "Edit site"}
+        </button>
+        <button type="button" className="site-edit-toggle site-cmd-open" onClick={() => { setPalette(true); setPaletteQuery(""); setPaletteAt(0); }} title="Find any text, go anywhere, do anything (Ctrl K)">
+          <Command size={15} aria-hidden="true" /> <kbd>Ctrl K</kbd>
         </button>
         {/* Drawing and writing notes on the page, for Claude (src/components/design-notes.tsx) */}
         <DesignNotes />
@@ -1967,6 +2257,30 @@ export function SiteEditor() {
               >
                 <Maximize2 size={11} aria-hidden="true" />
               </button>
+              {/* The whole card's corner: drag to make the card wider, narrower, taller or shorter */}
+              {target.kind === "image" && target.img && (() => {
+                const card = cardOf(target.img);
+                if (!card) return null;
+                const r = card.getBoundingClientRect();
+                return (
+                  <>
+                    {!dragging && <span className="site-card-frame" aria-hidden="true" style={{ top: r.top, left: r.left, width: r.width, height: r.height }} />}
+                    <button
+                      type="button"
+                      className="site-lay-handle is-card"
+                      style={{ top: r.bottom - 14, left: r.right - 14 }}
+                      title="Drag to change the whole card's width and height"
+                      aria-label="Resize the whole card"
+                      onPointerDown={startCardDrag}
+                      onPointerMove={moveCardDrag}
+                      onPointerUp={endCardDrag}
+                      onPointerCancel={endCardDrag}
+                    >
+                      <Scaling size={13} aria-hidden="true" />
+                    </button>
+                  </>
+                );
+              })()}
               {!dragging && site.layout(target.thing)?.[bpNow()] && (
                 <button
                   type="button"
@@ -1983,6 +2297,56 @@ export function SiteEditor() {
         </>
       )}
 
+      {/* Changes kept from before a reload or a closed tab */}
+      {site.stored > 0 && count === 0 && status === "idle" && (
+        <div className="site-savebar is-rescue" role="region" aria-label="Unsaved changes from before">
+          <span className="site-savebar-text"><History size={15} aria-hidden="true" /> {site.stored} unsaved {site.stored === 1 ? "change" : "changes"} from before were kept on this browser</span>
+          <div className="site-savebar-actions">
+            <button type="button" onClick={() => site.forget()}>Throw away</button>
+            <button type="button" className="site-save" onClick={() => site.restore()}>Bring them back</button>
+          </div>
+        </div>
+      )}
+
+      {/* The command bar */}
+      {palette && (
+        <div className="site-cmd-glass" onPointerDown={(event) => { if (event.target === event.currentTarget) setPalette(false); }}>
+          <div className="site-cmd" role="dialog" aria-label="Command bar">
+            <label className="site-cmd-search">
+              <Search size={17} aria-hidden="true" />
+              <input
+                autoFocus
+                value={paletteQuery}
+                placeholder="Find a text on this page, a page, or an action…"
+                aria-label="Find a text, a page or an action"
+                onChange={(event) => { setPaletteQuery(event.target.value); setPaletteAt(0); }}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                  if (event.key === "ArrowDown") { event.preventDefault(); setPaletteAt((at) => Math.min(commands.length - 1, at + 1)); }
+                  if (event.key === "ArrowUp") { event.preventDefault(); setPaletteAt((at) => Math.max(0, at - 1)); }
+                  if (event.key === "Enter") { event.preventDefault(); runCommand(paletteAt); }
+                  if (event.key === "Escape") setPalette(false);
+                }}
+              />
+              <kbd>Esc</kbd>
+            </label>
+            <ul className="site-cmd-list" role="listbox">
+              {commands.map((command, index) => (
+                <li key={command.id}>
+                  {(index === 0 || commands[index - 1]!.group !== command.group) && <p className="site-cmd-group">{command.group}</p>}
+                  <button type="button" role="option" aria-selected={index === paletteAt} className="site-cmd-item" onPointerEnter={() => setPaletteAt(index)} onClick={() => runCommand(index)}>
+                    <span>{command.label}</span>
+                    {command.hint && <kbd>{command.hint}</kbd>}
+                  </button>
+                </li>
+              ))}
+              {!commands.length && <li className="site-cmd-none">Nothing matches “{paletteQuery}”. Try a word from a headline.</li>}
+            </ul>
+            <p className="site-cmd-foot"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> run · <kbd>Ctrl S</kbd> save · <kbd>Ctrl Z</kbd> undo · <kbd>Ctrl E</kbd> edit buttons</p>
+          </div>
+        </div>
+      )}
+
       {(count > 0 || status !== "idle") && (
         <div className="site-savebar" role="region" aria-label="Unsaved changes">
           {status === "saving" ? (
@@ -1990,7 +2354,24 @@ export function SiteEditor() {
           ) : status === "saved" || status === "error" ? (
             <span className={`site-savebar-text ${status === "error" ? "is-error" : ""}`} role="status">{message}</span>
           ) : (
-            <span className="site-savebar-text"><span className="site-savebar-dot" aria-hidden="true" />{count} unsaved {count === 1 ? "change" : "changes"}</span>
+            <button type="button" className="site-savebar-text site-savebar-count" aria-expanded={changesOpen} onClick={() => setChangesOpen((open) => !open)} title="See each change, and take back any one of them">
+              <span className="site-savebar-dot" aria-hidden="true" />{count} unsaved {count === 1 ? "change" : "changes"}<ChevronUp size={14} aria-hidden="true" className="site-savebar-caret" />
+            </button>
+          )}
+          {/* Every unsaved change, each with its own "take back" */}
+          {changesOpen && count > 0 && status === "idle" && (
+            <div className="site-changes" role="dialog" aria-label="Unsaved changes">
+              <p className="site-changes-head">Unsaved changes <small>newest first</small></p>
+              <ol>
+                {[...changes].reverse().map((item) => (
+                  <li key={`${item.kind}:${item.key}`}>
+                    <span className={`site-changes-kind is-${item.kind}`}>{item.kind === "layout" ? "Layout" : item.kind === "image" ? "Photo" : item.kind === "story" ? "Story" : "Text"}</span>
+                    <span className="site-changes-what">{describe([item])}</span>
+                    <button type="button" onClick={() => site.revert(item.key)} title="Take back this change"><Undo2 size={13} aria-hidden="true" /></button>
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
           {count > 0 && status !== "saving" && (
             <div className="site-savebar-actions">
@@ -2096,6 +2477,72 @@ export function SiteEditor() {
                   <button type="button" aria-pressed="true" onClick={() => { if (cropDraft) keepCrop(cropDraft); setCropping(false); }}><Check size={13} aria-hidden="true" /> Done</button>
                 </div>
               </div>
+            );
+          })()}
+          {/* The photo's finish */}
+          <details className="site-photo-group site-photo-fold">
+            <summary className="site-photo-sub"><SlidersHorizontal size={13} aria-hidden="true" /> Finish {toneFilter(photo.current.tone) && <small>changed</small>}</summary>
+            {([["b", "Brightness", 40, 160, 100], ["c", "Contrast", 40, 180, 100], ["s", "Colour", 0, 200, 100], ["g", "Black and white", 0, 100, 0]] as const).map(([key, label, min, max, usual]) => {
+              const value = toneNow()[key] ?? usual;
+              return (
+                <label key={key} className="site-sec-slider">
+                  <span>{label}<b>{value}%</b></span>
+                  <input type="range" min={min} max={max} value={value} onChange={(event) => showTone({ [key]: Number(event.target.value) })} onPointerUp={() => keepTone()} onKeyUp={() => keepTone()} />
+                </label>
+              );
+            })}
+            <div className="site-photo-opts">
+              <button type="button" onClick={() => { showTone({ b: 100, c: 100, s: 100, g: 100 }); keepTone({ b: 100, c: 100, s: 100, g: 100 }); }}>Black and white</button>
+              <button type="button" onClick={() => { showTone({ b: 100, c: 100, s: 100, g: 0 }); keepTone({ b: 100, c: 100, s: 100, g: 0 }); }}>As it was</button>
+            </div>
+          </details>
+          {/* What the photo shows, for screen readers and search engines */}
+          <label className="site-photo-alt">
+            <span className="site-photo-sub"><Type size={13} aria-hidden="true" /> Describe the photo</span>
+            <input
+              type="text"
+              key={photo.k + (photo.current.alt ?? "")}
+              defaultValue={photo.current.alt ?? ""}
+              placeholder="e.g. Doja Cat on stage in Detroit"
+              maxLength={200}
+              onKeyDown={(event) => { event.stopPropagation(); if (event.key === "Enter") event.currentTarget.blur(); }}
+              onBlur={(event) => { const alt = event.target.value.trim(); if (alt !== (photo.current.alt ?? "")) setLook({ ...photo.current, alt }); }}
+            />
+          </label>
+          {photo.img && (() => {
+            const img = photo.img;
+            const collage = collageOf(img);
+            const look = cardLook(img);
+            const draft = cardDraftRef.current;
+            const w = draft.w ?? look.w, h = draft.h ?? look.h, ih = draft.ih ?? look.ih;
+            const parentW = look.card?.parentElement?.offsetWidth ?? 1200;
+            const sizeSlider = (label: string, value: number, min: number, max: number, field: "w" | "h" | "ih") => (
+              <label className="site-sec-slider">
+                <span>{label}<b>{Math.round(value)}px</b></span>
+                <input type="range" min={min} max={Math.max(max, Math.round(value))} value={Math.round(value)} onChange={(event) => nudgeCard(img, { [field]: Number(event.target.value) })} onPointerUp={() => settleCard(img)} onKeyUp={() => settleCard(img)} />
+              </label>
+            );
+            return (
+              <>
+                {collage && (
+                  <div className="site-photo-group" role="group" aria-label="Picture style">
+                    <p className="site-photo-sub"><LayoutGrid size={13} aria-hidden="true" /> Picture style</p>
+                    <div className="site-photo-opts">
+                      <button type="button" aria-pressed={site.layout(collage.thing)?.d?.one === undefined} onClick={() => pickCollage(img, false)}>Collage of {collage.group.parts.length}</button>
+                      <button type="button" aria-pressed={site.layout(collage.thing)?.d?.one !== undefined} onClick={() => pickCollage(img, true)}>Only this picture</button>
+                    </div>
+                  </div>
+                )}
+                {look.card && (
+                  <div className="site-photo-group" role="group" aria-label="Card size">
+                    <p className="site-photo-sub"><Scaling size={13} aria-hidden="true" /> Whole card <small>{bpNow() === "d" ? "on computers" : "on phones and tablets"}</small></p>
+                    {sizeSlider("Card width", w, 80, Math.round(parentW * 1.5), "w")}
+                    {sizeSlider("Card height", h, 60, Math.max(1200, Math.round(h * 2)), "h")}
+                    {sizeSlider("Picture height", ih, 40, Math.max(1200, Math.round(ih * 2)), "ih")}
+                    {look.pos && <button type="button" onClick={() => { cardDraftRef.current = {}; sizeCard(look.card!, img, undefined); keepCard(look.thing, null); }}><RotateCcw size={15} aria-hidden="true" /> Card back to its usual size</button>}
+                  </div>
+                )}
+              </>
             );
           })()}
           <button type="button" aria-pressed={!!photo.current.clear} onClick={() => setLook({ ...photo.current, clear: !photo.current.clear })}>

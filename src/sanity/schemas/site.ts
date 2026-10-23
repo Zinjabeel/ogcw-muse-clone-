@@ -27,6 +27,10 @@ const SECTION_FIELDS = [
   defineField({ name: "cols", title: "Columns", type: "number" }),
   defineField({ name: "band", title: "Band height (px)", type: "number" }),
   defineField({ name: "stories", title: "Stories in it (web addresses, in order)", type: "array", of: [defineArrayMember({ type: "string" })] }),
+  defineField({ name: "w", title: "Card width (px)", type: "number" }),
+  defineField({ name: "h", title: "Card height (px)", type: "number" }),
+  defineField({ name: "ih", title: "Picture height (px)", type: "number" }),
+  defineField({ name: "one", title: "Collage: only picture number (from 0)", type: "number" }),
 ];
 
 // A video in a photo's place, and a crop by hand (the site editor's photo menu, 23 Oct 2026)
@@ -37,6 +41,17 @@ const MEDIA_FIELDS = [
   defineField({ name: "videoEnd", title: "Video ends at (seconds)", type: "number" }),
   defineField({ name: "videoOnce", title: "Play once (no loop)", type: "boolean" }),
   defineField({ name: "videoRate", title: "Video speed (1 = usual)", type: "number" }),
+  defineField({
+    name: "tone",
+    title: "Photo finish",
+    type: "object",
+    fields: [
+      defineField({ name: "b", title: "Brightness (%)", type: "number" }),
+      defineField({ name: "c", title: "Contrast (%)", type: "number" }),
+      defineField({ name: "s", title: "Colour (%)", type: "number" }),
+      defineField({ name: "g", title: "Black and white (%)", type: "number" }),
+    ],
+  }),
   defineField({
     name: "crop",
     title: "Cropped by hand",
