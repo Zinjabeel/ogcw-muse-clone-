@@ -127,10 +127,10 @@ export function NavDrawer({ open, onClose, onSearch }: { open: boolean; onClose:
     window.setTimeout(finish, 260);
   };
   const go = () => close();
-  // A click on the glass itself (not on a link or button) closes the menu
+  // A click on the dimmed page beside the panel closes the menu
   const onGlass = (event: MouseEvent<HTMLDialogElement>) => {
-    const target = event.target as HTMLElement;
-    if (target === event.currentTarget || target.classList.contains("om-sheet") || target.classList.contains("om-body")) close();
+    const box = event.currentTarget.getBoundingClientRect();
+    if (event.target === event.currentTarget && (event.clientX > box.right || event.clientX < box.left || event.clientY < box.top || event.clientY > box.bottom)) close();
   };
 
   // Up and down arrows move through the list

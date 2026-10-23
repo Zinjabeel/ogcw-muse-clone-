@@ -2930,13 +2930,17 @@ a:hover .og-poster-play, a:focus-visible .og-poster-play { transform: scale(1.06
   .site-header-space { height: 122px; }
   .site-header { --hp-inv: calc(1 - var(--hp, 0)); height: calc(122px - 66px * var(--hp, 0)); }
   .site-header-row { position: relative; height: calc(76px - 20px * var(--hp, 0)); }
+  /* As the header slims, the logo stays in the middle and fades away (owner,
+     23 Oct 2026: not sliding to the left); it comes back as the header grows */
   .site-header .site-logo {
     position: absolute; z-index: 2; grid-column: auto; top: calc(38px - 10px * var(--hp, 0));
-    left: calc(var(--hp-inv) * 50% + var(--hp, 0) * (calc(4 * var(--vw, 1vw)) + 48px));
-    transform: translate(calc(-50% * var(--hp-inv)), -50%);
-    font-size: calc(2.5rem - 1.125rem * var(--hp, 0));
-    letter-spacing: calc(.14em - .08em * var(--hp, 0));
+    left: 50%;
+    transform: translate(-50%, -50%) scale(calc(1 - .25 * var(--hp, 0)));
+    opacity: max(0, calc(1 - 1.8 * var(--hp, 0)));
+    font-size: 2.5rem;
+    letter-spacing: .14em;
   }
+  .site-header.is-slim:not(.is-compact) .site-logo { visibility: hidden; pointer-events: none; }
   .site-header .site-nav { position: absolute; z-index: 1; left: 50%; top: calc(99px - 71px * var(--hp, 0)); transform: translate(-50%, -50%); }
 }
 .site-header.is-slim { box-shadow: 0 1px 0 var(--ogcw-border); }

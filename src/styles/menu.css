@@ -10,12 +10,14 @@
    ------------------------------------------------------------------ */
 html:has(dialog.om[open]) { overflow: hidden; }
 
+/* 23 Oct 2026 (owner: "like it was before, like the shop"): a solid panel
+   sliding in from the left over the dimmed page, as the shop's menu does,
+   instead of see-through glass over the whole screen */
 .om {
-  position: fixed; inset: 0; width: 100vw; max-width: none; height: 100dvh; max-height: none;
-  margin: 0; padding: 0; border: 0; overflow: hidden; outline: none;
-  background: rgb(12 12 12 / .74);
-  -webkit-backdrop-filter: blur(26px) saturate(1.25);
-  backdrop-filter: blur(26px) saturate(1.25);
+  position: fixed; inset: 0 auto 0 0; width: min(520px, 100vw); max-width: none; height: 100dvh; max-height: none;
+  margin: 0; padding: 0; border: 0; border-right: 1px solid rgb(245 244 240 / .1); overflow: hidden; outline: none;
+  background: #0f0f0f;
+  box-shadow: 24px 0 60px -20px rgb(0 0 0 / .6);
   color: #f5f4f0; font-family: var(--ogcw-ui);
   --om-gold: var(--fx-gold, #e2b84f);
   --om-dim: rgb(245 244 240 / .62);
@@ -23,18 +25,18 @@ html:has(dialog.om[open]) { overflow: hidden; }
   --om-ease: cubic-bezier(.2, .8, .2, 1);
   --om-pad: clamp(18px, calc(4 * var(--vw, 1vw)), 64px);
 }
-.om::backdrop { background: transparent; }
-.om[open] { animation: om-in .35s ease both; }
+.om::backdrop { background: rgb(0 0 0 / .5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.om[open] { animation: om-in .4s var(--om-ease, ease) both; }
 .om[data-closing] { animation: om-out .26s ease both; }
-@keyframes om-in { from { opacity: 0; } }
-@keyframes om-out { to { opacity: 0; } }
+@keyframes om-in { from { transform: translateX(-100%); } }
+@keyframes om-out { to { transform: translateX(-100%); } }
 @keyframes om-up { from { opacity: 0; transform: translateY(10px); } }
 
 /* The sheet scrolls if the screen is short; the bar stays on top */
 .om-sheet { display: flex; flex-direction: column; height: 100%; overflow: hidden auto; overscroll-behavior: contain; outline: none; scrollbar-width: thin; scrollbar-color: var(--om-line) transparent; }
 
 /* The bar: close (where the menu button was), OGCW, Search */
-.om-bar { position: sticky; top: 0; z-index: 2; background: rgb(10 10 10 / .5); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 14px var(--om-pad); border-bottom: 1px solid var(--om-line); }
+.om-bar { position: sticky; top: 0; z-index: 2; background: #0f0f0f; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 14px var(--om-pad); border-bottom: 1px solid var(--om-line); }
 .om-icon { justify-self: start; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--om-line); border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: border-color .2s ease, background-color .2s ease; }
 .om-logo { font-family: var(--ogcw-display); font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: .1em; color: inherit; }
 .om-search { justify-self: end; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 18px; border: 1px solid var(--om-line); border-radius: 999px; background: transparent; color: inherit; font: 600 13px var(--ogcw-ui); letter-spacing: .02em; cursor: pointer; transition: border-color .2s ease, background-color .2s ease; }
@@ -80,11 +82,16 @@ html:has(dialog.om[open]) { overflow: hidden; }
 .om-link[data-on] .om-name { color: var(--om-gold); transform: translateX(6px); }
 .om-link[data-on] .om-no { color: var(--om-gold); }
 
+/* Computers: the list, then the preview under it, inside the panel */
 @media (min-width: 1024px) {
-  .om-body { grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr); gap: clamp(48px, calc(6 * var(--vw, 1vw)), 112px); align-content: center; }
-  .om-link { padding: clamp(6px, .95svh, 12px) 0; }
-  .om-name { font-size: clamp(28px, min(calc(2.8 * var(--vw, 1vw)), 4.1svh), 42px); }
-  .om-preview { display: block; position: sticky; top: 0; }
+  .om { --om-pad: 36px; }
+  .om-body { gap: 32px; }
+  .om-link { padding: clamp(6px, .9svh, 11px) 0; }
+  .om-name { font-size: clamp(26px, 3.6svh, 34px); }
+  .om-preview { display: block; }
+  .om-story { grid-template-columns: 160px minmax(0, 1fr); align-items: start; gap: 16px; }
+  .om-story-title { font-size: 19px; }
+  .om-foot { width: calc(100% - 2 * var(--om-pad)); }
 }
 
 /* Hovers only with a real mouse (a tap on a phone leaves "hover" behind) */
@@ -101,10 +108,6 @@ html:has(dialog.om[open]) { overflow: hidden; }
 .om[open] .om-list li { animation: om-up .5s var(--om-ease) backwards; animation-delay: calc(.06s + var(--i) * 22ms); }
 .om[open] :is(.om-preview, .om-foot) { animation: om-up .55s var(--om-ease) .2s backwards; }
 
-/* Browsers without blur get a darker glass */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .om { background: rgb(12 12 12 / .95); }
-}
 @media (max-width: 560px) {
   .om-search span { display: none; }
   .om-search { width: 42px; padding: 0; justify-content: center; }
