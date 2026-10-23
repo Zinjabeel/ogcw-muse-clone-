@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, Play, Search } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
+import { EPISODES, SECTIONS, SONGS, spotifyTrack, youtubeThumb, type Article, type Song } from "@/data/content";
 import { VIDEOS } from "@/data/drops";
 import { useStories } from "@/lib/stories";
 import type { SiteSection } from "@/lib/site-sections";
@@ -540,7 +540,13 @@ function Explore() {
 
 // ------------------------------------------------------------ Official videos
 
+// Redrawn 23 Oct 2026 from the owner's sketch: the band uses the page's full
+// width (the player bigger and further left), the playing video's name sits
+// up in the heading row, each video in the list is its own outlined box, and
+// a third column, "Check this out", shows two OGCW Originals and a way in
+// to all of them. The black band itself is unchanged.
 const CLIPS = VIDEOS.slice(0, 4);
+const WATCH_PICKS = EPISODES.slice(0, 2);
 
 function Watch() {
   const [current, setCurrent] = useState(0);
@@ -548,7 +554,13 @@ function Watch() {
   const video = CLIPS[current]!;
   return (
     <Band tone="dark" name="Watch" id="watch" className="fx-watch">
-      <Head id="watch" k="front.watch" kicker="Watch" title="Official videos" />
+      <Head id="watch" k="front.watch" kicker="Watch" title="Official videos">
+        <div className="fx-watch-now" aria-live="polite">
+          <p className="fx-label">{video.kind} · {video.channel}</p>
+          <p className="fx-player-title">{video.title}</p>
+          <Link to="/news/$slug" params={{ slug: video.slug }} className="fx-more"><T k="front.watch.story">Read the story</T> <ArrowRight size={14} aria-hidden="true" /></Link>
+        </div>
+      </Head>
       <div className="fx-watch-grid">
         <div className="fx-player">
           {playing ? (
@@ -561,9 +573,6 @@ function Watch() {
           )}
         </div>
         <div className="fx-watch-side">
-          <p className="fx-label">{video.kind} · {video.channel}</p>
-          <p className="fx-player-title">{video.title}</p>
-          <Link to="/news/$slug" params={{ slug: video.slug }} className="fx-more"><T k="front.watch.story">Read the story</T> <ArrowRight size={14} aria-hidden="true" /></Link>
           <ol className="fx-playlist" aria-label="More videos">
             {CLIPS.map((item, index) => (
               <li key={item.id}>
@@ -575,6 +584,21 @@ function Watch() {
             ))}
           </ol>
         </div>
+        <aside className="fx-watch-picks" aria-labelledby="watch-picks-title">
+          <p id="watch-picks-title" className="fx-watch-picks-head"><T k="front.watch.picks">Check this out!</T></p>
+          <div className="fx-watch-pick-row">
+            {WATCH_PICKS.map((episode) => (
+              <Link key={episode.slug} to="/originals/$slug" params={{ slug: episode.slug }} className="fx-watch-pick">
+                <span className="fx-watch-pick-photo"><img src={episode.still.src} alt="" loading="lazy" style={{ objectPosition: episode.still.crop?.pos ?? "50% 50%" }} /></span>
+                <span className="fx-watch-pick-text"><span className="fx-label">{episode.series}</span><span className="fx-watch-pick-title">{episode.title}</span></span>
+              </Link>
+            ))}
+          </div>
+          <Link to="/originals" className="fx-watch-cta">
+            <span><span className="fx-watch-cta-title"><T k="front.watch.cta">OGCW Originals</T></span><span className="fx-watch-cta-copy"><T k="front.watch.cta.copy">Interviews and podcasts</T></span></span>
+            <ArrowRight size={20} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+        </aside>
       </div>
     </Band>
   );

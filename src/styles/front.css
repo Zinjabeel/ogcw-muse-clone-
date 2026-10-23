@@ -218,6 +218,52 @@
 .fx-clip-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .fx-clip-title { font-family: var(--ogcw-display); font-size: 15px; font-weight: 600; line-height: 1.22; }
 
+/* Redrawn 23 Oct 2026 (owner's sketch): the content uses the page's full
+   width on the black, not a column boxed inside it */
+.fx-watch .fx-wrap { width: calc(100% - 32px); max-width: 1880px; }
+@media (min-width: 1024px) { .fx-watch .fx-wrap { width: calc(100% - clamp(48px, 6vw, 112px)); } }
+.fx-watch .fx-head { align-items: flex-end; border-bottom-width: 1px; border-color: rgb(255 255 255 / .35); }
+/* The playing video's name, up in the heading row */
+.fx-watch-now { display: grid; gap: 6px; max-width: 46ch; text-align: right; justify-items: end; }
+.fx-watch-now > p { margin: 0; }
+.fx-watch-now .fx-label { color: var(--fx-gold); }
+.fx-watch-now .fx-more { color: #fff; }
+/* Each video in its own outlined box */
+.fx-watch .fx-playlist { gap: 10px; margin: 0; padding: 0; border-top: 0; }
+.fx-watch .fx-clip { grid-template-columns: 120px minmax(0, 1fr); padding: 8px; border: 1px solid rgb(255 255 255 / .28); }
+.fx-watch .fx-clip:hover, .fx-watch .fx-clip:focus-visible { border-color: #fff; background: #111; outline: none; }
+.fx-watch .fx-clip[aria-current="true"] { border-color: var(--fx-gold); background: #111; box-shadow: none; }
+/* Check this out: two Originals, square, and the way in to all of them */
+.fx-watch-picks { display: grid; align-content: start; gap: 14px; }
+.fx-watch-picks-head { margin: 0; font-family: var(--ogcw-ui); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #fff; }
+.fx-watch-pick-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fx-watch-pick { position: relative; display: block; aspect-ratio: 1; overflow: hidden; border: 1px solid rgb(255 255 255 / .28); color: #fff; }
+.fx-watch-pick-photo, .fx-watch-pick-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fx-watch-pick-photo img { transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.fx-watch-pick::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .85), rgb(0 0 0 / .1) 60%); }
+.fx-watch-pick-text { position: absolute; inset: auto 0 0; z-index: 1; display: grid; gap: 4px; padding: 10px; }
+.fx-watch-pick-text .fx-label { font-size: 10px; color: var(--fx-gold); }
+.fx-watch-pick-title { font-family: var(--ogcw-display); font-size: 14.5px; font-weight: 600; line-height: 1.2; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.fx-watch-pick:hover .fx-watch-pick-photo img { transform: scale(1.04); }
+.fx-watch-pick:hover, .fx-watch-pick:focus-visible { border-color: #fff; outline: none; }
+.fx-watch-cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 92px; padding: 18px 20px; border: 1px solid #fff; color: #fff; transition: background-color .2s ease, color .2s ease; }
+.fx-watch-cta > span { display: grid; gap: 4px; }
+.fx-watch-cta-title { font-family: var(--ogcw-display); font-size: clamp(20px, calc(1.6 * var(--vw, 1vw)), 26px); font-weight: 600; line-height: 1.1; }
+.fx-watch-cta-copy { font-family: var(--ogcw-ui); font-size: 13px; color: rgb(255 255 255 / .7); }
+.fx-watch-cta:hover, .fx-watch-cta:focus-visible { background: var(--fx-gold); border-color: var(--fx-gold); color: #000; outline: none; }
+.fx-watch-cta:hover .fx-watch-cta-copy, .fx-watch-cta:focus-visible .fx-watch-cta-copy { color: rgb(0 0 0 / .7); }
+@media (min-width: 1280px) {
+  .fx-watch-grid { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr) minmax(0, .95fr); gap: clamp(24px, 2.4vw, 44px); }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .fx-watch-grid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+  .fx-watch-picks { grid-column: 1 / -1; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); align-items: stretch; }
+  .fx-watch-picks-head { grid-column: 1 / -1; }
+}
+@media (max-width: 1023px) {
+  .fx-watch-now { text-align: left; justify-items: start; }
+}
+
 /* ---------------- Culture & fashion (white, last) */
 .fx-culture-grid { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); grid-template-rows: auto auto; gap: clamp(22px, calc(2.6 * var(--vw, 1vw)), 40px); }
 .fx-culture-grid > .fx-tile-xl { grid-row: span 2; }
