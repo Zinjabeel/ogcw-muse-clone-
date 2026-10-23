@@ -267,6 +267,49 @@
   .fx-watch-now { text-align: left; justify-items: start; }
 }
 
+/* Lined up (owner, 23 Oct 2026: "everything lined up, the text not mushed"):
+   the band keeps its breathing room whatever spacing was saved for the old
+   design; the three columns start and end with the player (the four videos
+   share its height evenly, the two Originals and the button fill the third
+   column); words get room and wrap evenly */
+.fx-band.fx-watch { padding-top: clamp(44px, calc(4.4 * var(--vw, 1vw)), 72px) !important; padding-bottom: clamp(48px, calc(4.8 * var(--vw, 1vw)), 80px) !important; }
+.fx-watch .fx-head { gap: 32px; margin-bottom: clamp(24px, calc(2.4 * var(--vw, 1vw)), 36px); padding-bottom: 20px; }
+.fx-watch .fx-kicker { color: var(--fx-gold); }
+.fx-watch .fx-title { color: #fff; }
+.fx-watch-now { gap: 8px; max-width: min(560px, 46vw); }
+.fx-watch-now .fx-player-title { font-size: clamp(18px, calc(1.5 * var(--vw, 1vw)), 24px); line-height: 1.2; text-wrap: balance; }
+.fx-watch .fx-player-title, .fx-watch .fx-clip-title, .fx-watch-pick-title, .fx-watch-cta-title { letter-spacing: -.005em; }
+.fx-watch-side, .fx-watch-picks { min-width: 0; }
+.fx-watch .fx-clip { gap: 14px; height: 100%; padding: 10px; }
+.fx-watch .fx-clip-title { font-size: 15.5px; line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; text-wrap: pretty; }
+.fx-watch-pick-row > *, .fx-watch-picks > * { min-width: 0; }
+.fx-watch-picks { grid-template-columns: minmax(0, 1fr); }
+/* The lined-up columns hold whatever card sizes were saved for this band */
+.fx-watch .fx-watch-pick-row { width: auto !important; min-height: 0 !important; justify-self: stretch !important; }
+.fx-watch .fx-watch-pick { width: 100% !important; max-width: 100% !important; }
+.fx-watch-pick { width: 100%; }
+.fx-watch-pick-text { gap: 6px; padding: 14px; }
+.fx-watch-pick-text .fx-label { font-size: 10.5px; letter-spacing: .12em; }
+.fx-watch-pick-title { font-size: 15px; line-height: 1.28; text-wrap: pretty; }
+.fx-watch-pick::after { background: linear-gradient(to top, rgb(0 0 0 / .92) 0%, rgb(0 0 0 / .55) 38%, rgb(0 0 0 / 0) 70%); }
+.fx-watch-cta { min-height: 84px; }
+@media (min-width: 1280px) {
+  .fx-watch-grid { align-items: stretch; }
+  /* The four videos share the player's height */
+  .fx-watch-side { display: flex; flex-direction: column; }
+  .fx-watch .fx-playlist { flex: 1; grid-template-rows: repeat(4, minmax(0, 1fr)); }
+  .fx-watch .fx-playlist > li { min-height: 0; }
+  .fx-watch .fx-clip { grid-template-columns: clamp(104px, 34%, 150px) minmax(0, 1fr); }
+  /* Originals: the heading, the two cards filling the space, the button at the foot */
+  .fx-watch-picks { grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; }
+  .fx-watch-pick-row { min-height: 0; }
+  .fx-watch-pick { aspect-ratio: auto; height: 100%; }
+}
+@media (max-width: 1023px) {
+  .fx-watch-now { max-width: none; }
+  .fx-watch .fx-head { gap: 16px; }
+}
+
 /* ---------------- Culture & fashion (white, last) */
 .fx-culture-grid { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); grid-template-rows: auto auto; gap: clamp(22px, calc(2.6 * var(--vw, 1vw)), 40px); }
 .fx-culture-grid > .fx-tile-xl { grid-row: span 2; }

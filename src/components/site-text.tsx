@@ -581,7 +581,10 @@ function placeInline(el: HTMLElement, pos: LayoutPos | undefined) {
 /** The card a picture sits in, if it's in one */
 export function cardOf(img: HTMLImageElement): HTMLElement | null {
   const frame = frameOf(img);
-  for (let el = frame.parentElement, depth = 0; el && depth < 6 && !/^(BODY|MAIN|SECTION|HEADER|FOOTER)$/.test(el.tagName); el = el.parentElement, depth += 1) {
+  // A picture filling its card exactly (words laid over it) makes the card its own frame
+  for (let el: HTMLElement | null = frame === img ? frame.parentElement : frame, depth = 0; el && depth < 6 && !/^(BODY|MAIN|SECTION|HEADER|FOOTER)$/.test(el.tagName); el = el.parentElement, depth += 1) {
+    // A row or grid holding several cards is never the card itself
+    if (el.tagName !== "A" && el.querySelectorAll("a[href]").length > 1) return null;
     const words = (el.textContent ?? "").replace(/\s+/g, "").length;
     const card = /^(A|ARTICLE|LI|FIGURE)$/.test(el.tagName) || [...el.classList].some((name) => /card|tile|pick|item|story/.test(name));
     if (card && words > 0 && el.getBoundingClientRect().width < window.innerWidth * 0.9) return el;
