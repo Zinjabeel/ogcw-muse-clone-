@@ -1,18 +1,19 @@
 "use client";
 
 import { Link } from "@tanstack/react-router";
-import { Mail } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useStories } from "@/lib/stories";
+import { useEffect, useRef, useState } from "react";
 import { SOCIALS, SocialIcon } from "@/components/socials";
 import type { InfoSlug } from "@/components/info-pages";
 import { T } from "@/components/site-text";
 import { CookieSettingsButton } from "@/components/cookie-settings-button";
 import { LanguagePicker } from "@/components/cookie-consent";
 
-// Site footer (see Footer2 below for the look). Lucide’s brand icons are
-// swapped for the site’s Instagram, TikTok, YouTube and X icons. OGCW has no
-// app yet, so the App Store / Google Play badges say "Coming soon" and don’t link.
+// Site footer, based on the "Footer 2" component: the OGCW wordmark and
+// social channels, four link columns, then the copyright and app badges.
+// Filled with OGCW’s own links; the template’s Linktree items don’t apply.
+// Lucide’s brand icons are swapped for the site’s Instagram, TikTok,
+// YouTube and X icons (lucide has no TikTok). OGCW has no app yet, so the
+// App Store / Google Play badges are marked "Coming soon" and don’t link.
 
 type FooterLink =
   | { label: string; page: "/news" | "/music" | "/games" | "/streaming" | "/culture" | "/sports" | "/originals" | "/shop" | "/explore" | "/trends" | "/forum" | "/about" }
@@ -21,6 +22,19 @@ type FooterLink =
   | { label: string; href: string }; // mailto or external
 
 const footerLinks: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Company",
+    links: [
+      { label: "About OGCW", page: "/about" },
+      { label: "Originals", page: "/originals" },
+      { label: "Forum", page: "/forum" },
+      { label: "Press", info: "press" },
+      { label: "Brand", info: "brand" },
+      { label: "Testimonials", info: "testimonials" },
+      { label: "Work with OGCW", info: "work-with-us" },
+      { label: "Newsletter", info: "newsletter" },
+    ],
+  },
   {
     title: "Explore",
     links: [
@@ -33,19 +47,6 @@ const footerLinks: { title: string; links: FooterLink[] }[] = [
       { label: "Shop", page: "/shop" },
       { label: "Trends", page: "/trends" },
       { label: "Explore", page: "/explore" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About OGCW", page: "/about" },
-      { label: "Originals", page: "/originals" },
-      { label: "Forum", page: "/forum" },
-      { label: "Press", info: "press" },
-      { label: "Brand", info: "brand" },
-      { label: "Testimonials", info: "testimonials" },
-      { label: "Work with OGCW", info: "work-with-us" },
-      { label: "Newsletter", info: "newsletter" },
     ],
   },
   {
@@ -107,111 +108,81 @@ function AppBadge({ store }: { store: "apple" | "google" }) {
   );
 }
 
-// The wall of stories under the footer: the latest stories' photos in three
-// rows, tilted back like a wall of screens, tinted in the site's colour and
-// drifting slowly sideways. Photos load only when the footer comes near; with
-// motion turned off the wall stands still.
-const WALL_ROWS = 3;
-const WALL_PER_ROW = 8;
-
-function useNear<T extends HTMLElement>() {
+// The footer’s contents slide up and fade in the first time it scrolls into
+// view. It only hides them once JavaScript is running and the footer is still
+// below the fold, so it never stays invisible; reduced-motion users skip it.
+function useScrollReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null);
-  const [near, setNear] = useState(false);
+  const [state, setState] = useState<"idle" | "hidden" | "shown">("idle");
+
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry?.isIntersecting) return;
-      setNear(true);
-      observer.disconnect();
-    }, { rootMargin: "600px 0px" });
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (el.getBoundingClientRect().top < window.innerHeight) return; // already on screen
+    setState("hidden");
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setState("shown");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-  return { ref, near };
+
+  return { ref, state };
 }
 
-const Svg = ({ children }: { children: ReactNode }) => <svg viewBox="0 0 24 24" aria-hidden="true">{children}</svg>;
-
-/**
- * The site footer, after the Driftbar footer the owner picked (21 Oct 2026),
- * in OGCW's own colours: a full-height footer, the brand block and the link
- * columns at the top; below them a wall of the latest stories' photos, tinted
- * in the theme's colour and fading into the page; and "One Great Culture
- * World" in giant frosted glass sinking into a mist of the same colour.
- * OGCW's own words and links throughout; the chips only say what's true (the
- * story count is live).
- */
 export function Footer2() {
-  const stories = useStories();
-  const wall = useNear<HTMLDivElement>();
-  const photos = stories.all.slice(0, WALL_ROWS * WALL_PER_ROW).map((story) => story.photo);
-  const rows = Array.from({ length: WALL_ROWS }, (_, row) => photos.filter((_, index) => index % WALL_ROWS === row));
+  const reveal = useScrollReveal<HTMLElement>();
   return (
-    <footer className="site-footer dfoot">
-      <div className="dfoot-stage" ref={wall.ref} aria-hidden="true">
-        {wall.near && photos.length > 0 && (
-          <div className="dfoot-wall">
-            {rows.map((row, index) => (
-              <div key={index} className={`dfoot-wall-row dfoot-wall-row-${index}`}>
-                {/* Each row twice, so the drift loops without a seam */}
-                {[...row, ...row].map((photo, i) => (
-                  <span key={i} className="dfoot-tile"><img src={photo.src} alt="" loading="lazy" decoding="async" style={{ objectPosition: photo.crop?.pos ?? "50% 50%" }} /></span>
-                ))}
-              </div>
+    <footer ref={reveal.ref} data-reveal={reveal.state} className="site-footer border-t bg-background text-foreground font-sans">
+      <div className="page-wrap">
+        {/* Masthead: the wordmark and line, with the social channels */}
+        <div className="footer-reveal footer-brand" style={{ ["--i" as string]: 0 }}>
+          <div>
+            <Link to="/" className="footer-wordmark" aria-label="OGCW home"><T>OGCW</T></Link>
+            <p className="footer-tagline"><T k="footer.tagline">One Great Culture World. Culture, reported from the inside.</T></p>
+          </div>
+          <div className="footer-socials">
+            {SOCIALS.map((social) => (
+              <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`OGCW on ${social.name}`} title={social.name} className="footer-social">
+                <SocialIcon path={social.path} size={16} />
+              </a>
             ))}
           </div>
-        )}
-      </div>
-      <p className="dfoot-wordmark" aria-hidden="true"><span>One Great</span><span>Culture World</span></p>
-      <div className="dfoot-fog" aria-hidden="true" />
-
-      <div className="dfoot-content">
-        <div className="dfoot-brand">
-          <Link to="/" className="dfoot-logo" aria-label="OGCW home"><span className="dfoot-mark" aria-hidden="true" /><T k="footer.logo">One Great Culture World</T></Link>
-          <h2 className="dfoot-title"><T k="footer.title">Culture, unfiltered.</T></h2>
-          <p className="dfoot-text"><T k="footer.tagline">One Great Culture World. Culture, reported from the inside.</T> <T k="footer.text">Music, gaming, streaming, entertainment and sports, with every source linked.</T></p>
-          <Link to="/info/$slug" params={{ slug: "newsletter" }} className="dfoot-cta">
-            <Mail aria-hidden="true" /> <T k="footer.cta">Get the OGCW newsletter</T>
-          </Link>
-          <p className="dfoot-copy">
-            © <span suppressHydrationWarning>{new Date().getFullYear()}</span> <T k="footer.name">One Great Culture World</T>. <T k="footer.rights">All rights reserved.</T>
-            {/* The team's login, kept out of the way */}
-            <span className="footer-work"> · <Link to="/work" className="dfoot-quiet"><T k="footer.work">For Work</T></Link></span>
-          </p>
-          <div className="dfoot-by">
-            <T k="footer.follow">Follow OGCW</T>
-            <span className="dfoot-socials">
-              {SOCIALS.map((social) => (
-                <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={`OGCW on ${social.name}`} title={social.name} className="dfoot-social">
-                  <SocialIcon path={social.path} size={12} />
-                </a>
-              ))}
-            </span>
-          </div>
-          <ul className="dfoot-status" aria-label="OGCW today">
-            <li className="dfoot-chip"><span className="dfoot-dot" aria-hidden="true" />{stories.all.length.toLocaleString("en-GB")} <T k="footer.chip.stories">stories</T></li>
-            <li className="dfoot-chip"><Svg><path d="M20 11a8 8 0 1 0-2.3 5.7" /><path d="M20 4v7h-7" /></Svg><T k="footer.chip.daily">Updated daily</T></li>
-            <li className="dfoot-chip"><Svg><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></Svg><T k="footer.chip.sources">Every source linked</T></li>
-          </ul>
         </div>
-
-        {footerLinks.map((item, index) => (
-          <nav key={item.title} className={`dfoot-col ${index === 0 ? "dfoot-col-menu" : ""}`} aria-label={item.title}>
-            <h3 className="dfoot-col-title"><T k={`footer.heading.${slug(item.title)}`}>{item.title}</T></h3>
-            <ul className="dfoot-list">
-              {item.links.map((link) => <li key={link.label}><FooterItem link={link} /></li>)}
-              {item.title === "Legal" && <li><CookieSettingsButton className={`${linkClass} footer-button`} /></li>}
-            </ul>
-            {item.title === "Legal" && (
-              <div className="dfoot-extras">
-                <LanguagePicker />
-                <AppBadge store="apple" />
-                <AppBadge store="google" />
-              </div>
-            )}
-          </nav>
-        ))}
+        {/* Link columns */}
+        <div className="grid grid-cols-2 gap-8 py-12 md:grid-cols-4">
+          {footerLinks.map((item, index) => (
+            <div key={item.title} className="footer-reveal" style={{ ["--i" as string]: index + 1 }}>
+              <h3 className="footer-heading"><T k={`footer.heading.${slug(item.title)}`}>{item.title}</T></h3>
+              <ul className="space-y-2 text-sm">
+                {item.links.map((link) => (
+                  <li key={link.label}><FooterItem link={link} /></li>
+                ))}
+                {item.title === "Legal" && <li><CookieSettingsButton className={`${linkClass} footer-button`} /></li>}
+              </ul>
+            </div>
+          ))}
+        </div>
+        {/* Copyright + app badges */}
+        <div className="footer-reveal footer-base" style={{ ["--i" as string]: 5 }}>
+          <p>
+            © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
+            <Link to="/" className="footer-link"><T k="footer.name">One Great Culture World</T></Link>. <T k="footer.rights">All rights reserved.</T>
+            {/* The team's login, kept out of the way */}
+            <span className="footer-work"> · <Link to="/work" className="footer-link"><T k="footer.work">For Work</T></Link></span>
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <LanguagePicker />
+            <AppBadge store="apple" />
+            <AppBadge store="google" />
+          </div>
+        </div>
       </div>
     </footer>
   );
