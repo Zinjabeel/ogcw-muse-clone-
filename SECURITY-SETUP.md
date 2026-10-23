@@ -109,7 +109,7 @@ in spam. Use your own domain instead:
 4. Copy the **Client ID** and **Client secret**.
 5. **Supabase → Authentication → Sign In / Providers → Google**: switch it on and paste both. Save.
 
-The "Continue with Google" button then appears by itself on /login, /signup and /work.
+The "Continue with Google" button is already on /login, /signup and /work. Until this step is done, pressing it says Google login isn't open yet. Once it's done, it opens Google straight away. No code change is needed. For Work still asks for your 6-digit code after Google.
 
 ## 7. Supabase's own protections (5 minutes)
 

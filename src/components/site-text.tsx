@@ -1922,14 +1922,15 @@ export function SiteEditor() {
               <div className="site-crop">
                 <div
                   className="site-crop-box"
-                  style={{ aspectRatio: String(Math.min(3, Math.max(0.4, ratio))) }}
+                  // The frame's own shape: a tall one is 220px high and narrower, a wide one fills the menu
+                  style={{ aspectRatio: String(Math.min(3, Math.max(0.4, ratio))), width: ratio < 1.2 ? `${Math.round(220 * Math.min(3, Math.max(0.4, ratio)))}px` : "100%" }}
                   role="slider"
                   tabIndex={0}
                   aria-label="Drag the picture to choose what stays in the frame (arrow keys work too)"
                   aria-valuetext={`${Math.round(crop.x)}% across, ${Math.round(crop.y)}% down`}
                   onPointerDown={(event) => {
                     const box = event.currentTarget.getBoundingClientRect();
-                    event.currentTarget.setPointerCapture(event.pointerId);
+                    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* a pointer the browser no longer has */ }
                     cropDrag.current = { x: event.clientX, y: event.clientY, start: crop, w: box.width, h: box.height };
                   }}
                   onPointerMove={(event) => {

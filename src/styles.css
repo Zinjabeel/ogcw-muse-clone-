@@ -3214,7 +3214,7 @@ html[data-entry]:not([data-entry-swap]) [data-site-logo] { visibility: hidden; }
 .site-photo-drop svg { display: inline; vertical-align: -2px; margin-right: 3px; }
 /* Crop it myself: the frame as it is on the page, the picture dragged inside it */
 .site-crop { display: grid; gap: 6px; margin: 4px 0 6px; }
-.site-crop-box { position: relative; overflow: hidden; width: 100%; max-height: 220px; border-radius: 8px; background: #111; cursor: grab; touch-action: none; }
+.site-crop-box { position: relative; overflow: hidden; width: 100%; max-width: 100%; margin-inline: auto; border-radius: 8px; background: #111; cursor: grab; touch-action: none; }
 .site-crop-box:active { cursor: grabbing; }
 .site-crop-box:focus-visible { outline: 2px solid var(--ogcw-accent); outline-offset: 2px; }
 .site-crop-box img, .site-crop-box video { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }

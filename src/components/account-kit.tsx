@@ -152,13 +152,22 @@ export const GoogleMark = () => (
   </svg>
 );
 
-/** "Continue with Google" (and GitHub), shown once they're switched on in Supabase */
+/**
+ * "Continue with Google" (always shown, owner 23 Oct 2026: until Google is
+ * switched on in Supabase it says so instead of opening), and GitHub once
+ * it's switched on. Either way the login comes back through the server
+ * (/auth/confirm, a one-time PKCE key), and For Work still asks for the
+ * account's 6-digit code after it.
+ */
 export function ProviderButtons({ returnTo, label = "Or continue with", onError }: { returnTo: string; label?: string; onError: (message: string) => void }) {
   const [providers, setProviders] = useState<Record<Provider, boolean> | null>(null);
   const [busy, setBusy] = useState<Provider | null>(null);
   useEffect(() => { void enabledProviders().then(setProviders); }, []);
-  if (!providers?.google && !providers?.github) return null;
   const go = async (provider: Provider) => {
+    if (providers && !providers[provider]) {
+      onError("Logging in with Google isn’t open yet. Log in with your email for now.");
+      return;
+    }
     setBusy(provider);
     try {
       await signInWith(provider, returnTo);
@@ -171,8 +180,8 @@ export function ProviderButtons({ returnTo, label = "Or continue with", onError 
     <>
       <p className="authx-divider"><span>{label}</span></p>
       <div className="authx-providers">
-        {providers.google && <button type="button" className="authx-provider" disabled={!!busy} onClick={() => void go("google")}><GoogleMark /> {busy === "google" ? "Opening Google…" : "Continue with Google"}</button>}
-        {providers.github && <button type="button" className="authx-provider" disabled={!!busy} onClick={() => void go("github")}><GitHubMark /> {busy === "github" ? "Opening GitHub…" : "Continue with GitHub"}</button>}
+        <button type="button" className="authx-provider" disabled={!!busy || !providers} onClick={() => void go("google")}><GoogleMark /> {busy === "google" ? "Opening Google…" : "Continue with Google"}</button>
+        {providers?.github && <button type="button" className="authx-provider" disabled={!!busy} onClick={() => void go("github")}><GitHubMark /> {busy === "github" ? "Opening GitHub…" : "Continue with GitHub"}</button>}
       </div>
     </>
   );
