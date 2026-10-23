@@ -144,7 +144,7 @@
   .tx-case:first-child { padding-left: 0; border-left: 0; }
   .tx-case:last-child { padding-right: 0; }
   .tx-buys { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .tx-screen { grid-column: 1 / 9; }
+  .tx-screen-wrap { grid-column: 1 / 9; }
   .tx-player-side { grid-column: 9 / 13; padding-left: clamp(0px, 1vw, 16px); }
 }
 
@@ -156,7 +156,27 @@
   .tx-screen:hover img, .tx-buy-picture:hover .bs-photo img, .tx-index-figure:hover .bs-photo img { transform: scale(calc(var(--zoom, 1) * 1.04)); }
   .tx-screen:hover .tx-play { transform: scale(1.08); }
 }
+/* Slideshows (owner, 23 Oct 2026): the opener, the trend photo and the video
+   screen turn like the hero (src/components/slide-controls.tsx): photos
+   cross-fade in 500ms, with the hero's pause ring and arrows in the corner */
+.tx-fade { position: relative; }
+.tx-fade-layer { position: absolute; inset: 0; opacity: 0; transition: opacity .5s; }
+.tx-fade-layer[data-on="true"] { opacity: 1; }
+.tx-hero .tx-fade-layer { z-index: 0; }
+.tx-index-figure.tx-fade { aspect-ratio: 3 / 2; overflow: hidden; animation: none; }
+.tx-fade-link { position: absolute; inset: 0; display: block; outline: none; }
+.tx-fade-link:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.tx-index-figure .tx-index-photo { width: 100%; height: 100%; }
+.tx-screen { animation: none; }
+.tx-screen .tx-fade-layer img { width: 100%; height: 100%; object-fit: cover; }
+.tx-screen .tx-play { z-index: 1; }
+.cxh-controls.tx-controls { right: 16px; bottom: 16px; }
+/* A shade at the foot, as under the hero's controls, so they read on any photo */
+.tx-index-figure.tx-fade::after, .tx-screen-wrap::after { content: ""; position: absolute; inset: auto 0 0; z-index: 2; height: 96px; pointer-events: none; background: linear-gradient(to top, rgb(0 0 0 / .55), transparent); }
+.tx-hero .cxh-controls.tx-controls { right: var(--tx-gutter); bottom: clamp(24px, 5svh, 48px); }
+.tx-now, .tx-index-text { animation: tx-fade .5s ease both; }
+
 @media (prefers-reduced-motion: reduce) {
   .tx-index-bg img, .tx-index-figure, .tx-index-text, .tx-screen, .tx-now { animation: none; }
-  .tx .bs-photo img, .tx-screen img, .tx-play, .tx-more svg { transition: none; }
+  .tx .bs-photo img, .tx-screen img, .tx-play, .tx-more svg, .tx-fade-layer { transition: none; }
 }

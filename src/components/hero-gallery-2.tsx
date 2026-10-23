@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useStories } from "@/lib/stories";
 import { CARDS, CardLink, type Card } from "./hero-gallery";
 import { EditableImage, S, T } from "./site-text";
-import { useSiteText } from "@/lib/site-text";
+import { SlideControls, SlideDots, useSlides } from "./slide-controls";
 
 // Gallery 2, rebuilt 22 Oct 2026 as Complex's front-page hero (owner: "an
 // exact copy of the Complex hero, 2 cards that are big with images, the
@@ -24,9 +24,6 @@ import { useSiteText } from "@/lib/site-text";
 // About). Each runs on its own and stops under the pointer, on focus, off
 // screen and while an admin edits; nothing runs for reduced motion.
 
-const SLIDE_MS = 6000;
-const RING = 2 * Math.PI * 13;
-
 export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
 
 /**
@@ -36,57 +33,11 @@ export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: R
  * at the same moment.
  */
 export function Slideshow({ label, slides, lead = 0 }: { label: string; slides: Slide[]; lead?: number }) {
-  const box = useRef<HTMLElement>(null);
-  const [index, setIndex] = useState(0);
-  const [moved, setMoved] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [hold, setHold] = useState(false);
-  const [inView, setInView] = useState(false);
-  const [reduce, setReduce] = useState(false);
-  const { busy } = useSiteText();
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduce(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-  // Only run while on screen (the hero is display: none unless chosen)
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      setInView(!!entry?.isIntersecting);
-      // Hidden (another hero chosen): back to the first slide, so the cards start apart again when it's shown
-      if (entry && !entry.isIntersecting && entry.boundingClientRect.width === 0) {
-        setIndex(0);
-        setMoved(false);
-      }
-    }, { threshold: 0.35 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-  useEffect(() => { if (index >= slides.length) setIndex(0); }, [index, slides.length]);
-
-  const count = slides.length;
-  const go = (step: number) => {
-    setMoved(true);
-    setIndex((value) => (((value + step) % count) + count) % count);
-  };
-  const running = !paused && !hold && inView && !reduce && !busy && count > 1;
+  const show = useSlides(slides.length, { lead });
+  const { index, count } = show;
 
   return (
-    <section
-      ref={box}
-      className="cxh-card"
-      aria-roledescription="carousel"
-      aria-label={label}
-      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
-      onPointerLeave={() => setHold(false)}
-      onFocus={() => setHold(true)}
-      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
-    >
+    <section {...show.box} className="cxh-card" aria-roledescription="carousel" aria-label={label}>
       {/* The photos, cross-fading */}
       {slides.map((slide, i) => (
         <div key={`p-${slide.key}`} className="cxh-photo" data-on={i === index} aria-hidden="true">{slide.picture}</div>
@@ -111,44 +62,8 @@ export function Slideshow({ label, slides, lead = 0 }: { label: string; slides: 
         );
       })}
 
-      {count > 1 && (
-        <>
-          <div className="cxh-dots" role="group" aria-label={`${label}: choose a slide`}>
-            {slides.map((slide, i) => (
-              <button key={slide.key} type="button" className="cxh-dot" data-on={i === index} aria-label={`Go to slide ${i + 1}`} aria-current={i === index ? "true" : undefined} onClick={() => { setMoved(true); setIndex(i); }} />
-            ))}
-          </div>
-          <div className="cxh-controls">
-            {!reduce && (
-              <button type="button" className="cxh-pause" aria-label={paused ? "Play slideshow" : "Pause slideshow"} onClick={() => setPaused((value) => !value)}>
-                <svg width="32" height="32" viewBox="0 0 32 32" className="cxh-ring" aria-hidden="true">
-                  <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
-                  <circle
-                    key={index}
-                    cx="16" cy="16" r="13" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round"
-                    strokeDasharray={RING}
-                    className="cxh-ring-time"
-                    data-run={running}
-                    style={{ "--ring": RING, "--dur": `${SLIDE_MS}ms`, ...(moved ? {} : { animationDelay: `-${lead}ms` }) } as CSSProperties}
-                    onAnimationEnd={() => go(1)}
-                  />
-                </svg>
-                {paused ? (
-                  <svg width="10" height="12" viewBox="0 0 10 12" fill="white" aria-hidden="true"><path d="M1 0.6v10.8a.6.6 0 0 0 .9.5l8.6-5.4a.6.6 0 0 0 0-1L1.9.1A.6.6 0 0 0 1 .6Z" /></svg>
-                ) : (
-                  <svg width="10" height="12" viewBox="0 0 10 12" fill="white" aria-hidden="true"><rect x="0" y="0" width="3.5" height="12" rx="1" /><rect x="6.5" y="0" width="3.5" height="12" rx="1" /></svg>
-                )}
-              </button>
-            )}
-            <button type="button" className="cxh-arrow" aria-label="Previous slide" onClick={() => go(-1)}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M12.5 15L7.5 10L12.5 5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-            <button type="button" className="cxh-arrow" aria-label="Next slide" onClick={() => go(1)}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7.5 5L12.5 10L7.5 15" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-            </button>
-          </div>
-        </>
-      )}
+      <SlideDots slides={show} label={label} />
+      <SlideControls slides={show} />
     </section>
   );
 }
