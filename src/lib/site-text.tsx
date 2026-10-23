@@ -15,8 +15,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 // resized ("layouts"): each move is kept for that page, separately for
 // computers (1024 px wide and up, "d") and phones and tablets ("m").
 
-/** fit: "contain" shows the whole picture instead of filling its frame; clear: no dimming or dark overlay on it */
-export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean };
+/** A crop by hand: the point kept in the middle (in %) and how far it's zoomed in (1 = not at all) */
+export type SiteCrop = { x: number; y: number; zoom: number };
+/**
+ * fit: "contain" shows the whole picture instead of filling its frame; clear:
+ * no dimming or dark overlay on it; video: a video plays in the photo's place
+ * (muted, looping); crop: cropped by hand (without it, the site crops
+ * automatically around the middle)
+ */
+export type SiteImage = { src: string; alt?: string; assetId?: string; fit?: "cover" | "contain"; clear?: boolean; video?: string; videoAssetId?: string; crop?: SiteCrop };
 /** What an admin can add as a new section: words, a picture, both, or a band of colour */
 export type SectionKind = "text" | "image" | "textimage" | "band";
 /**

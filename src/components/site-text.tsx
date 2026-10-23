@@ -1,9 +1,9 @@
 import { useRouter, useRouterState } from "@tanstack/react-router";
-import { ArrowDown, ArrowUp, Camera, Check, Eye, EyeOff, ImagePlus, Loader2, Maximize2, Move, PenLine, Plus, RotateCcw, Scaling, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Camera, Check, Crop, Eye, EyeOff, Film, ImagePlus, Loader2, Maximize2, Move, PenLine, Plus, RotateCcw, Scaling, Sparkles, Sun, Trash2, Undo2, Upload, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ImgHTMLAttributes, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { adminClient } from "@/lib/admin-sanity";
-import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
+import { adminClient, studioToken } from "@/lib/admin-sanity";
+import { itemKey, layoutKey, layoutStyle, storyKey, useSiteText, type EditMeta, type LayoutPos, type Pending, type SectionKind, type SiteContent, type SiteCrop, type SiteImage, type SiteLayout, type StoryField } from "@/lib/site-text";
 import { pageSection, sectionOfKey, type SiteSection } from "@/lib/site-sections";
 import { refreshSiteCache } from "@/lib/sanity-stories";
 import { useWorkAccess } from "@/lib/work";
@@ -282,6 +282,8 @@ function showPicture(img: HTMLImageElement, picture: SiteImage | undefined, own:
     }
     img.style.objectFit = picture?.fit === "contain" ? "contain" : picture ? "cover" : "";
   }
+  cropPicture(img, picture?.crop);
+  videoOver(img, picture);
   // Clear: the picture at full strength, without the dark wash over it (a
   // hidden picture, e.g. in the closed menu, has no box to clear around it)
   const shown = img.getBoundingClientRect().width > 0;
@@ -290,6 +292,70 @@ function showPicture(img: HTMLImageElement, picture: SiteImage | undefined, own:
     if (picture?.clear) el.setAttribute("data-pic-clear", "");
     else el.removeAttribute("data-pic-clear");
   }
+}
+
+/**
+ * A crop by hand: the point kept in the middle and the zoom (the page's own
+ * --zoom and --origin, which its cards already zoom from on hover; styles.css,
+ * img[data-pic-crop]). Without one, the picture is back to the page's own crop.
+ */
+function cropPicture(img: HTMLImageElement, crop: SiteCrop | undefined) {
+  const data = img.dataset;
+  if (crop) {
+    if (data["picCrop"] === undefined) {
+      data["origPos"] = img.style.objectPosition;
+      data["origZoom"] = img.style.getPropertyValue("--zoom");
+      data["origOrigin"] = img.style.getPropertyValue("--origin");
+    }
+    const pos = `${crop.x}% ${crop.y}%`;
+    data["picCrop"] = "";
+    img.style.objectPosition = pos;
+    img.style.setProperty("--zoom", String(crop.zoom));
+    img.style.setProperty("--origin", pos);
+  } else if (data["picCrop"] !== undefined) {
+    img.style.objectPosition = data["origPos"] ?? "";
+    if (data["origZoom"]) img.style.setProperty("--zoom", data["origZoom"]);
+    else img.style.removeProperty("--zoom");
+    if (data["origOrigin"]) img.style.setProperty("--origin", data["origOrigin"]);
+    else img.style.removeProperty("--origin");
+    for (const name of ["picCrop", "origPos", "origZoom", "origOrigin"]) delete data[name];
+  }
+}
+
+/** The video put in a picture's place: it plays over the picture, muted and on a loop */
+const videoOf = (img: HTMLImageElement) => (img.nextElementSibling instanceof HTMLVideoElement && img.nextElementSibling.classList.contains("site-video") ? img.nextElementSibling : null);
+function videoOver(img: HTMLImageElement, picture: SiteImage | undefined) {
+  let video = videoOf(img);
+  const parent = img.parentElement;
+  if (!picture?.video || !parent) {
+    if (video) {
+      video.remove();
+      if (parent?.dataset["videoPlaced"] !== undefined) { parent.style.position = ""; delete parent.dataset["videoPlaced"]; }
+    }
+    return;
+  }
+  if (!video) {
+    video = document.createElement("video");
+    video.className = "site-video";
+    video.muted = true;
+    video.loop = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.setAttribute("aria-hidden", "true");
+    img.after(video);
+  }
+  if (video.getAttribute("src") !== picture.video) { video.src = picture.video; void video.play().catch(() => {}); }
+  // It covers exactly the picture's box
+  if (getComputedStyle(parent).position === "static") { parent.style.position = "relative"; parent.dataset["videoPlaced"] = ""; }
+  video.poster = picture.src;
+  video.style.top = `${img.offsetTop}px`;
+  video.style.left = `${img.offsetLeft}px`;
+  video.style.width = `${img.offsetWidth}px`;
+  video.style.height = `${img.offsetHeight}px`;
+  video.style.objectFit = picture.fit === "contain" ? "contain" : "cover";
+  video.style.objectPosition = picture.crop ? `${picture.crop.x}% ${picture.crop.y}%` : "";
+  video.style.transform = picture.crop && picture.crop.zoom !== 1 ? `scale(${picture.crop.zoom})` : "";
+  video.style.transformOrigin = picture.crop ? `${picture.crop.x}% ${picture.crop.y}%` : "";
 }
 
 // ---------------------------------------------------------------- Sections
@@ -580,11 +646,15 @@ export function SiteLayouts() {
     const observer = new MutationObserver(() => { cancelAnimationFrame(frame); frame = requestAnimationFrame(apply); });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
     media.addEventListener("change", apply);
+    // Videos over pictures follow their picture's size
+    const resized = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(apply); };
+    window.addEventListener("resize", resized);
     return () => {
       observer.disconnect();
       cancelAnimationFrame(frame);
       window.clearTimeout(retry);
       media.removeEventListener("change", apply);
+      window.removeEventListener("resize", resized);
       for (const el of placed) placeInline(el, undefined);
       for (const el of looked) lookSection(el, undefined, editing);
       for (const el of stacked) stackParent(el, false);
@@ -662,12 +732,17 @@ function editDoc(key: string, kind: "text" | "image" | "layout", value: string |
     ...(kind === "layout"
       ? { layout: value }
       : image
-        ? { ...(image.alt ? { alt: image.alt } : {}), ...(image.fit ? { fit: image.fit } : {}), ...(image.clear ? { clear: true } : {}), ...(image.assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: image.assetId } } } : { url: image.src }) }
+        ? { ...(image.alt ? { alt: image.alt } : {}), ...(image.fit ? { fit: image.fit } : {}), ...(image.clear ? { clear: true } : {}), ...mediaExtras(image), ...(image.assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: image.assetId } } } : { url: image.src }) }
         : { value }),
     updatedAt: at,
     updatedBy: by,
   };
 }
+/** A replacement's video and its crop by hand, as kept in Sanity */
+const mediaExtras = (image: SiteImage) => ({
+  ...(image.video ? { video: image.video, ...(image.videoAssetId ? { videoFile: { _type: "file", asset: { _type: "reference", _ref: image.videoAssetId } } } : {}) } : {}),
+  ...(image.crop ? { crop: { x: image.crop.x, y: image.crop.y, zoom: image.crop.zoom } } : {}),
+});
 const editKind = (content: SiteContent, key: string): "text" | "image" | "layout" => (key in content.texts ? "text" : key in content.images ? "image" : "layout");
 
 // The whole set of edits, as kept in each Site history version
@@ -688,6 +763,7 @@ const imageItems = (content: SiteContent) =>
     ...(image.alt ? { alt: image.alt } : {}),
     ...(image.fit ? { fit: image.fit } : {}),
     ...(image.clear ? { clear: true } : {}),
+    ...mediaExtras(image),
     ...(image.assetId ? { image: { _type: "image", asset: { _type: "reference", _ref: image.assetId } } } : { url: image.src }),
   }));
 const layoutItems = (content: SiteContent) =>
@@ -772,6 +848,18 @@ export function SiteEditor() {
   const [photo, setPhoto] = useState<PhotoTarget | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dropping, setDropping] = useState(false);
+  // Crop: automatically (around the middle, as the page does) or by hand; remembered on this browser
+  const [cropMode, setCropModeState] = useState<"auto" | "hand">(() => {
+    try { return typeof window !== "undefined" && localStorage.getItem("ogcw-crop-mode") === "hand" ? "hand" : "auto"; } catch { return "auto"; }
+  });
+  const setCropMode = (mode: "auto" | "hand") => {
+    setCropModeState(mode);
+    try { localStorage.setItem("ogcw-crop-mode", mode); } catch { /* private window */ }
+  };
+  const [cropping, setCropping] = useState(false);
+  const cropDrag = useRef<{ x: number; y: number; start: SiteCrop; w: number; h: number } | null>(null);
+  const [cropDraft, setCropDraft] = useState<SiteCrop | null>(null);
+  useEffect(() => { if (!photo) { setCropping(false); setCropDraft(null); } }, [photo]);
   const [target, setTarget] = useState<Target | null>(null);
   const [section, setSection] = useState<{ el: HTMLElement; rect: DOMRect } | null>(null);
   const [sizing, setSizing] = useState<Sizing | null>(null);
@@ -1228,9 +1316,32 @@ export function SiteEditor() {
       setMessage("Log in at For Work on this browser (your admin account and its code, or GitHub) to upload, then try again.");
       return;
     }
+    // A video plays in the photo's place (the photo stays as its still, shown while it loads)
+    const isVideo = /^video\/(mp4|webm|quicktime)$/.test(file.type) || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+    if (isVideo) {
+      // Through the server a video travels as text, so it's kept smaller there
+      const limit = studioToken() ? 80 : 11;
+      if (file.size > limit * 1_000_000) {
+        setStatus("error");
+        setMessage(`That video is too big (${Math.round(file.size / 1_000_000)} MB). Use one under ${limit} MB: a short clip works best.`);
+        return;
+      }
+      setUploading(true);
+      try {
+        const type = file.type || (/\.webm$/i.test(file.name) ? "video/webm" : /\.mov$/i.test(file.name) ? "video/quicktime" : "video/mp4");
+        const asset = await client.upload(file.type ? file : new Blob([file], { type }), file.name);
+        setLook({ ...photo.current, video: asset.url, videoAssetId: asset._id });
+      } catch {
+        setStatus("error");
+        setMessage("The video didn’t upload. Try again, or try an MP4.");
+      } finally {
+        setUploading(false);
+      }
+      return;
+    }
     if (!file.type.startsWith("image/") && !/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(file.name)) {
       setStatus("error");
-      setMessage("That isn’t a picture. Choose a photo (JPG, PNG, WebP or HEIC).");
+      setMessage("That isn’t a picture or a video. Choose a photo (JPG, PNG, WebP or HEIC) or a video (MP4, MOV or WebM).");
       return;
     }
     setUploading(true);
@@ -1238,13 +1349,32 @@ export function SiteEditor() {
       const body = await shrink(file);
       const asset = await client.upload(body, file.name.replace(/\.(heic|heif)$/i, ".jpg"));
       const { fit, clear } = photo.current;
+      // A new photo starts cropped automatically; "Crop it myself" sets it by hand
       setLook({ src: `${asset.url}?auto=format&w=2000`, assetId: asset._id, alt: photo.alt, ...(fit ? { fit } : {}), ...(clear ? { clear } : {}) });
+      if (cropMode === "hand") setCropping(true);
     } catch {
       setStatus("error");
       setMessage("The photo didn’t upload. Try again.");
     } finally {
       setUploading(false);
     }
+  };
+  /** The crop while dragging: shown at once, put in the changes when let go */
+  const cropNow = (): SiteCrop => cropDraft ?? photo?.current.crop ?? { x: 50, y: 50, zoom: 1 };
+  const showDraft = (next: SiteCrop) => {
+    setCropDraft(next);
+    // On the page at once, without a change for every step of the drag
+    if (!photo) return;
+    for (const img of document.images) {
+      if (img.closest(SITE_UI)) continue;
+      const key = img.dataset["imgKey"];
+      if (key ? key === photo.k : pictureKey(normSrc(srcOf(img))) === photo.k) cropPicture(img, next);
+    }
+  };
+  const keepCrop = (next: SiteCrop) => {
+    if (!photo) return;
+    setCropDraft(null);
+    setLook({ ...photo.current, crop: next });
   };
 
   // The Edit button: just above the text's top right corner (below it near the top of the screen)
@@ -1500,22 +1630,87 @@ export function SiteEditor() {
           </div>
           <button type="button" className="is-main" disabled={uploading} onClick={() => picker.current?.click()}>
             {uploading ? <Loader2 size={15} className="site-spin" aria-hidden="true" /> : <Upload size={15} aria-hidden="true" />}
-            {uploading ? "Uploading…" : touch ? "Choose from Photos or Files" : "Choose from this computer"}
+            {uploading ? "Uploading…" : touch ? "Choose a photo or video" : "Choose a photo or video from this computer"}
           </button>
           {touch && (
             <button type="button" disabled={uploading} onClick={() => camera.current?.click()}><Camera size={15} aria-hidden="true" /> Take a photo</button>
           )}
-          {!touch && <span className="site-photo-drop">or drop a picture here</span>}
+          {!touch && <span className="site-photo-drop">or drop a picture or a video here</span>}
+          {photo.current.video ? (
+            <button type="button" onClick={() => { const { video: _video, videoAssetId: _asset, ...still } = photo.current; setLook(still); }}><Film size={15} aria-hidden="true" /> Remove the video (keep the photo)</button>
+          ) : (
+            <span className="site-photo-drop"><Film size={12} aria-hidden="true" /> Videos (MP4, MOV, WebM) play here muted, on a loop</span>
+          )}
           <div className="site-photo-opts" role="group" aria-label="How it shows">
             <button type="button" aria-pressed={photo.current.fit !== "contain"} onClick={() => setLook({ ...photo.current, fit: "cover" })}>Fill the frame</button>
             <button type="button" aria-pressed={photo.current.fit === "contain"} onClick={() => setLook({ ...photo.current, fit: "contain" })}>Whole picture</button>
           </div>
+          <div className="site-photo-opts" role="group" aria-label="Crop">
+            <button type="button" aria-pressed={!photo.current.crop && !cropping} onClick={() => { setCropMode("auto"); setCropping(false); setCropDraft(null); if (photo.current.crop) { const { crop: _crop, ...rest } = photo.current; setLook(rest); } }}><Sparkles size={13} aria-hidden="true" /> Crop automatically</button>
+            <button type="button" aria-pressed={!!photo.current.crop || cropping} onClick={() => { setCropMode("hand"); setCropping(true); }}><Crop size={13} aria-hidden="true" /> Crop it myself</button>
+          </div>
+          {cropping && (() => {
+            const crop = cropNow();
+            const ratio = photo.rect.width > 0 && photo.rect.height > 0 ? photo.rect.width / photo.rect.height : 16 / 9;
+            const pos = `${crop.x}% ${crop.y}%`;
+            return (
+              <div className="site-crop">
+                <div
+                  className="site-crop-box"
+                  style={{ aspectRatio: String(Math.min(3, Math.max(0.4, ratio))) }}
+                  role="slider"
+                  tabIndex={0}
+                  aria-label="Drag the picture to choose what stays in the frame (arrow keys work too)"
+                  aria-valuetext={`${Math.round(crop.x)}% across, ${Math.round(crop.y)}% down`}
+                  onPointerDown={(event) => {
+                    const box = event.currentTarget.getBoundingClientRect();
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    cropDrag.current = { x: event.clientX, y: event.clientY, start: crop, w: box.width, h: box.height };
+                  }}
+                  onPointerMove={(event) => {
+                    const drag = cropDrag.current;
+                    if (!drag) return;
+                    // Dragging the picture right shows more of its left side
+                    const speed = 100 / drag.start.zoom;
+                    const x = Math.min(100, Math.max(0, drag.start.x - ((event.clientX - drag.x) / drag.w) * speed));
+                    const y = Math.min(100, Math.max(0, drag.start.y - ((event.clientY - drag.y) / drag.h) * speed));
+                    showDraft({ ...drag.start, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
+                  }}
+                  onPointerUp={() => { if (cropDrag.current) { cropDrag.current = null; keepCrop(cropNow()); } }}
+                  onPointerCancel={() => { cropDrag.current = null; }}
+                  onKeyDown={(event) => {
+                    const step = event.shiftKey ? 10 : 2;
+                    const moves: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+                    const move = moves[event.key];
+                    if (!move) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    keepCrop({ ...crop, x: Math.min(100, Math.max(0, crop.x + move[0])), y: Math.min(100, Math.max(0, crop.y + move[1])) });
+                  }}
+                >
+                  {photo.current.video
+                    ? <video src={photo.current.video} poster={photo.current.src} muted loop autoPlay playsInline style={{ objectPosition: pos, transform: `scale(${crop.zoom})`, transformOrigin: pos }} />
+                    : <img src={photo.current.src} alt="" draggable={false} style={{ objectPosition: pos, transform: `scale(${crop.zoom})`, transformOrigin: pos }} />}
+                  <span className="site-crop-grid" aria-hidden="true" />
+                </div>
+                <label className="site-sec-slider">
+                  <span>Zoom<b>{Math.round(crop.zoom * 100)}%</b></span>
+                  <input type="range" min={100} max={300} value={Math.round(crop.zoom * 100)} onChange={(event) => showDraft({ ...crop, zoom: Number(event.target.value) / 100 })} onPointerUp={() => keepCrop(cropNow())} onKeyUp={() => keepCrop(cropNow())} />
+                </label>
+                <p className="site-sec-note">Drag the picture to choose what stays in the frame. It changes on the page as you go.</p>
+                <div className="site-photo-opts">
+                  <button type="button" onClick={() => keepCrop({ x: 50, y: 50, zoom: 1 })}><RotateCcw size={13} aria-hidden="true" /> Centre</button>
+                  <button type="button" aria-pressed="true" onClick={() => { if (cropDraft) keepCrop(cropDraft); setCropping(false); }}><Check size={13} aria-hidden="true" /> Done</button>
+                </div>
+              </div>
+            );
+          })()}
           <button type="button" aria-pressed={!!photo.current.clear} onClick={() => setLook({ ...photo.current, clear: !photo.current.clear })}>
             <Sun size={15} aria-hidden="true" /> {photo.current.clear ? "Shown clearly (tap to dim again)" : "Show it clearly, nothing behind it"}
           </button>
           {photo.swapped && <button type="button" onClick={() => { site.change(photo.k, "image", null, { section: sectionNow(photo.section), page: window.location.pathname, usual: photo.usual }); setPhoto(null); }}><RotateCcw size={15} aria-hidden="true" /> Back to the usual photo</button>}
           <button type="button" onClick={() => setPhoto(null)}><X size={15} aria-hidden="true" /> Close</button>
-          <input ref={picker} type="file" accept="image/*,.heic,.heif" hidden onChange={(event) => { void upload(event.target.files?.[0]); event.target.value = ""; }} />
+          <input ref={picker} type="file" accept="image/*,.heic,.heif,video/mp4,video/webm,video/quicktime,.mp4,.mov,.m4v,.webm" hidden onChange={(event) => { void upload(event.target.files?.[0]); event.target.value = ""; }} />
           <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(event) => { void upload(event.target.files?.[0]); event.target.value = ""; }} />
         </div>
       )}

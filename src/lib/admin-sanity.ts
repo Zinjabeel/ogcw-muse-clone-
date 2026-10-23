@@ -53,6 +53,7 @@ export type AdminWriter = {
   delete: (id: string) => Promise<unknown>;
   /** Site history versions older than the cut-off go */
   pruneHistory: (cutoff: string) => Promise<unknown>;
+  /** A photo, or a video (a Blob of type video/…: kept as a file) */
   upload: (file: Blob, filename: string) => Promise<{ _id: string; url: string }>;
 };
 
@@ -86,7 +87,7 @@ function direct(client: SanityClient): AdminWriter {
     delete: (id) => client.delete(id),
     pruneHistory: (cutoff) => client.delete({ query: `*[_type == "siteSnapshot" && at < $cutoff]`, params: { cutoff } }),
     upload: async (file, filename) => {
-      const asset = await client.assets.upload("image", file, { filename });
+      const asset = await client.assets.upload(file.type.startsWith("video/") ? "file" : "image", file, { filename, ...(file.type ? { contentType: file.type } : {}) });
       return { _id: asset._id, url: asset.url };
     },
   };
@@ -96,7 +97,7 @@ const asDataUrl = (file: Blob) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error ?? new Error("The photo couldn’t be read."));
+    reader.onerror = () => reject(reader.error ?? new Error("The file couldn’t be read."));
     reader.readAsDataURL(file);
   });
 

@@ -31,7 +31,8 @@ const LIST_TTL_MS = 10_000;
 export type Rating = { average: number; count: number };
 export type SiteStories = { stories: Article[]; layout: FrontLayout; ratings: Record<string, Rating>; site: SiteContent };
 
-type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null; fit?: string | null; clear?: boolean | null };
+type SiteItem = { key?: string; kind?: string; value?: string; section?: string; usual?: string; alt?: string; src?: string | null; assetId?: string | null; layout?: SiteLayout | null; fit?: string | null; clear?: boolean | null; video?: string | null; videoAssetId?: string | null; crop?: { x?: number; y?: number; zoom?: number } | null };
+const num = (value: unknown, min: number, max: number) => (typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : undefined);
 // Each edit is its own "Site edit" document; edits saved before that are
 // still in the old single "Site texts" document until the next save moves them
 type SiteDoc = { edits?: SiteItem[] | null; legacy?: { texts?: SiteItem[] | null; images?: SiteItem[] | null } | null } | null;
@@ -63,7 +64,10 @@ const toSite = (doc: SiteDoc): SiteContent => {
     }
     if (kind === "image") {
       if (!item.src) return;
-      site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}), ...(item.fit === "contain" ? { fit: "contain" as const } : {}), ...(item.clear ? { clear: true } : {}) };
+      site.images[item.key] = { src: item.src, ...(item.alt ? { alt: item.alt } : {}), ...(item.assetId ? { assetId: item.assetId } : {}), ...(item.fit === "contain" ? { fit: "contain" as const } : {}), ...(item.clear ? { clear: true } : {}),
+        // A video in the photo's place (only a real web address), and a crop by hand
+        ...(typeof item.video === "string" && /^https:\/\//.test(item.video) ? { video: item.video, ...(item.videoAssetId ? { videoAssetId: item.videoAssetId } : {}) } : {}),
+        ...(item.crop && num(item.crop.x, 0, 100) !== undefined && num(item.crop.y, 0, 100) !== undefined ? { crop: { x: num(item.crop.x, 0, 100)!, y: num(item.crop.y, 0, 100)!, zoom: num(item.crop.zoom, 1, 4) ?? 1 } } : {}) };
     } else {
       if (typeof item.value !== "string" || !item.value.trim()) return;
       site.texts[item.key] = item.value;
@@ -118,7 +122,7 @@ export const getStorySummaries = createServerFn({ method: "GET" }).handler(async
     const ratings = ratingTotals();
     const { docs, front, site } = await client.fetch<{ docs: SanityStory[]; front: LayoutDoc; site: SiteDoc }>(`{
       "site": {
-        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, fit, clear, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
+        "edits": *[_type == "siteEdit" && !(_id in path("drafts.**"))] { key, kind, value, section, usual, alt, layout, fit, clear, crop, "video": coalesce(videoFile.asset->url, video), "videoAssetId": videoFile.asset._ref, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) },
         "legacy": *[_id == "siteContent"][0] { "texts": texts[] { key, value }, "images": images[] { key, alt, "assetId": image.asset._ref, "src": coalesce(image.asset->url + "?auto=format&w=2000", url) } }
       },
       "docs": *[_type == "story" && defined(slug.current)] { ${STORY_FIELDS} },

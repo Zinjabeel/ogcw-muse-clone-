@@ -28,6 +28,23 @@ const SECTION_FIELDS = [
   defineField({ name: "band", title: "Band height (px)", type: "number" }),
 ];
 
+// A video in a photo's place, and a crop by hand (the site editor's photo menu, 23 Oct 2026)
+const MEDIA_FIELDS = [
+  defineField({ name: "videoFile", title: "Video (plays in the photo’s place, muted, on a loop)", type: "file", options: { accept: "video/*" } }),
+  defineField({ name: "video", title: "…or a video link", type: "url" }),
+  defineField({
+    name: "crop",
+    title: "Cropped by hand",
+    description: "Empty: cropped automatically around the middle.",
+    type: "object",
+    fields: [
+      defineField({ name: "x", title: "Across (%)", type: "number" }),
+      defineField({ name: "y", title: "Down (%)", type: "number" }),
+      defineField({ name: "zoom", title: "Zoom (1 = none)", type: "number" }),
+    ],
+  }),
+];
+
 export const siteEdit = defineType({
   name: "siteEdit",
   title: "Site edit",
@@ -59,6 +76,7 @@ export const siteEdit = defineType({
     defineField({ name: "alt", title: "Describe the photo", type: "string", hidden: ({ document }) => document?.["kind"] !== "image" }),
     defineField({ name: "fit", title: "How it fits", type: "string", options: { list: [{ title: "Fill the frame", value: "cover" }, { title: "Whole picture", value: "contain" }] }, hidden: ({ document }) => document?.["kind"] !== "image" }),
     defineField({ name: "clear", title: "Shown clearly (no dark overlay)", type: "boolean", hidden: ({ document }) => document?.["kind"] !== "image" }),
+    ...MEDIA_FIELDS.map((field) => ({ ...field, hidden: ({ document }: { document?: Record<string, unknown> | undefined }) => document?.["kind"] !== "image" })),
     defineField({ name: "usual", title: "Usual wording", type: "string", readOnly: true, description: "What it said before it was changed. Delete this edit to go back to it." }),
     defineField({ name: "section", title: "Part of the site", type: "string", readOnly: true, options: { list: [...SITE_SECTIONS] } }),
     defineField({ name: "page", title: "Changed on the page", type: "string", readOnly: true }),
@@ -113,6 +131,7 @@ const contentFields = [
         defineField({ name: "alt", title: "Describe the photo", type: "string" }),
         defineField({ name: "fit", title: "How it fits", type: "string" }),
         defineField({ name: "clear", title: "Shown clearly", type: "boolean" }),
+        ...MEDIA_FIELDS,
       ],
       preview: { select: { title: "section", subtitle: "key", media: "image" } },
     })],

@@ -85,12 +85,14 @@ export async function prune(input: { cutoff: string }) {
   return { ok: true as const };
 }
 
-/** A photo for the site, sent as a data: address */
+/** A photo or a short video for the site, sent as a data: address */
 export async function upload(input: { dataUrl: string; filename: string }) {
   const { store } = await ready();
-  const match = input.dataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif|avif));base64,([A-Za-z0-9+/=]+)$/);
-  if (!match) throw new Error("That isn’t a picture.");
+  const match = input.dataUrl.match(/^data:((?:image\/(?:jpeg|png|webp|gif|avif))|(?:video\/(?:mp4|webm|quicktime)));base64,([A-Za-z0-9+/=]+)$/);
+  if (!match) throw new Error("That isn’t a picture or a video.");
+  const type = match[1]!;
   const bytes = Uint8Array.from(atob(match[2]!), (char) => char.charCodeAt(0));
-  const asset = await store.assets.upload("image", new Blob([bytes], { type: match[1]! }), { filename: input.filename.replace(/[^\w.-]+/g, "-").slice(0, 120) || "photo.jpg" });
+  const filename = input.filename.replace(/[^\w.-]+/g, "-").slice(0, 120) || (type.startsWith("video/") ? "video.mp4" : "photo.jpg");
+  const asset = await store.assets.upload(type.startsWith("video/") ? "file" : "image", new Blob([bytes], { type }), { filename, contentType: type });
   return { _id: asset._id, url: asset.url };
 }
