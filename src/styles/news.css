@@ -1,0 +1,91 @@
+/* ------------------------------------------------------------------
+   The News page (src/routes/news.index.tsx), owner 20 Oct 2026 ("make it
+   ten times better, it looks very dull"): a black hero with the OGCW News
+   masthead in white over the picked section's newest photo, blurred, and
+   the sections as photo cards (the picked one marked in gold); then the
+   front page's This week layout (its own styles, in styles.css) under a
+   bold heading; then More stories on the smoky grey band, the next row
+   half-faded under a soft blur, and a gold Load more.
+   ------------------------------------------------------------------ */
+.nx { --nx-gold: var(--fx-gold, #e2b84f); --nx-ease: cubic-bezier(.2, .8, .2, 1); }
+@keyframes nx-fade { from { opacity: 0; } }
+
+/* ---------------------------------------------------------- The hero */
+.nx-top { position: relative; overflow: hidden; padding-block: clamp(40px, calc(4.6 * var(--vw, 1vw)), 72px) clamp(36px, calc(4 * var(--vw, 1vw)), 60px); background: #0b0b0b; color: #fff; --ogcw-text: #fff; --ogcw-text-2: rgb(255 255 255 / .74); --ogcw-border: rgb(255 255 255 / .18); --ogcw-accent: var(--nx-gold); }
+.nx-hero-bg { position: absolute; inset: -10%; pointer-events: none; }
+.nx-hero-bg img { width: 100%; height: 100%; object-fit: cover; filter: blur(42px) saturate(1.25) brightness(.42); transform: scale(1.08); animation: nx-fade .7s ease both; }
+.nx-top::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, rgb(11 11 11 / .35), rgb(11 11 11 / .1) 40%, rgb(11 11 11 / .7)); }
+.nx-hero-inner { position: relative; z-index: 1; }
+.nx-top .bs-masthead { padding-bottom: 14px; }
+.nx-top .bs-wordmark { font-size: clamp(56px, calc(6.4 * var(--vw, 1vw)), 112px); letter-spacing: .05em; color: #fff; }
+.nx-top .bs-flag { color: rgb(255 255 255 / .74); }
+.nx-intro { max-width: 46rem; margin: 6px auto 0; font-family: var(--ogcw-serif); font-size: clamp(16px, calc(1.2 * var(--vw, 1vw)), 19px); line-height: 1.5; text-align: center; color: rgb(255 255 255 / .86); animation: nx-fade .5s ease both; }
+
+/* The sections as photo cards */
+.nx-desks { margin-top: clamp(28px, calc(3 * var(--vw, 1vw)), 44px); }
+.nx-desks ul { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 44%); gap: 10px; margin: 0; padding: 0 0 4px; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.nx-desks ul::-webkit-scrollbar { display: none; }
+.nx-desks li { scroll-snap-align: start; }
+.nx-desk { position: relative; display: grid; height: 100%; overflow: hidden; background: #161616; color: #fff; outline: none; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .12); transition: box-shadow .25s ease, transform .35s var(--nx-ease); }
+.nx-desk-photo { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; }
+.nx-desk-photo .bs-photo { position: absolute; inset: 0; }
+.nx-desk-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .55), transparent 55%); transition: background-color .25s ease; }
+.nx-desk-mosaic { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
+.nx-desk-mosaic .bs-photo { position: relative; inset: auto; }
+.nx-desk-text { display: grid; align-content: start; gap: 6px; padding: 12px 14px 16px; }
+.nx-desk-name { font-family: var(--ogcw-display); font-size: clamp(18px, calc(1.3 * var(--vw, 1vw)), 23px); font-weight: 400; line-height: 1.1; overflow-wrap: anywhere; transition: color .2s ease; }
+.nx-desk-latest { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-family: var(--ogcw-ui); font-size: 12.5px; line-height: 1.4; color: rgb(255 255 255 / .78); }
+.nx-desk[aria-current="page"] { box-shadow: inset 0 0 0 2px var(--nx-gold); }
+.nx-desk[aria-current="page"] .nx-desk-name { color: var(--nx-gold); }
+.nx-desk[aria-current="page"]::before { content: ""; position: absolute; top: 12px; left: 12px; z-index: 1; width: 10px; height: 10px; border-radius: 50%; background: var(--nx-gold); box-shadow: 0 0 0 3px rgb(0 0 0 / .45); }
+.nx-desk:focus-visible { box-shadow: inset 0 0 0 2px #fff; }
+
+/* ---------------------------------------------------------- Headings */
+.nx-head { display: grid; gap: 8px; margin-bottom: clamp(24px, calc(2.6 * var(--vw, 1vw)), 36px); padding-bottom: 16px; border-bottom: 2px solid var(--ogcw-text); }
+.nx-head-kicker { display: flex; align-items: center; gap: 10px; margin: 0; font: 800 12px var(--ogcw-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--ogcw-accent); }
+.nx-head-kicker::before { content: ""; width: 22px; height: 2px; background: currentColor; }
+.nx-head-title { margin: 0; font-family: var(--ogcw-display); font-size: clamp(34px, calc(3.6 * var(--vw, 1vw)), 56px); font-weight: 400; line-height: 1.02; letter-spacing: -.02em; }
+.nx-main .bs-section-head { display: block; margin-bottom: 0; }
+.nx-main .bs-week { margin-top: 0; animation: nx-fade .5s ease both; }
+
+/* ---------------------------------------------------------- More stories, on the smoky grey band */
+.nx-more { padding-block: clamp(48px, calc(5 * var(--vw, 1vw)), 80px) clamp(56px, calc(6 * var(--vw, 1vw)), 96px); background: var(--ogcw-bg); color: var(--ogcw-text); }
+:root[data-theme="gold"] .nx-more { background: radial-gradient(ellipse 70% 120% at 15% 0%, rgb(255 255 255 / .45), transparent 60%), radial-gradient(ellipse 60% 100% at 90% 100%, rgb(0 0 0 / .07), transparent 65%), #d9d9d6; }
+.nx-more .bs-all-item { animation: none; }
+/* The next row: the top half of each story, fading out under a soft blur */
+.nx-peek { position: relative; max-height: 400px; overflow: hidden; pointer-events: none; user-select: none; }
+.nx-peek.has-above .bs-all-item { border-top: 1px solid var(--ogcw-border); }
+.nx-peek::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 34%, #d9d9d6 96%);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 30%, #000 82%); mask-image: linear-gradient(to bottom, transparent 30%, #000 82%);
+}
+:root:not([data-theme="gold"]) .nx-peek::after { background: linear-gradient(to bottom, transparent 34%, var(--ogcw-bg) 96%); }
+.nx-more-foot { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: -24px; }
+.nx-load { min-height: 52px; padding-inline: 30px; }
+
+/* Browsers without blur: the fade alone */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .nx-peek::after { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* ---------------------------------------------------------- Bigger screens */
+@media (min-width: 768px) {
+  .nx-desks ul { grid-auto-columns: minmax(150px, 30%); }
+}
+@media (min-width: 1024px) {
+  .nx-desks ul { grid-auto-flow: row; grid-template-columns: repeat(6, minmax(0, 1fr)); overflow: visible; }
+}
+
+/* Hovers only with a real mouse */
+@media (hover: hover) {
+  .nx-desk:hover { transform: translateY(-3px); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .4); }
+  .nx-desk[aria-current="page"]:hover { box-shadow: inset 0 0 0 2px var(--nx-gold); }
+  .nx-desk:hover .bs-photo img { transform: scale(calc(var(--zoom, 1) * 1.06)); }
+  .nx-desk:hover .nx-desk-name { color: var(--nx-gold); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nx-hero-bg img, .nx-intro, .nx-main .bs-week { animation: none; }
+  .nx-desk { transition: none; }
+}

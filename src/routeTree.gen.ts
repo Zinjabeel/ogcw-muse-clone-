@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as CultureRouteImport } from './routes/culture'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -18,11 +19,18 @@ import { Route as GamesRouteImport } from './routes/games'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SportsRouteImport } from './routes/sports'
 import { Route as StreamingRouteImport } from './routes/streaming'
 import { Route as TrendsRouteImport } from './routes/trends'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as AdminSplatRouteImport } from './routes/admin.$'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
+import { Route as ForumIndexRouteImport } from './routes/forum.index'
+import { Route as ForumRoomRouteImport } from './routes/forum.$room'
 import { Route as InfoSlugRouteImport } from './routes/info.$slug'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
@@ -30,7 +38,21 @@ import { Route as OriginalsIndexRouteImport } from './routes/originals.index'
 import { Route as OriginalsSlugRouteImport } from './routes/originals.$slug'
 import { Route as ShopIndexRouteImport } from './routes/shop.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
+import { Route as ShopAllRouteImport } from './routes/shop.all'
+import { Route as ShopBrandsRouteImport } from './routes/shop.brands'
+import { Route as ShopCheckThisOutRouteImport } from './routes/shop.check-this-out'
+import { Route as ShopCheckoutRouteImport } from './routes/shop.checkout'
+import { Route as ShopDropsRouteImport } from './routes/shop.drops'
+import { Route as ShopFeaturedDropsRouteImport } from './routes/shop.featured-drops'
+import { Route as ShopGiftsRouteImport } from './routes/shop.gifts'
+import { Route as ShopLatestRouteImport } from './routes/shop.latest'
+import { Route as ShopMenRouteImport } from './routes/shop.men'
+import { Route as ShopSavedRouteImport } from './routes/shop.saved'
+import { Route as ShopTrendiestRouteImport } from './routes/shop.trendiest'
+import { Route as ShopWomenRouteImport } from './routes/shop.women'
 import { Route as TourBtsArirangRouteImport } from './routes/tour.bts-arirang'
+import { Route as ForumTIdRouteImport } from './routes/forum.t.$id'
+import { Route as ShopPIdRouteImport } from './routes/shop.p.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -77,9 +104,29 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SportsRoute = SportsRouteImport.update({
+  id: '/sports',
+  path: '/sports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StreamingRoute = StreamingRouteImport.update({
@@ -100,6 +147,21 @@ const WorkRoute = WorkRouteImport.update({
 const AdminSplatRoute = AdminSplatRouteImport.update({
   id: '/admin/$',
   path: '/admin/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm',
+  path: '/auth/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumIndexRoute = ForumIndexRouteImport.update({
+  id: '/forum/',
+  path: '/forum/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumRoomRoute = ForumRoomRouteImport.update({
+  id: '/forum/$room',
+  path: '/forum/$room',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InfoSlugRoute = InfoSlugRouteImport.update({
@@ -137,15 +199,86 @@ const ShopSlugRoute = ShopSlugRouteImport.update({
   path: '/shop/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShopAllRoute = ShopAllRouteImport.update({
+  id: '/shop/all',
+  path: '/shop/all',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopBrandsRoute = ShopBrandsRouteImport.update({
+  id: '/shop/brands',
+  path: '/shop/brands',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopCheckThisOutRoute = ShopCheckThisOutRouteImport.update({
+  id: '/shop/check-this-out',
+  path: '/shop/check-this-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopCheckoutRoute = ShopCheckoutRouteImport.update({
+  id: '/shop/checkout',
+  path: '/shop/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopDropsRoute = ShopDropsRouteImport.update({
+  id: '/shop/drops',
+  path: '/shop/drops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopFeaturedDropsRoute = ShopFeaturedDropsRouteImport.update({
+  id: '/shop/featured-drops',
+  path: '/shop/featured-drops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopGiftsRoute = ShopGiftsRouteImport.update({
+  id: '/shop/gifts',
+  path: '/shop/gifts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopLatestRoute = ShopLatestRouteImport.update({
+  id: '/shop/latest',
+  path: '/shop/latest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopMenRoute = ShopMenRouteImport.update({
+  id: '/shop/men',
+  path: '/shop/men',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopSavedRoute = ShopSavedRouteImport.update({
+  id: '/shop/saved',
+  path: '/shop/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopTrendiestRoute = ShopTrendiestRouteImport.update({
+  id: '/shop/trendiest',
+  path: '/shop/trendiest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopWomenRoute = ShopWomenRouteImport.update({
+  id: '/shop/women',
+  path: '/shop/women',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TourBtsArirangRoute = TourBtsArirangRouteImport.update({
   id: '/tour/bts-arirang',
   path: '/tour/bts-arirang',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumTIdRoute = ForumTIdRouteImport.update({
+  id: '/forum/t/$id',
+  path: '/forum/t/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopPIdRoute = ShopPIdRouteImport.update({
+  id: '/shop/p/$id',
+  path: '/shop/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -153,23 +286,45 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
+  '/shop/checkout': typeof ShopCheckoutRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
+  '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -177,24 +332,46 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
+  '/shop/checkout': typeof ShopCheckoutRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
+  '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum': typeof ForumIndexRoute
   '/news': typeof NewsIndexRoute
   '/originals': typeof OriginalsIndexRoute
   '/shop': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/account': typeof AccountRoute
   '/blog': typeof BlogRoute
   '/culture': typeof CultureRoute
   '/explore': typeof ExploreRoute
@@ -202,25 +379,47 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sports': typeof SportsRoute
   '/streaming': typeof StreamingRoute
   '/trends': typeof TrendsRoute
   '/work': typeof WorkRoute
   '/admin/$': typeof AdminSplatRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/forum/$room': typeof ForumRoomRoute
   '/info/$slug': typeof InfoSlugRoute
   '/news/$slug': typeof NewsSlugRoute
   '/originals/$slug': typeof OriginalsSlugRoute
   '/shop/$slug': typeof ShopSlugRoute
+  '/shop/all': typeof ShopAllRoute
+  '/shop/brands': typeof ShopBrandsRoute
+  '/shop/check-this-out': typeof ShopCheckThisOutRoute
+  '/shop/checkout': typeof ShopCheckoutRoute
+  '/shop/drops': typeof ShopDropsRoute
+  '/shop/featured-drops': typeof ShopFeaturedDropsRoute
+  '/shop/gifts': typeof ShopGiftsRoute
+  '/shop/latest': typeof ShopLatestRoute
+  '/shop/men': typeof ShopMenRoute
+  '/shop/saved': typeof ShopSavedRoute
+  '/shop/trendiest': typeof ShopTrendiestRoute
+  '/shop/women': typeof ShopWomenRoute
   '/tour/bts-arirang': typeof TourBtsArirangRoute
+  '/forum/': typeof ForumIndexRoute
   '/news/': typeof NewsIndexRoute
   '/originals/': typeof OriginalsIndexRoute
   '/shop/': typeof ShopIndexRoute
+  '/forum/t/$id': typeof ForumTIdRoute
+  '/shop/p/$id': typeof ShopPIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -228,23 +427,45 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/check-this-out'
+    | '/shop/checkout'
+    | '/shop/drops'
+    | '/shop/featured-drops'
+    | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
+    | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
+    | '/forum/'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/forum/t/$id'
+    | '/shop/p/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -252,23 +473,45 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/check-this-out'
+    | '/shop/checkout'
+    | '/shop/drops'
+    | '/shop/featured-drops'
+    | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
+    | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
+    | '/forum'
     | '/news'
     | '/originals'
     | '/shop'
+    | '/forum/t/$id'
+    | '/shop/p/$id'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/account'
     | '/blog'
     | '/culture'
     | '/explore'
@@ -276,24 +519,46 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/reset-password'
+    | '/robots.txt'
+    | '/rss.xml'
     | '/signup'
+    | '/sitemap.xml'
+    | '/sports'
     | '/streaming'
     | '/trends'
     | '/work'
     | '/admin/$'
+    | '/auth/confirm'
+    | '/forum/$room'
     | '/info/$slug'
     | '/news/$slug'
     | '/originals/$slug'
     | '/shop/$slug'
+    | '/shop/all'
+    | '/shop/brands'
+    | '/shop/check-this-out'
+    | '/shop/checkout'
+    | '/shop/drops'
+    | '/shop/featured-drops'
+    | '/shop/gifts'
+    | '/shop/latest'
+    | '/shop/men'
+    | '/shop/saved'
+    | '/shop/trendiest'
+    | '/shop/women'
     | '/tour/bts-arirang'
+    | '/forum/'
     | '/news/'
     | '/originals/'
     | '/shop/'
+    | '/forum/t/$id'
+    | '/shop/p/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AccountRoute: typeof AccountRoute
   BlogRoute: typeof BlogRoute
   CultureRoute: typeof CultureRoute
   ExploreRoute: typeof ExploreRoute
@@ -301,19 +566,40 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MusicRoute: typeof MusicRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SportsRoute: typeof SportsRoute
   StreamingRoute: typeof StreamingRoute
   TrendsRoute: typeof TrendsRoute
   WorkRoute: typeof WorkRoute
   AdminSplatRoute: typeof AdminSplatRoute
+  AuthConfirmRoute: typeof AuthConfirmRoute
+  ForumRoomRoute: typeof ForumRoomRoute
   InfoSlugRoute: typeof InfoSlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
   OriginalsSlugRoute: typeof OriginalsSlugRoute
   ShopSlugRoute: typeof ShopSlugRoute
+  ShopAllRoute: typeof ShopAllRoute
+  ShopBrandsRoute: typeof ShopBrandsRoute
+  ShopCheckThisOutRoute: typeof ShopCheckThisOutRoute
+  ShopCheckoutRoute: typeof ShopCheckoutRoute
+  ShopDropsRoute: typeof ShopDropsRoute
+  ShopFeaturedDropsRoute: typeof ShopFeaturedDropsRoute
+  ShopGiftsRoute: typeof ShopGiftsRoute
+  ShopLatestRoute: typeof ShopLatestRoute
+  ShopMenRoute: typeof ShopMenRoute
+  ShopSavedRoute: typeof ShopSavedRoute
+  ShopTrendiestRoute: typeof ShopTrendiestRoute
+  ShopWomenRoute: typeof ShopWomenRoute
   TourBtsArirangRoute: typeof TourBtsArirangRoute
+  ForumIndexRoute: typeof ForumIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   OriginalsIndexRoute: typeof OriginalsIndexRoute
   ShopIndexRoute: typeof ShopIndexRoute
+  ForumTIdRoute: typeof ForumTIdRoute
+  ShopPIdRoute: typeof ShopPIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -330,6 +616,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -381,11 +674,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sports': {
+      id: '/sports'
+      path: '/sports'
+      fullPath: '/sports'
+      preLoaderRoute: typeof SportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/streaming': {
@@ -414,6 +735,27 @@ declare module '@tanstack/react-router' {
       path: '/admin/$'
       fullPath: '/admin/$'
       preLoaderRoute: typeof AdminSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/auth/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/': {
+      id: '/forum/'
+      path: '/forum'
+      fullPath: '/forum/'
+      preLoaderRoute: typeof ForumIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/$room': {
+      id: '/forum/$room'
+      path: '/forum/$room'
+      fullPath: '/forum/$room'
+      preLoaderRoute: typeof ForumRoomRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/info/$slug': {
@@ -465,11 +807,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shop/all': {
+      id: '/shop/all'
+      path: '/shop/all'
+      fullPath: '/shop/all'
+      preLoaderRoute: typeof ShopAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/brands': {
+      id: '/shop/brands'
+      path: '/shop/brands'
+      fullPath: '/shop/brands'
+      preLoaderRoute: typeof ShopBrandsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/check-this-out': {
+      id: '/shop/check-this-out'
+      path: '/shop/check-this-out'
+      fullPath: '/shop/check-this-out'
+      preLoaderRoute: typeof ShopCheckThisOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/checkout': {
+      id: '/shop/checkout'
+      path: '/shop/checkout'
+      fullPath: '/shop/checkout'
+      preLoaderRoute: typeof ShopCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/drops': {
+      id: '/shop/drops'
+      path: '/shop/drops'
+      fullPath: '/shop/drops'
+      preLoaderRoute: typeof ShopDropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/featured-drops': {
+      id: '/shop/featured-drops'
+      path: '/shop/featured-drops'
+      fullPath: '/shop/featured-drops'
+      preLoaderRoute: typeof ShopFeaturedDropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/gifts': {
+      id: '/shop/gifts'
+      path: '/shop/gifts'
+      fullPath: '/shop/gifts'
+      preLoaderRoute: typeof ShopGiftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/latest': {
+      id: '/shop/latest'
+      path: '/shop/latest'
+      fullPath: '/shop/latest'
+      preLoaderRoute: typeof ShopLatestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/men': {
+      id: '/shop/men'
+      path: '/shop/men'
+      fullPath: '/shop/men'
+      preLoaderRoute: typeof ShopMenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/saved': {
+      id: '/shop/saved'
+      path: '/shop/saved'
+      fullPath: '/shop/saved'
+      preLoaderRoute: typeof ShopSavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/trendiest': {
+      id: '/shop/trendiest'
+      path: '/shop/trendiest'
+      fullPath: '/shop/trendiest'
+      preLoaderRoute: typeof ShopTrendiestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/women': {
+      id: '/shop/women'
+      path: '/shop/women'
+      fullPath: '/shop/women'
+      preLoaderRoute: typeof ShopWomenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tour/bts-arirang': {
       id: '/tour/bts-arirang'
       path: '/tour/bts-arirang'
       fullPath: '/tour/bts-arirang'
       preLoaderRoute: typeof TourBtsArirangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/t/$id': {
+      id: '/forum/t/$id'
+      path: '/forum/t/$id'
+      fullPath: '/forum/t/$id'
+      preLoaderRoute: typeof ForumTIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/p/$id': {
+      id: '/shop/p/$id'
+      path: '/shop/p/$id'
+      fullPath: '/shop/p/$id'
+      preLoaderRoute: typeof ShopPIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -478,6 +918,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AccountRoute: AccountRoute,
   BlogRoute: BlogRoute,
   CultureRoute: CultureRoute,
   ExploreRoute: ExploreRoute,
@@ -485,19 +926,40 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MusicRoute: MusicRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SportsRoute: SportsRoute,
   StreamingRoute: StreamingRoute,
   TrendsRoute: TrendsRoute,
   WorkRoute: WorkRoute,
   AdminSplatRoute: AdminSplatRoute,
+  AuthConfirmRoute: AuthConfirmRoute,
+  ForumRoomRoute: ForumRoomRoute,
   InfoSlugRoute: InfoSlugRoute,
   NewsSlugRoute: NewsSlugRoute,
   OriginalsSlugRoute: OriginalsSlugRoute,
   ShopSlugRoute: ShopSlugRoute,
+  ShopAllRoute: ShopAllRoute,
+  ShopBrandsRoute: ShopBrandsRoute,
+  ShopCheckThisOutRoute: ShopCheckThisOutRoute,
+  ShopCheckoutRoute: ShopCheckoutRoute,
+  ShopDropsRoute: ShopDropsRoute,
+  ShopFeaturedDropsRoute: ShopFeaturedDropsRoute,
+  ShopGiftsRoute: ShopGiftsRoute,
+  ShopLatestRoute: ShopLatestRoute,
+  ShopMenRoute: ShopMenRoute,
+  ShopSavedRoute: ShopSavedRoute,
+  ShopTrendiestRoute: ShopTrendiestRoute,
+  ShopWomenRoute: ShopWomenRoute,
   TourBtsArirangRoute: TourBtsArirangRoute,
+  ForumIndexRoute: ForumIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   OriginalsIndexRoute: OriginalsIndexRoute,
   ShopIndexRoute: ShopIndexRoute,
+  ForumTIdRoute: ForumTIdRoute,
+  ShopPIdRoute: ShopPIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

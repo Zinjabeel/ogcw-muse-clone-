@@ -3,13 +3,15 @@ import type { PreviewProps } from "sanity";
 import { Img } from "@/components/cards";
 import { toPhoto, type SanityPhoto } from "@/lib/sanity-mapping";
 import { usePageView } from "./page-editor";
+import { Gallery } from "@/components/story-figures";
+import type { GalleryLayout } from "@/data/content";
 
 // How the photo and box blocks in a story's text look in the page view of
 // the studio: the same as on the site (src/routes/news.$slug.tsx). Click one
 // to change it. Outside the page view they keep Sanity's usual look.
 
 type Extra = {
-  photo?: SanityPhoto; first?: SanityPhoto; second?: SanityPhoto; caption?: string; size?: string;
+  photo?: SanityPhoto; first?: SanityPhoto; second?: SanityPhoto; photos?: SanityPhoto[]; galleryLayout?: GalleryLayout; caption?: string; size?: string;
   items?: unknown[]; label?: string; href?: string;
 };
 type Props = PreviewProps & Extra;
@@ -30,17 +32,12 @@ export function StoryImagePreview(props: Props) {
 
 export function StoryImagePairPreview(props: Props) {
   if (!usePageView()) return props.renderDefault(props);
-  const photos = [toPhoto(props.first, 900), toPhoto(props.second, 900)];
-  return (
-    <figure className="og-inline og-pair se-block">
-      <span className="og-pair-photos">
-        {photos.map((photo, index) => photo
-          ? <Img key={index} photo={photo} className="og-pair-photo" />
-          : <span key={index} className="og-pair-photo se-block-photo"><Missing>PHOTO HERE</Missing></span>)}
-      </span>
-      <figcaption>{props.caption || <Missing>CAPTION HERE</Missing>}</figcaption>
-    </figure>
-  );
+  const list = Array.isArray(props.photos) && props.photos.length ? props.photos : [props.first, props.second];
+  const photos = list.flatMap((item) => {
+    const photo = toPhoto(item, 900);
+    return photo ? [photo] : [];
+  });
+  return <Gallery photos={photos} layout={props.galleryLayout ?? "row"} look={{}} caption={props.caption ?? ""} empty={<span className="og-inline-photo se-block-photo"><Missing>PHOTOS HERE</Missing></span>} />;
 }
 
 export function FactsPreview(props: Props) {

@@ -1,51 +1,49 @@
-import { createServerFn } from "@tanstack/react-start";
+import { getSupabase } from "./supabase";
+import { voterId } from "./polls";
+import { castVote } from "./votes-api";
 
 // Reader answers to the yes/no question at the end of each story ("Was this
-// helpful?", "Are you going?"), and the notes people add under it. Answers
-// are counted on the server, so the share a reader sees is everyone's. Notes
-// are kept for the desk to read and never shown on the site.
-// TODO: keep both in a database. In server memory they start again from
-// zero whenever the server restarts, and each server copy keeps its own.
+// helpful?", "Are you going?"), and the notes people add under it. Both are
+// kept in Supabase (story_feedback, story_feedback_notes), so the share a
+// reader sees is everyone's and nothing is lost on a restart. One answer per
+// account, or else per browser, checked by the database. Notes are kept for
+// the desk to read (in Supabase) and never shown on the site; a reader can
+// leave five a day on a story.
 
 export type Answer = "yes" | "no";
 export type FeedbackCounts = Record<Answer, number>;
 
-const counts = new Map<string, FeedbackCounts>();
-const notes: { slug: string; answer: Answer | null; text: string; at: string }[] = [];
-
-const countsFor = (slug: string): FeedbackCounts => counts.get(slug) ?? { yes: 0, no: 0 };
 const storySlug = (value: unknown) => {
   // Any story address (stories can be added in the studio at any time)
   if (typeof value !== "string" || !/^[a-z0-9-]{1,120}$/.test(value)) throw new Error("Not a story address");
   return value;
 };
 const isAnswer = (value: unknown): value is Answer => value === "yes" || value === "no";
+const toCounts = (rows: unknown): FeedbackCounts => {
+  const row = (Array.isArray(rows) ? rows[0] : rows) as { yes?: number | string; no?: number | string } | undefined;
+  return { yes: Number(row?.yes ?? 0), no: Number(row?.no ?? 0) };
+};
 
-export const getFeedback = createServerFn({ method: "GET" })
-  .inputValidator((slug: unknown) => storySlug(slug))
-  .handler(async ({ data }) => countsFor(data));
+export async function getFeedback({ data }: { data: unknown }): Promise<FeedbackCounts> {
+  const { data: rows, error } = await getSupabase().rpc("story_feedback_totals", { p_slug: storySlug(data) });
+  if (error) throw new Error("The answers couldn’t be loaded.");
+  return toCounts(rows);
+}
 
-export const sendFeedback = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => {
-    const { slug, answer } = (input ?? {}) as { slug?: unknown; answer?: unknown };
-    if (!isAnswer(answer)) throw new Error("The answer is yes or no");
-    return { slug: storySlug(slug), answer };
-  })
-  .handler(async ({ data }) => {
-    const next = { ...countsFor(data.slug) };
-    next[data.answer] += 1;
-    counts.set(data.slug, next);
-    return next;
-  });
+// Answers and notes go through the server: as the logged-in account, if there is one (src/lib/votes-api.ts)
+export async function sendFeedback({ data }: { data: { slug: unknown; answer: unknown } }): Promise<FeedbackCounts> {
+  if (!isAnswer(data.answer)) throw new Error("The answer is yes or no");
+  const rows = await castVote("story_feedback_answer", { p_slug: storySlug(data.slug), p_answer: data.answer, p_voter: voterId() }, "That didn’t go through.");
+  return toCounts(rows);
+}
 
-export const sendFeedbackNote = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => {
-    const { slug, answer, text } = (input ?? {}) as { slug?: unknown; answer?: unknown; text?: unknown };
-    if (typeof text !== "string" || !text.trim()) throw new Error("The note is empty");
-    return { slug: storySlug(slug), answer: isAnswer(answer) ? answer : null, text: text.trim().slice(0, 1000) };
-  })
-  .handler(async ({ data }) => {
-    notes.push({ ...data, at: new Date().toISOString() });
-    if (notes.length > 1000) notes.shift();
-    return { ok: true };
-  });
+export async function sendFeedbackNote({ data }: { data: { slug: unknown; answer: unknown; text: unknown } }) {
+  if (typeof data.text !== "string" || !data.text.trim()) throw new Error("The note is empty");
+  await castVote("story_feedback_note", {
+    p_slug: storySlug(data.slug),
+    p_answer: isAnswer(data.answer) ? data.answer : null,
+    p_text: data.text.trim().slice(0, 1000),
+    p_voter: voterId(),
+  }, "That didn’t go through.");
+  return { ok: true };
+}

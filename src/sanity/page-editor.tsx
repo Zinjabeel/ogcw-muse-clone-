@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type DragEvent } from "react";
-import { Check, ChevronDown, ImagePlus, Link2, Plus, RefreshCw, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ClipboardPaste, Copy, ImagePlus, Link2, Palette, Plus, Redo2, RefreshCw, Trash2, Undo2, X } from "lucide-react";
+import { designClasses, type StoryDesign } from "@/data/designs";
+import { DesignPanel, PublishList, useDesignClipboard, useUndo } from "./page-tools";
 import { useDocumentPane } from "sanity/structure";
 import { PlacesButton } from "./placements";
 import { getPublishedId, insert, ObjectInputMember, set, setIfMissing, unset, useClient, type FieldMember, type FormPatch, type ObjectInputProps, type Path, type PatchEvent, type RenderFieldCallback } from "sanity";
@@ -18,18 +20,24 @@ import { SANITY_API_VERSION } from "./env";
 type Source = { _key: string; _type?: string; name?: string; url?: string };
 type Story = {
   title?: string; slug?: { current?: string }; section?: string; kicker?: string; deck?: string; credit?: string; date?: string; updated?: string; certified?: boolean;
-  photo?: SanityPhoto; ask?: string; body?: SanityBlock[]; sources?: Source[];
+  photo?: SanityPhoto; ask?: string; body?: SanityBlock[]; sources?: Source[]; design?: StoryDesign;
 };
-type Change = FormPatch | FormPatch[] | PatchEvent;
+export type Change = FormPatch | FormPatch[] | PatchEvent;
 
 const MODE_KEY = "ogcw-studio-editor";
 /** A story's web address: what the site accepts (src/lib/sanity-stories.ts) */
 export const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ALL_FIELDS = "all-fields";
 
-/** True inside the page view, so the story's photo and box blocks draw themselves as they look on the site */
-export const PageViewContext = createContext(false);
-export const usePageView = () => useContext(PageViewContext);
+/**
+ * Inside the page view: the story's photo and box blocks draw themselves as
+ * they look on the site, with their tools (src/sanity/story-blocks.tsx),
+ * and change the story through this
+ */
+export type PageEditor = { onChange: (change: Change) => void; readOnly: boolean; body: SanityBlock[] };
+export const PageViewContext = createContext<PageEditor | null>(null);
+export const usePageView = () => useContext(PageViewContext) !== null;
+export const usePageEditor = () => useContext(PageViewContext);
 
 const slugify = (text: string) =>
   text.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 90).replace(/-$/, "");
@@ -49,16 +57,13 @@ function checkStory(story: Story): Record<string, string[]> {
   required("slug", story.slug?.current);
   if (story.slug?.current && !SLUG.test(story.slug.current)) add("slug", "Use lowercase letters, numbers and dashes only, e.g. vmas-2026-winners.");
   required("section", story.section);
-  required("kicker", story.kicker?.trim());
   max("kicker", story.kicker, 40);
-  required("deck", story.deck?.trim());
   max("deck", story.deck, 240);
   required("credit", story.credit?.trim());
   max("credit", story.credit, 60);
   if (story.updated && story.date && story.updated < story.date) add("updated", "The latest update can’t be before the date it happened.");
   required("date", story.date);
   required("photo", story.photo?.image?.asset?._ref || story.photo?.url);
-  if (story.photo?.image?.asset?._ref || story.photo?.url) required("photo.alt", story.photo.alt?.trim());
   return errors;
 }
 
@@ -66,10 +71,10 @@ function checkStory(story: Story): Record<string, string[]> {
 
 /** A box you click and type in, styled by whatever it sits in (the headline, the summary…) */
 function Box({
-  label, value, placeholder, onChange, onFocus, errors, readOnly, multiline = false, className = "",
+  label, value, placeholder, onChange, onFocus, errors, readOnly, multiline = false, className = "", field,
 }: {
   label: string; value: string | undefined; placeholder: string; onChange: (value: string) => void; onFocus?: () => void;
-  errors?: string[]; readOnly?: boolean; multiline?: boolean; className?: string;
+  errors?: string[]; readOnly?: boolean; multiline?: boolean; className?: string; /** For "Show me" in the list of what's missing */ field?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   // Grow with the text, and with the column when the pane is resized
@@ -87,7 +92,7 @@ function Box({
   }, [value]);
 
   return (
-    <span className={`se-box ${value ? "" : "se-empty"} ${errors?.length ? "se-invalid" : ""} ${className}`} data-label={label}>
+    <span className={`se-box ${value ? "" : "se-empty"} ${errors?.length ? "se-invalid" : ""} ${className}`} data-label={label} data-field={field}>
       <textarea
         ref={ref}
         className="se-input"
@@ -172,7 +177,7 @@ function LeadPhoto({ photo, onChange, onFocus, errors, altErrors, readOnly }: {
     setDragging(false);
     void upload(event.dataTransfer.files[0]);
   };
-  const useLink = (url: string) => {
+  const applyLink = (url: string) => {
     if (!/^https?:\/\/\S+$/.test(url.trim())) {
       setProblem("Paste a full link that starts with https://");
       return;
@@ -183,7 +188,7 @@ function LeadPhoto({ photo, onChange, onFocus, errors, altErrors, readOnly }: {
   };
 
   return (
-    <figure className="og-article-lead se-lead" onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop}>
+    <figure className="og-article-lead se-lead" data-field="photo" onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={onDrop}>
       {shown ? (
         <div className={`se-photo ${dragging ? "se-dragging" : ""}`}>
           <Img photo={shown} className="og-article-lead-photo" eager />
@@ -206,8 +211,8 @@ function LeadPhoto({ photo, onChange, onFocus, errors, altErrors, readOnly }: {
       {!shown && !readOnly && <button type="button" className="se-link-toggle" onClick={() => setLinking((open) => !open)}><Link2 size={13} aria-hidden="true" /> Use a photo link instead</button>}
       {linking && (
         <span className="se-link">
-          <input type="url" placeholder="Paste a photo link: https://…" autoFocus defaultValue={photo?.url ?? ""} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); useLink(event.currentTarget.value); } if (event.key === "Escape") setLinking(false); }} />
-          <button type="button" aria-label="Use this link" onClick={(event) => useLink((event.currentTarget.previousElementSibling as HTMLInputElement).value)}><Check size={15} aria-hidden="true" /></button>
+          <input type="url" placeholder="Paste a photo link: https://…" autoFocus defaultValue={photo?.url ?? ""} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyLink(event.currentTarget.value); } if (event.key === "Escape") setLinking(false); }} />
+          <button type="button" aria-label="Use this link" onClick={(event) => applyLink((event.currentTarget.previousElementSibling as HTMLInputElement).value)}><Check size={15} aria-hidden="true" /></button>
           <button type="button" aria-label="Cancel" onClick={() => setLinking(false)}><X size={15} aria-hidden="true" /></button>
         </span>
       )}
@@ -215,8 +220,8 @@ function LeadPhoto({ photo, onChange, onFocus, errors, altErrors, readOnly }: {
         Photo: <Box label="Photo credit" value={photo?.credit} placeholder="PHOTO CREDIT HERE" onChange={field("credit")} onFocus={() => onFocus(["photo", "credit"])} readOnly={readOnly} className="se-inline" />
       </figcaption>
       <p className="se-note">
-        <span className="se-note-label">Not shown, read aloud to blind readers:</span>
-        <Box label="Photo description" value={photo?.alt} placeholder="DESCRIBE THE PHOTO HERE" onChange={field("alt")} onFocus={() => onFocus(["photo", "alt"])} errors={altErrors} readOnly={readOnly} />
+        <span className="se-note-label">Optional, not shown: read aloud to blind readers (empty: the headline is read)</span>
+        <Box label="Photo description" value={photo?.alt} placeholder="Describe the photo (optional)" onChange={field("alt")} onFocus={() => onFocus(["photo", "alt"])} errors={altErrors} readOnly={readOnly} />
       </p>
       {/* With no photo the empty frame turns red on its own */}
       {[...(shown ? errors : []), ...(problem ? [problem] : [])].map((message) => <span key={message} className="se-error" role="alert">{message}</span>)}
@@ -272,9 +277,17 @@ export function StoryPageInput(props: ObjectInputProps) {
     if (mode === "page" && selectedGroup && selectedGroup !== ALL_FIELDS) onFieldGroupSelect(ALL_FIELDS);
   }, [mode, selectedGroup, onFieldGroupSelect]);
 
+  // Undo and Redo, Copy and Paste design, the design chooser (src/sanity/page-tools.tsx)
+  const history = useUndo(props.value as Record<string, unknown> | undefined, onChange);
+  const clipboard = useDesignClipboard(story, onChange);
+  const canvas = useRef<HTMLDivElement>(null);
+  // A new, empty story asks how it should look
+  const empty = !story.title && !story.design && !toBlocks(story.body).length && !story.photo;
+  const [designing, setDesigning] = useState<"closed" | "open" | "fresh">(() => (empty && !readOnly ? "fresh" : "closed"));
+
   // What's missing or wrong, box by box: the page's own checks, straight
   // away as you type, plus Sanity's (which also guard the Publish button)
-  const { validation: checks } = useDocumentPane();
+  const { validation: checks, editState } = useDocumentPane();
   const local = checkStory(story);
   const errorsAt = (...path: string[]) => {
     const key = path.join(".");
@@ -318,11 +331,22 @@ export function StoryPageInput(props: ObjectInputProps) {
   const slug = story.slug?.current ?? "";
 
   return (
-    <PageViewContext.Provider value={true}>
-      <div className="se-canvas">
+    <PageViewContext.Provider value={{ onChange, readOnly, body: story.body ?? [] }}>
+      <div className="se-canvas" ref={canvas}>
         <div className="se-bar">
           {switcher}
-          <label className={`se-address ${errorsAt("slug").length ? "se-invalid" : ""}`}>
+          {!readOnly && (
+            <div className="se-tools" role="group" aria-label="Changes and design">
+              <button type="button" className="se-tool" title="Go back to before your last change" disabled={!history.undo} onClick={history.undo}><Undo2 size={14} aria-hidden="true" /> Undo</button>
+              <button type="button" className="se-tool" title="Put the change back" disabled={!history.redo} onClick={history.redo}><Redo2 size={14} aria-hidden="true" /> Redo</button>
+              <span className="se-blk-sep" aria-hidden="true" />
+              <button type="button" className={`se-tool ${designing !== "closed" ? "is-on" : ""}`} title="Choose how this story looks" onClick={() => setDesigning((open) => (open === "closed" ? "open" : "closed"))}><Palette size={14} aria-hidden="true" /> Design</button>
+              <button type="button" className="se-tool" title="Copy this story's design, to paste on another story" onClick={clipboard.copy}><Copy size={14} aria-hidden="true" /> Copy design</button>
+              <button type="button" className="se-tool" title={clipboard.copiedFrom ? `Make this story look like “${clipboard.copiedFrom}”` : "Copy a design from another story first"} disabled={!clipboard.paste} onClick={clipboard.paste}><ClipboardPaste size={14} aria-hidden="true" /> Paste design</button>
+            </div>
+          )}
+          {clipboard.flash && <span className="se-flash" role="status">{clipboard.flash}</span>}
+          <label className={`se-address ${errorsAt("slug").length ? "se-invalid" : ""}`} data-field="slug">
             <span>ogcultureworld.com/news/</span>
             <input
               value={slug}
@@ -340,12 +364,17 @@ export function StoryPageInput(props: ObjectInputProps) {
           {places}
         </div>
         {slug && errorsAt("slug").map((message) => <p key={message} className="se-error se-bar-error" role="alert">{message}</p>)}
+        <PublishList checks={checks} local={local} hasDraft={Boolean(editState?.draft)} canvas={canvas} />
+        {designing !== "closed" && (
+          <DesignPanel design={story.design} fresh={designing === "fresh"} readOnly={readOnly} onChange={onChange} onClose={() => setDesigning("closed")} />
+        )}
 
-        <article className="og-article se-wrap">
+        <article className={`og-article se-wrap ${designClasses(story.design)}`}>
+          {story.design?.look === "breaking" && <p className="og-breaking-bar"><span>Breaking</span></p>}
           <header className="og-article-head">
             <div className="og-article-top">
               <div>
-                <nav className="og-crumbs" aria-label="Section">
+                <nav className="og-crumbs" aria-label="Section" data-field="section">
                   <span>News</span>
                   <span aria-hidden="true">/</span>
                   <Choice
@@ -359,21 +388,21 @@ export function StoryPageInput(props: ObjectInputProps) {
                   />
                 </nav>
                 <p className="og-kicker">
-                  <Box label="Label" value={story.kicker} placeholder="LABEL HERE" onChange={text("kicker")} onFocus={focus(["kicker"])} errors={errorsAt("kicker")} readOnly={readOnly} />
+                  <Box field="kicker" label="Label" value={story.kicker} placeholder="LABEL HERE (optional)" onChange={text("kicker")} onFocus={focus(["kicker"])} errors={errorsAt("kicker")} readOnly={readOnly} />
                 </p>
                 <h1 className="og-article-title">
-                  <Box label="Headline" value={story.title} placeholder="HEADLINE HERE" onChange={text("title")} onFocus={focus(["title"])} errors={errorsAt("title")} readOnly={readOnly} />
+                  <Box field="title" label="Headline" value={story.title} placeholder="HEADLINE HERE" onChange={text("title")} onFocus={focus(["title"])} errors={errorsAt("title")} readOnly={readOnly} />
                 </h1>
                 <p className="og-article-deck">
-                  <Box label="Summary" value={story.deck} placeholder="SUMMARY HERE: one or two sentences under the headline" onChange={text("deck")} onFocus={focus(["deck"])} errors={errorsAt("deck")} readOnly={readOnly} />
+                  <Box field="deck" label="Summary" value={story.deck} placeholder="SUMMARY HERE (optional): one or two sentences under the headline" onChange={text("deck")} onFocus={focus(["deck"])} errors={errorsAt("deck")} readOnly={readOnly} />
                 </p>
               </div>
               <LeadPhoto photo={story.photo} onChange={onChange} onFocus={onPathFocus} errors={errorsAt("photo")} altErrors={errorsAt("photo", "alt")} readOnly={readOnly} />
             </div>
             <div className="og-byline">
               {/* Who the news comes from: a real company or publication, or OGCW */}
-              <span className="se-credit">{story.credit === "OGCW" ? "By" : "Source:"} <Box label="Source" value={story.credit} placeholder="SOURCE HERE" onChange={text("credit")} onFocus={focus(["credit"])} errors={errorsAt("credit")} readOnly={readOnly} className="se-inline" /></span>
-              <DateChoice value={story.date} onChange={text("date")} readOnly={readOnly} invalid={errorsAt("date").length > 0} />
+              <span className="se-credit">{story.credit === "OGCW" ? "By" : "Source:"} <Box field="credit" label="Source" value={story.credit} placeholder="SOURCE HERE" onChange={text("credit")} onFocus={focus(["credit"])} errors={errorsAt("credit")} readOnly={readOnly} className="se-inline" /></span>
+              <span data-field="date"><DateChoice value={story.date} onChange={text("date")} readOnly={readOnly} invalid={errorsAt("date").length > 0} /></span>
               <span className="se-updated">
                 <DateChoice value={story.updated} onChange={text("updated")} readOnly={readOnly} invalid={errorsAt("updated").length > 0} empty="+ LATEST UPDATE" prefix="Latest update: " />
                 {story.updated && !readOnly && <button type="button" className="se-icon" aria-label="Remove the latest update" onClick={() => onChange(unset(["updated"]))}><X size={13} aria-hidden="true" /></button>}

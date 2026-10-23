@@ -15,7 +15,6 @@ import zeratorPhoto from "../assets/news/zerator-zevent.jpg";
 import twitchconPhoto from "../assets/news/twitchcon-block-party.jpg";
 import runwayPhoto from "../assets/news/runway-mcqueen.jpg";
 import wylePhoto from "../assets/news/noah-wyle.jpg";
-import barbicanPhoto from "../assets/news/barbican-lakeside.jpg";
 import mileyPhoto from "../assets/news/miley-cyrus-primavera.jpg";
 import skarsgardPhoto from "../assets/news/bill-skarsgard.jpg";
 import speedPhoto from "../assets/news/ishowspeed-singapore.jpg";
@@ -27,6 +26,13 @@ import colePhoto from "../assets/news/j-cole-2010.jpg";
 import coleArenaPhoto from "../assets/news/j-cole-arena.jpg";
 import futurePhoto from "../assets/news/future-2014.jpg";
 import cardiPhoto from "../assets/news/cardi-b-vma.jpg";
+import pollCartiPhoto from "../assets/news/poll-playboi-carti.jpg";
+import pollTylerPhoto from "../assets/news/poll-tyler-the-creator.jpg";
+import pollDojaPhoto from "../assets/news/poll-doja-cat.jpg";
+import pollCentralCeePhoto from "../assets/news/poll-central-cee.jpg";
+import pollDavePhoto from "../assets/news/poll-dave.jpg";
+import pollMeganPhoto from "../assets/news/poll-megan-thee-stallion.jpg";
+import pollRockyPhoto from "../assets/news/poll-asap-rocky.jpg";
 import durkPhoto from "../assets/news/lil-durk.jpg";
 import tupacStarPhoto from "../assets/news/tupac-shakur-star.jpg";
 import jhenePhoto from "../assets/news/jhene-aiko.jpg";
@@ -56,18 +62,21 @@ import galleriaPhoto from "../assets/news/galleria-milano.jpg";
 import courregesPhoto from "../assets/news/courreges-1965.jpg";
 import haskinsPhoto from "../assets/news/dennis-haskins.jpg";
 import { unsplash, youtubeThumb, youtubeUrl } from "./media";
+import { ARIRANG_TOUR, stopLabel, upcomingStops } from "./tours";
 import { STORY_BODIES } from "./stories";
+import type { CaptionSize, StoryDesign } from "./designs";
 
 export type Crop = { pos: string; zoom?: number };
 export type Photo = { src: string; alt: string; credit?: string; crop?: Crop };
 export type Source = { name: string; url: string };
 
-export type SectionId = "music" | "games" | "streaming" | "culture";
+export type SectionId = "music" | "games" | "streaming" | "culture" | "sports";
 export const SECTIONS: Record<SectionId, { label: string; intro: string }> = {
   music: { label: "Music", intro: "New releases, tours and the awards nights everyone is talking about." },
-  games: { label: "Games", intro: "Launches, sales and the showcases setting up the next few years of play." },
+  games: { label: "Gaming", intro: "Launches, sales and the showcases setting up the next few years of play." },
   streaming: { label: "Streaming", intro: "The creators, records and charity marathons that live on Twitch, YouTube and Kick." },
-  culture: { label: "Culture", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
+  culture: { label: "Entertainment", intro: "Fashion weeks, television, sneakers and the shows shaping the season." },
+  sports: { label: "Sports", intro: "The games, records and athletes crossing over into music and fashion." },
 };
 export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 
@@ -76,12 +85,16 @@ export const SECTION_IDS = Object.keys(SECTIONS) as SectionId[];
 // a checklist ("what to prepare"), questions and answers, the questions a
 // story will answer, a summary, a timeline and links to related stories.
 export type ImageSize = "inline" | "wide" | "full" | "side";
+/** How a caption looks: its size, where it sits, and its style (set per photo in the studio) */
+export type CaptionLook = { captionSize?: CaptionSize; captionAlign?: "left" | "center"; captionStyle?: "plain" | "italic" | "bar" };
+/** Photos together: side by side in one row, a slideshow with arrows, or a grid */
+export type GalleryLayout = "row" | "slider" | "grid";
 export type Block =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
   | { type: "quote"; text: string }
-  | { type: "image"; photo: Photo; caption: string; size?: ImageSize }
-  | { type: "images"; photos: [Photo, Photo]; caption: string }
+  | ({ type: "image"; photo: Photo; caption: string; size?: ImageSize } & CaptionLook)
+  | ({ type: "images"; photos: Photo[]; caption: string; layout?: GalleryLayout; columns?: number } & CaptionLook)
   | { type: "list"; items: string[] }
   | { type: "facts"; title: string; items: [string, string][] }
   | { type: "checklist"; title: string; items: string[] }
@@ -112,6 +125,8 @@ export type Article = {
   body: Block[];
   sources: Source[];
   ask?: string; // the yes/no question at the end ("Are you going?"); "Was this helpful?" when unset
+  /** The page's look, chosen in the studio (src/data/designs.ts); the classic look when unset */
+  design?: StoryDesign;
 };
 
 export { youtubeThumb, youtubeUrl, spotifyTrack } from "./media";
@@ -1067,11 +1082,11 @@ export const CONTENT_OF_THE_MONTH: RankedCreator[] = [
 export const AWARDS_SOURCE = { name: "Wikipedia: 2025 Streamer Awards", url: "https://en.wikipedia.org/wiki/2025_Streamer_Awards" };
 
 // ---------------------------------------------------------------- The No. 1 rapper vote
-// The poll on the rap desk (home page): five names, each with the case for
-// them from "Five rappers, five number ones". The ids are what the vote
-// counter keeps (src/lib/rap-poll.ts).
+// The poll on the rap desk (home page): twelve names, each with the case for
+// them from our own stories. The ids are what the vote counter keeps
+// (src/lib/rap-poll.ts).
 
-export const RAP_POLL_CHOICES = ["kendrick", "drake", "cole", "future", "cardi"] as const;
+export const RAP_POLL_CHOICES = ["kendrick", "drake", "cole", "future", "cardi", "carti", "tyler", "doja", "centralcee", "dave", "megan", "rocky"] as const;
 export type RapPollChoice = (typeof RAP_POLL_CHOICES)[number];
 export type Contender = { id: RapPollChoice; name: string; photo: Photo; case: string };
 export const RAP_POLL: { question: string; story: string; contenders: Contender[] } = {
@@ -1083,6 +1098,13 @@ export const RAP_POLL: { question: string; story: string; contenders: Contender[
     { id: "cole", name: "J. Cole", photo: { src: colePhoto, alt: "J. Cole smiling on stage", credit: "H D, CC BY 2.0", crop: { pos: "55% 22%" } }, case: "The Fall-Off went straight to No. 1" },
     { id: "future", name: "Future", photo: { src: futurePhoto, alt: "Future in sunglasses and a leather jacket", credit: "thecomeupshow, CC BY 2.0", crop: { pos: "50% 20%" } }, case: "12th No. 1 album, one more than Eminem" },
     { id: "cardi", name: "Cardi B", photo: { src: cardiPhoto, alt: "Cardi B at the 2018 VMAs", credit: "Nicole Alexander, CC BY 3.0", crop: { pos: "40% 35%" } }, case: "Best Hip-Hop at the 2026 VMAs for “Safe”" },
+    { id: "carti", name: "Playboi Carti", photo: { src: pollCartiPhoto, alt: "Playboi Carti on stage in a red jacket", credit: "Wojciech Pędzich, CC BY 4.0", crop: { pos: "50% 18%" } }, case: "Artistic director and Sunday headliner of the tenth ComplexCon" },
+    { id: "tyler", name: "Tyler, the Creator", photo: { src: pollTylerPhoto, alt: "Tyler, the Creator on stage in a furry hat", credit: "Raph_PH, CC BY 2.0", crop: { pos: "50% 25%" } }, case: "Apple Music’s Artist of the Year for 2025" },
+    { id: "doja", name: "Doja Cat", photo: { src: pollDojaPhoto, alt: "Doja Cat performing with pink hair", credit: "LavishRuby, CC BY 3.0", crop: { pos: "62% 30%" } }, case: "Tour Ma Vie: 31 nights in North American arenas" },
+    { id: "centralcee", name: "Central Cee", photo: { src: pollCentralCeePhoto, alt: "Central Cee on stage in a cap", credit: "200izo, CC BY-SA 4.0", crop: { pos: "50% 20%" } }, case: "The first UK rapper past 10 billion Spotify streams" },
+    { id: "dave", name: "Dave", photo: { src: pollDavePhoto, alt: "Dave performing under blue stage light", credit: "Jasonhm121, CC BY-SA 4.0", crop: { pos: "50% 22%" } }, case: "Brit Award for hip hop, grime and rap act in 2026" },
+    { id: "megan", name: "Megan Thee Stallion", photo: { src: pollMeganPhoto, alt: "Megan Thee Stallion singing on stage", credit: "BABYGIRLTOS on YouTube, CC BY 3.0", crop: { pos: "55% 25%" } }, case: "Made her Broadway debut in Moulin Rouge! this year" },
+    { id: "rocky", name: "A$AP Rocky", photo: { src: pollRockyPhoto, alt: "A$AP Rocky in a white hoodie", credit: "The Come Up Show, CC BY 2.0", crop: { pos: "50% 18%" } }, case: "Don’t Be Dumb debuted at No. 1 in January" },
   ],
 };
 
@@ -1097,7 +1119,7 @@ export const EVENTS: UpcomingEvent[] = [
   { date: "2026-10-02", end: "2026-10-03", category: "Music", title: "BTS in Bogotá", detail: "The Arirang World Tour opens its Latin America leg", slug: "bts-arirang-world-tour-latin-america" },
   { date: "2026-10-06", category: "Fashion", title: "Louis Vuitton closes Paris Fashion Week", detail: "The last show of the spring/summer 2027 season", slug: "paris-fashion-week-ss27" },
   { date: "2026-10-16", category: "Film", title: "Whalefall", detail: "20th Century Studios’ adaptation of Daniel Kraus’s novel" },
-  { date: "2026-10-16", end: "2026-10-18", category: "Music", title: "Miley Cyrus at the Hollywood Bowl", detail: "Two rare shows, with Model/Actriz opening", slug: "miley-cyrus-bass-persuades-number-one" },
+  { date: "2026-10-23", end: "2026-10-24", category: "Music", title: "Jay-Z at SoFi Stadium", detail: "The JAY-Z 30 Tour finale", slug: "jay-z-30-tour-sofi-finale" },
   { date: "2026-10-20", category: "Games", title: "Hearthstone: Reign of the Black Empire", detail: "The next expansion, announced at BlizzCon", slug: "blizzcon-2026-diablo-v-starcraft" },
   { date: "2026-10-22", category: "Music", title: "Mercury Prize 2026", detail: "The winner is named live in Newcastle", slug: "mercury-prize-2026-shortlist" },
   { date: "2026-10-23", category: "Film", title: "Klara and the Sun", detail: "Taika Waititi adapts Kazuo Ishiguro’s novel" },
@@ -1122,124 +1144,182 @@ export const EVENTS: UpcomingEvent[] = [
 export type Song = { artist: string; title: string; album: string; year: number; note: string; spotify: string; cover: string };
 const spotifyCover = (id: string) => `https://i.scdn.co/image/ab67616d0000b273${id}`;
 export const SONGS: Song[] = [
+  { artist: "Cardi B feat. Kehlani", title: "Safe", album: "AM I THE DRAMA?", year: 2025, note: "Best Hip-Hop at the 2026 VMAs.", spotify: "5q9I5RmmrLC4U2mW2BnF3K", cover: spotifyCover("4449c12628ef639dd6500c4a") },
   { artist: "Taylor Swift", title: "Patient Zero", album: "The Life of a Showgirl: The Encore", year: 2026, note: "The lead single from The Life of a Showgirl: The Encore, out 25 September.", spotify: "49JeKZqejPtqJKpK7x9Ew4", cover: spotifyCover("b2de0f5e12f0b369fde79953") },
   { artist: "BTS", title: "Swim", album: "ARIRANG", year: 2026, note: "Song of the Year at the 2026 VMAs, and the centrepiece of the Arirang tour.", spotify: "68lbSrXDORS51pmyjZv712", cover: spotifyCover("dfa17fad7f190c901603270e") },
-  { artist: "Cardi B feat. Kehlani", title: "Safe", album: "AM I THE DRAMA?", year: 2025, note: "Best Hip-Hop at the 2026 VMAs.", spotify: "5q9I5RmmrLC4U2mW2BnF3K", cover: spotifyCover("4449c12628ef639dd6500c4a") },
   { artist: "Bad Bunny", title: "NUEVAYoL", album: "DeBÍ TiRAR MáS FOToS", year: 2025, note: "Best Latin at the 2026 VMAs.", spotify: "5TFD2bmFKGhoCRbX61nXY5", cover: spotifyCover("bbd45c8d36e0e045ef640411") },
   { artist: "LISA", title: "Dream", album: "Alter Ego", year: 2025, note: "Best Pop at the 2026 VMAs, for the short film with Kentaro Sakaguchi.", spotify: "5fFdUV9NMDxPjgkS54My63", cover: spotifyCover("4a5dbcceaff49f85a1f1e756") },
 ];
 
-// The live listing on the Music front
+// The live listing on the Music front (and the hero's "Also on OGCW" row):
+// the next stop on the tour, worked out from the dates, then the three after
+const [btsNext, ...btsLater] = upcomingStops(ARIRANG_TOUR, new Date().toISOString().slice(0, 10));
 export const LIVE = {
   kicker: "Live · Tickets",
   title: "BTS: Arirang World Tour",
-  meta: "Bogotá 2–3 Oct · Lima · Santiago · La Plata · São Paulo",
+  meta: btsNext ? [stopLabel(btsNext, "short"), ...btsLater.slice(0, 3).map((stop) => stop.city)].join(" · ") : "Tour dates",
+  next: btsNext ? stopLabel(btsNext) : "",
   url: "https://ibighit.com/bts/eng/",
   photo: { src: btsStadiumPhoto, alt: "A full stadium in Paris waiting for BTS", credit: "Chiyako92, CC BY-SA 4.0", crop: { pos: "50% 55%" } } satisfies Photo,
 };
 
 // ---------------------------------------------------------------- OGCW Originals
 
+// The conversations we point readers to: long-form interviews and podcasts
+// with rappers, streamers and stars. Each one plays from its creator's own
+// YouTube channel, and the poster is that channel's thumbnail, credited.
 export type Episode = {
   slug: string;
-  series: string;
-  number: number;
+  series: string; // the show
+  channel: string; // the YouTube channel it plays from
+  host: string;
+  guest: string;
+  youtube: string; // YouTube video id
   title: string;
   kind: string;
   length: string;
-  date: string;
-  still: Photo; // the frame shown on posters and in the player
+  date: string; // first published
+  still: Photo; // the channel's thumbnail, shown on posters and in the player
   summary: string;
   body: string[];
-  chapters: [string, string][];
-  credits: [string, string][];
+  chapters: [string, string][]; // from the creator's own chapter list, when there is one
   related: string[]; // article slugs
 };
 
+const ytStill = (id: string, alt: string, channel: string, file = "maxresdefault"): Photo => ({ src: `https://i.ytimg.com/vi/${id}/${file}.jpg`, alt, credit: `${channel}, YouTube`, crop: { pos: "50% 50%" } });
+
 export const EPISODES: Episode[] = [
   {
-    slug: "inside-the-listening-bar",
-    series: "OGCW Sessions", number: 1, kind: "Interview", length: "12:40", date: "2026-09-26",
-    still: { src: unsplash("photo-1508700115892-45ecd05ae2ad", 1600), alt: "A neon sign reading “you are what you listen to” on a brick wall", crop: { pos: "50% 50%" } },
-    title: "Inside the listening bar: one night, one record",
-    summary: "We spend a night in a listening bar and ask the selector why one record can hold a room.",
+    slug: "kai-cenat-360-with-jillian",
+    series: "360", channel: "Complex", host: "Jillian Superstar", guest: "Kai Cenat", youtube: "3JZUYeJrCsg",
+    kind: "Interview", length: "24:00", date: "2026-09-23",
+    still: ytStill("3JZUYeJrCsg", "Kai Cenat in conversation on the set of Complex’s 360", "Complex"),
+    title: "Kai Cenat on quitting streaming, heartbreak and taking Streamer University to Europe",
+    summary: "Days before his Vivet runway debut, Kai Cenat sits down with Jillian Superstar for Complex’s 360 and explains why he walked away, and why he is coming back.",
     body: [
-      "One room, one sound system and one rule: listen. OGCW Sessions spends a night behind the counter of a listening bar, from the first record at opening to the last track before the lights come up.",
-      "The selector talks us through how a night is built, why albums beat playlists and what happens to a crowd when nobody reaches for their phone.",
+      "If you want to know where Kai Cenat’s head is right now, start with this one. Recorded for Complex’s 360 series ahead of his Vivet runway debut at New York Fashion Week, it finds one of the biggest streamers in the world in a reflective mood.",
+      "He talks about his nine-month break from streaming and the truth behind the viral “I Quit” video, why he no longer streams with celebrities, and whether there is a limit to how big streaming can get. He also opens up about heartbreak, buying “The Hill” with AMP, and his plans for Streamer University 2027 in Europe, including what he will ask of the creators who take part.",
+      "Short on time? Jump to the Streamer University chapters. Got the full 24 minutes? Stay for the end, where he is asked whether he would ever give streaming up for good.",
     ],
-    chapters: [["00:00", "Opening the room"], ["02:15", "Choosing the first record"], ["06:40", "The crowd goes quiet"], ["10:05", "Last track"]],
-    credits: [["Series", "OGCW Sessions"], ["Produced by", "OGCW"], ["Format", "Interview"]],
-    related: [],
+    chapters: [["0:00", "Intro"], ["1:21", "How Kai Cenat built an empire"], ["3:02", "The truth behind the “I Quit” video"], ["4:45", "Why he doesn’t stream with celebrities any more"], ["7:07", "The secrets behind Streamer University"], ["8:38", "Streamer University is going to Europe"], ["12:03", "How Kai created Vivet"], ["16:50", "Would he ever give up streaming?"], ["19:47", "Heartbreak"]],
+    related: ["kai-cenat-vivet-nyfw", "streamer-university-2026", "kai-cenat-returns-july-2026"],
   },
   {
-    slug: "made-to-last-object-makers",
-    series: "Made to Last", number: 1, kind: "Reportage", length: "08:15", date: "2026-09-23",
-    still: { src: unsplash("photo-1558618666-fcd25c85cd64", 1600), alt: "A maker at work at a lathe in a small studio", crop: { pos: "50% 45%" } },
-    title: "Made to last: in the studio with the object makers",
-    summary: "In the studio with designers building sneakers, headphones and homeware to keep, not to flip.",
+    slug: "druski-diary-of-a-ceo",
+    series: "The Diary Of A CEO", channel: "The Diary Of A CEO", host: "Steven Bartlett", guest: "Druski", youtube: "UhzI1fg8rCA",
+    kind: "Podcast", length: "1:48:42", date: "2026-09-24",
+    still: ytStill("UhzI1fg8rCA", "Druski in conversation with Steven Bartlett on The Diary Of A CEO", "The Diary Of A CEO"),
+    title: "Druski on trauma, comedy and the lie of overnight success",
+    summary: "The comedian who hosted this year’s BET Awards spends nearly two hours with Steven Bartlett on where his drive comes from.",
     body: [
-      "Made to Last visits the studios of designers who build objects meant to outlive the feed, from repairable headphones to shoes resoled rather than replaced.",
-      "We follow a single piece from sketch to finished object and ask what it takes to design for ten years instead of ten days.",
+      "Druski is everywhere right now: viral sketches, his own independent production company and, in June, the host’s chair at the BET Awards. In this long conversation with Steven Bartlett on The Diary Of A CEO, he slows down and explains how he got there.",
+      "He talks about growing up in a high-stress, physically abusive household and how humour became the way through it, about betting everything on himself, and about why the idea of overnight success is a lie. He also explains how Drake changed his life. Be aware that the conversation includes discussion of child abuse and violence.",
+      "It is long, but it is the fullest picture yet of the man behind the characters.",
     ],
-    chapters: [["00:00", "The studio"], ["01:50", "Materials first"], ["04:30", "Repair, not replace"], ["07:10", "What lasting means"]],
-    credits: [["Series", "Made to Last"], ["Produced by", "OGCW"], ["Format", "Reportage"]],
-    related: ["sneaker-drops-late-september-2026"],
+    chapters: [],
+    related: ["bet-awards-2026-winners", "drake-fomo-film-2027-tour"],
   },
   {
-    slug: "the-list-records-that-shaped-the-year",
-    series: "The List", number: 1, kind: "The list", length: "05:32", date: "2026-09-20",
-    still: { src: unsplash("photo-1470225620780-dba8ba36b745", 1600), alt: "A DJ’s hands on a controller lit purple", crop: { pos: "50% 50%" } },
-    title: "Ten records that shaped the year so far",
-    summary: "The OGCW music desk counts down the records everyone kept coming back to.",
+    slug: "inspectah-deck-drink-champs",
+    series: "Drink Champs", channel: "Drink Champs", host: "N.O.R.E. and DJ EFN", guest: "Inspectah Deck", youtube: "9UHd-ktqTxM",
+    kind: "Podcast", length: "3:06:12", date: "2026-09-28",
+    still: ytStill("9UHd-ktqTxM", "Inspectah Deck on the set of Drink Champs", "Drink Champs", "hqdefault"),
+    title: "Inspectah Deck on Wu-Tang, RZA and the verses that made him a legend",
+    summary: "More than three hours with N.O.R.E. and DJ EFN, weeks before Wu-Tang Clan enter the Rock & Roll Hall of Fame.",
     body: [
-      "The List is OGCW’s fast countdown format. In this first episode the music desk argues its way through the records that defined the year so far, from K-pop to Latin, pop and rap.",
-      "Expect disagreements, a few surprises and at least one record you’ll want to go back to.",
+      "If you are getting ready for Wu-Tang Clan’s induction into the Rock & Roll Hall of Fame on 14 November, start here. Inspectah Deck, the man behind some of the most quoted verses in rap, from “C.R.E.A.M.” to his opening on “Triumph”, sits down with N.O.R.E. and DJ EFN for more than three hours of Drink Champs.",
+      "He goes back to the early days of the group and his journey from Brooklyn and Staten Island, his relationship with RZA and the other members, and the chemistry that turned a crew of hungry New York MCs into a global movement. He also talks about his creative process, his solo career and the challenges that shaped it.",
+      "Drink Champs is loose, long and full of tangents, which is exactly the point: the stories come out the way they would at a bar. Settle in.",
     ],
-    chapters: [["00:00", "The rules"], ["00:45", "10 to 6"], ["02:40", "5 to 2"], ["04:30", "Number one"]],
-    credits: [["Series", "The List"], ["Produced by", "OGCW music desk"], ["Format", "Countdown"]],
-    related: ["vmas-2026-winners", "taylor-swift-the-life-of-a-showgirl-the-encore"],
+    chapters: [],
+    related: ["rock-hall-2026-wu-tang-clan-queen-latifah"],
   },
   {
-    slug: "street-level-independent-labels",
-    series: "Street Level", number: 1, kind: "Reportage", length: "10:05", date: "2026-09-18",
-    still: { src: unsplash("photo-1445205170230-053b83016050", 1600), alt: "Clothes on rails backstage, lit warm", crop: { pos: "50% 50%" } },
-    title: "Independent labels, off the runway",
-    summary: "Backstage at a show staged under a bridge, with the labels skipping fashion week altogether.",
+    slug: "cardi-b-breakfast-club-am-i-the-drama",
+    series: "The Breakfast Club", channel: "Breakfast Club Power 105.1 FM", host: "The Breakfast Club", guest: "Cardi B", youtube: "E5dwBAiRc6w",
+    kind: "Interview", length: "1:00:03", date: "2025-09-19",
+    still: ytStill("E5dwBAiRc6w", "Cardi B in the studio at The Breakfast Club", "Breakfast Club Power 105.1 FM"),
+    title: "Cardi B on Am I the Drama?, touring and starting over",
+    summary: "On the day her second album came out, Cardi B spent an hour with The Breakfast Club. It is the best way into the record, and the tour that followed.",
     body: [
-      "Street Level follows the independent labels putting on shows in car parks, basements and under bridges, with friends as models and local producers on the soundtrack.",
-      "We go backstage before, during and after a show to see how a collection comes together without a fashion house behind it.",
+      "Cardi B released Am I the Drama? on 19 September 2025, and that morning she sat down with The Breakfast Club. The result is an hour-long conversation that covers almost everything people wanted to ask her.",
+      "She talks about her pregnancy, dating after her separation, the new album and her plans to tour, months before the Little Miss Drama Tour became the highest-grossing debut arena run by a female rapper.",
+      "Watch it alongside our report on the tour’s record numbers and you get the full arc: the promise, then the proof.",
     ],
-    chapters: [["00:00", "Finding the location"], ["03:10", "Casting from friends"], ["06:00", "Showtime"], ["08:45", "Sold in the room"]],
-    credits: [["Series", "Street Level"], ["Produced by", "OGCW"], ["Format", "Reportage"]],
-    related: ["paris-fashion-week-ss27"],
+    chapters: [],
+    related: ["cardi-b-little-miss-drama-tour-record", "bet-awards-2026-winners"],
   },
   {
-    slug: "city-notes-where-brutalism-lives",
-    series: "City Notes", number: 1, kind: "Analysis", length: "07:48", date: "2026-09-15",
-    still: { src: barbicanPhoto, alt: "Concrete towers and walkways over the lake at London’s Barbican Estate", credit: "Julian Herzog, CC BY 4.0", crop: { pos: "50% 55%" } },
-    title: "Where brutalism lives now",
-    summary: "A walk through the concrete buildings a new generation wants to save.",
+    slug: "clipse-pharrell-complex-cover",
+    series: "Complex Cover", channel: "Complex", host: "Complex", guest: "Clipse and Pharrell", youtube: "CPV6T5EFRe0",
+    kind: "Interview", length: "47:00", date: "2025-07-11",
+    still: ytStill("CPV6T5EFRe0", "Pusha T, Malice and Pharrell together for their Complex cover", "Complex"),
+    title: "Clipse and Pharrell tell the story behind Let God Sort Em Out",
+    summary: "Pusha T, Malice and Pharrell play the album song by song and explain how it came together.",
     body: [
-      "City Notes is a walking series about how cities shape culture. This episode tours the brutalist buildings that became the backdrop for a generation’s photographs and videos.",
-      "Along the way: why concrete photographs so well at night, and what these buildings still promise the public.",
+      "Let God Sort Em Out was one of the great comebacks of 2025, and this is the best way to hear how it was made. On release day, Clipse and Pharrell sat down with Complex for a listening session, stopping after each song to explain it.",
+      "They play “Chains & Whips” with Kendrick Lamar, “Let God Sort Em/Chandeliers” with Nas, “So Far Ahead”, “Ace Trumpets” and “So Be It”, and talk about the state of rap, why Malice felt ready to make music again, how Pusha T felt after 15 years as a solo artist and Pharrell’s wish to make music that does not age.",
+      "Pharrell also remembers the day he first met the Thornton brothers, a story every Clipse fan should hear.",
     ],
-    chapters: [["00:00", "Concrete at night"], ["02:20", "Built for the public"], ["05:05", "Saving what’s left"]],
-    credits: [["Series", "City Notes"], ["Produced by", "OGCW"], ["Format", "Analysis"]],
-    related: [],
+    chapters: [["0:00", "Intro"], ["0:42", "“Chains & Whips” with Kendrick Lamar"], ["5:55", "“Let God Sort Em/Chandeliers” with Nas"], ["11:51", "“So Far Ahead” with Pharrell"], ["20:53", "Pharrell on Martin Scorsese and more"], ["22:34", "“Ace Trumpets”"], ["26:29", "Pharrell remembers meeting Clipse"], ["29:26", "“So Be It”"]],
+    related: ["clipse-let-god-sort-em-out-year", "pharrell-louis-vuitton-ss27-surf-show", "bet-awards-2026-winners"],
   },
   {
-    slug: "print-run-the-zine-makers",
-    series: "Print Run", number: 1, kind: "Short doc", length: "09:20", date: "2026-09-12",
-    still: { src: unsplash("photo-1457369804613-52c61a468e7d", 1600), alt: "Printed pages laid out edge to edge", crop: { pos: "50% 50%" } },
-    title: "The zine makers",
-    summary: "In a shared studio with the people printing small-run magazines that sell out in days.",
+    slug: "kai-cenat-hot-ones",
+    series: "Hot Ones", channel: "First We Feast", host: "Sean Evans", guest: "Kai Cenat", youtube: "aDT5efihCcY",
+    kind: "Interview", length: "23:02", date: "2025-07-10",
+    still: ytStill("aDT5efihCcY", "Kai Cenat at the Hot Ones table with a plate of wings", "First We Feast"),
+    title: "Kai Cenat takes on the wings of death on Hot Ones",
+    summary: "The streamer faces Sean Evans’s hot sauce line-up and talks the NBA, Kevin Hart and why Sean is the GOAT.",
     body: [
-      "Print Run spends a week in a shared studio where small-run magazines and zines are made, printed and packed by hand.",
-      "We follow one issue from layout to launch night, and ask why a printed page still matters to people who grew up online.",
+      "Hot Ones is the interview show where the questions get harder as the wings get hotter, and Kai Cenat is exactly the guest it was made for. Freshly named to the TIME100 Creators list, he sits down with Sean Evans and works his way through the wings of death.",
+      "Between bites they talk about the state of the NBA, his relationship with Kevin Hart and why Kai thinks Sean is the greatest of all time. Expect a lot of shouting.",
     ],
-    chapters: [["00:00", "The studio"], ["02:40", "Layout"], ["05:15", "On the press"], ["08:00", "Launch night"]],
-    credits: [["Series", "Print Run"], ["Produced by", "OGCW"], ["Format", "Short documentary"]],
-    related: [],
+    chapters: [],
+    related: ["kai-cenat-wolverine-marathon", "kai-cenat-vivet-nyfw"],
+  },
+  {
+    slug: "bad-bunny-hot-ones",
+    series: "Hot Ones", channel: "First We Feast", host: "Sean Evans", guest: "Bad Bunny", youtube: "HyqEtb5HE50",
+    kind: "Interview", length: "20:30", date: "2025-01-23",
+    still: ytStill("HyqEtb5HE50", "Bad Bunny at the Hot Ones table", "First We Feast"),
+    title: "Bad Bunny risks his life on Hot Ones",
+    summary: "Weeks after Debí Tirar Más Fotos came out, Benito took on the wings and talked “BAILE INoLVIDABLE”, fashion and wrestling.",
+    body: [
+      "Watch this one and you can see the year Bad Bunny was about to have. Debí Tirar Más Fotos had just gone to No. 1, the Puerto Rico residency was coming that summer, and the Album of the Year Grammy and the Super Bowl were still ahead of him.",
+      "With Sean Evans he works through the wings of death and talks about the making of “BAILE INoLVIDABLE”, his most memorable fashion moments and why he is the best celebrity wrestler of all time. He also, memorably, dips a wing in ice cream.",
+    ],
+    chapters: [],
+    related: ["bad-bunny-super-bowl-lx-halftime-audience", "bad-bunny-europe-stadium-tour-2026", "latin-grammys-2026-nominations"],
+  },
+  {
+    slug: "central-cee-chicken-shop-date",
+    series: "Chicken Shop Date", channel: "Amelia Dimoldenberg", host: "Amelia Dimoldenberg", guest: "Central Cee", youtube: "kh1Hz1HIJDE",
+    kind: "Interview", length: "7:28", date: "2023-02-14",
+    still: ytStill("kh1Hz1HIJDE", "Central Cee and Amelia Dimoldenberg at a table in a chicken shop", "Amelia Dimoldenberg"),
+    title: "Central Cee goes on a Chicken Shop Date",
+    summary: "Amelia Dimoldenberg takes the west London rapper on a Valentine’s Day date over fried chicken.",
+    body: [
+      "Chicken Shop Date is the most awkward interview format in Britain, and that is why it works. Amelia Dimoldenberg takes a famous guest to a local chicken shop, asks the questions nobody else would and lets the silences do the work.",
+      "Released on Valentine’s Day 2023, her date with Central Cee is a classic of the format. They talk about the perfect date, commitment, effort in relationships and his personal style.",
+      "It is seven and a half minutes long. You have time.",
+    ],
+    chapters: [],
+    related: ["central-cee-islam-all-roads-lead-home", "central-cee-bredx-abu-dhabi", "uk-awards-2026-olivia-dean-dave-central-cee"],
+  },
+  {
+    slug: "megan-thee-stallion-hot-ones",
+    series: "Hot Ones", channel: "First We Feast", host: "Sean Evans", guest: "Megan Thee Stallion", youtube: "kDx5WNdbCSU",
+    kind: "Interview", length: "23:41", date: "2021-10-14",
+    still: ytStill("kDx5WNdbCSU", "Megan Thee Stallion at the Hot Ones table", "First We Feast"),
+    title: "Megan Thee Stallion turns into Hot Girl Meg on Hot Ones",
+    summary: "A self-confessed spice lover takes on the wings and talks anime, freak anthems and the day Cardi B brought a python to set.",
+    body: [
+      "With Act III still on the way, now is a good time to go back to one of Megan Thee Stallion’s most fun interviews. Megan, a self-confessed spice lover with a hot sauce of her own, takes on the full Hot Ones line-up with Sean Evans.",
+      "She talks about her love of anime, the keys to a great freak anthem and the time Cardi B brought a 120-pound albino python to a video set. If you only know Megan from her songs, this is the place to meet the personality.",
+    ],
+    chapters: [],
+    related: ["megan-thee-stallion-marie-claire-act-iii", "cardi-b-little-miss-drama-tour-record"],
   },
 ];
 
@@ -1357,7 +1437,7 @@ export function searchSite(query: string, stories: Article[]): Hit[] {
   const match = (...fields: string[]) => fields.join(" ").toLowerCase().includes(q);
   return [
     ...stories.filter((a) => match(a.title, a.deck, a.kicker, a.credit, SECTIONS[a.section].label)).map((item): Hit => ({ kind: "article", item })),
-    ...EPISODES.filter((e) => match(e.title, e.series, e.summary, e.kind, "originals")).map((item): Hit => ({ kind: "episode", item })),
+    ...EPISODES.filter((e) => match(e.title, e.series, e.guest, e.channel, e.summary, "originals")).map((item): Hit => ({ kind: "episode", item })),
     ...SHOPS.filter((s) => match(s.name, s.tagline, "shop", ...s.products.map((p) => `${p.name} ${p.category}`))).map((item): Hit => ({ kind: "shop", item })),
   ];
 }

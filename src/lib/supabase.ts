@@ -8,11 +8,16 @@ export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_O40ZHX86w6GatKyosuDW7w_r
 
 let client: SupabaseClient | null = null;
 
-/** The Supabase client, in the browser only (it keeps the reader's session in localStorage) */
+/**
+ * Supabase in the browser, for public things only: reading the forum, the
+ * poll and rating counts, the newsletter sign-up. It never holds a login:
+ * logins are kept by the server (src/lib/server/session.server.ts), and
+ * anything done as an account goes through the server.
+ */
 export function getSupabase(): SupabaseClient {
   if (typeof window === "undefined") throw new Error("Supabase is only used in the browser.");
   client ??= createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
   return client;
 }

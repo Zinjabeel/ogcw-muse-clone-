@@ -6,7 +6,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useMemo, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -16,12 +16,17 @@ import { NotFoundPage } from "../components/not-found";
 import { getStorySummaries } from "../lib/sanity-stories";
 import { EMPTY_LAYOUT } from "../data/placements";
 import { EMPTY_SITE, SiteTextProvider } from "../lib/site-text";
-import { SiteEditor } from "../components/site-text";
+import { SiteEditor, SiteLayouts } from "../components/site-text";
 import { StoriesProvider } from "../lib/stories";
 import { StudioHost } from "../components/studio-host";
+import { NewsletterPrompt } from "../components/newsletter-prompt";
 import { CardHover } from "../components/card-hover";
+import { SiteIntro, introInitScript } from "../components/site-intro";
+import { fitInitScript } from "../lib/laptop-fit";
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error: thrown, reset }: { error: unknown; reset: () => void }) {
+  // TanStack Start 1.168.60+ hands over whatever was thrown, not always an Error
+  const error = useMemo(() => (thrown instanceof Error ? thrown : new Error(String(thrown))), [thrown]);
   console.error(error);
   const router = useRouter();
   useEffect(() => {
@@ -71,16 +76,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "Independent news and stories from the people shaping culture now." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:site_name", content: "One Great Culture World" },
+      { name: "theme-color", content: "#0d0d0d" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600;700&display=swap" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Inter:wght@400;500;600;700;800;900&display=swap" },
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      // OGCW's mark (a yellow square with a black O): the tab, phones' home screens and app lists
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
+      { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/site.webmanifest" },
+      // For feed readers (src/routes/rss[.]xml.ts); not shown on the page
+      { rel: "alternate", type: "application/rss+xml", title: "OGCW", href: "/rss.xml" },
     ],
   }),
   // Every story, and which goes where on the front page, live from the
@@ -100,7 +113,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Apply the visitor’s saved colour theme and hero before first paint */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript + heroInitScript }} />
+        {/* The server writes this page's security nonce onto it (src/server.ts), which the browser then hides */}
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: fitInitScript + themeInitScript + heroInitScript + introInitScript }} />
         <HeadContent />
       </head>
       <body>
@@ -111,7 +125,21 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// A link from an OGCW email or a Google login that landed on another page
+// (Supabase sends it to the site's main address when the page it was meant
+// for isn't on its list): passed on to /auth/confirm, which reads it
+function useAuthLinkCatcher() {
+  useEffect(() => {
+    if (window.location.pathname.startsWith("/auth/")) return;
+    const query = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const forUs = query.has("token_hash") || (query.has("code") && window.location.pathname === "/") || hash.has("access_token") || (query.has("error_description") && query.has("error"));
+    if (forUs) window.location.replace(`/auth/confirm${window.location.search}${window.location.hash}`);
+  }, []);
+}
+
 function RootComponent() {
+  useAuthLinkCatcher();
   const { queryClient } = Route.useRouteContext();
   const { stories, layout, ratings, site } = Route.useLoaderData();
 
@@ -126,7 +154,13 @@ function RootComponent() {
             <Outlet />
           </StudioHost>
           <SiteEditor />
+          {/* After logging in: "Subscribe to our newsletter", once per account */}
+          <NewsletterPrompt />
+          {/* Pictures an admin moved or resized, in their places for everyone */}
+          <SiteLayouts />
           <CardHover />
+          {/* The intro when you enter the site: the wordmark spreads, then docks into the logo */}
+          <SiteIntro />
         </SiteTextProvider>
       </StoriesProvider>
     </QueryClientProvider>

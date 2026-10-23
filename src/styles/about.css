@@ -1,0 +1,174 @@
+/* ------------------------------------------------------------------
+   The About page (src/routes/about.tsx), owner 19 Oct 2026, after
+   Moncler's "In Moncler": full-screen photo chapters with a few words on
+   them, calm off-white chapters laid out on twelve columns (title, picture,
+   words), quiet headings in the display serif at one weight, uppercase text
+   links with a chevron. Moncler's red-washed archive photo is a gold wash
+   here. Nothing moves on scroll; only hovering or picking a desk changes
+   anything. Square corners throughout.
+   ------------------------------------------------------------------ */
+.ab {
+  --ab-gutter: clamp(16px, 4.4vw, 80px);
+  --ab-gap: clamp(16px, 2vw, 32px);
+  --ab-tall: min(calc(100svh - 56px), 1000px);
+  --ab-ease: cubic-bezier(.2, .8, .2, 1);
+  background: var(--ogcw-bg);
+}
+@media (min-width: 1024px) { .ab { --ab-tall: min(calc(100svh - 122px), 1000px); } }
+.ab [id] { scroll-margin-top: 80px; }
+.ab .bs-photo { border-radius: 0; box-shadow: none; }
+
+/* The off-white chapters (Moncler's #F7F8F3, kept neutral) */
+.ab-paper { background: var(--ogcw-bg); color: var(--ogcw-text); }
+:root[data-theme="gold"] .ab-paper {
+  --ogcw-bg: #f6f6f3;
+  --ogcw-surface: #ececea;
+  --ogcw-text: #0a0a0a;
+  --ogcw-text-2: #555553;
+  --ogcw-border: #dcdcd7;
+  --ogcw-accent: #8a6410;
+  color-scheme: light;
+}
+
+/* Twelve columns, edge to edge with a gutter */
+.ab-grid { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 22px; column-gap: var(--ab-gap); padding-inline: var(--ab-gutter); }
+
+/* Type: one quiet heading size, serif reading text, uppercase links */
+.ab-h2 { margin: 0; font-family: var(--ogcw-display); font-size: clamp(28px, calc(2.2 * var(--vw, 1vw)), 40px); font-weight: 400; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+.ab-body { margin: 0; max-width: 42ch; font-family: var(--ogcw-serif); font-size: 16.5px; line-height: 1.55; }
+.ab-body a, .ab-rule-copy a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.ab-more { display: inline-flex; align-items: center; gap: 4px; padding-block: 6px; color: inherit; font: 600 12.5px/1 var(--ogcw-ui); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.ab-more svg { transition: transform .25s var(--ab-ease); }
+.ab-more:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.ab-more-row { display: flex; flex-wrap: wrap; gap: 4px 28px; margin: 22px 0 0; }
+.ab-caption { margin-top: 12px; font: 400 12px/1.45 var(--ogcw-ui); color: var(--ogcw-text-2); }
+.ab-credit { position: absolute; right: var(--ab-gutter); bottom: 14px; z-index: 2; margin: 0; font: 400 11px var(--ogcw-ui); letter-spacing: .02em; color: rgb(255 255 255 / .72); }
+
+/* ---------------------------------------------------------- 1. Who we are */
+.ab-hero { position: relative; display: grid; align-items: end; justify-items: center; height: var(--ab-tall); min-height: 540px; overflow: hidden; background: #0a0a0a; color: #fff; text-align: center; }
+.ab-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+.ab-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .78), rgb(0 0 0 / .28) 46%, rgb(0 0 0 / .12)); }
+.ab-hero-text { position: relative; z-index: 1; display: grid; justify-items: center; gap: 14px; max-width: 920px; padding: 0 var(--ab-gutter) clamp(48px, 8svh, 88px); }
+.ab-hero-kicker { margin: 0; font-family: var(--ogcw-display); font-size: clamp(17px, calc(1.2 * var(--vw, 1vw)), 20px); font-weight: 400; }
+.ab-hero-title { margin: 0; font-family: var(--ogcw-display); font-size: clamp(40px, calc(4.2 * var(--vw, 1vw)), 68px); font-weight: 400; line-height: 1.04; letter-spacing: -.018em; text-wrap: balance; }
+.ab-hero-copy { margin: 0; max-width: 46ch; font-family: var(--ogcw-serif); font-size: clamp(16px, calc(1.1 * var(--vw, 1vw)), 18px); line-height: 1.5; color: rgb(255 255 255 / .88); }
+.ab-hero .ab-more { margin-top: 8px; }
+
+/* ---------------------------------------------------------- 2. Our position, on a gold wash */
+.ab-wash { position: relative; display: grid; align-items: center; min-height: var(--ab-tall); overflow: hidden; background: #2b2006; color: #fff; }
+.ab-wash-photo { position: absolute; inset: 0; isolation: isolate; }
+.ab-wash-photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.12) brightness(1.04); }
+.ab-wash-photo::after { content: ""; position: absolute; inset: 0; background: #8a6410; mix-blend-mode: multiply; }
+.ab-wash-grid { position: relative; z-index: 1; padding-block: clamp(64px, 8vw, 120px); align-items: center; }
+.ab-wash-title { max-width: 18ch; font-size: clamp(30px, calc(2.6 * var(--vw, 1vw)), 46px); }
+.ab-wash-copy { margin: 0; max-width: 40ch; font-family: var(--ogcw-serif); font-size: 16.5px; line-height: 1.55; color: #fff; }
+
+/* ---------------------------------------------------------- 3. How we work: title, picture, words */
+.ab-tri { padding-block: clamp(48px, 6vw, 96px); }
+.ab-tri-grid { align-items: center; }
+.ab-tri-figure { margin: 0; }
+.ab-tri-photo-link { display: block; outline: none; }
+.ab-tri-photo { aspect-ratio: 4 / 5; }
+.ab-tri-photo-link:focus-visible { outline: 2px solid var(--ogcw-text); outline-offset: 4px; }
+.ab-tri .ab-more { margin-top: 14px; }
+
+/* ---------------------------------------------------------- 4. The desks: pick one, its picture changes */
+.ab-desks { position: relative; display: grid; align-items: center; min-height: var(--ab-tall); overflow: hidden; padding-block: clamp(64px, 8vw, 120px); background: #1c1c1b; color: #fff; }
+.ab-desks-bg { position: absolute; inset: -12%; }
+.ab-desks-bg img { width: 100%; height: 100%; object-fit: cover; filter: blur(56px) saturate(1.15) brightness(.58); transform: scale(1.1); animation: ab-fade .7s ease both; }
+.ab-desks-grid { position: relative; z-index: 1; align-items: center; }
+.ab-desks-heading { margin: 0 0 22px; font: 600 12px var(--ogcw-ui); letter-spacing: .14em; text-transform: uppercase; color: rgb(255 255 255 / .8); }
+.ab-desks-list { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.ab-desks-tab { padding: 4px 0; border: 0; background: none; color: rgb(255 255 255 / .74); font: 400 20px/1.25 var(--ogcw-display); text-align: left; cursor: pointer; transition: color .2s ease; }
+.ab-desks-tab[aria-selected="true"] { color: #fff; font-size: clamp(24px, calc(2 * var(--vw, 1vw)), 30px); }
+.ab-desks-tab:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.ab-desks-panel { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 22px; column-gap: var(--ab-gap); align-items: center; }
+.ab-desks-figure { display: block; outline: none; animation: ab-fade .45s ease both; }
+.ab-desks-photo { aspect-ratio: 3 / 2; }
+.ab-desks-figure:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.ab-desks-text { animation: ab-fade .45s ease both; }
+.ab-desks-meta { margin: 14px 0 0; max-width: 46ch; font: 400 12.5px/1.5 var(--ogcw-ui); color: rgb(255 255 255 / .8); }
+.ab-desks .ab-more { margin-top: 16px; }
+@keyframes ab-fade { from { opacity: 0; } }
+
+/* ---------------------------------------------------------- 5. The standard */
+.ab-standard { padding-block: clamp(64px, 7vw, 112px); }
+.ab-standard-grid { align-items: start; }
+.ab-rules { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px clamp(32px, 4vw, 72px); margin: 0; padding: 0; list-style: none; }
+.ab-rules li { padding-top: 16px; border-top: 1px solid var(--ogcw-border); }
+.ab-rule-title { margin: 0 0 8px; font-family: var(--ogcw-display); font-size: 21px; font-weight: 400; line-height: 1.25; }
+.ab-rule-copy { margin: 0; max-width: 46ch; font-family: var(--ogcw-serif); font-size: 15.5px; line-height: 1.55; color: var(--ogcw-text-2); }
+
+/* ---------------------------------------------------------- 6. Join in: full screen, words at the foot */
+.ab-join { position: relative; display: grid; align-items: end; min-height: var(--ab-tall); overflow: hidden; background: #0a0a0a; color: #fff; }
+.ab-join-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ab-join::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .88), rgb(0 0 0 / .62) 34%, rgb(0 0 0 / .18) 70%); }
+.ab-join-grid { position: relative; z-index: 1; align-items: end; padding-block: 120px clamp(56px, 8svh, 96px); }
+.ab-join .ab-body { color: rgb(255 255 255 / .9); }
+
+/* ---------------------------------------------------------- 7. More from OGCW: four tall pictures */
+.ab-beyond { padding-block: clamp(56px, 6vw, 96px) clamp(40px, 4vw, 64px); }
+.ab-beyond-head { align-items: start; margin-bottom: clamp(32px, 4vw, 56px); }
+.ab-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0 12px; list-style: none; }
+.ab-card { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; background: #111; color: #fff; outline: none; }
+.ab-card-photo { position: absolute; inset: 0; }
+.ab-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / .62), transparent 38%); }
+.ab-card-label { position: absolute; inset: auto 12px 22px; z-index: 1; display: block; font: 600 12.5px/1.35 var(--ogcw-ui); letter-spacing: .08em; text-align: center; text-transform: uppercase; text-wrap: balance; }
+.ab-card-label svg { display: inline-block; margin-left: 3px; vertical-align: -3px; }
+.ab-card:focus-visible { outline: 2px solid var(--ogcw-text); outline-offset: 3px; }
+
+/* ---------------------------------------------------------- 8. Get in touch */
+.ab-contact { padding-block: clamp(48px, 5vw, 80px) clamp(72px, 8vw, 128px); }
+.ab-contact-grid { align-items: start; }
+.ab-contact-email { margin: 18px 0 0; font-family: var(--ogcw-display); font-size: clamp(22px, calc(1.8 * var(--vw, 1vw)), 28px); font-weight: 400; overflow-wrap: anywhere; }
+.ab-contact-email a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
+.ab-contact-email a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.ab-more-grid { display: grid; grid-template-columns: repeat(2, max-content); gap: 2px 32px; }
+
+/* ---------------------------------------------------------- Phones: one column */
+@media (max-width: 959px) {
+  .ab-wash, .ab-join { align-items: end; }
+  .ab-wash-grid { padding-block: 120px 56px; }
+  .ab-wash-title { font-size: clamp(28px, calc(7 * var(--vw, 1vw)), 36px); }
+  .ab-desks-heading { margin-bottom: 12px; }
+  .ab-desks-tab[aria-selected="true"] { font-size: 22px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
+  .ab-desks-tab { font-size: 18px; }
+  .ab-desks-nav { margin-bottom: 8px; }
+  .ab-tri-figure { max-width: 520px; }
+}
+@media (max-width: 420px) {
+  .ab-more-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------------------------------------------------------- Computers: twelve columns */
+@media (min-width: 960px) {
+  .ab-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); row-gap: 0; }
+  .ab-wash-title { grid-column: 2 / 6; }
+  .ab-wash-copy { grid-column: 8 / 11; }
+  .ab-tri-title { grid-column: 1 / 4; }
+  .ab-tri-figure { grid-column: 5 / 9; }
+  .ab-tri-text { grid-column: 10 / 13; }
+  .ab-desks-nav { grid-column: 1 / 4; }
+  .ab-desks-list { flex-direction: column; flex-wrap: nowrap; gap: 14px; }
+  .ab-desks-panel { grid-column: 4 / 13; grid-template-columns: repeat(9, minmax(0, 1fr)); row-gap: 0; }
+  .ab-desks-figure { grid-column: 1 / 6; }
+  .ab-desks-text { grid-column: 7 / 10; }
+  .ab-standard-title { grid-column: 1 / 4; }
+  .ab-rules { grid-column: 5 / 13; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ab-join-title { grid-column: 1 / 6; }
+  .ab-join-text { grid-column: 8 / 12; }
+  .ab-beyond-head > .ab-h2, .ab-contact-grid > .ab-h2 { grid-column: 1 / 6; }
+  .ab-beyond-text, .ab-contact-text { grid-column: 8 / 12; }
+  .ab-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Hovers only with a real mouse */
+@media (hover: hover) {
+  .ab-more:hover svg { transform: translateX(3px); }
+  .ab-desks-tab:hover { color: #fff; }
+  .ab-card:hover .bs-photo img, .ab-tri-photo-link:hover .bs-photo img, .ab-desks-figure:hover .bs-photo img { transform: scale(calc(var(--zoom, 1) * 1.04)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-desks-bg img, .ab-desks-figure, .ab-desks-text { animation: none; }
+  .ab .bs-photo img, .ab-more svg { transition: none; }
+}

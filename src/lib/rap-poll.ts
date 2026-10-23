@@ -1,26 +1,24 @@
-import { createServerFn } from "@tanstack/react-start";
 import { RAP_POLL_CHOICES, type RapPollChoice } from "@/data/content";
+import { pollTotals, votePoll } from "./polls";
 
-// The vote counter for the No. 1 rapper poll on the rap desk. Everyone's
-// votes land in the same count on the server, so the percentages are what
-// people actually picked (each browser votes once; see rap-desk.tsx).
-// TODO: keep the counts in a database. In server memory they start again
-// from zero whenever the server restarts, and each server copy keeps its own.
+// The vote counter for the No. 1 rapper poll on the rap desk. The votes are
+// kept in Supabase with the site's other reader polls (poll_votes, through
+// vote_poll / poll_totals), so they survive restarts and every visitor sees
+// the same count. One vote per account, or else per browser; the database
+// checks that, not just the page (rap-vote.tsx also remembers it locally).
 
 export type RapPollCounts = Record<RapPollChoice, number>;
 
-const counts = new Map<RapPollChoice, number>(RAP_POLL_CHOICES.map((choice) => [choice, 0]));
-const snapshot = () => Object.fromEntries(RAP_POLL_CHOICES.map((choice) => [choice, counts.get(choice) ?? 0])) as RapPollCounts;
+const POLL = "no1-rapper";
 const isChoice = (value: unknown): value is RapPollChoice => RAP_POLL_CHOICES.some((choice) => choice === value);
+const snapshot = (totals: Record<string, number>) => Object.fromEntries(RAP_POLL_CHOICES.map((choice) => [choice, totals[choice] ?? 0])) as RapPollCounts;
 
-export const getRapPoll = createServerFn({ method: "GET" }).handler(async () => snapshot());
+export async function getRapPoll(): Promise<RapPollCounts> {
+  return snapshot(await pollTotals(POLL));
+}
 
-export const voteRapPoll = createServerFn({ method: "POST" })
-  .inputValidator((choice: unknown) => {
-    if (!isChoice(choice)) throw new Error("Not one of the five names on the ballot");
-    return choice;
-  })
-  .handler(async ({ data }) => {
-    counts.set(data, (counts.get(data) ?? 0) + 1);
-    return snapshot();
-  });
+export async function voteRapPoll({ data: choice }: { data: unknown }): Promise<RapPollCounts> {
+  if (!isChoice(choice)) throw new Error("Not one of the names on the ballot");
+  await votePoll(POLL, choice);
+  return getRapPoll();
+}

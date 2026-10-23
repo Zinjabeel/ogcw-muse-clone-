@@ -1,0 +1,91 @@
+/* ------------------------------------------------------------------
+   Gallery 2 (src/components/hero-gallery-2.tsx), rebuilt 22 Oct 2026 as
+   Complex's front-page hero, two of them side by side. Every size, colour
+   and gap below was measured from complex.com at 1440px wide (their
+   classes in brackets): shade, Inter 44/52 semibold headline (-1px),
+   Inter 14/18 summary at 75% white, 16px between them, 28px to the
+   outlined button, words 68px from the left, 80px from the right and foot,
+   dots 28px from the foot, controls 16px from the foot and 80px from the
+   right, 500ms cross-fades. Under 1024px, Complex's phone sizes: a 24px
+   headline, a 12px summary on two lines, no button, 16px all round.
+   The hero is black in every theme. Nothing moves on scroll.
+   The older .g2-* and .g2x-* rules no longer match anything.
+   ------------------------------------------------------------------ */
+.gallery2.cxh {
+  --cxh-font: "Inter", ui-sans-serif, system-ui, sans-serif;
+  display: block; min-height: 0; padding: 0;
+  background: #000; color: #fff; font-family: var(--cxh-font); transition: none;
+}
+.cxh-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; background: #000; }
+
+/* ---------------------------------------------------------- A card (one Complex slideshow) */
+.cxh-card { position: relative; isolation: isolate; overflow: hidden; min-height: 0; background: #000; }
+.cxh-photo { position: absolute; inset: 0; opacity: 0; transition: opacity .5s; }
+.cxh-photo[data-on="true"] { opacity: 1; }
+.cxh-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Complex's shade, rising from the foot */
+.cxh-shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(0, 0, 0, .85) 0%, rgba(0, 0, 0, .5) 35%, rgba(0, 0, 0, .1) 60%, rgba(0, 0, 0, 0) 80%); }
+
+/* The words: each slide's in the same place, cross-fading (absolute inset-0 flex items-end, duration-500) */
+.cxh-slide { position: absolute; inset: 0; z-index: 2; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity .5s; }
+.cxh-slide[data-on="true"] { opacity: 1; }
+.cxh-content { width: 100%; padding: 16px 16px 64px; }
+.cxh-slide[data-on="true"] .cxh-content { pointer-events: auto; }
+.cxh-words { display: flex; flex-direction: column; gap: 28px; }
+.cxh-text { display: flex; flex-direction: column; gap: 16px; }
+.cxh-title { margin: 0; font: 600 24px / 30px var(--cxh-font); letter-spacing: -.5px; color: #fff; }
+.cxh-title-link { display: block; color: inherit; text-decoration: none; outline: none; }
+.cxh-title-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.cxh-deck { margin: 0; font: 400 12px / 16px var(--cxh-font); color: rgba(255, 255, 255, .75); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* The button (inline-flex h-11 py-3 px-4 rounded border tags-labels-12-bold), from 1024px like Complex */
+.cxh-action { display: none; }
+.cxh-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 12px 16px;
+  border: 1px solid #fff; border-radius: 4px; background: transparent;
+  font: 700 12px / 14px var(--cxh-font); text-transform: uppercase; color: #fff; text-decoration: none; transition: background-color .15s;
+}
+.cxh-btn:hover, .cxh-btn:focus-visible { background: rgba(255, 255, 255, .1); outline: none; }
+.cxh-btn:focus-visible { box-shadow: 0 0 0 2px #000, 0 0 0 4px #fff; }
+
+/* The dots (8px, rounded-full, white / white 50%) */
+.cxh-dots { position: absolute; left: 50%; bottom: 28px; z-index: 3; display: flex; gap: 8px; transform: translateX(-50%); }
+.cxh-dot { position: relative; width: 8px; height: 8px; padding: 0; border: 0; border-radius: 9999px; background: rgba(255, 255, 255, .5); cursor: pointer; transition: background-color .15s; }
+.cxh-dot::before { content: ""; position: absolute; inset: -8px -4px; }
+.cxh-dot[data-on="true"] { background: #fff; }
+.cxh-dot:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* The controls: pause with its ring, back and next (w-8 h-8 border-white/30) */
+.cxh-controls { position: absolute; right: 16px; bottom: 16px; z-index: 3; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.cxh-pause { position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.cxh-ring { position: absolute; inset: 0; }
+.cxh-ring-time { transform: rotate(-90deg); transform-origin: 16px 16px; stroke-dashoffset: var(--ring); animation: cxh-ring var(--dur) linear forwards; }
+.cxh-ring-time[data-run="false"] { animation-play-state: paused; }
+.cxh-arrow { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 1px solid rgba(255, 255, 255, .3); border-radius: 0; background: transparent; color: #fff; cursor: pointer; transition: background-color .15s; }
+.cxh-arrow:hover { background: rgba(255, 255, 255, .1); }
+.cxh-pause:focus-visible, .cxh-arrow:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+@keyframes cxh-ring { from { stroke-dashoffset: var(--ring); } to { stroke-dashoffset: 0; } }
+
+/* ---------------------------------------------------------- Sizes */
+/* Phones: the two cards one above the other */
+@media (max-width: 767px) {
+  .cxh-card { aspect-ratio: 4 / 5; max-height: 78svh; }
+}
+/* Tablets and up: side by side */
+@media (min-width: 768px) {
+  .cxh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); height: clamp(520px, 72svh, 760px); }
+}
+/* Computers: Complex's desktop sizes, and the first screen under the header */
+@media (min-width: 1024px) {
+  .cxh-grid { height: clamp(600px, calc(100svh - 122px), 1000px); }
+  .cxh-content { padding: 16px 80px 80px 68px; }
+  .cxh-words { max-width: 630px; }
+  .cxh-title { font-size: 44px; line-height: 52px; letter-spacing: -1px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .cxh-deck { font-size: 14px; line-height: 18px; -webkit-line-clamp: unset; display: block; }
+  .cxh-action { display: block; }
+  .cxh-controls { right: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cxh-photo, .cxh-slide, .cxh-dot, .cxh-btn, .cxh-arrow { transition: none; }
+}

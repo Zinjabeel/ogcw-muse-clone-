@@ -3,52 +3,47 @@ import { ArrowRight, ArrowUpRight, Pause, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { LIVE, SECTIONS, type Article } from "@/data/content";
 import { useStories } from "@/lib/stories";
+import { StoryDate } from "./story-meta";
 import { S, T } from "./site-text";
 import { useSiteText } from "@/lib/site-text";
 
-// Home hero, "Cover story" in the hero switcher: set like a magazine cover.
-// The cover stories take turns every 3 seconds: the photo cross-fades into
-// the next with a slow push-in, and the new headline rises line by line. A
-// row of numbered lines under the copy shows which is on and how long it
-// has left (click one to jump; pause beside it). The "Also on OGCW" row
-// under it keeps its three places but changes one every second, so each
-// place moves on every 3 seconds, never showing the cover on show. Both
-// stop under the pointer, on keyboard focus and off screen, and hold still
-// for reduced motion. On scroll the photo drifts slower than the text.
+// Cover story hero, rebuilt 21 Oct 2026 after i-D's front page (a portrait
+// filling most of the screen, a plain column beside it with the masthead
+// big at the top and a single cover line at the bottom) and Highsnobiety's
+// (a tiny category line over a big headline).
+//  - The cover photo runs edge to edge on the left.
+//  - Beside it, a column in the OGCW yellow (the theme's accent) is set like
+//    a magazine cover: the cover's number big at the top, its words in black
+//    at the bottom, and a numbered line per cover under them.
+//  - "Also on OGCW" runs along the bottom on black.
+// The cover stories take turns every 3 seconds: the photo cross-fades with
+// a slow push-in and the headline rises line by line. The row underneath
+// changes one of its three places every second, never showing the cover on
+// show. Both stop under the pointer, on keyboard focus, off screen and while
+// an admin edits, and hold still for reduced motion. Nothing moves on scroll.
 // Which stories take turns is chosen in the studio (src/data/placements.ts).
 
 const TURN_MS = 3000;
 const RAIL_STEP_MS = 1000;
+const pad = (n: number) => String(n).padStart(2, "0");
 
-// The usual cover keeps its hand-set headline; a short headline is split in
-// two lines for the reveal, a long one wraps on its own, evened out
+// The usual cover keeps its hand-set lines; any other headline wraps on its
+// own in the column, evened out, and rises as one
 const USUAL_COVER = "taylor-swift-the-life-of-a-showgirl-the-encore";
-
-function coverLines(title: string): string[] {
-  const words = title.split(" ");
-  if (words.length < 4) return [title];
-  let best = 1;
-  for (let i = 1; i < words.length; i += 1) {
-    const left = words.slice(0, i).join(" ").length;
-    const bestLeft = words.slice(0, best).join(" ").length;
-    if (Math.abs(left - title.length / 2) < Math.abs(bestLeft - title.length / 2)) best = i;
-  }
-  return [words.slice(0, best).join(" "), words.slice(best).join(" ")];
-}
 
 type RailItem = { id: string; kicker: string; title: string; meta: string; image: string; pos: string; live?: boolean; slug?: string; story?: Article };
 
 const railStory = (story: Article): RailItem => ({ id: story.slug, kicker: story.kicker, title: story.title, meta: SECTIONS[story.section].label, image: story.photo.src, pos: story.photo.crop?.pos ?? "50% 50%", slug: story.slug, story });
-const LIVE_ITEM: RailItem = { id: "live", kicker: "Live", title: LIVE.title, meta: "Bogotá, 2–3 October · Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
+const LIVE_ITEM: RailItem = { id: "live", kicker: "Live", title: LIVE.title, meta: LIVE.next ? `${LIVE.next} · Tour dates` : "Tour dates", image: LIVE.photo.src, pos: LIVE.photo.crop.pos, live: true };
 
 function RailEntry({ item, index }: { item: RailItem; index: number }) {
   const inner = (
     <>
-      <span className="cover-rail-thumb"><img src={item.image} alt="" loading="lazy" style={{ objectPosition: item.pos }} /></span>
-      <span className="cover-rail-text">
-        <span className="cover-rail-kicker" data-live={item.live ? "" : undefined}>{String(index + 1).padStart(2, "0")} · {item.story ? <S story={item.story} f="kicker" /> : <T>{item.kicker}</T>}</span>
-        <span className="cover-rail-title">{item.story ? <S story={item.story} f="title" /> : <T>{item.title}</T>}</span>
-        <span className="cover-rail-meta">
+      <span className="cvx-rail-thumb"><img src={item.image} alt="" loading="lazy" style={{ objectPosition: item.pos }} /></span>
+      <span className="cvx-rail-text">
+        <span className="cvx-rail-kicker" data-live={item.live ? "" : undefined}>{pad(index + 1)} · {item.story ? <S story={item.story} f="kicker" /> : <T>{item.kicker}</T>}</span>
+        <span className="cvx-rail-title">{item.story ? <S story={item.story} f="title" /> : <T>{item.title}</T>}</span>
+        <span className="cvx-rail-meta">
           <T>{item.meta}</T>
           {item.live && <ArrowUpRight size={13} strokeWidth={2} aria-hidden="true" />}
         </span>
@@ -56,32 +51,30 @@ function RailEntry({ item, index }: { item: RailItem; index: number }) {
     </>
   );
   return item.live ? (
-    <a className="cover-rail-item" href={LIVE.url} target="_blank" rel="noopener noreferrer">{inner}</a>
+    <a className="cvx-rail-item" href={LIVE.url} target="_blank" rel="noopener noreferrer">{inner}</a>
   ) : (
-    <Link className="cover-rail-item" to="/news/$slug" params={{ slug: item.slug ?? "" }}>{inner}</Link>
+    <Link className="cvx-rail-item" to="/news/$slug" params={{ slug: item.slug ?? "" }}>{inner}</Link>
   );
 }
 
-/** The cover's words: kicker, headline, summary and the link, rising in each time it takes its turn */
+/** The cover line: section, headline, summary and the link, rising in each time it takes its turn */
 function CoverCopy({ cover, first, leaving }: { cover: Article; first: boolean; leaving?: boolean }) {
   const site = useSiteText();
   const title = site.story(cover.slug, "title") ?? cover.title;
   // The usual cover's hand-set lines, until an admin changes its headline
   const usual = cover.slug === USUAL_COVER && title === cover.title;
-  const long = !usual && title.length > 48;
-  const linesOf = (words: string) => (usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : long ? [words] : coverLines(words));
+  const long = !usual && title.length > 52;
+  const linesOf = (words: string) => (usual ? ["Taylor Swift’s Showgirl", "gets an encore"] : [words]);
   return (
-    <div className={`cover-slide ${first ? "" : "is-turn"} ${leaving ? "is-leaving" : ""}`} aria-hidden={leaving || undefined}>
-      <p className="cover-kicker"><T k="hero.cover.kicker">Cover story</T> · <T>{SECTIONS[cover.section].label}</T></p>
-      <h1 id={leaving ? undefined : "cover-title"} className={`cover-title ${long ? "cover-title-long" : ""}`}>
-        <S story={cover} f="title">{(words) => linesOf(words).map((line) => <span key={line} className="cover-line"><span>{line}</span></span>)}</S>
+    <div className={`cvx-slide ${first ? "" : "is-turn"} ${leaving ? "is-leaving" : ""}`} aria-hidden={leaving || undefined}>
+      <p className="cvx-kicker"><T>{SECTIONS[cover.section].label}</T></p>
+      <h1 id={leaving ? undefined : "cover-title"} className={`cvx-title${long ? " is-long" : ""}`}>
+        <S story={cover} f="title">{(words) => linesOf(words).map((line) => <span key={line} className="cvx-line"><span>{line}</span></span>)}</S>
       </h1>
-      <p className="cover-deck"><S story={cover} f="deck" /></p>
-      <div className="cover-cta">
-        <Link to="/news/$slug" params={{ slug: cover.slug }} className="cover-link" tabIndex={leaving ? -1 : undefined}>
-          <T k="hero.cover.cta">Read the cover story</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-        </Link>
-      </div>
+      <p className="cvx-deck"><S story={cover} f="deck" /></p>
+      <Link to="/news/$slug" params={{ slug: cover.slug }} className="cvx-link" tabIndex={leaving ? -1 : undefined}>
+        <T k="hero.cover.cta">Read the cover story</T> <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+      </Link>
     </div>
   );
 }
@@ -159,68 +152,80 @@ export function HeroCover() {
   return (
     <section
       ref={section}
-      className="cover"
+      className="cover cvx"
       aria-labelledby="cover-title"
       aria-roledescription="carousel"
-      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHold(true); }}
-      onPointerLeave={() => setHold(false)}
-      onFocus={() => setHold(true)}
+      // Keeps playing under the mouse (owner, 23 Oct 2026); only keyboard focus holds it still
+      onFocus={(event) => { if (event.target.matches(":focus-visible")) setHold(true); }}
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHold(false); }}
     >
-      <div className="cover-glow" aria-hidden="true" />
+      <div className="cvx-main">
+        {/* The cover photo, edge to edge */}
+        <figure className="cvx-photo">
+          {covers.map((story, index) => (
+            <img
+              key={story.slug}
+              src={story.photo.src}
+              alt={index === current ? story.photo.alt : ""}
+              className={index === current ? "is-on" : undefined}
+              // Lazy: hidden while another hero is chosen, so its photos aren't fetched then (shown, they load at once)
+              loading="lazy"
+              style={{ objectPosition: story.slug === USUAL_COVER ? "50% 45%" : story.photo.crop?.pos ?? "50% 30%" }}
+            />
+          ))}
+          {cover.photo.credit && <figcaption className="cvx-credit">{cover.slug === USUAL_COVER && "Taylor Swift, The Eras Tour · "}Photo: {cover.photo.credit}</figcaption>}
+        </figure>
 
-      <figure className="cover-photo">
-        {covers.map((story, index) => (
-          <img
-            key={story.slug}
-            src={story.photo.src}
-            alt={index === current ? story.photo.alt : ""}
-            className={index === current ? "is-on" : undefined}
-            loading={index === 0 ? "eager" : "lazy"}
-            style={{ objectPosition: story.slug === USUAL_COVER ? "50% 45%" : story.photo.crop?.pos ?? "50% 30%" }}
-          />
-        ))}
-      </figure>
-      {cover.photo.credit && <p className="cover-credit">{cover.slug === USUAL_COVER && "Taylor Swift, The Eras Tour · "}Photo: {cover.photo.credit}</p>}
+        {/* The cover column: its number at the top, the cover line at the bottom */}
+        <div className="cvx-band">
+          <div className="cvx-band-top">
+            <p className="cvx-num" aria-hidden="true">
+              <span key={current} className="cvx-num-now">{pad(current + 1)}</span>
+              <span className="cvx-num-of">/{pad(covers.length)}</span>
+            </p>
+            <div className="cvx-masthead">
+              <p className="cvx-tag"><T k="hero.cover.kicker">Cover story</T></p>
+              <p className="cvx-date"><StoryDate story={cover} /></p>
+            </div>
+          </div>
 
-      <div className="cover-inner">
-        <div className="cover-copy">
-          <div className="cover-slides">
+          <div className="cvx-slides">
             {leaving !== null && covers[leaving] && <CoverCopy key={`out-${covers[leaving]!.slug}`} cover={covers[leaving]!} first={false} leaving />}
             <CoverCopy key={cover.slug} cover={cover} first={!turned} />
           </div>
 
           {/* Which cover is on, and how long it has left */}
           {covers.length > 1 && (
-            <div className="cover-turns" role="group" aria-label="Cover stories">
-              <span className="cover-count" aria-hidden="true">{String(current + 1).padStart(2, "0")} / {String(covers.length).padStart(2, "0")}</span>
+            <div className="cvx-turns" role="group" aria-label="Cover stories">
               {covers.map((story, index) => (
-                <button key={story.slug} type="button" className="cover-turn" aria-label={`Cover story ${index + 1}: ${story.title}`} aria-pressed={index === current} onClick={() => go(index)}>
-                  <span>
+                <button key={story.slug} type="button" className="cvx-turn" aria-label={`Cover story ${index + 1}: ${story.title}`} aria-pressed={index === current} onClick={() => go(index)}>
+                  <span className="cvx-turn-line">
                     {index === current && !reduce && (
                       <i key={current} style={{ "--dur": `${TURN_MS}ms` } as CSSProperties} data-run={running} onAnimationEnd={() => go((current + 1) % covers.length)} />
                     )}
                   </span>
+                  <span className="cvx-turn-num" aria-hidden="true">{pad(index + 1)}</span>
                 </button>
               ))}
               {!reduce && (
-                <button type="button" className="cover-pause" aria-label={paused ? "Play the cover stories" : "Pause the cover stories"} onClick={() => setPaused((value) => !value)}>
+                <button type="button" className="cvx-pause" aria-label={paused ? "Play the cover stories" : "Pause the cover stories"} onClick={() => setPaused((value) => !value)}>
                   {paused ? <Play size={13} strokeWidth={2} aria-hidden="true" /> : <Pause size={13} strokeWidth={2} aria-hidden="true" />}
                 </button>
               )}
             </div>
           )}
         </div>
-
-        <nav className="cover-rail" aria-label="Also on OGCW">
-          <p className="cover-rail-label"><T k="hero.cover.rail">Also on OGCW</T></p>
-          <ol>
-            {railItems.map((item, index) => (
-              <li key={index}><div key={item.id} className="cover-rail-swap"><RailEntry item={item} index={index} /></div></li>
-            ))}
-          </ol>
-        </nav>
       </div>
+
+      {/* Also on OGCW, along the bottom */}
+      <nav className="cvx-rail" aria-label="Also on OGCW">
+        <p className="cvx-rail-label"><T k="hero.cover.rail">Also on OGCW</T></p>
+        <ol>
+          {railItems.map((item, index) => (
+            <li key={index}><div key={item.id} className="cvx-rail-swap"><RailEntry item={item} index={index} /></div></li>
+          ))}
+        </ol>
+      </nav>
     </section>
   );
 }

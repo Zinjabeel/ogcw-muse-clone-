@@ -1,18 +1,24 @@
 // Cookie and storage consent. OGCW keeps a few small things in the browser
-// (never tracking): the reader's consent choice and language, which are
-// strictly necessary, and preferences (colour theme, hero choice, remembered
-// votes and answers), which are only stored with the reader's consent. There
-// are no analytics or advertising cookies. The Cookie Policy (/info/cookies)
-// lists every item.
+// (never tracking): what the site needs to work (the login cookie, the
+// reader's consent choice and language, the voter number that makes a vote
+// count once), which can't be turned off, and preferences (colour theme,
+// hero and shop background, saved shop items and bag, remembered votes,
+// answers and ratings, game scores), which are only stored with the reader's
+// consent. There are no analytics or advertising cookies. The Cookie Policy
+// (/info/cookies, src/components/info-pages.tsx) lists every item.
 
 export const CONSENT_KEY = "ogcw-consent";
 export const LANGUAGE_KEY = "ogcw-lang";
-const CONSENT_VERSION = 1;
+// Version 2 (22 Oct 2026): the list changed (login cookie, more preferences), so readers are asked again
+const CONSENT_VERSION = 2;
 
 export type Consent = { version: number; preferences: boolean; date: string };
 
-// Storage keys that count as preferences
-const PREFERENCE_KEYS = [/^ogcw-theme$/, /^ogcw-hero$/, /^ogcw-vote-/, /^ogcw-answer-/];
+// Storage keys that count as preferences (removed when preferences are turned off)
+const PREFERENCE_KEYS = [
+  /^ogcw-theme$/, /^ogcw-hero$/, /^ogcw-shop-backdrop$/, /^ogcw-shop-saved$/, /^ogcw-shop-cart$/,
+  /^ogcw-vote-/, /^ogcw-answer-/, /^ogcw-poll-/, /^ogcw-rated$/, /^ogcw-ranking-vote$/, /^ogcw-404-best-/,
+];
 
 export function readConsent(): Consent | null {
   try {

@@ -12,12 +12,27 @@ export const SITE_SECTIONS = [
   "Search",
   // The home page, top to bottom
   "Hero",
+  "The Wire",
+  "More news",
+  "Drops",
+  "The rundown",
+  "The OGCW 10",
+  "Sports desk",
+  "Games & streaming",
+  "Watch",
+  "Culture & fashion",
+  "The latest",
+  "Stay in the culture",
+  // Earlier parts of the home page (their saved edits stay filed here)
   "OGCW News",
   "Upcoming events",
   "This week",
   "Content of the month",
   "Shop on the home page",
   "Explore",
+  "Top 10 lists",
+  "Brand poll",
+  "Added sections",
   "Keep exploring",
   "Rap desk",
   "More to explore",
@@ -44,8 +59,8 @@ export function pageSection(pathname: string): SiteSection {
   const first = pathname.split("/")[1] ?? "";
   if (first === "") return "Other";
   if (first === "news") return pathname.split("/")[2] ? "Article pages" : "News page";
-  if (["music", "games", "streaming", "culture"].includes(first)) return "Section pages";
-  const pages: Record<string, SiteSection> = { explore: "Explore page", shop: "Shop pages", originals: "Originals", blog: "Blog", trends: "Trends", about: "About page", tour: "Tour page" };
+  if (["music", "games", "streaming", "culture", "sports"].includes(first)) return "Section pages";
+  const pages: Record<string, SiteSection> = { explore: "Explore page", shop: "Shop pages", originals: "Originals", blog: "Blog", forum: "Blog", trends: "Trends", about: "About page", tour: "Tour page" };
   return pages[first] ?? "Other";
 }
 
@@ -56,7 +71,7 @@ export function sectionOfKey(key: string): SiteSection {
     nav: "Navigation bar", more: "Navigation bar", ix: "Menu", footer: "Footer", hero: "Hero",
     home: "OGCW News", events: "Upcoming events", cotm: "Content of the month", "shop-promo": "Shop on the home page",
     explore: "Explore", kx: "Keep exploring", connect: "About & newsletter", "404": "Error page", story: "Article pages",
-    section: "Section pages", originals: "Originals", blog: "Blog", trends: "Trends", about: "About page", shop: "Shop pages", news: "News page",
+    section: "Section pages", originals: "Originals", blog: "Blog", forum: "Blog", trends: "Trends", about: "About page", shop: "Shop pages", news: "News page",
   };
   if (key.startsWith("home.week")) return "This week";
   return known[prefix] ?? "Other";

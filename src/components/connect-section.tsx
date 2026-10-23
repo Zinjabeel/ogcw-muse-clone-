@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, Mail } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { BUSINESS_EMAIL, mail } from "@/lib/contact";
+import { getSupabase } from "@/lib/supabase";
 import { T } from "./site-text";
 
 // Three columns under the news front (requirements doc):
@@ -21,21 +22,32 @@ const workWith = [
   { label: "Music submissions", note: "New releases from artists and labels" },
 ];
 
-export function NewsletterForm() {
-  const [done, setDone] = useState(false);
-  // TODO: send to the newsletter provider once one is chosen; until then this stores nothing.
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+// Sign-ups are saved in Supabase (newsletter_signups, through the
+// newsletter_signup function: the browser can add an address but never read
+// the list). The owner chose this over a newsletter service for now (18 Oct
+// 2026); the list can be exported to one later. "Thanks" shows only once the
+// address is really saved.
+export function NewsletterForm({ source = "site" }: { source?: string }) {
+  const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setDone(true);
+    if (state === "sending") return;
+    const email = String(new FormData(event.currentTarget).get("email") ?? "");
+    setState("sending");
+    const { error } = await getSupabase().rpc("newsletter_signup", { p_email: email, p_source: source });
+    setState(error ? "error" : "done");
   };
 
-  if (done) return <p className="ogcw-connect-thanks" role="status"><T>Thanks! The newsletter launches soon.</T></p>;
+  if (state === "done") return <p className="ogcw-connect-thanks" role="status"><T>Thanks! The newsletter launches soon.</T></p>;
   return (
-    <form className="ogcw-connect-form" onSubmit={onSubmit}>
-      <label htmlFor="newsletter-email" className="sr-only"><T>Your email</T></label>
-      <input id="newsletter-email" name="email" type="email" placeholder="Your email" autoComplete="email" required />
-      <button type="submit"><T>Subscribe</T></button>
-    </form>
+    <>
+      <form className="ogcw-connect-form" onSubmit={onSubmit}>
+        <label htmlFor="newsletter-email" className="sr-only"><T>Your email</T></label>
+        <input id="newsletter-email" name="email" type="email" placeholder="Your email" autoComplete="email" required />
+        <button type="submit" disabled={state === "sending"} aria-busy={state === "sending" || undefined}><T>Subscribe</T></button>
+      </form>
+      {state === "error" && <p className="ogcw-connect-thanks" role="alert">That didn’t go through. Check the address and try again.</p>}
+    </>
   );
 }
 

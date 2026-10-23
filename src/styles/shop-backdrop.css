@@ -1,0 +1,61 @@
+/* ------------------------------------------------------------------
+   The shop's background (src/components/shop-backdrop.tsx): React Bits'
+   AeroShards on a fixed layer behind every shop page, the shop's panels
+   turned to frosted glass so the shards show through, and the shop's
+   colours following the chosen set (dark sets turn the words light).
+   ------------------------------------------------------------------ */
+.shop-bd { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: var(--bd-bg); }
+.shop-bd .aero-shards { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+.aero-shards-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* A still version in the same colours: under the shards, and in their place without WebGPU */
+.shop-bd-still {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 45% at 18% 28%, color-mix(in srgb, var(--bd-accent) 22%, transparent), transparent 70%),
+    radial-gradient(50% 40% at 82% 70%, color-mix(in srgb, var(--bd-shard) 30%, transparent), transparent 70%),
+    linear-gradient(160deg, color-mix(in srgb, var(--bd-shard) 10%, var(--bd-bg)), var(--bd-bg) 60%);
+}
+.sx-main { position: relative; z-index: 1; }
+
+/* The shop over the shards. Each set's highlight colour, on the shop itself
+   (the buttons and lines read it there), kept in step with BACKDROPS in
+   src/components/shop-backdrop.tsx */
+.site-root-shop:has(.shop-bd[data-set="black-gold"]) { --bd-ui: #f2d36b; }
+.site-root-shop:has(.shop-bd[data-set="black-white"]) { --bd-ui: #ffffff; }
+.site-root-shop:has(.shop-bd[data-set="ogcw-yellow"]) { --bd-ui: #ffe600; }
+.site-root-shop:has(.shop-bd[data-set="white-gold"]) { --bd-ui: #86600e; }
+.site-root-shop:has(.shop-bd[data-set="white-black"]) { --bd-ui: #000000; }
+:root .site-root-shop:has(.shop-bd) { background: var(--ogcw-bg); }
+:root .site-root-shop:has(.shop-bd[data-tone="dark"]) {
+  --ogcw-bg: #0b0b0b;
+  --ogcw-surface: rgb(24 24 24 / .72);
+  --ogcw-text: #f2f0ea;
+  --ogcw-text-2: #b6b3ab;
+  --ogcw-border: rgb(255 255 255 / .14);
+  --ogcw-accent: var(--bd-ui);
+  --sx-on-gold: #0d0d0d;
+}
+/* The shop's black buttons, light on the dark sets */
+:root .site-root-shop:has(.shop-bd[data-tone="dark"]) .sh-cta { background: var(--bd-ui); color: #0d0d0d; }
+:root .site-root-shop:has(.shop-bd[data-tone="dark"]) .sh-cta:hover { background: #ffffff; color: #0d0d0d; }
+:root .site-root-shop:has(.shop-bd[data-tone="light"]) { --ogcw-accent: var(--bd-ui); }
+:root .site-root-shop:has(.shop-bd[data-tone="dark"]) .sx-add { background: #f2f0ea; color: #0d0d0d; }
+
+/* Panels as frosted glass, so the shards show through behind the products */
+.site-root-shop:has(.shop-bd[data-tone="light"]) .sh-row[data-tone="dark"] { background: rgb(12 12 12 / .84); }
+.site-root-shop:has(.shop-bd[data-tone="light"]) .sh-row[data-tone="light"] { background: rgb(255 255 255 / .5); -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); }
+.site-root-shop:has(.shop-bd[data-tone="dark"]) .sh-row[data-tone="light"] { background: rgb(14 14 14 / .5); color: var(--ogcw-text); -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .08); }
+.site-root-shop:has(.shop-bd) .sh-row[data-tone="dark"] { background: rgb(0 0 0 / .55); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+
+/* ---------------------------------------------------------- The switcher */
+.shop-bd-pick { position: fixed; left: 16px; bottom: 64px; z-index: 60; display: grid; justify-items: start; gap: 8px; font-family: var(--ogcw-ui); }
+.shop-bd-toggle { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 1px solid rgb(0 0 0 / .12); border-radius: 999px; background: rgb(255 255 255 / .9); color: #0d0d0d; font-size: 12.5px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px -12px rgb(0 0 0 / .45); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.shop-bd-toggle:hover, .shop-bd-toggle:focus-visible { background: #fff; outline: none; }
+.shop-bd-menu { display: grid; gap: 2px; min-width: 230px; padding: 8px; border: 1px solid rgb(0 0 0 / .1); border-radius: 14px; background: rgb(255 255 255 / .96); color: #0d0d0d; box-shadow: 0 18px 40px -18px rgb(0 0 0 / .5); }
+.shop-bd-menu-title { margin: 4px 8px 6px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #6b6b66; }
+.shop-bd-option { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 9px; font-size: 13px; font-weight: 500; text-align: left; color: inherit; cursor: pointer; }
+.shop-bd-option:hover, .shop-bd-option:focus-visible { background: rgb(0 0 0 / .05); outline: none; }
+.shop-bd-option[aria-pressed="true"] { background: rgb(0 0 0 / .08); font-weight: 700; }
+.shop-bd-swatch { flex: none; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .18); }
+.shop-bd-swatch-off { background: #f7f8f3; }
+.shop-bd-note { max-width: 220px; margin: 6px 8px 2px; font-size: 11.5px; line-height: 1.4; color: #6b6b66; }

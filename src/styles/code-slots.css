@@ -1,0 +1,62 @@
+/* ------------------------------------------------------------------
+   React Bits' CodeSlots (src/components/code-slots.tsx): the boxes for a
+   text-message code. The original's springs are transitions here: each box
+   waits --cs-delay before it lands or drains, so several land in a cascade.
+   ------------------------------------------------------------------ */
+.code-slots {
+  --cs-accent: #f5f5f5; --cs-ink: #f5f5f5; --cs-slot: #27272a; --cs-digit: #18181b; --cs-danger: #ff3b30;
+  --cs-size: 44px; --cs-height: 52px; --cs-gap: 8px; --cs-radius: 12px; --cs-font: 22px;
+  --cs-settle: .3s; --cs-spring: cubic-bezier(0.34, 1.44, 0.64, 1); --cs-rise: 8px; --cs-sink: 26px; --cs-caret: 0px;
+  --cs-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative; display: inline-block;
+}
+.code-slots__row { position: relative; display: inline-flex; gap: var(--cs-gap); cursor: text; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: opacity 200ms ease; }
+.code-slots__row[data-disabled] { opacity: .5; cursor: not-allowed; }
+.code-slots__input { position: absolute; inset: 0; z-index: 4; margin: 0; padding: 0; border: 0; outline: 0; background: transparent; color: transparent; caret-color: transparent; font-size: 16px; opacity: 0; cursor: inherit; -webkit-appearance: none; appearance: none; }
+
+.code-slots__slot { position: relative; width: var(--cs-size); height: var(--cs-height); overflow: hidden; border-radius: var(--cs-radius); background: var(--cs-slot); transition: background-color 200ms ease; user-select: none; -webkit-user-select: none; }
+/* The fill under a digit: grows from the middle when it lands, shrinks when it drains */
+.code-slots__fill { position: absolute; inset: 0; border-radius: inherit; background: var(--cs-accent); transform: scale(0); transform-origin: center; transition: transform var(--cs-settle) var(--cs-ease-out) var(--cs-delay, 0ms), background-color 200ms ease; }
+.code-slots__slot[data-filled] .code-slots__fill { transform: scale(1); transition: transform var(--cs-settle) var(--cs-spring) var(--cs-delay, 0ms), background-color 200ms ease; }
+.code-slots__digit { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; color: var(--cs-digit); font-family: inherit; font-size: var(--cs-font); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; opacity: 0; transform: translateY(var(--cs-rise)); transition: opacity var(--cs-settle) ease var(--cs-delay, 0ms), transform var(--cs-settle) var(--cs-ease-out) var(--cs-delay, 0ms); }
+.code-slots__slot[data-filled] .code-slots__digit { opacity: 1; transform: none; transition: opacity calc(var(--cs-settle) * .8) ease var(--cs-delay, 0ms), transform var(--cs-settle) var(--cs-spring) var(--cs-delay, 0ms); }
+
+@media (hover: hover) and (pointer: fine) {
+  .code-slots__row[data-status="idle"]:not([data-disabled]):hover .code-slots__slot:not([data-active]) { background: color-mix(in srgb, var(--cs-ink) 4%, var(--cs-slot)); }
+}
+.code-slots__slot[data-active] { background: color-mix(in srgb, var(--cs-ink) 8%, var(--cs-slot)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--cs-accent) 70%, transparent); }
+.code-slots__row[data-status="error"] .code-slots__slot { background: color-mix(in srgb, var(--cs-danger) 20%, var(--cs-slot)); box-shadow: none; }
+.code-slots__row[data-status="error"] .code-slots__fill { background: var(--cs-danger); }
+
+/* The right code: the fills merge into one wash from the middle out, the digits sink, a tick rises */
+.code-slots__wash { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; border-radius: var(--cs-radius); background: var(--cs-accent); color: var(--cs-digit); pointer-events: none; clip-path: inset(0 50% round var(--cs-radius)); transition: clip-path .2s var(--cs-ease-out) .06s; }
+.code-slots__row[data-status="success"] .code-slots__wash { clip-path: inset(0 0 round var(--cs-radius)); transition: clip-path .3s var(--cs-ease-out); }
+.code-slots__check { display: grid; place-items: center; opacity: 0; transform: translateY(8px) scale(.85); transition: opacity .15s var(--cs-ease-out), transform .15s var(--cs-ease-out); }
+.code-slots__row[data-status="success"] .code-slots__check { opacity: 1; transform: none; transition: opacity .35s ease .28s, transform .35s var(--cs-spring) .28s; }
+.code-slots__row[data-status="success"] .code-slots__digit { z-index: 0; opacity: 0; transform: translateY(var(--cs-sink)); transition: opacity .18s ease calc(60ms + var(--cs-i) * 30ms), transform .3s var(--cs-ease-out) calc(60ms + var(--cs-i) * 30ms); }
+
+/* The caret, sliding to the box you're on */
+.code-slots__caret { position: absolute; z-index: 3; top: 25%; left: calc(var(--cs-size) / 2 - .75px); width: 1.5px; height: 50%; opacity: 0; pointer-events: none; transform: translateX(var(--cs-caret)); transition: transform .2s var(--cs-ease-out); }
+.code-slots__caret[data-show] { opacity: 1; }
+.code-slots__caret-line { display: block; width: 100%; height: 100%; background: var(--cs-ink); animation: code-slots-blink 1s linear infinite; }
+@keyframes code-slots-blink { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.code-slots__sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .code-slots__fill, .code-slots__digit, .code-slots__check, .code-slots__caret, .code-slots__wash,
+  .code-slots__slot[data-filled] .code-slots__fill, .code-slots__slot[data-filled] .code-slots__digit,
+  .code-slots__row[data-status] .code-slots__digit, .code-slots__row[data-status] .code-slots__check, .code-slots__row[data-status] .code-slots__wash { transition: opacity 150ms ease; transform: none; }
+  .code-slots__caret-line { animation: none; }
+  .code-slots__wash { opacity: 0; clip-path: none; }
+  .code-slots__row[data-status="success"] .code-slots__wash { opacity: 1; }
+}
+
+/* ---------------------------------------------------------- On the sign-up page */
+.kl .signup-code { display: grid; justify-items: start; gap: calc(14 * var(--u)); margin-top: calc(22 * var(--u)); }
+.kl .signup-code .code-slots { max-width: 100%; }
+.kl .signup-code-row { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 calc(14 * var(--u)) / calc(20 * var(--u)) var(--ogcw-ui); color: var(--kl-muted); }
+.kl .signup-code-row button { padding: 0; font: 600 calc(14 * var(--u)) / calc(20 * var(--u)) var(--ogcw-ui); color: var(--kl-ink); cursor: pointer; }
+.kl .signup-code-row button:disabled { color: var(--kl-muted); cursor: default; }
+.kl .signup-code-row button:not(:disabled):hover { text-decoration: underline; text-decoration-color: var(--ogcw-accent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.kl .auth-field input[type="tel"] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8d93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='6' y='2' width='12' height='20' rx='2'/%3E%3Cpath d='M11 18h2'/%3E%3C/svg%3E"); }
+@media (max-width: 420px) { .kl .signup-code .code-slots { --cs-size: 42px !important; --cs-gap: 7px !important; } }

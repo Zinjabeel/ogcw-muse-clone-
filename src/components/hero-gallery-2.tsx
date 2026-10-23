@@ -1,197 +1,104 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Pause, Play } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import type { SectionId } from "@/data/content";
+import type { ReactNode } from "react";
 import { useStories } from "@/lib/stories";
-import { StoryMeta } from "./story-meta";
-import { CARDS, CardLink } from "./hero-gallery";
+import { CARDS, CardLink, type Card } from "./hero-gallery";
 import { EditableImage, S, T } from "./site-text";
-import { useSiteText } from "@/lib/site-text";
+import { SlideControls, SlideDots, useSlides } from "./slide-controls";
 
-// Gallery 2 (the second option in the hero switcher): the top news takes the
-// middle of the hero, and the five doors into OGCW run in a smaller strip
-// beneath it. The news is three stories (games, fashion, music), each with
-// its headline, a line and a button on the left and its picture on the
-// right, moving on every 7 seconds; the tabs under it show which is on and
-// how long it has left. The strip glides one card along every 2 seconds.
-// Both pause under the pointer, on focus and off screen, and hold still for
-// reduced motion. The hero takes the colour of the story on show.
+// Gallery 2, rebuilt 22 Oct 2026 as Complex's front-page hero (owner: "an
+// exact copy of the Complex hero, 2 cards that are big with images, the
+// design and look 100% the same"), measured from complex.com at 1440px:
+// each card is a Complex hero slide: the photo filling it, a shade rising
+// from the foot (black 85% → 50% at 35% → 10% at 60% → clear at 80%), the
+// headline in Inter 44/52 semibold at -1px, the summary in Inter 14/18 at
+// 75% white, 16px apart, and 28px under them an outlined button (44px tall,
+// 1px white border, 4px corners, 12px bold capitals). The words sit 68px from
+// the left and 80px from the right and the foot; the dots (8px, 8px apart,
+// white and half-white) sit centred 28px from the foot; the controls (a
+// pause button ringed by the slide's time running out, and square back and
+// next buttons with a 30% white border) 16px from the foot and 80px from
+// the right. Slides cross-fade in 500ms.
+// Complex shows one such slideshow across the page; here there are two,
+// side by side: the top stories on the left (chosen in the studio, slot
+// "hero-top"), OGCW's own doors on the right (Shop, Newsletter, Forum,
+// About). Each runs on its own, also under the mouse, and stops for keyboard
+// focus, off screen and while an admin edits; nothing runs for reduced motion.
 
-// The top stories are chosen in the studio (src/data/placements.ts). The
-// usual three have their own tab name, colour and button; any other story
-// uses its label, its section's colour and "Read the story".
-const USUAL: Record<string, { tab: string; tone: string; cta: string }> = {
-  "gta-vi-countdown": { tab: "GTA VI", tone: "#4f7f96", cta: "Read the countdown" },
-  "paris-fashion-week-ss27": { tab: "Paris Fashion Week", tone: "#6b3a3a", cta: "See the shows to watch" },
-  "taylor-swift-the-life-of-a-showgirl-the-encore": { tab: "Taylor Swift", tone: "#6e3320", cta: "Read the story" },
-};
-const SECTION_TONE: Record<SectionId, string> = { music: "#6e3320", games: "#4f7f96", streaming: "#5a4a8a", culture: "#6b3a3a" };
+export type Slide = { key: string; picture: ReactNode; title: ReactNode; deck: ReactNode; cta: ReactNode; link: (props: { className: string; tabIndex: number | undefined; children: ReactNode }) => ReactNode };
 
-const FEATURE_MS = 7000;
-const STRIP_MS = 2000;
+/**
+ * One Complex card: a slideshow (with dots and controls), or a single slide
+ * (none). Also used by the Impact grid (hero-impact.tsx). `lead` starts the
+ * first slide's time part-way through, so cards side by side don't all turn
+ * at the same moment.
+ */
+export function Slideshow({ label, slides, lead = 0 }: { label: string; slides: Slide[]; lead?: number }) {
+  const show = useSlides(slides.length, { lead });
+  const { index, count } = show;
 
-// The strip's positions: 0 in the middle, then two either side, smaller and dimmer
-const offsetOf = (index: number, active: number) => {
-  const n = CARDS.length;
-  const d = (((index - active) % n) + n) % n;
-  return d > n / 2 ? d - n : d;
-};
-const GAP = 0.08;
-const SCALE = [1, 0.86, 0.74];
-const X = [0, 0.5 + GAP + SCALE[1]! / 2, 0.5 + GAP + SCALE[1]! + GAP + SCALE[2]! / 2];
+  return (
+    <section {...show.box} className="cxh-card" aria-roledescription="carousel" aria-label={label}>
+      {/* The photos, cross-fading */}
+      {slides.map((slide, i) => (
+        <div key={`p-${slide.key}`} className="cxh-photo" data-on={i === index} aria-hidden="true">{slide.picture}</div>
+      ))}
+      <div className="cxh-shade" aria-hidden="true" />
+
+      {/* The words */}
+      {slides.map((slide, i) => {
+        const on = i === index;
+        return (
+          <div key={slide.key} className="cxh-slide" data-on={on} aria-hidden={!on} aria-roledescription="slide" aria-label={`${i + 1} of ${count}`}>
+            <div className="cxh-content">
+              <div className="cxh-words">
+                <div className="cxh-text">
+                  <h2 className="cxh-title">{slide.link({ className: "cxh-title-link", tabIndex: on ? undefined : -1, children: slide.title })}</h2>
+                  <p className="cxh-deck">{slide.deck}</p>
+                </div>
+                <div className="cxh-action">{slide.link({ className: "cxh-btn", tabIndex: on ? undefined : -1, children: slide.cta })}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      <SlideDots slides={show} label={label} />
+      <SlideControls slides={show} />
+    </section>
+  );
+}
+
+// The doors on the right, in this order: the shop first (Complex leads with its shop too)
+const DOORS = ["shop", "subscribe", "blog", "about"].map((id) => CARDS.find((card) => card.id === id)).filter((card): card is Card => !!card);
 
 export function HeroGallery2() {
   const stories = useStories();
-  const FEATURES = stories.slot("hero-top").map((story) => ({ story, ...(USUAL[story.slug] ?? { tab: story.kicker, tone: SECTION_TONE[story.section], cta: "Read the story" }) }));
-  const section = useRef<HTMLElement>(null);
-  const [feature, setFeature] = useState(0);
-  const [card, setCard] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [holdFeature, setHoldFeature] = useState(false);
-  const [holdStrip, setHoldStrip] = useState(false);
-  const [inView, setInView] = useState(false);
-  const [reduce, setReduce] = useState(false);
-  const lastOffsets = useRef<number[]>(CARDS.map((_, index) => offsetOf(index, 0)));
+  const top = stories.slot("hero-top");
 
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduce(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
+  const storySlides: Slide[] = top.map((story) => ({
+    key: story.slug,
+    picture: <img src={story.photo.src} alt="" loading="lazy" style={{ objectPosition: story.photo.crop?.pos ?? "50% 50%" }} />,
+    title: <S story={story} f="title" />,
+    deck: <S story={story} f="deck" />,
+    cta: <T k="hero.top.cta">Read more</T>,
+    link: ({ className, tabIndex, children }) => <Link to="/news/$slug" params={{ slug: story.slug }} className={className} tabIndex={tabIndex}>{children}</Link>,
+  }));
 
-  // Only run while the hero is on screen (it is display: none unless chosen)
-  useEffect(() => {
-    const el = section.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(([entry]) => setInView(!!entry?.isIntersecting), { threshold: 0.35 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // The strip moves on every 2 seconds
-  const { busy } = useSiteText();
-  const stripRunning = !paused && !holdStrip && inView && !reduce && !busy;
-  useEffect(() => {
-    if (!stripRunning) return;
-    const timer = window.setInterval(() => setCard((value) => (value + 1) % CARDS.length), STRIP_MS);
-    return () => window.clearInterval(timer);
-  }, [stripRunning]);
-
-  const offsets = CARDS.map((_, index) => offsetOf(index, card));
-  useEffect(() => { lastOffsets.current = offsets; });
-
-  const featureRunning = !paused && !holdFeature && inView && !reduce && !busy;
-  // The studio can change how many top stories there are while the page is open
-  useEffect(() => { if (feature >= FEATURES.length) setFeature(0); }, [feature, FEATURES.length]);
-  const current = FEATURES[feature] ?? FEATURES[0];
-  if (!current) return null;
+  const doorSlides: Slide[] = DOORS.map((card) => ({
+    key: card.id,
+    picture: <EditableImage k={`hero.card.${card.id}`} src={card.photo} alt={card.alt} loading="lazy" draggable={false} />,
+    title: <T k={`hero.card.${card.id}.title`}>{card.title}</T>,
+    deck: <T k={`hero.card.${card.id}.copy`}>{card.copy}</T>,
+    cta: <T k={`hero.card.${card.id}.cta`}>{card.cta}</T>,
+    link: ({ className, tabIndex, children }) => <CardLink dest={card.dest} className={className} tabIndex={tabIndex} onClick={() => {}}>{children}</CardLink>,
+  }));
 
   return (
-    <section ref={section} className="gallery2" style={{ "--tone": current.tone } as CSSProperties} aria-labelledby="g2-title">
+    <section className="gallery2 cxh" aria-labelledby="g2-title">
       <h1 id="g2-title" className="sr-only"><T>OGCW, One Great Culture World</T></h1>
-
-      <div className="gallery-bg" aria-hidden="true">
-        {FEATURES.map((item, index) => (
-          <img key={item.story.slug} src={item.story.photo.src} alt="" className={index === feature ? "is-on" : undefined} />
-        ))}
-      </div>
-
-      <div className="g2-inner">
-        {/* The top news: headline and button on the left, picture on the right */}
-        <div
-          className="g2-feature"
-          aria-roledescription="carousel"
-          aria-label="Top stories"
-          onPointerEnter={(event) => { if (event.pointerType === "mouse") setHoldFeature(true); }}
-          onPointerLeave={() => setHoldFeature(false)}
-          onFocus={() => setHoldFeature(true)}
-          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHoldFeature(false); }}
-        >
-          <div className="g2-stage">
-            {FEATURES.map((item, index) => (
-              <article
-                key={item.story.slug}
-                className="g2-slide"
-                aria-roledescription="slide"
-                aria-label={`${index + 1} of ${FEATURES.length}`}
-                aria-hidden={index === feature ? undefined : true}
-                data-on={index === feature}
-              >
-                <div className="g2-text">
-                  <p className="g2-kicker"><T k="hero.top.kicker">Top story</T> · <S story={item.story} f="kicker" /></p>
-                  <h2 className="g2-title">
-                    <Link to="/news/$slug" params={{ slug: item.story.slug }} tabIndex={index === feature ? undefined : -1}><S story={item.story} f="title" /></Link>
-                  </h2>
-                  <p className="g2-deck"><S story={item.story} f="deck" /></p>
-                  <div className="g2-actions">
-                    <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-cta" tabIndex={index === feature ? undefined : -1}>
-                      <T>{item.cta}</T> <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-                    </Link>
-                    <StoryMeta story={item.story} className="g2-meta" />
-                  </div>
-                </div>
-                <Link to="/news/$slug" params={{ slug: item.story.slug }} className="g2-picture" tabIndex={-1} aria-hidden="true">
-                  <img src={item.story.photo.src} alt="" style={{ objectPosition: item.story.photo.crop?.pos ?? "50% 50%" }} loading={index === 0 ? "eager" : "lazy"} />
-                </Link>
-              </article>
-            ))}
-          </div>
-
-          {/* One tab per story; the line fills while it is on show */}
-          <div className="g2-tabs" role="group" aria-label="Choose a top story">
-            {FEATURES.map((item, index) => (
-              <button key={item.story.slug} type="button" className="g2-tab" aria-pressed={index === feature} onClick={() => setFeature(index)}>
-                <span className="g2-tab-line" aria-hidden="true">
-                  {index === feature && !reduce && (
-                    <i key={feature} style={{ "--dur": `${FEATURE_MS}ms` } as CSSProperties} data-run={featureRunning} onAnimationEnd={() => setFeature((value) => (value + 1) % FEATURES.length)} />
-                  )}
-                </span>
-                <span className="g2-tab-kicker"><S story={item.story} f="kicker" /></span>
-                <span className="g2-tab-name">{item.tab}</span>
-              </button>
-            ))}
-            {!reduce && (
-              <button type="button" className="g2-pause" aria-label={paused ? "Play" : "Pause"} onClick={() => setPaused((value) => !value)}>
-                {paused ? <Play size={15} strokeWidth={1.75} aria-hidden="true" /> : <Pause size={15} strokeWidth={1.75} aria-hidden="true" />}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* The five doors into OGCW, smaller, gliding along underneath */}
-        <ol
-          className="g2-strip"
-          aria-label="Explore OGCW"
-          onPointerEnter={(event) => { if (event.pointerType === "mouse") setHoldStrip(true); }}
-          onPointerLeave={() => setHoldStrip(false)}
-          onFocus={() => setHoldStrip(true)}
-          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setHoldStrip(false); }}
-        >
-          {CARDS.map((item, index) => {
-            const offset = offsets[index]!;
-            const distance = Math.abs(offset);
-            const wraps = Math.abs(offset - (lastOffsets.current[index] ?? offset)) > 2;
-            return (
-              <li
-                key={item.id}
-                className={`g2-card${wraps ? " is-wrapping" : ""}`}
-                data-pos={distance}
-                style={{ "--x": Math.sign(offset) * X[distance]!, "--s": SCALE[distance], zIndex: 10 - distance } as CSSProperties}
-              >
-                <CardLink dest={item.dest} className="g2-card-link" tabIndex={undefined} onClick={() => {}}>
-                  <EditableImage k={`hero.card.${item.id}`} src={item.photo} alt="" loading="lazy" draggable={false} />
-                  <span className="g2-card-body">
-                    <span className="g2-card-label"><T k={`hero.card.${item.id}.label`}>{item.label}</T></span>
-                    <span className="g2-card-title"><T k={`hero.card.${item.id}.title`}>{item.title}</T></span>
-                    <span className="g2-card-cta"><T k={`hero.card.${item.id}.cta`}>{item.cta}</T> <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></span>
-                  </span>
-                </CardLink>
-              </li>
-            );
-          })}
-        </ol>
+      <div className="cxh-grid">
+        {storySlides.length > 0 && <Slideshow label="Top stories" slides={storySlides} />}
+        <Slideshow label="Explore OGCW" slides={doorSlides} lead={3000} />
       </div>
     </section>
   );

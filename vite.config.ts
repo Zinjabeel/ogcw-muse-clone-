@@ -30,9 +30,21 @@ function skipPrebundledDepsInStartCompiler(): Plugin {
   };
 }
 
+// Where the built site runs. On Vercel (it sets VERCEL=1 while building) the
+// server is built for Vercel's functions with Nitro's "vercel" preset; a
+// NITRO_PRESET setting still wins. Everywhere else, including Lovable, this
+// adds nothing, so those builds stay exactly as they were (Cloudflare).
+const onVercel = !!process.env["VERCEL"] && !process.env["NITRO_PRESET"];
+
 export default defineConfig({
+  ...(onVercel ? { nitro: { preset: "vercel" } } : {}),
   vite: {
     plugins: [skipPrebundledDepsInStartCompiler()],
+    server: {
+      // Any LocalTunnel address (*.loca.lt) can reach the dev server, so a new
+      // tunnel works straight away; every other host is still checked
+      allowedHosts: [".loca.lt"],
+    },
   },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

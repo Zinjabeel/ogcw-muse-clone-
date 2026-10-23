@@ -1,0 +1,120 @@
+/* ------------------------------------------------------------------
+   The site menu (src/components/nav-drawer.tsx), owner 18 Oct 2026:
+   simple and professional, on the see-through glass. One sheet of dark
+   glass over the whole page (the page stays faintly visible through it):
+   a bar with close, OGCW and Search; the sections as one list of white
+   serif names at full strength (the one under the pointer turns gold, the
+   others never fade); on computers a single preview of that section's
+   newest story; one quiet line of links and socials at the foot. The glass
+   is always dark, so the menu looks the same in every theme.
+   ------------------------------------------------------------------ */
+html:has(dialog.om[open]) { overflow: hidden; }
+
+/* 23 Oct 2026 (owner: "like it was before, like the shop"): a solid panel
+   sliding in from the left over the dimmed page, as the shop's menu does,
+   instead of see-through glass over the whole screen */
+.om {
+  position: fixed; inset: 0 auto 0 0; width: min(520px, 100vw); max-width: none; height: 100dvh; max-height: none;
+  margin: 0; padding: 0; border: 0; border-right: 1px solid rgb(245 244 240 / .1); overflow: hidden; outline: none;
+  background: #0f0f0f;
+  box-shadow: 24px 0 60px -20px rgb(0 0 0 / .6);
+  color: #f5f4f0; font-family: var(--ogcw-ui);
+  --om-gold: var(--fx-gold, #e2b84f);
+  --om-dim: rgb(245 244 240 / .62);
+  --om-line: rgb(245 244 240 / .12);
+  --om-ease: cubic-bezier(.2, .8, .2, 1);
+  --om-pad: clamp(18px, calc(4 * var(--vw, 1vw)), 64px);
+}
+.om::backdrop { background: rgb(0 0 0 / .5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.om[open] { animation: om-in .4s var(--om-ease, ease) both; }
+.om[data-closing] { animation: om-out .26s ease both; }
+@keyframes om-in { from { transform: translateX(-100%); } }
+@keyframes om-out { to { transform: translateX(-100%); } }
+@keyframes om-up { from { opacity: 0; transform: translateY(10px); } }
+
+/* The sheet scrolls if the screen is short; the bar stays on top */
+.om-sheet { display: flex; flex-direction: column; height: 100%; overflow: hidden auto; overscroll-behavior: contain; outline: none; scrollbar-width: thin; scrollbar-color: var(--om-line) transparent; }
+
+/* The bar: close (where the menu button was), OGCW, Search */
+.om-bar { position: sticky; top: 0; z-index: 2; background: #0f0f0f; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 14px var(--om-pad); border-bottom: 1px solid var(--om-line); }
+.om-icon { justify-self: start; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--om-line); border-radius: 50%; background: transparent; color: inherit; cursor: pointer; transition: border-color .2s ease, background-color .2s ease; }
+.om-logo { font-family: var(--ogcw-display); font-size: 26px; font-weight: 600; line-height: 1; letter-spacing: .1em; color: inherit; }
+.om-search { justify-self: end; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 18px; border: 1px solid var(--om-line); border-radius: 999px; background: transparent; color: inherit; font: 600 13px var(--ogcw-ui); letter-spacing: .02em; cursor: pointer; transition: border-color .2s ease, background-color .2s ease; }
+:is(.om-icon, .om-search, .om-logo):focus-visible { outline: 2px solid var(--om-gold); outline-offset: 3px; }
+
+/* The body: the list, and (computers) the preview beside it */
+.om-body { flex: 1; display: grid; align-content: start; gap: 40px; width: min(100%, 1240px); margin: 0 auto; padding: clamp(18px, 3.4svh, 44px) var(--om-pad); }
+
+/* The sections: number, name, note. All at full strength; the one under
+   the pointer (or keyboard) turns gold and steps in a touch */
+.om-list { margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.om-list li { border-bottom: 1px solid var(--om-line); }
+.om-list li:first-child { border-top: 1px solid var(--om-line); }
+.om-link { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: baseline; gap: 12px; padding: 12px 0; color: #fff; outline: none; }
+.om-no { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--om-dim); font-variant-numeric: tabular-nums; transition: color .2s ease; }
+.om-name { font-family: var(--ogcw-display); font-size: clamp(28px, calc(7.6 * var(--vw, 1vw)), 34px); font-weight: 500; line-height: 1.1; letter-spacing: -.012em; transition: color .2s ease, transform .35s var(--om-ease); }
+.om-note { font-size: 12px; letter-spacing: .02em; color: var(--om-dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.om-link[aria-current="page"] .om-note { color: var(--om-gold); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 10.5px; }
+.om-link:focus-visible .om-name { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--om-gold); text-underline-offset: 7px; }
+
+/* The preview (computers only): the newest story of the section shown */
+.om-preview { display: none; }
+.om-preview-head { margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--om-line); font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--om-gold); }
+.om-story { display: grid; gap: 10px; color: #fff; outline: none; animation: om-up .45s var(--om-ease) both; }
+.om-story-photo { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: rgb(255 255 255 / .06); }
+.om-story-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 1s var(--om-ease); }
+.om-story-label { margin-top: 6px; overflow: hidden; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--om-dim); white-space: nowrap; text-overflow: ellipsis; }
+.om-story-title { font-family: var(--ogcw-display); font-size: 24px; font-weight: 500; line-height: 1.18; letter-spacing: -.01em; text-wrap: balance; transition: color .2s ease; }
+.om-story:focus-visible .om-story-photo { outline: 2px solid var(--om-gold); outline-offset: 4px; }
+.om-go { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #fff; transition: gap .2s ease, color .2s ease; }
+.om-go:focus-visible { outline: 2px solid var(--om-gold); outline-offset: 4px; }
+
+/* The foot: one quiet line of links, and the socials */
+.om-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 28px; width: calc(min(100%, 1240px) - 2 * var(--om-pad)); margin: 0 auto; padding: 18px 0 24px; border-top: 1px solid var(--om-line); }
+.om-pages { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; padding: 0; list-style: none; }
+.om-pages :is(a, button) { padding: 0; border: 0; background: none; color: var(--om-dim); font: 500 13px var(--ogcw-ui); cursor: pointer; transition: color .2s ease; }
+.om-pages :is(a, button):focus-visible { color: #fff; outline: 2px solid var(--om-gold); outline-offset: 3px; }
+.om-social { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.om-social a { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--om-line); border-radius: 50%; color: #fff; transition: border-color .2s ease, background-color .2s ease, color .2s ease; }
+.om-social a:focus-visible { outline: 2px solid var(--om-gold); outline-offset: 3px; }
+
+/* The one marked as shown (pointer or keyboard) */
+.om-link[data-on] .om-name { color: var(--om-gold); transform: translateX(6px); }
+.om-link[data-on] .om-no { color: var(--om-gold); }
+
+/* Computers: the list, then the preview under it, inside the panel */
+@media (min-width: 1024px) {
+  .om { --om-pad: 36px; }
+  .om-body { gap: 32px; }
+  .om-link { padding: clamp(6px, .9svh, 11px) 0; }
+  .om-name { font-size: clamp(26px, 3.6svh, 34px); }
+  .om-preview { display: block; }
+  .om-story { grid-template-columns: 160px minmax(0, 1fr); align-items: start; gap: 16px; }
+  .om-story-title { font-size: 19px; }
+  .om-foot { width: calc(100% - 2 * var(--om-pad)); }
+}
+
+/* Hovers only with a real mouse (a tap on a phone leaves "hover" behind) */
+@media (hover: hover) {
+  .om-icon:hover, .om-search:hover { border-color: rgb(245 244 240 / .5); background: rgb(255 255 255 / .06); }
+  .om-story:hover .om-story-photo img { transform: scale(1.04); }
+  .om-story:hover .om-story-title, .om-go:hover { color: var(--om-gold); }
+  .om-go:hover { gap: 12px; }
+  .om-pages :is(a, button):hover { color: #fff; }
+  .om-social a:hover { border-color: var(--om-gold); background: var(--om-gold); color: #000; }
+}
+
+/* Opening: the glass fades in and the list settles, line by line */
+.om[open] .om-list li { animation: om-up .5s var(--om-ease) backwards; animation-delay: calc(.06s + var(--i) * 22ms); }
+.om[open] :is(.om-preview, .om-foot) { animation: om-up .55s var(--om-ease) .2s backwards; }
+
+@media (max-width: 560px) {
+  .om-search span { display: none; }
+  .om-search { width: 42px; padding: 0; justify-content: center; }
+  .om-link { grid-template-columns: 34px minmax(0, 1fr) auto; }
+  .om-foot { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .om[open], .om[data-closing], .om[open] .om-list li, .om[open] :is(.om-preview, .om-foot), .om-story { animation: none; }
+  .om-name, .om-story-photo img { transition: none; }
+}

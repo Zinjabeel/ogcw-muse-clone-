@@ -1,0 +1,126 @@
+/* ------------------------------------------------------------------
+   The studio's story editor, the parts added on 20 Oct 2026
+   (src/sanity/page-editor.tsx, src/sanity/story-blocks.tsx): the
+   admin password on the work login, the bar's Undo and Redo, Copy and
+   Paste design, the design chooser, the "before you publish" list, and
+   the tools on every photo and box in the story text.
+   ------------------------------------------------------------------ */
+
+/* The admin password, beside "Continue with GitHub" (src/routes/work.tsx) */
+.authx-passcode { justify-content: flex-start; padding: 0 5px 0 18px; cursor: text; }
+.authx-passcode:focus-within { border-color: var(--ogcw-text); }
+.authx-passcode input { flex: 1; min-width: 0; height: 46px; border: 0; background: transparent; font: 600 14px var(--ogcw-ui); letter-spacing: .08em; color: var(--ogcw-text); outline: none; }
+.authx-passcode input::placeholder { letter-spacing: 0; color: var(--ogcw-text-2); }
+.authx-passcode button { display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--ogcw-accent); color: var(--ogcw-bg); cursor: pointer; }
+.authx-passcode button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---------------------------------------------------------- The bar */
+.se-tools { display: inline-flex; flex: none; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); }
+.se-tool { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 999px; font: 600 12.5px var(--ogcw-ui); color: var(--ogcw-text); cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.se-tool:hover:not(:disabled), .se-tool:focus-visible { background: var(--ogcw-accent); color: var(--ogcw-bg); outline: none; }
+.se-tool:disabled { opacity: .38; cursor: not-allowed; }
+.se-tool.is-on { background: color-mix(in srgb, var(--ogcw-accent) 18%, transparent); }
+.se-tool-icon { width: 28px; padding: 0; justify-content: center; }
+.se-flash { font: 600 12px var(--ogcw-ui); color: var(--ogcw-accent); }
+
+/* "Before you can publish": what's missing, each a link to the box */
+.se-publish { display: grid; gap: 8px; margin: 14px clamp(20px, 4.5cqi, 56px) 0; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--destructive) 55%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--destructive) 8%, var(--ogcw-bg)); font-family: var(--ogcw-ui); }
+.se-publish-title { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--destructive); }
+.se-publish ul { display: flex; flex-wrap: wrap; gap: 6px; }
+.se-publish button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-surface); font: 600 12.5px var(--ogcw-ui); color: var(--ogcw-text); cursor: pointer; }
+.se-publish button:hover { border-color: var(--ogcw-accent); }
+.se-publish.is-ok { border-color: color-mix(in srgb, #1fa65a 55%, transparent); background: color-mix(in srgb, #1fa65a 8%, var(--ogcw-bg)); }
+.se-publish.is-ok .se-publish-title { color: #1fa65a; }
+.se-publish p { margin: 0; font-size: 12.5px; color: var(--ogcw-text-2); }
+
+/* ---------------------------------------------------------- The design chooser */
+.se-design { margin: 14px clamp(20px, 4.5cqi, 56px) 0; padding: 18px; border: 1px solid var(--ogcw-border); border-radius: 14px; background: var(--ogcw-surface); font-family: var(--ogcw-ui); }
+.se-design-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.se-design-head h2 { margin: 0; font: 400 24px/1.1 var(--ogcw-display); }
+.se-design-head p { margin: 4px 0 0; font-size: 13px; color: var(--ogcw-text-2); }
+.se-design-label { margin: 18px 0 8px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.se-looks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.se-look { display: grid; gap: 8px; padding: 8px 8px 10px; border: 1.5px solid var(--ogcw-border); border-radius: 12px; background: var(--ogcw-bg); text-align: left; color: var(--ogcw-text); cursor: pointer; transition: border-color .15s ease, transform .15s ease; }
+.se-look:hover, .se-look:focus-visible { border-color: var(--ogcw-text); outline: none; }
+.se-look:active { transform: scale(.98); }
+.se-look[aria-pressed="true"] { border-color: var(--ogcw-accent); box-shadow: 0 0 0 1px var(--ogcw-accent); }
+.se-look strong { font-size: 13px; }
+.se-look small { font-size: 11.5px; line-height: 1.35; color: var(--ogcw-text-2); }
+/* A tiny drawing of each look: grey bars for words, a darker block for the photo */
+.se-wire { position: relative; display: grid; gap: 4px; aspect-ratio: 16 / 10; padding: 8px; overflow: hidden; border-radius: 7px; background: color-mix(in srgb, var(--ogcw-text) 6%, var(--ogcw-bg)); }
+.se-wire i { display: block; border-radius: 2px; background: color-mix(in srgb, var(--ogcw-text) 22%, transparent); }
+.se-wire b { display: block; border-radius: 3px; background: color-mix(in srgb, var(--ogcw-text) 42%, transparent); }
+.se-wire .k { width: 26%; height: 4px; background: var(--ogcw-accent); }
+.se-wire .h { width: 80%; height: 8px; }
+.se-wire .h2 { width: 55%; height: 8px; }
+.se-wire .t { width: 92%; height: 3px; }
+.se-wire-classic { grid-template-columns: 1.1fr 1fr; align-content: start; }
+.se-wire-classic > div { display: grid; gap: 4px; align-content: start; }
+.se-wire-classic b { height: 100%; min-height: 54px; }
+.se-wire-spotlight b, .se-wire-magazine b, .se-wire-night b, .se-wire-minimal b, .se-wire-breaking b { height: 34px; }
+.se-wire-magazine { justify-items: center; }
+.se-wire-cover b { position: absolute; inset: 0; border-radius: 0; }
+.se-wire-cover i { position: relative; background: rgb(255 255 255 / .8); }
+.se-wire-cover { align-content: end; }
+.se-wire-split { grid-template-columns: 1fr 1fr; }
+.se-wire-split b { grid-row: span 4; min-height: 60px; }
+.se-wire-night { background: #111; }
+.se-wire-night i { background: rgb(255 255 255 / .45); }
+.se-wire-night b { background: rgb(255 255 255 / .25); }
+.se-wire-breaking::before { content: ""; display: block; height: 6px; margin: -8px -8px 2px; background: #e5322d; }
+.se-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.se-swatch { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 6px; border: 1.5px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); font: 600 12.5px var(--ogcw-ui); color: var(--ogcw-text); cursor: pointer; }
+.se-swatch span { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .15); }
+.se-swatch[aria-pressed="true"] { border-color: var(--ogcw-accent); }
+.se-design-row { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.se-design-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.se-primary { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font: 700 13px var(--ogcw-ui); cursor: pointer; }
+.se-primary:hover { filter: brightness(1.08); }
+.se-secondary { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-bg); color: var(--ogcw-text); font: 600 13px var(--ogcw-ui); cursor: pointer; }
+.se-secondary:hover { border-color: var(--ogcw-text); }
+
+/* ---------------------------------------------------------- Blocks in the story text */
+/* Every photo and box: a tools strip on top while you point at it or it's picked */
+.se-blk { position: relative; border-radius: 12px; outline: 1px dashed transparent; outline-offset: 8px; transition: outline-color .15s ease; }
+.se-blk:hover, .se-blk:focus-within, .se-blk.is-picked { outline-color: color-mix(in srgb, var(--ogcw-accent) 70%, transparent); }
+.se-blk-tools { position: absolute; top: -18px; left: 0; right: 0; z-index: 6; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; width: fit-content; max-width: 100%; margin-inline: auto; padding: 3px; border: 1px solid var(--ogcw-border); border-radius: 999px; background: var(--ogcw-surface); box-shadow: 0 6px 22px rgb(0 0 0 / .18); font-family: var(--ogcw-ui); opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .15s ease, transform .15s ease; }
+.se-blk:hover > .se-blk-tools, .se-blk:focus-within > .se-blk-tools, .se-blk.is-picked > .se-blk-tools { opacity: 1; transform: none; pointer-events: auto; }
+.se-blk-name { padding: 0 8px 0 10px; font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ogcw-text-2); }
+.se-blk-sep { width: 1px; height: 18px; margin-inline: 2px; background: var(--ogcw-border); }
+.se-blk-danger:hover:not(:disabled), .se-blk-danger:focus-visible { background: var(--destructive) !important; color: #fff !important; }
+.se-blk-body { padding-top: 22px; }
+/* While a box's settings are open */
+.se-blk-hidden { display: none; }
+
+/* A photo's own boxes: the caption and the credit, typed on the page */
+.se-cap { display: block; width: 100%; border-radius: 6px; outline: 1px dashed color-mix(in srgb, var(--ogcw-text) 25%, transparent); outline-offset: 4px; }
+.se-cap:focus-within { outline: 2px solid var(--ogcw-accent); }
+.se-cap textarea { all: unset; display: block; box-sizing: border-box; width: 100%; overflow: hidden; resize: none; font: inherit; color: inherit; line-height: inherit; text-align: inherit; white-space: pre-wrap; cursor: text; }
+.se-cap textarea::placeholder { color: color-mix(in srgb, currentColor 45%, transparent); }
+.se-credit-line { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; font: 11.5px var(--ogcw-ui); color: var(--ogcw-text-2); }
+.se-credit-line input { flex: 1; min-width: 0; border: 0; border-bottom: 1px dashed var(--ogcw-border); background: transparent; font: inherit; color: var(--ogcw-text); outline: none; }
+.se-credit-line input:focus { border-bottom-color: var(--ogcw-accent); }
+
+/* An empty photo: drop one here */
+.se-blk-drop { display: grid; place-items: center; gap: 8px; width: 100%; aspect-ratio: 16 / 9; border: 1.5px dashed color-mix(in srgb, var(--ogcw-text) 32%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--ogcw-text) 4%, transparent); color: var(--ogcw-text-2); font: 600 13px var(--ogcw-ui); text-align: center; cursor: pointer; }
+.se-blk-drop:hover, .se-blk-drop.is-over { border-color: var(--ogcw-accent); color: var(--ogcw-text); }
+.se-blk-drop strong { display: block; font-size: 12px; letter-spacing: .1em; color: var(--ogcw-text); }
+.se-blk.is-over::after { content: "Drop to add"; position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; border-radius: 12px; outline: 2px solid var(--ogcw-accent); background: color-mix(in srgb, var(--ogcw-bg) 72%, transparent); font: 700 14px var(--ogcw-ui); color: var(--ogcw-text); pointer-events: none; }
+.se-blk-busy { position: absolute; top: 34px; left: 12px; z-index: 4; padding: 4px 10px; border-radius: 999px; background: var(--ogcw-accent); color: var(--ogcw-bg); font: 700 12px var(--ogcw-ui); }
+
+/* The photos of a gallery, in order: drag one to move it, × to take it out */
+.se-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.se-thumb { position: relative; width: 74px; height: 56px; overflow: hidden; border: 2px solid transparent; border-radius: 8px; background: var(--ogcw-surface); cursor: grab; }
+.se-thumb.is-current { border-color: var(--ogcw-accent); }
+.se-thumb.is-dragging { opacity: .4; }
+.se-thumb.is-target { border-color: var(--ogcw-text); }
+.se-thumb img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.se-thumb span { position: absolute; left: 4px; bottom: 3px; padding: 0 5px; border-radius: 4px; background: rgb(0 0 0 / .6); color: #fff; font: 700 10px/1.5 var(--ogcw-ui); }
+.se-thumb button { position: absolute; top: 3px; right: 3px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: rgb(0 0 0 / .65); color: #fff; cursor: pointer; }
+.se-thumb button:hover { background: var(--destructive); }
+.se-thumb-add { display: grid; place-items: center; width: 74px; height: 56px; border: 1.5px dashed var(--ogcw-border); border-radius: 8px; color: var(--ogcw-text-2); cursor: pointer; }
+.se-thumb-add:hover { border-color: var(--ogcw-accent); color: var(--ogcw-accent); }
+.se-blk .og-slide-arrow, .se-blk .og-slide-dots button { pointer-events: auto; }
+
+/* Sanity's own frame around a block, hidden behind ours in the page view */
+.se-body [data-testid="pte-block-object"]:has(.se-blk) > [data-ui="Card"] { padding: 0 !important; border: 0 !important; box-shadow: none !important; }

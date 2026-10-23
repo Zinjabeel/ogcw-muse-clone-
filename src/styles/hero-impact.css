@@ -1,0 +1,53 @@
+/* ------------------------------------------------------------------
+   Impact grid hero (src/components/hero-impact.tsx), rebuilt 23 Oct 2026
+   to look exactly like Gallery 2 (src/styles/hero-gallery-2.css, the
+   Complex cards), with three cards side by side: News, Shop and Tour Ma
+   Vie. A clear light line runs between them, and the cards cast soft
+   shadows onto the lines and the whole row onto the page below. The
+   hero is black in every theme. Nothing moves on scroll.
+   ------------------------------------------------------------------ */
+.impact.cxi {
+  --cxh-font: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --cxi-line: #f2f0ea;
+  /* Above the page under it, and not clipped, so the row's shadow falls onto the page */
+  position: relative; z-index: 2; overflow: visible;
+  display: block; height: auto; min-height: 0; padding: 0;
+  background: transparent; color: #fff; font-family: var(--cxh-font);
+}
+.cxi-grid {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px;
+  background: var(--cxi-line);
+  box-shadow: 0 28px 60px -24px rgba(0, 0, 0, .7), 0 6px 18px -8px rgba(0, 0, 0, .45);
+}
+/* Each card casts its shadow downwards (so the lines stay clean) and is
+   shaded along its inner edges, so it looks raised beside the lines */
+.cxi .cxh-card { z-index: 1; box-shadow: 0 22px 40px -18px rgba(0, 0, 0, .7), 0 4px 10px -4px rgba(0, 0, 0, .45); }
+.cxi .cxh-card::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  box-shadow: inset 14px 0 24px -16px rgba(0, 0, 0, .8), inset -14px 0 24px -16px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+/* Tour Ma Vie's poster, filling its card, its own printed frame cropped off */
+.cxi-poster { position: absolute; inset: 0; display: block; overflow: hidden; background: #000; }
+.cxi-poster img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; transform: scale(1.09); }
+.cxi-poster.is-own img { transform: none; }
+
+/* The space between the hero and the news under it */
+.impact.cxi ~ main > .broadsheet:first-child { padding-top: clamp(56px, calc(6 * var(--vw, 1vw)), 96px); }
+
+/* ---------------------------------------------------------- Sizes */
+@media (max-width: 767px) {
+  .cxi .cxh-card { aspect-ratio: 4 / 5; max-height: 78svh; }
+}
+@media (min-width: 768px) {
+  .cxi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); height: clamp(520px, 72svh, 760px); }
+}
+@media (min-width: 1024px) {
+  .cxi-grid { height: clamp(600px, calc(100svh - 122px), 1000px); }
+  /* Three cards are narrower than Gallery 2's two: a little less room at the
+     sides (the controls move in with the words), and headlines a step smaller
+     so a longer story's headline isn't cut short; everything else the same */
+  .cxi .cxh-content { padding: 16px 44px 80px 44px; }
+  .cxi .cxh-controls { right: 44px; }
+  .cxi .cxh-title { font-size: 38px; line-height: 44px; letter-spacing: -.8px; -webkit-line-clamp: 4; }
+}

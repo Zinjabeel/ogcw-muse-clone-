@@ -20,6 +20,14 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Vercel (the build's output and the CLI's project link)
+.vercel
+
+# Environment files hold private keys: never committed (the example is)
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

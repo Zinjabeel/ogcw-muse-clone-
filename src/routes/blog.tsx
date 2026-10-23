@@ -1,77 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
-import { PageIntro, SiteShell } from "../components/ogcw-layout";
-import { Img, SectionHead, StoryCard } from "../components/cards";
-import { formatDate } from "../data/content";
-import { useStories } from "../lib/stories";
-import { StoryMeta } from "../components/story-meta";
-import { S, T } from "@/components/site-text";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// The blog became the OGCW Forum (src/routes/forum.*); old links land there
 export const Route = createFileRoute("/blog")({
-  head: () => ({
-    meta: [
-      { title: "Journal — OGCW" },
-      { name: "description", content: "Essays, interviews and visual stories from One Great Culture World." },
-      { property: "og:title", content: "Journal — OGCW" },
-      { property: "og:description", content: "Essays, interviews and visual stories from One Great Culture World." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Blog,
+  beforeLoad: () => {
+    throw redirect({ to: "/forum", statusCode: 301 });
+  },
 });
-
-// The journal: OGCW’s longest reads, longest first, then the essays in progress
-const minutes = (read: string) => Number.parseInt(read, 10) || 0;
-
-const IN_THE_WORKS = [
-  { kind: "Essay · Sound", title: "The value of a room that hasn’t been discovered yet", note: "On small stages, accidental communities and why cultural spaces need time before they need scale." },
-  { kind: "Photo essay · Rap", title: "The body becomes part of the stage", note: "What happens to a performer, and a crowd, when the show is built for movement rather than songs." },
-  { kind: "Notebook", title: "Who gets to write the history of a scene?", note: "A conversation about memory, documentation and the politics of being first." },
-];
-
-function Blog() {
-  const { all } = useStories();
-  const [cover, ...longReads] = [...all].sort((a, b) => b.words - a.words).slice(0, 4);
-  if (!cover) return null;
-  return (
-    <SiteShell>
-      <PageIntro kicker="The OGCW journal" title="Deep dives" copy="Long-form essays and conversations that make room for context, contradiction and original voices." />
-      <main className="page-wrap pb-24">
-        <Link to="/news/$slug" params={{ slug: cover.slug }} className="journal-cover">
-          <Img photo={cover.photo} className="journal-cover-photo" eager />
-          <span className="journal-cover-text">
-            <span className="og-kicker"><T>Cover read ·</T> <S story={cover} f="kicker" /></span>
-            <span className="og-lead-title"><S story={cover} f="title" /></span>
-            <span className="og-lead-deck"><S story={cover} f="deck" /></span>
-            <StoryMeta story={cover} className="og-meta" />
-            <span className="og-cta"><T k="blog.read">Read it</T> <ArrowRight size={16} aria-hidden="true" /></span>
-          </span>
-        </Link>
-
-        <section className="og-block" aria-labelledby="long-reads">
-          <SectionHead id="long-reads" title="More long reads">
-            <Link to="/news" className="og-more-link"><T k="blog.all">All stories</T></Link>
-          </SectionHead>
-          <div className="og-grid-3">
-            {longReads.map((story) => <StoryCard key={story.slug} story={story} showDeck />)}
-          </div>
-        </section>
-
-        <section className="og-block" aria-labelledby="in-the-works">
-          <SectionHead id="in-the-works" title="In the works" />
-          <ol className="journal-works">
-            {IN_THE_WORKS.map((piece) => (
-              <li key={piece.title}>
-                <span className="og-kicker">{piece.kind}</span>
-                <span className="journal-works-title"><T>{piece.title}</T></span>
-                <span className="journal-works-note"><T>{piece.note}</T></span>
-                <span className="og-meta"><T k="blog.soon">Coming to the journal soon</T></span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </main>
-    </SiteShell>
-  );
-}

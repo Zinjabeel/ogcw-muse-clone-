@@ -4,5 +4,3 @@
 - [x] Resolve type checks and complete responsive verification
 - [x] Simplify hero controls, copy, CTA styling, and transitions
 - [x] Replace Vedan and Roga Roga with timely artist stories and licensed photography
-- [ ] Finish and verify the selected Impact Grid hero
-- [ ] Create and verify the custom 3D About Us page

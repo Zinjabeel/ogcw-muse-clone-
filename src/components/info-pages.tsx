@@ -22,8 +22,9 @@ export type InfoGroup = "Help" | "Company" | "Legal";
 type InfoPage = { kicker: InfoGroup; title: string; label?: string; intro: string; updated?: string; body: ReactNode };
 
 const UPDATED = "30 September 2026";
-// Privacy and cookies changed when reader accounts moved to Supabase
-const ACCOUNTS_UPDATED = "2 October 2026";
+// Privacy and cookies changed when reader accounts moved to Supabase, and
+// again when logins moved to a server cookie with two-step login (22 Oct 2026)
+const ACCOUNTS_UPDATED = "22 October 2026";
 
 const Mail = ({ subject, children }: { subject: string; children: ReactNode }) => <a href={mail(subject)}>{children}</a>;
 const Page = ({ slug, children }: { slug: InfoSlug; children: ReactNode }) => <Link to="/info/$slug" params={{ slug }}>{children}</Link>;
@@ -52,6 +53,15 @@ const LICENCES = {
 
 // [what, photographer, licence, Commons file name]
 const COMMONS_CREDITS: [string, string, string, string][] = [
+  // The two top-10 list collages in Explore (src/assets/lists)
+  ["Margot Robbie at the Barbie premiere", "Eva Rinaldi", "CC BY-SA 2.0", "Margot_Robbie_(53012385004).jpg"],
+  ["Greta Lee at the Berlinale premiere of Past Lives", "Martin Kraft", "CC BY-SA 4.0", "MKr22929_Greta_Lee_(Past_Lives,_Berlinale_2023).jpg"],
+  ["Tom Cruise at the Top Gun: Maverick premiere", "Gabriel Hutchinson", "CC BY-SA 4.0", "Tom_Cruise_at_Top_Gun-_Maverick_premiere.jpg"],
+  ["Robert Pattinson at The Batman premiere in New York", "Loveworldpeace2003", "CC BY-SA 4.0", "Robert_Pattinson_at_Lincoln_Center_attending_“The_Batman”_Premiere_in_NYC_on_March_1st,_2022.jpg"],
+  ["Clair Obscur: Expedition 33 cosplay at Fan Expo Denver", "SpiritedMichelle", "CC BY-SA 4.0", "Clair_Obscur_Expedition_33_cosplay_at_Fan_Expo_Denver_2026_05.jpg"],
+  ["The Vampire Survivors stand at WASD, London", "Captain Galaxy", "CC BY 4.0", "Garlic-filled_skeleton_at_Vampire_Survivors_booth_at_the_WASD_Gaming_Expo,_London_-_March_2023.jpg"],
+  ["Hades cosplay at Poznań Game Arena 2021", "Klapi", "CC BY 4.0", "PGA_2021_Hades_Cosplay.jpg"],
+  ["A Helldivers cosplayer at GalaxyCon Raleigh", "John Manard", "CC BY-SA 2.0", "Helldivers_Cosplayer_at_GalaxyCon_Raleigh_Craftsmanship_Cosplay_Contest_2024_-_03.jpg"],
   ["Taylor Swift’s Eras Tour in London", "BrigidLIS", "CC BY 4.0", "Taylor_Swift_Eras_Tour_London_20240819_1989era.jpg"],
   ["Madonna, The Celebration Tour", "Ronald Woan", "CC BY 4.0", "Madonna_-_The_Celebration_Tour_(53539842925)_(cropped).jpg"],
   ["BTS, Arirang World Tour in Paris (“Swim”)", "Chiyako92", "CC BY-SA 4.0", "BTS_Arirang_World_Tour_in_Paris_(17_July_2026)_-_Swim.jpg"],
@@ -121,14 +131,31 @@ const COMMONS_CREDITS: [string, string, string, string][] = [
 ];
 
 // Every item OGCW keeps in the browser, for the Cookie Policy
+// Every cookie and browser-storage item OGCW uses (22 Oct 2026): name, type, what it does, how long it stays
 const STORAGE_ITEMS: [string, string, string][] = [
+  ["__Host-ogcw-session", "Strictly necessary (cookie)", "Keeps you logged in to your OGCW account, for up to 30 days from your last visit. Only our server can read it (not the page’s scripts), it’s only sent over a secure connection, and never to other sites. Only there while you’re logged in."],
+  ["__Host-ogcw-pkce", "Strictly necessary (cookie)", "A one-time key while you log in with Google, so the login can’t be swapped on the way back. Lasts 10 minutes at most, deleted as soon as you’re back."],
+  ["__Host-ogcw-recovery", "Strictly necessary (cookie)", "Lets you choose a new password after opening a reset link from your email. Lasts 15 minutes at most, deleted once the password is saved."],
   ["ogcw-consent", "Strictly necessary", "Remembers your cookie choices, so we don’t ask on every visit."],
   ["ogcw-lang", "Strictly necessary", "Remembers your language."],
-  ["sb-dkzjgjerfaxtjyeixpqe-auth-token", "Strictly necessary", "Keeps you signed in to your OGCW account on this device until you sign out. Only there if you sign in."],
+  ["ogcw-voter", "Strictly necessary", "A random number, with no name attached, so your vote in a poll, a ranking or a star rating counts once. Only set when you vote."],
+  ["ogcw-newsletter-asked:(account)", "Strictly necessary", "So we ask about the newsletter only once after you log in."],
+  ["ogcw-auth-next", "Strictly necessary (this visit)", "Where to take you back to after logging in with Google. Gone when you close the tab."],
+  ["ogcw-shop-intro-seen", "Strictly necessary (this visit)", "So the shop’s opening animation plays once a visit, not on every page. Gone when you close the tab."],
+  ["Cloudflare Turnstile", "Security", "On the login, sign-up and password pages only: Cloudflare’s check that you’re a person, not a bot trying passwords. Set by Cloudflare (challenges.cloudflare.com); not used for tracking or adverts."],
   ["ogcw-theme", "Preferences", "Remembers the colour theme you picked (Night, Gold, Navy or Aurora)."],
   ["ogcw-hero", "Preferences", "Remembers which home page hero you picked."],
+  ["ogcw-shop-backdrop", "Preferences", "Remembers the shop background you picked."],
+  ["ogcw-shop-saved", "Preferences", "The shop items you saved for later."],
+  ["ogcw-shop-cart", "Preferences", "What’s in your shop bag."],
   ["ogcw-vote-no1-rapper", "Preferences", "Remembers your vote in the No. 1 rapper poll, so you see the results when you come back."],
+  ["ogcw-poll-(poll)", "Preferences", "Remembers your vote in a reader poll."],
+  ["ogcw-ranking-vote", "Preferences", "Remembers your pick in this week’s OGCW 10 vote."],
+  ["ogcw-rated", "Preferences", "Remembers the stars you gave stories."],
   ["ogcw-answer-(story)", "Preferences", "Remembers your answer to the question at the end of a story."],
+  ["ogcw-404-best-(game)", "Preferences", "Your best score in the games on the “page not found” page."],
+  ["__studio_auth_token_(project)", "OGCW team only", "Keeps an OGCW editor logged in to the studio (set by Sanity, our content system). Readers never get it."],
+  ["ogcw-edit-buttons-off, ogcw-studio-editor, ogcw-copied-design", "OGCW team only", "Editing settings for the OGCW team: whether the edit buttons show, the studio’s view, and a copied story design."],
 ];
 
 // The contact subjects, for the Contact page
@@ -156,7 +183,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
         <h2>About OGCW</h2>
         <Faq items={[
           ["What is OGCW?", "OGCW, One Great Culture World, is an independent platform for culture and the stories around it. The idea is simple: bring culture and what’s happening right now, from all over the world, together in one place."],
-          ["What do you cover?", <>Music, games, streaming and culture, from fashion and film to television and sneakers, plus OGCW Originals, our own video series. See <Link to="/about">About OGCW</Link> for more.</>],
+          ["What do you cover?", <>Music, games, streaming and culture, from fashion and film to television and sneakers, plus Originals, our pick of the best interviews and podcasts with rappers, streamers and stars. See <Link to="/about">About OGCW</Link> for more.</>],
           ["Who writes OGCW?", <>The OGCW desk. Every story carries the name of the writer, and the <Link to="/about">About page</Link> lists the desk and what each writer covers.</>],
           ["Where do your facts come from?", "Every story ends with a Sources list: the reporting, official announcements and records it is based on. Our stories are written in our own words, and we link to the original sources so you can check them."],
         ]} />
@@ -272,7 +299,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     intro: "For brands, artists, labels, PR agencies and partners.",
     body: (
       <>
-        <p>OGCW reaches readers who care about music, games, streaming and culture. We work with partners who fit that audience, in ways that stay honest with it.</p>
+        <p>OGCW reaches readers who care about music, games, streaming, culture and sports. We work with partners who fit that audience, in ways that stay honest with it.</p>
         <h2>Advertising</h2>
         <p>Campaigns, sponsorships and branded content. Anything paid for is always clearly labelled as such, and it never appears as editorial. Email <Mail subject="Advertising">{BUSINESS_EMAIL}</Mail> with what you have in mind, your timing and your budget range.</p>
         <h2>Partnerships</h2>
@@ -302,8 +329,8 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <li>OGCW exclusives and Originals</li>
         </ul>
         <h2>Sign up</h2>
-        <div className="info-form"><NewsletterForm /></div>
-        <p className="info-note">The newsletter launches soon. Until it does, this form doesn’t send or store your address. When it launches, we’ll only use your email to send the newsletter, as set out in the <Page slug="privacy">Privacy Policy</Page>.</p>
+        <div className="info-form"><NewsletterForm source="newsletter-page" /></div>
+        <p className="info-note">The newsletter launches soon. We keep your address safely until then, so you get the first issue, and we’ll only use it to send the newsletter, as set out in the <Page slug="privacy">Privacy Policy</Page>. To be taken off the list, email <Mail subject="Newsletter: take me off">{BUSINESS_EMAIL}</Mail>.</p>
       </>
     ),
   },
@@ -314,11 +341,11 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
     body: (
       <>
         <h2>About OGCW</h2>
-        <p>OGCW, One Great Culture World, is an independent editorial platform covering music, games, streaming and culture. Every story is reported, written in our own words and published with its sources.</p>
+        <p>OGCW, One Great Culture World, is an independent editorial platform covering music, games, streaming, culture and sports. Every story is reported, written in our own words and published with its sources.</p>
         <h2>OGCW at a glance</h2>
         <ul className="info-list">
-          <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming and culture</li>
-          <li>{EPISODES.length} episodes of OGCW Originals, our own video series</li>
+          <li><StoryCount /> stories across {SECTION_IDS.length} sections: music, games, streaming, culture and sports</li>
+          <li>{EPISODES.length} Originals: the best interviews and podcasts, picked by us</li>
           <li>The OGCW Shop: an edit from {SHOPS.length} retailers</li>
           <li>Available in four colour themes, free to read, with no account needed</li>
         </ul>
@@ -390,7 +417,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <li>use the site for anything unlawful, or to harass or harm anyone.</li>
         </ul>
         <h2>3. Our content</h2>
-        <p>The text, design and OGCW Originals are ours, or used with permission. Photos are credited where they appear and on our <Page slug="credits">photo credits</Page> page, and remain the property of their photographers under their licences. Names and logos of other brands belong to their owners.</p>
+        <p>The text and design are ours, or used with permission. The interviews and podcasts on our Originals page are embedded from their creators’ official YouTube channels and belong to them. Photos are credited where they appear and on our <Page slug="credits">photo credits</Page> page, and remain the property of their photographers under their licences. Names and logos of other brands belong to their owners.</p>
         <h2>4. What you send us</h2>
         <p>When you send us a tip, a submission, a note under a story or a vote, you confirm that you have the right to share it and that it isn’t unlawful or harmful. You allow us to use it to run OGCW and to report stories. We won’t publish your name or your words without asking, except where you have sent them to us for publication.</p>
         <h2>5. Polls and questions</h2>
@@ -426,10 +453,11 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           <thead><tr><th>What</th><th>Why</th><th>Legal basis</th></tr></thead>
           <tbody>
             <tr><td>Technical data your browser sends when you visit, such as your IP address, browser type and the pages you request</td><td>To deliver the site, keep it secure and fix problems. Our hosting provider processes this data for us.</td><td>Our legitimate interest in running a secure website</td></tr>
-            <tr><td>Your name, email address and password, if you create an account</td><td>To let you log in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it. If you log in with Google or GitHub instead, they share your name, email address and username with us, and no password.</td><td>Our agreement with you when you create an account</td></tr>
+            <tr><td>Your name, email address and password, if you create an account</td><td>To let you log in to OGCW on any device. Accounts are run for us by Supabase, on servers in the EU (Frankfurt). Your password is only stored in a scrambled (hashed) form, never as you typed it. If you log in with Google or GitHub instead, they share your name, email address and username with us, and no password. If you turn on two-step login, a secret shared with your authenticator app is kept with your account.</td><td>Our agreement with you when you create an account</td></tr>
+            <tr><td>Login protection: your IP address and the email you try to log in with, counted for up to two hours; on the login pages, Cloudflare’s check that you’re a person</td><td>To stop people guessing passwords. We count tries per IP address and per account, in a scrambled form, and the counts are cleared away once they run out. New passwords are checked against Have I Been Pwned’s list of leaked passwords: only the first 5 characters of a scrambled fingerprint of the password are sent, never the password.</td><td>Our legitimate interest in keeping accounts safe</td></tr>
             <tr><td>Your answers to polls and to the questions at the end of stories</td><td>To count them and show the results. They are counted without your name.</td><td>Our legitimate interest in running polls you choose to take part in</td></tr>
             <tr><td>Notes you write under a story</td><td>To read your feedback. Notes are stored with the story and the time, and never published.</td><td>Our legitimate interest in improving our reporting</td></tr>
-            <tr><td>Your email address, when the newsletter launches</td><td>To send you the newsletter.</td><td>Your consent, which you can withdraw at any time</td></tr>
+            <tr><td>Your email address, if you sign up for the newsletter</td><td>To send you the newsletter once it launches. It is kept by Supabase, on servers in the EU (Frankfurt), and is never shown on the site.</td><td>Your consent, which you can withdraw at any time</td></tr>
             <tr><td>Emails you send us</td><td>To answer you and deal with your request.</td><td>Our legitimate interest in replying, or steps you ask us to take</td></tr>
             <tr><td>Preferences stored in your browser</td><td>To remember your theme, hero choice and answers.</td><td>Your consent (see the <Page slug="cookies">Cookie Policy</Page>)</td></tr>
           </tbody>
@@ -471,12 +499,12 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
             {STORAGE_ITEMS.map(([name, type, purpose]) => <tr key={name}><td><code>{name}</code></td><td>{type}</td><td>{purpose}</td></tr>)}
           </tbody>
         </table>
-        <p>All of these are stored in your browser only, on this device, and stay until you clear them or change your choices. Items marked Preferences are only stored if you allow them.</p>
+        <p>The three login cookies are only ever sent to OGCW’s own server. Everything else stays in your browser, on this device, until you clear it or change your choices. Items marked Preferences are only stored if you allow them.</p>
         <h2>What we don’t use</h2>
         <ul className="info-list">
           <li>No analytics cookies: we don’t measure your visits with cookies.</li>
           <li>No advertising or tracking cookies.</li>
-          <li>No third-party cookies set by us. Images from YouTube, Spotify and Unsplash load from their servers, but we don’t embed their players or trackers.</li>
+          <li>No third-party cookies for tracking. Cloudflare’s security check runs only on the login, sign-up and password pages. Images from YouTube, Spotify and Unsplash load from their servers, and videos play from YouTube’s privacy-enhanced (no-cookie) player only when you press play.</li>
         </ul>
         <h2>Changing your choices</h2>
         <p>You can change your mind at any time. Turning Preferences off removes the preference items stored before.</p>
@@ -558,7 +586,7 @@ export const infoPages: Record<InfoSlug, InfoPage> = {
           ))}
         </ul>
         <p>Video thumbnails (streamers, music videos, and trailers and showcases from Capcom, PlayStation, Xbox, Nintendo, Netflix, Ketchup Entertainment, CD Projekt Red, Mojang and the ONE PIECE channel) belong to the channels that published them and link to the videos on YouTube. Album covers belong to the artists and labels, and link to the songs on Spotify. The Nike, Adidas, StockX and Uniqlo logos are their owners’ trademarks, shown to link to their shops (logo files via Wikimedia Commons).</p>
-        <p>Shop, hero, Originals and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
+        <p>Shop, hero and some news photos (sneakers, the cinema, the controller) come from <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Unsplash</a> under the Unsplash License, including shop photos by Paul Steuber (Nike), Sou Jest (Adidas), Irene Kredenets (StockX) and Howen (Uniqlo), and a PlayStation controller by User_Pascal.</p>
         <p>Is one of your photos on OGCW without the right credit? Email <Mail subject="Photo credit">{BUSINESS_EMAIL}</Mail> and we’ll fix it.</p>
       </>
     ),
