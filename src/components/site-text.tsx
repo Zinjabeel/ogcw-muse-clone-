@@ -924,7 +924,22 @@ export function SiteEditor() {
       if (hideTimer.current !== undefined) return;
       hideTimer.current = window.setTimeout(() => { hideTimer.current = undefined; setTarget((current) => (current?.typing ? current : null)); }, 450);
     };
-    const imageAt = (x: number, y: number) => document.elementsFromPoint(x, y).find((el) => el instanceof HTMLImageElement && !el.closest(SITE_UI) && el.getBoundingClientRect().width >= 24) as HTMLImageElement | undefined;
+    // The picture you can see there: in a slideshow the photos sit on top of
+    // each other and only the one showing is at full strength, so faded-out
+    // ones underneath (or on top) are skipped
+    const seen = (el: Element) => {
+      let opacity = 1;
+      for (let node: Element | null = el; node && node !== document.body; node = node.parentElement) {
+        const style = getComputedStyle(node);
+        if (style.visibility === "hidden") return false;
+        opacity *= Number(style.opacity);
+      }
+      return opacity > 0.5;
+    };
+    const imageAt = (x: number, y: number) => {
+      const images = document.elementsFromPoint(x, y).filter((el): el is HTMLImageElement => el instanceof HTMLImageElement && !el.closest(SITE_UI) && el.getBoundingClientRect().width >= 24);
+      return images.find(seen) ?? images[0];
+    };
     const noteSection = (from: Element | null) => {
       if (sizingRef.current) return;
       const el = sectionOf(from);
@@ -957,6 +972,8 @@ export function SiteEditor() {
       const from = event.target as Element | null;
       if (from?.closest?.(SITE_UI)) return;
       const text = from?.closest?.("[data-edit]") as HTMLElement | null;
+      // The page's own buttons (a slideshow's arrows and dots) still work, to get to its other photos
+      if (!text && from?.closest?.("button, input, select, textarea")) return;
       const img = text ? undefined : imageAt(event.clientX, event.clientY);
       const el = text ?? (img ? frameOf(img) : null);
       noteSection(from);
